@@ -1,4 +1,4 @@
-import { AppShell, Burger, Group, Skeleton } from "@mantine/core";
+import { AppShell, Burger, Container, Group, Skeleton } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconHome2, IconUsers } from "@tabler/icons-react";
 import { Link, Outlet } from "react-router-dom";
@@ -20,7 +20,9 @@ export default function Layout() {
         <NavLink label="People" href="people" leftSection={<IconUsers size={16} />} onClick={toggle} />
       </AppShell.Navbar>
       <AppShell.Main>
-        <Outlet />
+        <Container p={0}>
+          <Outlet />
+        </Container>
       </AppShell.Main>
     </AppShell>
   );

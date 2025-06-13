@@ -8,6 +8,7 @@ import "@mantine/core/styles.css";
 import { MantineProvider } from "@mantine/core";
 import People from "./pages/People";
 import Person from "./pages/Person";
+import NewPerson from "./pages/NewPerson";
 import Dashboard from "./pages/Dashboard";
 
 const router = createBrowserRouter([
@@ -22,6 +23,10 @@ const router = createBrowserRouter([
       {
         path: "people",
         element: <People />,
+      },
+      {
+        path: "people/new",
+        element: <NewPerson />,
       },
       {
         path: "people/:personId",
