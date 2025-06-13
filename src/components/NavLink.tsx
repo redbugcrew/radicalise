@@ -1,22 +1,10 @@
 import { NavLink as MantineNavLink, type NavLinkProps as MantineNavLinkProps } from "@mantine/core";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router";
 
 export type NavLinkProps = MantineNavLinkProps & {
   href: string;
 };
 
 export default function NavLink({ href, ...innerProps }: NavLinkProps) {
-  let navigate = useNavigate();
-
-  return (
-    <MantineNavLink
-      {...innerProps}
-      onClick={(e) => {
-        navigate(href);
-        if (innerProps.onClick) {
-          innerProps.onClick(e);
-        }
-      }}
-    />
-  );
+  return <MantineNavLink component={Link} {...innerProps} to={href} />;
 }
