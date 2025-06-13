@@ -1,8 +1,8 @@
 import { AppShell, Burger, Container, Group } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconHome2, IconUsers } from "@tabler/icons-react";
-import { Link, Outlet } from "react-router-dom";
-import { NavLink } from "../components";
+import { Anchor, NavLink } from "../components";
+import { Outlet } from "react-router";
 
 export default function Layout() {
   const [opened, { toggle }] = useDisclosure();
@@ -12,7 +12,7 @@ export default function Layout() {
       <AppShell.Header>
         <Group h="100%" px="md">
           <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-          <Link to="/">Radicalise!</Link>
+          <Anchor href="/">Radicalise!</Anchor>
         </Group>
       </AppShell.Header>
       <AppShell.Navbar p="md">
