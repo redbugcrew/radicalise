@@ -8,5 +8,15 @@ export type NavLinkProps = MantineNavLinkProps & {
 export default function NavLink({ href, ...innerProps }: NavLinkProps) {
   let navigate = useNavigate();
 
-  return <MantineNavLink {...innerProps} onClick={() => navigate(href) && false} />;
+  return (
+    <MantineNavLink
+      {...innerProps}
+      onClick={(e) => {
+        navigate(href);
+        if (innerProps.onClick) {
+          innerProps.onClick(e);
+        }
+      }}
+    />
+  );
 }

@@ -1,4 +1,4 @@
-import { Avatar, Badge, Center, Group, Table, Text, TextInput, UnstyledButton, keys } from "@mantine/core";
+import { Avatar, Badge, Center, Group, Table, Text, TextInput, UnstyledButton, Stack, keys } from "@mantine/core";
 import Anchor from "./Anchor";
 import { IconChevronDown, IconChevronUp, IconSearch, IconSelector } from "@tabler/icons-react";
 import { useState } from "react";
@@ -140,8 +140,8 @@ export default function PeopleTable() {
   ));
 
   return (
-    <Table.ScrollContainer minWidth={300}>
-      <TextInput placeholder="Search by any field" mb="md" leftSection={<IconSearch size={16} stroke={1.5} />} value={search} onChange={handleSearchChange} />
+    <Stack align="stretch">
+      <TextInput placeholder="Search by any field" leftSection={<IconSearch size={16} stroke={1.5} />} value={search} onChange={handleSearchChange} />
       <Table verticalSpacing="sm">
         <Table.Thead>
           <Table.Tr>
@@ -155,6 +155,6 @@ export default function PeopleTable() {
         </Table.Thead>
         <Table.Tbody>{rows}</Table.Tbody>
       </Table>
-    </Table.ScrollContainer>
+    </Stack>
   );
 }

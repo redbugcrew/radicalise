@@ -16,8 +16,8 @@ export default function Layout() {
         </Group>
       </AppShell.Header>
       <AppShell.Navbar p="md">
-        <NavLink label="Dashboard" href="dashboard" leftSection={<IconHome2 size={16} />} />
-        <NavLink label="People" href="people" leftSection={<IconUsers size={16} />} />
+        <NavLink label="Dashboard" href="dashboard" leftSection={<IconHome2 size={16} />} onClick={toggle} />
+        <NavLink label="People" href="people" leftSection={<IconUsers size={16} />} onClick={toggle} />
       </AppShell.Navbar>
       <AppShell.Main>
         <Outlet />
