@@ -1,6 +1,6 @@
 import { AppShell, Burger, Group, Skeleton } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { IconHome2 } from "@tabler/icons-react";
+import { IconHome2, IconUsers } from "@tabler/icons-react";
 import { Link, Outlet } from "react-router-dom";
 import NavLink from "../components/NavLink";
 
@@ -16,13 +16,8 @@ export default function Layout() {
         </Group>
       </AppShell.Header>
       <AppShell.Navbar p="md">
-        Navbar
-        <NavLink label="Dashboard" href="dashboard" leftSection={<IconHome2 size={16} stroke={1.5} />} />
-        {Array(15)
-          .fill(0)
-          .map((_, index) => (
-            <Skeleton key={index} h={28} mt="sm" animate={false} />
-          ))}
+        <NavLink label="Dashboard" href="dashboard" leftSection={<IconHome2 size={16} />} />
+        <NavLink label="People" href="people" leftSection={<IconUsers size={16} />} />
       </AppShell.Navbar>
       <AppShell.Main>
         <Outlet />
