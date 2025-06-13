@@ -1,8 +1,8 @@
 import { Avatar, Badge, Center, Group, Table, Text, TextInput, UnstyledButton, Stack, keys } from "@mantine/core";
-import Anchor from "./Anchor";
+import { Anchor } from "../";
 import { IconChevronDown, IconChevronUp, IconSearch, IconSelector } from "@tabler/icons-react";
 import { useState } from "react";
-import classes from "./TableSort.module.css";
+import classes from "./PeopleTable.module.css";
 
 interface RowData {
   key: string;

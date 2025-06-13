@@ -6,10 +6,7 @@ import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import "@mantine/core/styles.css";
 
 import { MantineProvider } from "@mantine/core";
-import People from "./pages/People";
-import Person from "./pages/Person";
-import NewPerson from "./pages/NewPerson";
-import Dashboard from "./pages/Dashboard";
+import { Login, ForgotPassword, Dashboard, NewPerson, People, Person } from "./pages";
 
 const router = createBrowserRouter([
   {
@@ -33,6 +30,14 @@ const router = createBrowserRouter([
         element: <Person />,
       },
     ],
+  },
+  {
+    path: "login",
+    element: <Login />,
+  },
+  {
+    path: "forgot_password",
+    element: <ForgotPassword />,
   },
 ]);
 

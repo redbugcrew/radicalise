@@ -1,8 +1,8 @@
-import { AppShell, Burger, Container, Group, Skeleton } from "@mantine/core";
+import { AppShell, Burger, Container, Group } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconHome2, IconUsers } from "@tabler/icons-react";
 import { Link, Outlet } from "react-router-dom";
-import NavLink from "../components/NavLink";
+import { NavLink } from "../components";
 
 export default function Layout() {
   const [opened, { toggle }] = useDisclosure();

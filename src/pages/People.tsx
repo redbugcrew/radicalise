@@ -1,7 +1,7 @@
 import { ActionIcon, Group, Stack, Tabs, Title } from "@mantine/core";
-import PeopleTable from "../components/PeopleTable";
+import { PeopleTable } from "../components";
 import { IconUserPlus } from "@tabler/icons-react";
-import Anchor from "../components/Anchor";
+import { Anchor } from "../components";
 
 export default function People() {
   return (
