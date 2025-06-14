@@ -1,0 +1,7 @@
+# JS package files
+.react-router/
+npm-debug.log*
+node_modules
+
+# Build output
+build/

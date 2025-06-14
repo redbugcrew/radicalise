@@ -1,4 +1,4 @@
-import { Button, Checkbox, Container, Group, Paper, PasswordInput, Text, TextInput, Title } from "@mantine/core";
+import { Button, Checkbox, Container, Group, Paper, PasswordInput, TextInput, Title } from "@mantine/core";
 import classes from "./Login.module.css";
 import { Anchor } from "../../components";
 
