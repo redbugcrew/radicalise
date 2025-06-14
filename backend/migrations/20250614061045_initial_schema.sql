@@ -40,7 +40,11 @@ CREATE TABLE intervals (
 CREATE TABLE people (
 	id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 	display_name TEXT,
-	formal_name TEXT
+	formal_name TEXT,
+  email TEXT UNIQUE,
+  hashed_password TEXT,
+  password_reset_token TEXT,
+  password_reset_token_issued_at INTEGER
 );
 
 

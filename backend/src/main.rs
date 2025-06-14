@@ -12,7 +12,9 @@ extern crate lazy_static;
 async fn main() {
     let cors = CorsLayer::new().allow_origin(Any); // Allow all origins (open policy)
 
-    let _pool = prepare_database().await;
+    let _pool = prepare_database()
+        .await
+        .expect("Failed to prepare database");
 
     // build our application with a single route
     let app = Router::new()
