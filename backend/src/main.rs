@@ -3,6 +3,7 @@ use tower_http::cors::{Any, CorsLayer};
 
 use crate::database::prepare_database;
 
+mod auth;
 mod database;
 
 #[macro_use]
@@ -19,6 +20,7 @@ async fn main() {
     // build our application with a single route
     let app = Router::new()
         .route("/", get(|| async { "Hello, World!" }))
+        .nest("/auth", crate::auth::auth_router())
         .layer(cors);
 
     // run our app with hyper, listening globally on port 8000
