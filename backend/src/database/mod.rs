@@ -24,8 +24,9 @@ pub async fn prepare_database() -> anyhow::Result<Pool<Sqlite>> {
     // prepare connection pool
     let pool = SqlitePool::connect_with(options).await?;
 
+
     // prepare schema in db if it does not yet exist
-    sqlx::migrate!().run(&pool).await?;
+    sqlx::migrate!("./migrations").run(&pool).await?;
 
     Ok(pool)
 }
