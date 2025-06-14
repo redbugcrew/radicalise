@@ -183,3 +183,27 @@ export class HttpClient<SecurityDataType = unknown> {
     });
   };
 }
+
+/**
+ * @title radicalise
+ * @version 0.1.0
+ * @license
+ */
+export class Api<
+  SecurityDataType extends unknown,
+> extends HttpClient<SecurityDataType> {
+  auth = {
+    /**
+     * No description
+     *
+     * @name ForgotPassword
+     * @request POST:/auth/forgot_password
+     */
+    forgotPassword: (params: RequestParams = {}) =>
+      this.request<string, any>({
+        path: `/auth/forgot_password`,
+        method: "POST",
+        ...params,
+      }),
+  };
+}

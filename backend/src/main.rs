@@ -30,7 +30,7 @@ async fn main() {
     #[openapi()]
     struct ApiDoc;
 
-    //let cors = CorsLayer::new().allow_origin(Any); // Allow all origins (open policy)
+    let cors = CorsLayer::new().allow_origin(Any); // Allow all origins (open policy)
 
     let _pool = prepare_database()
         .await
@@ -41,14 +41,10 @@ async fn main() {
         .nest("/auth", crate::auth::router())
         .split_for_parts();
 
-    let router =
-        router.merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", api.clone()));
+    let router = router
+        .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", api.clone()))
+        .layer(cors);
 
-    // // build our application with a single route
-    // let app = Router::new()
-    //     .route("/", get(|| async { "Hello, World!" }))
-    //     .merge(router)
-    //     .layer(cors);
     let app = router.into_make_service();
 
     // run our app with hyper, listening globally on port 8000

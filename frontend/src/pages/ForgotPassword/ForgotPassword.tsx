@@ -1,8 +1,18 @@
 import { IconArrowLeft } from "@tabler/icons-react";
 import { Anchor, Box, Button, Center, Container, Group, Paper, Text, TextInput, Title } from "@mantine/core";
 import classes from "./ForgotPassword.module.css";
+import { Api } from "../../api/Api";
 
 export default function ForgotPassword() {
+  const api = new Api({
+    baseURL: "http://localhost:8000",
+  });
+
+  const onSubmit = () => {
+    console.log("Sending to API");
+    api.auth.forgotPassword();
+  };
+  ``;
   return (
     <Container size={460} my={30}>
       <Title className={classes.title} ta="center">
@@ -21,7 +31,9 @@ export default function ForgotPassword() {
               <Box ml={5}>Back to the login page</Box>
             </Center>
           </Anchor>
-          <Button className={classes.control}>Reset password</Button>
+          <Button className={classes.control} onClick={onSubmit}>
+            Reset password
+          </Button>
         </Group>
       </Paper>
     </Container>
