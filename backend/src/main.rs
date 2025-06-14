@@ -27,11 +27,7 @@ async fn forgot_password() -> axum::response::Response {
 #[tokio::main]
 async fn main() {
     #[derive(OpenApi)]
-    #[openapi(
-        tags(
-            (name = "todo", description = "Todo items management API")
-        )
-    )]
+    #[openapi()]
     struct ApiDoc;
 
     //let cors = CorsLayer::new().allow_origin(Any); // Allow all origins (open policy)
