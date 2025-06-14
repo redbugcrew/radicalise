@@ -1,9 +1,18 @@
 use axum::{Router, routing::get};
 use tower_http::cors::{Any, CorsLayer};
 
+use crate::database::prepare_database;
+
+mod database;
+
+#[macro_use]
+extern crate lazy_static;
+
 #[tokio::main]
 async fn main() {
     let cors = CorsLayer::new().allow_origin(Any); // Allow all origins (open policy)
+
+    let _pool = prepare_database().await;
 
     // build our application with a single route
     let app = Router::new()
