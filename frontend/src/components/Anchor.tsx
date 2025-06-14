@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import { Anchor as MantineAnchor, type AnchorProps as MantineAnchorProps } from "@mantine/core";
 
 export type AnchorProps = MantineAnchorProps & {

@@ -1,6 +1,5 @@
-import { Button, Checkbox, Container, Group, Paper, PasswordInput, TextInput, Title } from "@mantine/core";
+import { Anchor, Button, Checkbox, Container, Group, Paper, PasswordInput, TextInput, Title } from "@mantine/core";
 import classes from "./Login.module.css";
-import { Anchor } from "../../components";
 
 export default function Login() {
   return (
@@ -14,7 +13,7 @@ export default function Login() {
         <PasswordInput label="Password" placeholder="Your password" required mt="md" radius="md" />
         <Group justify="space-between" mt="lg">
           <Checkbox label="Remember me" />
-          <Anchor size="sm" href="../forgot_password">
+          <Anchor component="button" size="sm">
             Forgot password?
           </Anchor>
         </Group>
