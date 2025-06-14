@@ -1,10 +1,13 @@
-use axum::{Router, routing::post};
+use utoipa_axum::{router::OpenApiRouter, routes};
 
-pub fn auth_router() -> axum::Router {
-    Router::new().route("/forgot_password", post(forgot_password))
+pub(super) fn router() -> OpenApiRouter {
+    OpenApiRouter::new().routes(routes!(forgot_password))
 }
 
+#[utoipa::path(post, path = "/forgot_password", responses((status = OK, body = String)))]
 async fn forgot_password() -> axum::response::Response {
+    println!("Handling forgot password request");
+
     // Here you would implement the logic for handling the forgot password request
     // For now, we will just return a placeholder response
     axum::response::Response::builder()
