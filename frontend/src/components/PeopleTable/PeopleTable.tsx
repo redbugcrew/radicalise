@@ -4,18 +4,20 @@ import { IconChevronDown, IconChevronUp, IconSearch, IconSelector } from "@table
 import { useState } from "react";
 import classes from "./PeopleTable.module.css";
 
+interface Group {
+  id: number;
+  name: string;
+}
+
+interface SortableRowData {
+  name: string;
+}
+
 interface RowData {
   key: string;
   avatar: string;
   name: string;
-  role: string;
-}
-
-interface ThProps {
-  children: React.ReactNode;
-  reversed: boolean;
-  sorted: boolean;
-  onSort: () => void;
+  groups: Group[];
 }
 
 const data = [
@@ -23,40 +25,52 @@ const data = [
     key: "1",
     avatar: "https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-1.png",
     name: "Robert Wolfkisser",
-    role: "Engineer",
+    groups: [],
   },
   {
     key: "2",
     avatar: "https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-7.png",
     name: "Jill Jailbreaker",
-    role: "Engineer",
+    groups: [{ id: 5, name: "Retreat Crew" }],
   },
   {
     key: "3",
     avatar: "https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-2.png",
     name: "Henry Silkeater",
-    role: "Designer",
+    groups: [],
   },
   {
     key: "4",
     avatar: "https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-3.png",
     name: "Bill Horsefighter",
-    role: "Designer",
+    groups: [
+      { id: 2, name: "PAS Crew" },
+      { id: 3, name: "Solidarity Crew" },
+    ],
   },
   {
     key: "5",
     avatar: "https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-10.png",
     name: "Jeremy Footviewer",
-    role: "Manager",
+    groups: [
+      { id: 5, name: "Retreat Crew" },
+      { id: 4, name: "Seedling Crew" },
+      { id: 3, name: "Solidarity Crew" },
+    ],
   },
 ];
 
-function filterData(data: RowData[], search: string) {
-  const query = search.toLowerCase().trim();
-  return data.filter((item) => keys(data[0]).some((key) => item[key].toLowerCase().includes(query)));
+function matchesFilter(item: RowData, query: string) {
+  const lowerQuery = query.toLowerCase();
+  return item.name.toLowerCase().includes(lowerQuery) || item.groups.some((group) => group.name.toLowerCase().includes(lowerQuery));
 }
 
-function sortData(data: RowData[], payload: { sortBy: keyof RowData | null; reversed: boolean; search: string }) {
+function filterData(data: RowData[], search: string) {
+  const query = search.toLowerCase().trim();
+  return data.filter((item) => matchesFilter(item, query));
+}
+
+function sortData(data: RowData[], payload: { sortBy: keyof SortableRowData | null; reversed: boolean; search: string }) {
   const { sortBy } = payload;
 
   if (!sortBy) {
@@ -75,13 +89,21 @@ function sortData(data: RowData[], payload: { sortBy: keyof RowData | null; reve
   );
 }
 
-const jobColors: Record<string, string> = {
-  engineer: "blue",
-  manager: "cyan",
-  designer: "pink",
+const groupColours: Record<number, string> = {
+  2: "blue",
+  3: "cyan",
+  4: "pink",
+  5: "green",
 };
 
-function Th({ children, reversed, sorted, onSort }: ThProps) {
+interface SortableThProps {
+  children: React.ReactNode;
+  reversed: boolean;
+  sorted: boolean;
+  onSort: () => void;
+}
+
+function SortableTh({ children, reversed, sorted, onSort }: SortableThProps) {
   const Icon = sorted ? (reversed ? IconChevronUp : IconChevronDown) : IconSelector;
   return (
     <Table.Th className={classes.th}>
@@ -99,13 +121,27 @@ function Th({ children, reversed, sorted, onSort }: ThProps) {
   );
 }
 
+interface ThProps {
+  children: React.ReactNode;
+}
+
+function Th({ children }: ThProps) {
+  return (
+    <Table.Th className={classes.th}>
+      <Text fw={500} fz="sm">
+        {children}
+      </Text>
+    </Table.Th>
+  );
+}
+
 export default function PeopleTable() {
   const [search, setSearch] = useState("");
   const [sortedData, setSortedData] = useState(data);
-  const [sortBy, setSortBy] = useState<keyof RowData | null>(null);
+  const [sortBy, setSortBy] = useState<keyof SortableRowData | null>(null);
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
 
-  const setSorting = (field: keyof RowData) => {
+  const setSorting = (field: keyof SortableRowData) => {
     const reversed = field === sortBy ? !reverseSortDirection : false;
     setReverseSortDirection(reversed);
     setSortBy(field);
@@ -132,9 +168,11 @@ export default function PeopleTable() {
       </Table.Td>
 
       <Table.Td>
-        <Badge color={jobColors[item.role.toLowerCase()]} variant="light">
-          {item.role}
-        </Badge>
+        {item.groups.map((group) => (
+          <Badge key={group.id} color={groupColours[group.id] || "gray"} variant="light" mr={5}>
+            {group.name}
+          </Badge>
+        ))}
       </Table.Td>
     </Table.Tr>
   ));
@@ -145,12 +183,10 @@ export default function PeopleTable() {
       <Table verticalSpacing="sm">
         <Table.Thead>
           <Table.Tr>
-            <Th sorted={sortBy == "name"} reversed={reverseSortDirection} onSort={() => setSorting("name")}>
+            <SortableTh sorted={sortBy == "name"} reversed={reverseSortDirection} onSort={() => setSorting("name")}>
               Name
-            </Th>
-            <Th sorted={sortBy == "role"} reversed={reverseSortDirection} onSort={() => setSorting("role")}>
-              Role(s)
-            </Th>
+            </SortableTh>
+            <Th>Groups(s)</Th>
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>{rows}</Table.Tbody>

@@ -1,4 +1,4 @@
-use axum::{Router, routing::get};
+use axum::routing::get;
 use tower_http::cors::{Any, CorsLayer};
 use utoipa::OpenApi;
 use utoipa_axum::router::OpenApiRouter;
@@ -11,18 +11,6 @@ mod database;
 
 #[macro_use]
 extern crate lazy_static;
-
-#[utoipa::path(post, path = "forgot_password", responses((status = OK, body = String)))]
-async fn forgot_password() -> axum::response::Response {
-    println!("Handling forgot password request");
-
-    // Here you would implement the logic for handling the forgot password request
-    // For now, we will just return a placeholder response
-    axum::response::Response::builder()
-        .status(axum::http::StatusCode::OK)
-        .body(axum::body::Body::from("Forgot password endpoint"))
-        .unwrap()
-}
 
 #[tokio::main]
 async fn main() {

@@ -1,5 +1,5 @@
 import { ActionIcon, Group, Stack, Tabs, Title } from "@mantine/core";
-import { PeopleTable } from "../components";
+import { IntervalSelector, PeopleTable } from "../components";
 import { IconUserPlus } from "@tabler/icons-react";
 import { Anchor } from "../components";
 
@@ -14,6 +14,7 @@ export default function People() {
           </ActionIcon>
         </Anchor>
       </Group>
+      <IntervalSelector />
       <Tabs defaultValue="participants">
         <Tabs.List>
           <Tabs.Tab value="participants">Participants</Tabs.Tab>
