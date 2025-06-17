@@ -1208,6 +1208,7 @@ dependencies = [
  "anyhow",
  "axum",
  "lazy_static",
+ "serde",
  "sqlx",
  "tokio",
  "tower-http",

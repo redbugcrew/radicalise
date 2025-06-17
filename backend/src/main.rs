@@ -7,6 +7,7 @@ use utoipa_swagger_ui::SwaggerUi;
 use crate::database::prepare_database;
 
 mod auth;
+mod collective;
 mod database;
 
 #[macro_use]
@@ -27,6 +28,7 @@ async fn main() {
     let (router, api) = OpenApiRouter::with_openapi(ApiDoc::openapi())
         .route("/", get(|| async { "Hello, World!" }))
         .nest("/auth", crate::auth::router())
+        .nest("/collective", crate::collective::router())
         .split_for_parts();
 
     let router = router
