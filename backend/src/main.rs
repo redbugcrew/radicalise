@@ -1,4 +1,4 @@
-use axum::routing::get;
+use axum::{Extension, routing::get};
 use tower_http::cors::{Any, CorsLayer};
 use utoipa::OpenApi;
 use utoipa_axum::router::OpenApiRouter;
@@ -21,7 +21,7 @@ async fn main() {
 
     let cors = CorsLayer::new().allow_origin(Any); // Allow all origins (open policy)
 
-    let _pool = prepare_database()
+    let pool = prepare_database()
         .await
         .expect("Failed to prepare database");
 
@@ -33,7 +33,8 @@ async fn main() {
 
     let router = router
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", api.clone()))
-        .layer(cors);
+        .layer(cors)
+        .layer(Extension(pool));
 
     let app = router.into_make_service();
 

@@ -1,12 +1,13 @@
-use axum::{Json, http::StatusCode, response::IntoResponse};
+use axum::{Extension, Json, http::StatusCode, response::IntoResponse};
 use serde::{Deserialize, Serialize};
+use sqlx::SqlitePool;
 use utoipa::ToSchema;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 #[derive(Serialize, Deserialize, ToSchema)]
 struct Collective {
-    pub id: u32,
-    pub name: String,
+    pub id: i64,
+    pub name: Option<String>,
 }
 
 pub(super) fn router() -> OpenApiRouter {
@@ -15,13 +16,15 @@ pub(super) fn router() -> OpenApiRouter {
 
 #[utoipa::path(get, path = "/", responses(
         (status = 200, description = "Collective found successfully", body = Collective),
-        (status = NOT_FOUND, description = "Collective was not found")
+        (status = NOT_FOUND, description = "Collective was not found", body = ())
     ),)]
-async fn get_state() -> impl IntoResponse {
-    let collective = Collective {
-        id: 1,
-        name: "Example Collective".to_string(),
-    };
+async fn get_state(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse {
+    let result = sqlx::query_as!(Collective, "SELECT id, name FROM groups WHERE id = 1")
+        .fetch_one(&pool)
+        .await;
 
-    (StatusCode::OK, Json(collective))
+    match result {
+        Ok(collective) => (StatusCode::OK, Json(collective)).into_response(),
+        Err(_) => (StatusCode::NOT_FOUND, ()).into_response(),
+    }
 }
