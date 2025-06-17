@@ -3,16 +3,20 @@ import { useDisclosure } from "@mantine/hooks";
 import { IconHome2, IconUsers } from "@tabler/icons-react";
 import { Link, Outlet } from "react-router-dom";
 import { NavLink } from "../components";
+import { useSelector } from "react-redux";
+
+const selectCollective = (state: any) => state.collective;
 
 export default function Layout() {
   const [opened, { toggle }] = useDisclosure();
+  const collective = useSelector(selectCollective);
 
   return (
     <AppShell header={{ height: 60 }} navbar={{ width: 300, breakpoint: "sm", collapsed: { mobile: !opened } }} padding="md">
       <AppShell.Header>
         <Group h="100%" px="md">
           <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-          <Link to="/">Radicalise!</Link>
+          <Link to="/">{collective ? collective.name : "Radicalise!"}</Link>
         </Group>
       </AppShell.Header>
       <AppShell.Navbar p="md">

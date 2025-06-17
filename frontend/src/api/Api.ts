@@ -10,6 +10,12 @@
  * ---------------------------------------------------------------
  */
 
+export interface Collective {
+  /** @format int64 */
+  id: number;
+  name?: string | null;
+}
+
 import type {
   AxiosInstance,
   AxiosRequestConfig,
@@ -203,6 +209,21 @@ export class Api<
       this.request<string, any>({
         path: `/auth/forgot_password`,
         method: "POST",
+        ...params,
+      }),
+  };
+  collective = {
+    /**
+     * No description
+     *
+     * @name GetState
+     * @request GET:/collective
+     */
+    getState: (params: RequestParams = {}) =>
+      this.request<Collective, any>({
+        path: `/collective`,
+        method: "GET",
+        format: "json",
         ...params,
       }),
   };

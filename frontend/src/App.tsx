@@ -11,12 +11,18 @@ import { MantineProvider } from "@mantine/core";
 import { Login, ForgotPassword, Dashboard, NewPerson, People, Person } from "./pages";
 import type { EnhancedStore, UnknownAction, Tuple, StoreEnhancer, ThunkDispatch } from "@reduxjs/toolkit";
 import { collectiveLoaded } from "./store/collective";
+import { Api } from "./api/Api";
 
 type ThisStoreType = EnhancedStore<any, UnknownAction, Tuple<[StoreEnhancer<{ dispatch: ThunkDispatch<any, undefined, UnknownAction> }>, StoreEnhancer]>>;
 
 async function loadCollective(store: ThisStoreType) {
-  console.log("Collective loaded");
-  store.dispatch(collectiveLoaded({ id: 1, name: "My Collective" }));
+  const api = new Api({
+    baseURL: "http://localhost:8000",
+  });
+
+  api.collective.getState().then((response) => {
+    store.dispatch(collectiveLoaded(response.data));
+  });
 }
 
 function withStore(func: (store: ThisStoreType) => void, store: ThisStoreType): LoaderFunction<any> {
