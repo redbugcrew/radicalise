@@ -1,10 +1,14 @@
 import { configureStore } from "@reduxjs/toolkit";
 import collectiveReducer from "./collective";
+import peopleReducer from "./people";
+import intervalsReducer from "./intervals";
 import { useDispatch, useSelector, useStore } from "react-redux";
 
 const store = configureStore({
   reducer: {
     collective: collectiveReducer,
+    people: peopleReducer,
+    intervals: intervalsReducer,
   },
 });
 

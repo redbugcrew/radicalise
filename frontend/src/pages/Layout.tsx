@@ -7,7 +7,7 @@ import { useAppSelector } from "../store";
 
 export default function Layout() {
   const [opened, { toggle }] = useDisclosure();
-  const collective = useAppSelector((state) => state.collective?.collective);
+  const collective = useAppSelector((state) => state.collective);
 
   return (
     <AppShell header={{ height: 60 }} navbar={{ width: 300, breakpoint: "sm", collapsed: { mobile: !opened } }} padding="md">

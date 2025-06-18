@@ -1,13 +1,13 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { InitialData } from "../api/Api";
+import type { Collective } from "../api/Api";
 
-export type CollectiveState = InitialData | null;
+export type CollectiveState = Collective | null;
 
 const collectiveSlice = createSlice({
   name: "collective",
   initialState: null as CollectiveState,
   reducers: {
-    collectiveLoaded: (_state: CollectiveState, action: PayloadAction<InitialData>) => action.payload,
+    collectiveLoaded: (_state: CollectiveState, action: PayloadAction<Collective>) => action.payload,
   },
 });
 
