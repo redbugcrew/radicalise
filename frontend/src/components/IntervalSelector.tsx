@@ -5,7 +5,8 @@ import type { DateOnly } from "@urbdyn/date-only";
 
 interface IntervalSelectorProps {
   intervals: DateInterval[];
-  current_interval: DateInterval | null;
+  currentInterval: DateInterval | null;
+  onChangeInterval: (interval: DateInterval) => void;
 }
 
 function DateText({ date }: { date: DateOnly }) {
@@ -18,14 +19,15 @@ function DateText({ date }: { date: DateOnly }) {
 interface IntervalNavigationButtonProps {
   variant: "previous" | "next";
   to: DateInterval | null;
+  onChange: (interval: DateInterval) => void;
 }
 
-function IntervalNavigationButton({ variant, to }: IntervalNavigationButtonProps) {
+function IntervalNavigationButton({ variant, to, onChange }: IntervalNavigationButtonProps) {
   const IconComponent = variant === "previous" ? IconChevronLeft : IconChevronRight;
   const disabled = !to;
   const label = variant === "previous" ? "Previous Interval" : "Next Interval";
   const onClick = () => {
-    console.log(`Navigating to ${variant} interval`, to);
+    if (to) onChange(to);
   };
 
   return (
@@ -35,27 +37,27 @@ function IntervalNavigationButton({ variant, to }: IntervalNavigationButtonProps
   );
 }
 
-export default function IntervalSelector({ intervals, current_interval }: IntervalSelectorProps) {
-  if (!current_interval) {
+export default function IntervalSelector({ intervals, currentInterval, onChangeInterval }: IntervalSelectorProps) {
+  if (!currentInterval) {
     return null;
   }
 
-  const currentIntervalIndex = intervals.findIndex((interval) => interval.id === current_interval.id);
+  const currentIntervalIndex = intervals.findIndex((interval) => interval.id === currentInterval.id);
   const previousInterval = currentIntervalIndex > 0 ? intervals[currentIntervalIndex - 1] : null;
   const nextInterval = currentIntervalIndex < intervals.length - 1 ? intervals[currentIntervalIndex + 1] : null;
 
   return (
     <Group justify="space-between">
-      <IntervalNavigationButton variant="previous" to={previousInterval} />
+      <IntervalNavigationButton variant="previous" to={previousInterval} onChange={onChangeInterval} />
       <Stack align="center" justify="center" gap={0}>
         <Text span fw="bold" size="lg">
-          Interval {current_interval.id}
+          Interval {currentInterval.id}
         </Text>
         <Text span c="dimmed">
-          <DateText date={current_interval.start_date} /> - <DateText date={current_interval.end_date} />
+          <DateText date={currentInterval.start_date} /> - <DateText date={currentInterval.end_date} />
         </Text>
       </Stack>
-      <IntervalNavigationButton variant="next" to={nextInterval} />
+      <IntervalNavigationButton variant="next" to={nextInterval} onChange={onChangeInterval} />
     </Group>
   );
 }

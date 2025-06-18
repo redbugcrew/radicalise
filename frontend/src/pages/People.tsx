@@ -3,9 +3,18 @@ import { IntervalSelector, PeopleTable } from "../components";
 import { IconUserPlus } from "@tabler/icons-react";
 import { Anchor } from "../components";
 import { useAppSelector } from "../store";
+import type { DateInterval } from "../store/intervals";
+import { useEffect, useState } from "react";
 
 export default function People() {
   const intervals = useAppSelector((state) => state.intervals);
+
+  const [currentInterval, setCurrentInterval] = useState<DateInterval | null>(null);
+  useEffect(() => {
+    if (intervals.currentInterval != currentInterval) {
+      setCurrentInterval(intervals.currentInterval);
+    }
+  }, [intervals.currentInterval]);
 
   return (
     <Stack>
@@ -17,7 +26,7 @@ export default function People() {
           </ActionIcon>
         </Anchor>
       </Group>
-      <IntervalSelector intervals={intervals.allIntervals} current_interval={intervals.currentInterval} />
+      <IntervalSelector intervals={intervals.allIntervals} currentInterval={currentInterval} onChangeInterval={setCurrentInterval} />
       <Tabs defaultValue="participants">
         <Tabs.List>
           <Tabs.Tab value="participants">Participants</Tabs.Tab>

@@ -22,11 +22,15 @@ async function loadCollective(store: ThisStoreType) {
     baseURL: "http://localhost:8000",
   });
 
-  api.collective.getState().then((response) => {
-    store.dispatch(collectiveLoaded(response.data.collective));
-    store.dispatch(peopleLoaded(response.data.people));
-    store.dispatch(intervalsLoaded(response.data.intervals));
-  });
+  const dataHasLoaded = store.getState().collective;
+
+  if (!dataHasLoaded) {
+    api.collective.getState().then((response) => {
+      store.dispatch(collectiveLoaded(response.data.collective));
+      store.dispatch(peopleLoaded(response.data.people));
+      store.dispatch(intervalsLoaded(response.data.intervals));
+    });
+  }
 }
 
 function withStore(func: (store: ThisStoreType) => void, store: ThisStoreType): LoaderFunction<any> {
