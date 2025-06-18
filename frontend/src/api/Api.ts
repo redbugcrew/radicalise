@@ -10,6 +10,11 @@
  * ---------------------------------------------------------------
  */
 
+export enum InvolvementStatus {
+  Participating = "Participating",
+  OnHiatus = "OnHiatus",
+}
+
 export interface Collective {
   /** @format int64 */
   id: number;
@@ -27,6 +32,20 @@ export interface Interval {
   /** @format int64 */
   id: number;
   start_date: string;
+}
+
+export interface Involvement {
+  /** @format int64 */
+  end_interval_id?: number | null;
+  /** @format int64 */
+  group_id: number;
+  /** @format int64 */
+  id: number;
+  /** @format int64 */
+  person_id: number;
+  /** @format int64 */
+  start_interval_id: number;
+  status: InvolvementStatus;
 }
 
 export interface Person {
@@ -241,6 +260,20 @@ export class Api<
     getState: (params: RequestParams = {}) =>
       this.request<InitialData, any>({
         path: `/collective`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GetInvolvements
+     * @request GET:/collective/interval/{interval_id}/involvements
+     */
+    getInvolvements: (intervalId: number, params: RequestParams = {}) =>
+      this.request<Involvement[], any>({
+        path: `/collective/interval/${intervalId}/involvements`,
         method: "GET",
         format: "json",
         ...params,

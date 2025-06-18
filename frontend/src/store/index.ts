@@ -1,8 +1,9 @@
 import { configureStore } from "@reduxjs/toolkit";
-import collectiveReducer from "./collective";
-import peopleReducer from "./people";
-import intervalsReducer from "./intervals";
+import collectiveReducer, { collectiveLoaded } from "./collective";
+import peopleReducer, { peopleLoaded } from "./people";
+import intervalsReducer, { intervalsLoaded } from "./intervals";
 import { useDispatch, useSelector, useStore } from "react-redux";
+import { Api } from "../api/Api";
 
 const store = configureStore({
   reducer: {
@@ -19,5 +20,21 @@ export type AppDispatch = AppStore["dispatch"];
 export const useAppDispatch = useDispatch.withTypes<AppDispatch>();
 export const useAppSelector = useSelector.withTypes<RootState>();
 export const useAppStore = useStore.withTypes<AppStore>();
+
+export async function loadInitialData(store: AppStore) {
+  const api = new Api({
+    baseURL: "http://localhost:8000",
+  });
+
+  const dataHasLoaded = store.getState().collective;
+
+  if (!dataHasLoaded) {
+    api.collective.getState().then((response) => {
+      store.dispatch(collectiveLoaded(response.data.collective));
+      store.dispatch(peopleLoaded(response.data.people));
+      store.dispatch(intervalsLoaded(response.data.intervals));
+    });
+  }
+}
 
 export default store;
