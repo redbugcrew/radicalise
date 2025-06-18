@@ -1,7 +1,13 @@
 import { Group, ActionIcon, Text, Stack } from "@mantine/core";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
+import type { DateInterval } from "../store/intervals";
 
-export default function IntervalSelector() {
+interface IntervalSelectorProps {
+  intervals: DateInterval[];
+  current_interval: DateInterval | null;
+}
+
+export default function IntervalSelector(props: IntervalSelectorProps) {
   return (
     <Group justify="space-between">
       <ActionIcon variant="default" aria-label="Previous Page" size="lg">

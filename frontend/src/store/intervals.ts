@@ -1,13 +1,56 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { Interval } from "../api/Api";
+import { produce } from "immer";
+import { DateOnly } from "@urbdyn/date-only";
 
-export type IntervalsState = Interval[];
+export interface DateInterval {
+  id: number;
+  end_date: DateOnly;
+  start_date: DateOnly;
+}
+
+export type IntervalsState = {
+  allIntervals: DateInterval[];
+  currentInterval: DateInterval | null;
+};
+
+function buildDateInterval(interval: Interval): DateInterval {
+  return {
+    id: interval.id,
+    start_date: DateOnly.fromString(interval.start_date),
+    end_date: DateOnly.fromString(interval.end_date),
+  };
+}
+
+function buildDateIntervals(intervals: Interval[]): DateInterval[] {
+  return intervals.map(buildDateInterval);
+}
+
+function timestampInInterval(timestamp: number, interval: DateInterval): boolean {
+  return timestamp >= interval.start_date.startEpoch && timestamp <= interval.end_date.endEpoch;
+}
+
+function getCurrentInterval(intervals: DateInterval[]): DateInterval | null {
+  const timestamp = Date.now();
+
+  return intervals.find((interval) => timestampInInterval(timestamp, interval)) || null;
+}
 
 const intervalsSlice = createSlice({
   name: "people",
-  initialState: [] as IntervalsState,
+  initialState: {
+    allIntervals: [],
+    currentInterval: null,
+  } as IntervalsState,
   reducers: {
-    intervalsLoaded: (_state: IntervalsState, action: PayloadAction<Interval[]>) => action.payload,
+    intervalsLoaded: (state: IntervalsState, action: PayloadAction<Interval[]>) => {
+      const dateIntervals = buildDateIntervals(action.payload);
+
+      return produce(state, (draft) => {
+        draft.allIntervals = dateIntervals;
+        draft.currentInterval = getCurrentInterval(dateIntervals);
+      });
+    },
   },
 });
 
