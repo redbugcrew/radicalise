@@ -3,13 +3,11 @@ import { useDisclosure } from "@mantine/hooks";
 import { IconHome2, IconUsers } from "@tabler/icons-react";
 import { Link, Outlet } from "react-router-dom";
 import { NavLink } from "../components";
-import { useSelector } from "react-redux";
-
-const selectCollective = (state: any) => state.collective;
+import { useAppSelector } from "../store";
 
 export default function Layout() {
   const [opened, { toggle }] = useDisclosure();
-  const collective = useSelector(selectCollective);
+  const collective = useAppSelector((state) => state.collective?.collective);
 
   return (
     <AppShell header={{ height: 60 }} navbar={{ width: 300, breakpoint: "sm", collapsed: { mobile: !opened } }} padding="md">

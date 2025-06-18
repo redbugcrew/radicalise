@@ -16,6 +16,17 @@ export interface Collective {
   name?: string | null;
 }
 
+export interface CollectiveState {
+  collective: Collective;
+  people: Person[];
+}
+
+export interface Person {
+  display_name: string;
+  /** @format int64 */
+  id: number;
+}
+
 import type {
   AxiosInstance,
   AxiosRequestConfig,
@@ -220,7 +231,7 @@ export class Api<
      * @request GET:/collective
      */
     getState: (params: RequestParams = {}) =>
-      this.request<Collective, any>({
+      this.request<CollectiveState, any>({
         path: `/collective`,
         method: "GET",
         format: "json",
