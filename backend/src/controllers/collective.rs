@@ -1,65 +1,10 @@
-use std::str::FromStr;
-
 use axum::{Extension, Json, extract::Path, http::StatusCode, response::IntoResponse};
 use serde::{Deserialize, Serialize};
 use sqlx::SqlitePool;
 use utoipa::ToSchema;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
-#[derive(Serialize, Deserialize, ToSchema)]
-struct Collective {
-    pub id: i64,
-    pub name: Option<String>,
-}
-
-#[derive(Serialize, Deserialize, ToSchema)]
-struct Person {
-    pub id: i64,
-    pub display_name: String,
-}
-
-#[derive(Serialize, Deserialize, ToSchema)]
-struct Interval {
-    pub id: i64,
-    pub start_date: String,
-    pub end_date: String,
-}
-
-#[derive(Serialize, Deserialize, ToSchema, sqlx::Type)]
-enum InvolvementStatus {
-    Participating,
-    OnHiatus,
-}
-
-impl FromStr for InvolvementStatus {
-    type Err = ();
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "Participating" => Ok(InvolvementStatus::Participating),
-            "OnHiatus" => Ok(InvolvementStatus::OnHiatus),
-            _ => Err(()),
-        }
-    }
-}
-
-impl TryFrom<String> for InvolvementStatus {
-    type Error = ();
-
-    fn try_from(value: String) -> Result<Self, Self::Error> {
-        InvolvementStatus::from_str(&value)
-    }
-}
-
-#[derive(Serialize, Deserialize, ToSchema)]
-struct Involvement {
-    pub id: i64,
-    pub person_id: i64,
-    pub group_id: i64,
-    pub start_interval_id: i64,
-    pub end_interval_id: Option<i64>,
-    pub status: InvolvementStatus,
-}
+use crate::entities::{Collective, Interval, Involvement, InvolvementStatus, Person};
 
 #[derive(Serialize, Deserialize, ToSchema)]
 struct InitialData {
@@ -71,7 +16,7 @@ struct InitialData {
 const COLLECTIVE_GROUP_ID: i64 = 1;
 const COLLECTIVE_ID: i64 = 1;
 
-pub(super) fn router() -> OpenApiRouter {
+pub fn router() -> OpenApiRouter {
     OpenApiRouter::new()
         .routes(routes!(get_state))
         .routes(routes!(get_involvements))
@@ -104,6 +49,9 @@ async fn get_state(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse 
             .fetch_all(&pool)
             .await;
 
+            // let collective_involvements_result =
+            //     find_all_involvements(interval_id, COLLECTIVE_GROUP_ID, &pool).await;
+
             if interval_result.is_err() || people_result.is_err() {
                 return (StatusCode::NOT_FOUND, ()).into_response();
             }
@@ -131,18 +79,7 @@ async fn get_involvements(
     Path(interval_id): Path<i64>,
     Extension(pool): Extension<SqlitePool>,
 ) -> impl IntoResponse {
-    let involvements_result = sqlx::query_as!(
-        Involvement,
-        "SELECT id, person_id, group_id, start_interval_id, end_interval_id, status as \"status: InvolvementStatus\" FROM involvements
-        WHERE
-          (start_interval_id <= ? AND (end_interval_id IS NULL OR end_interval_id >= ?)) AND
-          group_id = ?",
-        interval_id,
-        interval_id,
-        COLLECTIVE_GROUP_ID
-    )
-    .fetch_all(&pool)
-    .await;
+    let involvements_result = find_all_involvements(interval_id, COLLECTIVE_GROUP_ID, &pool).await;
 
     match involvements_result {
         Ok(involvements) => (StatusCode::OK, Json(involvements)).into_response(),
@@ -151,4 +88,23 @@ async fn get_involvements(
             return (StatusCode::NOT_FOUND, ()).into_response();
         }
     }
+}
+
+async fn find_all_involvements(
+    interval_id: i64,
+    group_id: i64,
+    pool: &SqlitePool,
+) -> Result<Vec<Involvement>, sqlx::Error> {
+    sqlx::query_as!(
+        Involvement,
+        "SELECT id, person_id, group_id, start_interval_id, end_interval_id, status as \"status: InvolvementStatus\" FROM involvements
+        WHERE
+          (start_interval_id <= ? AND (end_interval_id IS NULL OR end_interval_id >= ?)) AND
+          group_id = ?",
+        interval_id,
+        interval_id,
+        group_id
+    )
+    .fetch_all(pool)
+    .await
 }
