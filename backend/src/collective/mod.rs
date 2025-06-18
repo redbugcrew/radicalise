@@ -17,26 +17,35 @@ struct Person {
 }
 
 #[derive(Serialize, Deserialize, ToSchema)]
-struct CollectiveState {
-    pub collective: Collective,
-    pub people: Vec<Person>,
+struct Interval {
+    pub id: i64,
+    pub start_date: String,
+    pub end_date: String,
 }
 
-const COLLECTIVE_ID: i64 = 1; // Assuming a single collective with ID 1
+#[derive(Serialize, Deserialize, ToSchema)]
+struct InitialData {
+    pub collective: Collective,
+    pub people: Vec<Person>,
+    pub intervals: Vec<Interval>,
+}
+
+const COLLECTIVE_GROUP_ID: i64 = 1;
+const COLLECTIVE_ID: i64 = 1;
 
 pub(super) fn router() -> OpenApiRouter {
     OpenApiRouter::new().routes(routes!(get_state))
 }
 
 #[utoipa::path(get, path = "/", responses(
-        (status = 200, description = "Collective found successfully", body = CollectiveState),
+        (status = 200, description = "Collective found successfully", body = InitialData),
         (status = NOT_FOUND, description = "Collective was not found", body = ())
     ),)]
 async fn get_state(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse {
     let collective_result = sqlx::query_as!(
         Collective,
         "SELECT id, name FROM groups WHERE id = ?",
-        COLLECTIVE_ID
+        COLLECTIVE_GROUP_ID
     )
     .fetch_one(&pool)
     .await;
@@ -47,13 +56,26 @@ async fn get_state(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse 
                 .fetch_all(&pool)
                 .await;
 
-            match people_result {
-                Ok(people) => {
-                    let collective_state = CollectiveState { collective, people };
-                    return (StatusCode::OK, Json(collective_state)).into_response();
-                }
-                Err(_) => (StatusCode::NOT_FOUND, ()).into_response(),
+            let interval_result = sqlx::query_as!(
+                Interval,
+                "SELECT id, start_date, end_date FROM intervals WHERE collective_id = ?",
+                COLLECTIVE_ID
+            )
+            .fetch_all(&pool)
+            .await;
+
+            if interval_result.is_err() || people_result.is_err() {
+                return (StatusCode::NOT_FOUND, ()).into_response();
             }
+            let people = people_result.unwrap();
+            let intervals = interval_result.unwrap();
+
+            let initial_data = InitialData {
+                collective,
+                people,
+                intervals,
+            };
+            return (StatusCode::OK, Json(initial_data)).into_response();
         }
         Err(_) => (StatusCode::NOT_FOUND, ()).into_response(),
     }

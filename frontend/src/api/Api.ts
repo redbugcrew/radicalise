@@ -16,9 +16,17 @@ export interface Collective {
   name?: string | null;
 }
 
-export interface CollectiveState {
+export interface InitialData {
   collective: Collective;
+  intervals: Interval[];
   people: Person[];
+}
+
+export interface Interval {
+  end_date: string;
+  /** @format int64 */
+  id: number;
+  start_date: string;
 }
 
 export interface Person {
@@ -231,7 +239,7 @@ export class Api<
      * @request GET:/collective
      */
     getState: (params: RequestParams = {}) =>
-      this.request<CollectiveState, any>({
+      this.request<InitialData, any>({
         path: `/collective`,
         method: "GET",
         format: "json",
