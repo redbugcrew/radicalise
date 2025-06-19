@@ -10,6 +10,7 @@ interface PeopleForIntervalProps {
 export default function PeopleForInterval({ interval }: PeopleForIntervalProps) {
   const currentInterval = useAppSelector((state) => state.intervals.currentInterval);
   const currentCollectiveInvolvements = useAppSelector((state) => state.involvements.collective_involvements);
+  const currentCrewInvolvements = useAppSelector((state) => state.involvements.crew_involvements);
 
   const [involvements, setInvolvements] = useState<Involvement[] | null>(null);
 
@@ -34,5 +35,5 @@ export default function PeopleForInterval({ interval }: PeopleForIntervalProps) 
     }
   }, [interval, currentInterval, currentCollectiveInvolvements]);
 
-  return involvements && <PeopleByInvolvementStatus key={interval.id} involvements={involvements} />;
+  return involvements && <PeopleByInvolvementStatus key={interval.id} involvements={involvements} crewEnrolments={currentCrewInvolvements} />;
 }

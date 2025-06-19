@@ -6,8 +6,12 @@ import { capitalCase } from "change-case";
 import { useState } from "react";
 import type { PeopleState } from "../store/people";
 import type { PeopleTableRow } from "../components/PeopleTable/PeopleTable";
+import { IconMapPlus } from "@tabler/icons-react";
 
-function hashInvolvementsByStatus(involvements: Involvement[]): Map<InvolvementStatus, Involvement[]> {
+type InvolvementsHashById = Map<number, Involvement[]>;
+type InvolvementsHashByStatus = Map<InvolvementStatus, Involvement[]>;
+
+function hashInvolvementsByStatus(involvements: Involvement[]): InvolvementsHashByStatus {
   const map = new Map<InvolvementStatus, Involvement[]>();
   involvements.forEach((involvement) => {
     const status = InvolvementStatus[involvement.status as keyof typeof InvolvementStatus];
@@ -19,18 +23,44 @@ function hashInvolvementsByStatus(involvements: Involvement[]): Map<InvolvementS
   return map;
 }
 
-function peopleForInvolvements(involvements: Involvement[], allPeople: PeopleState): PeopleTableRow[] {
+function hashInvolvementsByPerson(involvements: Involvement[] | undefined): InvolvementsHashById {
+  const map = new Map<number, Involvement[]>();
+
+  if (!involvements) return map;
+
+  involvements.forEach((involvement) => {
+    if (!map.has(involvement.person_id)) {
+      map.set(involvement.person_id, []);
+    }
+    map.get(involvement.person_id)?.push(involvement);
+  });
+  return map;
+}
+
+function peopleForInvolvements(involvements: Involvement[], allCrewInvolvements: InvolvementsHashById, allPeople: PeopleState): PeopleTableRow[] {
+  console.log("applying crew involvements", allCrewInvolvements);
+
   return involvements.map((involvement) => {
     const person = allPeople[involvement.person_id];
+    const crewInvolvements = allCrewInvolvements.get(person.id) || [];
+
     return {
       id: person.id,
       name: person.display_name,
-      groups: [],
+      groups: crewInvolvements.map((crewInvolvement) => ({
+        id: crewInvolvement.id,
+        name: crewInvolvement.group_id.toString(),
+      })),
     };
   });
 }
 
-export default function PeopleByInvolvementStatus({ involvements }: { involvements: Involvement[] }) {
+interface PeopleByInvolvementStatusProps {
+  involvements: Involvement[];
+  crewEnrolments?: Involvement[];
+}
+
+export default function PeopleByInvolvementStatus({ involvements, crewEnrolments }: PeopleByInvolvementStatusProps) {
   const states = [InvolvementStatus.Participating, InvolvementStatus.OnHiatus];
   const [activeState, setActiveState] = useState<InvolvementStatus>(states[0]);
 
@@ -41,6 +71,8 @@ export default function PeopleByInvolvementStatus({ involvements }: { involvemen
   };
 
   const hashedInvolvements = hashInvolvementsByStatus(involvements);
+  const hashedCrewEnrolments = hashInvolvementsByPerson(crewEnrolments);
+
   const allPeople = useAppSelector((state) => state.people);
 
   return (
@@ -55,7 +87,7 @@ export default function PeopleByInvolvementStatus({ involvements }: { involvemen
 
       {states.map((state) => (
         <Tabs.Panel value={state} key={state} pt="md">
-          <PeopleTable people={peopleForInvolvements(hashedInvolvements.get(state) || [], allPeople)} />
+          <PeopleTable people={peopleForInvolvements(hashedInvolvements.get(state) || [], hashedCrewEnrolments, allPeople)} />
         </Tabs.Panel>
       ))}
     </Tabs>
