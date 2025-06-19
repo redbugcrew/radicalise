@@ -1,68 +1,38 @@
-import { Tabs } from "@mantine/core";
-import { PeopleTable } from "../components";
-import { InvolvementStatus, type Interval, type Involvement } from "../api/Api";
+import { useEffect, useState } from "react";
+import { Api, type Interval, type Involvement } from "../api/Api";
 import { useAppSelector } from "../store";
-import { capitalCase } from "change-case";
-import { useState } from "react";
-import type { PeopleState } from "../store/people";
-import type { PeopleTableRow } from "../components/PeopleTable/PeopleTable";
+import PeopleByInvolvementStatus from "./PeopleByInvolvementStatus";
 
 interface PeopleForIntervalProps {
   interval: Interval;
 }
 
-function hashInvolvementsByStatus(involvements: Involvement[]): Map<InvolvementStatus, Involvement[]> {
-  const map = new Map<InvolvementStatus, Involvement[]>();
-  involvements.forEach((involvement) => {
-    const status = InvolvementStatus[involvement.status as keyof typeof InvolvementStatus];
-    if (!map.has(status)) {
-      map.set(status, []);
-    }
-    map.get(status)?.push(involvement);
-  });
-  return map;
-}
-
-function peopleForInvolvements(involvements: Involvement[], allPeople: PeopleState): PeopleTableRow[] {
-  return involvements.map((involvement) => {
-    const person = allPeople[involvement.person_id];
-    return {
-      id: person.id,
-      name: person.display_name,
-      groups: [],
-    };
-  });
-}
-
 export default function PeopleForInterval({ interval }: PeopleForIntervalProps) {
-  const states = [InvolvementStatus.Participating, InvolvementStatus.OnHiatus];
-  const [activeState, setActiveState] = useState<InvolvementStatus>(states[0]);
+  const currentInterval = useAppSelector((state) => state.intervals.currentInterval);
+  const currentCollectiveInvolvements = useAppSelector((state) => state.involvements.collective_involvements);
 
-  const setActiveTab = (value: string | null) => {
-    if (value === null) return states[0];
+  const [involvements, setInvolvements] = useState<Involvement[]>([]);
 
-    setActiveState(InvolvementStatus[value as keyof typeof InvolvementStatus]);
-  };
+  useEffect(() => {
+    if (currentInterval && currentInterval.id == interval.id) {
+      setInvolvements(currentCollectiveInvolvements);
+    } else {
+      const api = new Api({
+        baseURL: "http://localhost:8000",
+      });
 
-  const allInvolvements = hashInvolvementsByStatus(useAppSelector((state) => state.involvements.collective_involvements));
+      api.collective
+        .getInvolvements(interval.id)
+        .then((response) => {
+          // Assuming the API returns an array of involvements
+          setInvolvements(response.data);
+        })
+        .catch((error) => {
+          console.error("Error fetching involvements:", error);
+          setInvolvements([]);
+        });
+    }
+  }, [interval]);
 
-  const allPeople = useAppSelector((state) => state.people);
-
-  return (
-    <Tabs value={activeState} onChange={setActiveTab}>
-      <Tabs.List>
-        {states.map((state) => (
-          <Tabs.Tab key={state} value={state.toString()}>
-            {capitalCase(state.toString())}
-          </Tabs.Tab>
-        ))}
-      </Tabs.List>
-
-      {states.map((state) => (
-        <Tabs.Panel value={state} key={state} pt="md">
-          <PeopleTable people={peopleForInvolvements(allInvolvements.get(state) || [], allPeople)} />
-        </Tabs.Panel>
-      ))}
-    </Tabs>
-  );
+  return <PeopleByInvolvementStatus key={interval.id} involvements={involvements} />;
 }
