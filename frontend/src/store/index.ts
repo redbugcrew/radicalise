@@ -5,6 +5,7 @@ import collectiveReducer, { collectiveLoaded } from "./collective";
 import peopleReducer, { peopleLoaded } from "./people";
 import intervalsReducer, { intervalsLoaded } from "./intervals";
 import involvementsReducer, { involvementsLoaded } from "./involvements";
+import groupsReducer, { groupsLoaded } from "./groups";
 
 const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ const store = configureStore({
     people: peopleReducer,
     intervals: intervalsReducer,
     involvements: involvementsReducer,
+    groups: groupsReducer,
   },
 });
 
@@ -31,8 +33,10 @@ export async function loadInitialData(store: AppStore) {
   const dataHasLoaded = store.getState().collective;
 
   if (!dataHasLoaded) {
+    console.log("Loading initial data from API...");
     api.collective.getState().then((response) => {
       store.dispatch(peopleLoaded(response.data.people));
+      store.dispatch(groupsLoaded(response.data.groups));
       store.dispatch(intervalsLoaded({ allIntervals: response.data.intervals, currentInterval: response.data.current_interval }));
       store.dispatch(involvementsLoaded(response.data.involvements));
       store.dispatch(collectiveLoaded(response.data.collective));

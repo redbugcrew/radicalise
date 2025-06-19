@@ -5,6 +5,7 @@ import { useAppSelector } from "../store";
 import { capitalCase } from "change-case";
 import { useState } from "react";
 import type { PeopleState } from "../store/people";
+import type { GroupState } from "../store/groups";
 import type { PeopleTableRow } from "../components/PeopleTable/PeopleTable";
 
 type InvolvementsHashById = Map<number, Involvement[]>;
@@ -36,7 +37,7 @@ function hashInvolvementsByPerson(involvements: Involvement[] | undefined): Invo
   return map;
 }
 
-function peopleForInvolvements(involvements: Involvement[], allCrewInvolvements: InvolvementsHashById, allPeople: PeopleState): PeopleTableRow[] {
+function peopleForInvolvements(involvements: Involvement[], allCrewInvolvements: InvolvementsHashById, allPeople: PeopleState, allGroups: GroupState): PeopleTableRow[] {
   return involvements.map((involvement) => {
     const person = allPeople[involvement.person_id];
     const crewInvolvements = allCrewInvolvements.get(person.id) || [];
@@ -44,10 +45,7 @@ function peopleForInvolvements(involvements: Involvement[], allCrewInvolvements:
     return {
       id: person.id,
       name: person.display_name,
-      groups: crewInvolvements.map((crewInvolvement) => ({
-        id: crewInvolvement.id,
-        name: crewInvolvement.group_id.toString(),
-      })),
+      groups: crewInvolvements.map((crewInvolvement) => allGroups[crewInvolvement.group_id] || null).filter((group) => group),
     };
   });
 }
@@ -72,6 +70,7 @@ export default function PeopleByInvolvementStatus({ involvements, crewEnrolments
   const hashedCrewEnrolments = hashInvolvementsByPerson(crewEnrolments);
 
   const allPeople = useAppSelector((state) => state.people);
+  const allGroups = useAppSelector((state) => state.groups);
 
   return (
     <Tabs value={activeState} onChange={setActiveTab}>
@@ -85,7 +84,7 @@ export default function PeopleByInvolvementStatus({ involvements, crewEnrolments
 
       {states.map((state) => (
         <Tabs.Panel value={state} key={state} pt="md">
-          <PeopleTable key={tableKey} people={peopleForInvolvements(hashedInvolvements.get(state) || [], hashedCrewEnrolments, allPeople)} />
+          <PeopleTable key={tableKey} people={peopleForInvolvements(hashedInvolvements.get(state) || [], hashedCrewEnrolments, allPeople, allGroups)} />
         </Tabs.Panel>
       ))}
     </Tabs>
