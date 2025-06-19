@@ -32,10 +32,10 @@ export async function loadInitialData(store: AppStore) {
 
   if (!dataHasLoaded) {
     api.collective.getState().then((response) => {
-      store.dispatch(collectiveLoaded(response.data.collective));
       store.dispatch(peopleLoaded(response.data.people));
       store.dispatch(intervalsLoaded({ allIntervals: response.data.intervals, currentInterval: response.data.current_interval }));
       store.dispatch(involvementsLoaded(response.data.involvements));
+      store.dispatch(collectiveLoaded(response.data.collective));
     });
   }
 }

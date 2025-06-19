@@ -3,11 +3,15 @@ import type { Involvement } from "../api/Api";
 
 export type InvolvementsState = {
   collective_involvements: Involvement[];
+  crew_involvements: Involvement[];
 };
 
 const involvementsSlice = createSlice({
   name: "involvements",
-  initialState: { collective_involvements: [] } as InvolvementsState,
+  initialState: {
+    collective_involvements: [],
+    crew_involvements: [],
+  } as InvolvementsState,
   reducers: {
     involvementsLoaded: (_state: InvolvementsState, action: PayloadAction<InvolvementsState>) => action.payload,
   },

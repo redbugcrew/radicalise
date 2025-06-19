@@ -9,6 +9,7 @@ use crate::entities::{Collective, Interval, Involvement, InvolvementStatus, Pers
 #[derive(Serialize, Deserialize, ToSchema)]
 struct InitialInvolvementsData {
     pub collective_involvements: Vec<Involvement>,
+    pub crew_involvements: Vec<Involvement>,
 }
 
 #[derive(Serialize, Deserialize, ToSchema)]
@@ -75,12 +76,15 @@ async fn get_state(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse 
             let current_interval = current_interval_result.unwrap();
 
             let collective_involvements_result =
-                find_all_involvements(current_interval.id, COLLECTIVE_GROUP_ID, &pool).await;
+                find_all_group_involvements(current_interval.id, COLLECTIVE_GROUP_ID, &pool).await;
+            let crew_involvements_result =
+                find_all_crew_involvements(current_interval.id, &pool).await; // Assuming crew group ID is 2
 
-            if collective_involvements_result.is_err() {
+            if collective_involvements_result.is_err() || crew_involvements_result.is_err() {
                 return (StatusCode::NOT_FOUND, ()).into_response();
             }
             let collective_involvements = collective_involvements_result.unwrap();
+            let crew_involvements = crew_involvements_result.unwrap();
 
             let initial_data = InitialData {
                 collective,
@@ -89,6 +93,7 @@ async fn get_state(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse 
                 current_interval,
                 involvements: InitialInvolvementsData {
                     collective_involvements,
+                    crew_involvements,
                 },
             };
             return (StatusCode::OK, Json(initial_data)).into_response();
@@ -107,7 +112,8 @@ async fn get_involvements(
     Path(interval_id): Path<i64>,
     Extension(pool): Extension<SqlitePool>,
 ) -> impl IntoResponse {
-    let involvements_result = find_all_involvements(interval_id, COLLECTIVE_GROUP_ID, &pool).await;
+    let involvements_result =
+        find_all_group_involvements(interval_id, COLLECTIVE_GROUP_ID, &pool).await;
 
     match involvements_result {
         Ok(involvements) => (StatusCode::OK, Json(involvements)).into_response(),
@@ -118,7 +124,7 @@ async fn get_involvements(
     }
 }
 
-async fn find_all_involvements(
+async fn find_all_group_involvements(
     interval_id: i64,
     group_id: i64,
     pool: &SqlitePool,
@@ -132,6 +138,25 @@ async fn find_all_involvements(
         interval_id,
         interval_id,
         group_id
+    )
+    .fetch_all(pool)
+    .await
+}
+
+async fn find_all_crew_involvements(
+    interval_id: i64,
+    pool: &SqlitePool,
+) -> Result<Vec<Involvement>, sqlx::Error> {
+    sqlx::query_as!(
+        Involvement,
+        "SELECT involvements.id, person_id, group_id, start_interval_id, end_interval_id, status as \"status: InvolvementStatus\" FROM involvements
+        LEFT JOIN groups ON involvements.group_id = groups.id
+        WHERE
+          (start_interval_id <= ? AND (end_interval_id IS NULL OR end_interval_id >= ?)) AND
+          groups.type = ?",
+        interval_id,
+        interval_id,
+        "crew",
     )
     .fetch_all(pool)
     .await

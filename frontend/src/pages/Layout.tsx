@@ -22,9 +22,7 @@ export default function Layout() {
         <NavLink label="People" href="people" leftSection={<IconUsers size={16} />} onClick={toggle} />
       </AppShell.Navbar>
       <AppShell.Main>
-        <Container p={0}>
-          <Outlet />
-        </Container>
+        <Container p={0}>{collective && <Outlet />}</Container>
       </AppShell.Main>
     </AppShell>
   );

@@ -31,6 +31,7 @@ export interface InitialData {
 
 export interface InitialInvolvementsData {
   collective_involvements: Involvement[];
+  crew_involvements: Involvement[];
 }
 
 export interface Interval {

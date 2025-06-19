@@ -11,7 +11,7 @@ export default function PeopleForInterval({ interval }: PeopleForIntervalProps) 
   const currentInterval = useAppSelector((state) => state.intervals.currentInterval);
   const currentCollectiveInvolvements = useAppSelector((state) => state.involvements.collective_involvements);
 
-  const [involvements, setInvolvements] = useState<Involvement[]>([]);
+  const [involvements, setInvolvements] = useState<Involvement[] | null>(null);
 
   useEffect(() => {
     if (currentInterval && currentInterval.id == interval.id) {
@@ -29,10 +29,10 @@ export default function PeopleForInterval({ interval }: PeopleForIntervalProps) 
         })
         .catch((error) => {
           console.error("Error fetching involvements:", error);
-          setInvolvements([]);
+          setInvolvements(null);
         });
     }
-  }, [interval]);
+  }, [interval, currentInterval, currentCollectiveInvolvements]);
 
-  return <PeopleByInvolvementStatus key={interval.id} involvements={involvements} />;
+  return involvements && <PeopleByInvolvementStatus key={interval.id} involvements={involvements} />;
 }
