@@ -1,15 +1,17 @@
+import { useDispatch, useSelector, useStore } from "react-redux";
+import { Api } from "../api/Api";
 import { configureStore } from "@reduxjs/toolkit";
 import collectiveReducer, { collectiveLoaded } from "./collective";
 import peopleReducer, { peopleLoaded } from "./people";
 import intervalsReducer, { intervalsLoaded } from "./intervals";
-import { useDispatch, useSelector, useStore } from "react-redux";
-import { Api } from "../api/Api";
+import involvementsReducer, { involvementsLoaded } from "./involvements";
 
 const store = configureStore({
   reducer: {
     collective: collectiveReducer,
     people: peopleReducer,
     intervals: intervalsReducer,
+    involvements: involvementsReducer,
   },
 });
 
@@ -33,6 +35,7 @@ export async function loadInitialData(store: AppStore) {
       store.dispatch(collectiveLoaded(response.data.collective));
       store.dispatch(peopleLoaded(response.data.people));
       store.dispatch(intervalsLoaded({ allIntervals: response.data.intervals, currentInterval: response.data.current_interval }));
+      store.dispatch(involvementsLoaded(response.data.involvements));
     });
   }
 }

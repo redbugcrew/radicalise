@@ -7,11 +7,17 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 use crate::entities::{Collective, Interval, Involvement, InvolvementStatus, Person};
 
 #[derive(Serialize, Deserialize, ToSchema)]
+struct InitialInvolvementsData {
+    pub collective_involvements: Vec<Involvement>,
+}
+
+#[derive(Serialize, Deserialize, ToSchema)]
 struct InitialData {
     pub collective: Collective,
     pub people: Vec<Person>,
     pub intervals: Vec<Interval>,
     pub current_interval: Interval,
+    pub involvements: InitialInvolvementsData,
 }
 
 const COLLECTIVE_GROUP_ID: i64 = 1;
@@ -58,9 +64,6 @@ async fn get_state(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse 
             .fetch_one(&pool)
             .await;
 
-            // let collective_involvements_result =
-            //     find_all_involvements(interval_id, COLLECTIVE_GROUP_ID, &pool).await;
-
             if intervals_result.is_err()
                 || people_result.is_err()
                 || current_interval_result.is_err()
@@ -71,11 +74,22 @@ async fn get_state(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse 
             let intervals = intervals_result.unwrap();
             let current_interval = current_interval_result.unwrap();
 
+            let collective_involvements_result =
+                find_all_involvements(current_interval.id, COLLECTIVE_GROUP_ID, &pool).await;
+
+            if collective_involvements_result.is_err() {
+                return (StatusCode::NOT_FOUND, ()).into_response();
+            }
+            let collective_involvements = collective_involvements_result.unwrap();
+
             let initial_data = InitialData {
                 collective,
                 people,
                 intervals,
                 current_interval,
+                involvements: InitialInvolvementsData {
+                    collective_involvements,
+                },
             };
             return (StatusCode::OK, Json(initial_data)).into_response();
         }

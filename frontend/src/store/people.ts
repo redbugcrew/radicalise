@@ -1,13 +1,23 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { Person } from "../api/Api";
 
-export type PeopleState = Person[];
+interface PeopleObjectMap {
+  [key: number]: Person;
+}
+
+export type PeopleState = PeopleObjectMap;
 
 const peopleSlice = createSlice({
   name: "people",
-  initialState: [] as PeopleState,
+  initialState: {} as PeopleState,
   reducers: {
-    peopleLoaded: (_state: PeopleState, action: PayloadAction<Person[]>) => action.payload,
+    peopleLoaded: (_state: PeopleState, action: PayloadAction<Person[]>) => {
+      const people: PeopleObjectMap = {};
+      action.payload.forEach((person) => {
+        people[person.id] = person;
+      });
+      return people;
+    },
   },
 });
 

@@ -25,7 +25,12 @@ export interface InitialData {
   collective: Collective;
   current_interval: Interval;
   intervals: Interval[];
+  involvements: InitialInvolvementsData;
   people: Person[];
+}
+
+export interface InitialInvolvementsData {
+  collective_involvements: Involvement[];
 }
 
 export interface Interval {

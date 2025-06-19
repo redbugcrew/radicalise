@@ -1,4 +1,4 @@
-import { Avatar, Badge, Center, Group, Table, Text, TextInput, UnstyledButton, Stack, keys } from "@mantine/core";
+import { Avatar, Badge, Center, Group, Table, Text, TextInput, UnstyledButton, Stack } from "@mantine/core";
 import { Anchor } from "../";
 import { IconChevronDown, IconChevronUp, IconSearch, IconSelector } from "@tabler/icons-react";
 import { useState } from "react";
@@ -13,64 +13,23 @@ interface SortableRowData {
   name: string;
 }
 
-interface RowData {
-  key: string;
-  avatar: string;
+export interface PeopleTableRow {
+  id: number;
   name: string;
   groups: Group[];
 }
 
-const data = [
-  {
-    key: "1",
-    avatar: "https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-1.png",
-    name: "Robert Wolfkisser",
-    groups: [],
-  },
-  {
-    key: "2",
-    avatar: "https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-7.png",
-    name: "Jill Jailbreaker",
-    groups: [{ id: 5, name: "Retreat Crew" }],
-  },
-  {
-    key: "3",
-    avatar: "https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-2.png",
-    name: "Henry Silkeater",
-    groups: [],
-  },
-  {
-    key: "4",
-    avatar: "https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-3.png",
-    name: "Bill Horsefighter",
-    groups: [
-      { id: 2, name: "PAS Crew" },
-      { id: 3, name: "Solidarity Crew" },
-    ],
-  },
-  {
-    key: "5",
-    avatar: "https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-10.png",
-    name: "Jeremy Footviewer",
-    groups: [
-      { id: 5, name: "Retreat Crew" },
-      { id: 4, name: "Seedling Crew" },
-      { id: 3, name: "Solidarity Crew" },
-    ],
-  },
-];
-
-function matchesFilter(item: RowData, query: string) {
+function matchesFilter(item: PeopleTableRow, query: string) {
   const lowerQuery = query.toLowerCase();
   return item.name.toLowerCase().includes(lowerQuery) || item.groups.some((group) => group.name.toLowerCase().includes(lowerQuery));
 }
 
-function filterData(data: RowData[], search: string) {
+function filterData(data: PeopleTableRow[], search: string) {
   const query = search.toLowerCase().trim();
   return data.filter((item) => matchesFilter(item, query));
 }
 
-function sortData(data: RowData[], payload: { sortBy: keyof SortableRowData | null; reversed: boolean; search: string }) {
+function sortData(data: PeopleTableRow[], payload: { sortBy: keyof SortableRowData | null; reversed: boolean; search: string }) {
   const { sortBy } = payload;
 
   if (!sortBy) {
@@ -102,6 +61,8 @@ interface SortableThProps {
   sorted: boolean;
   onSort: () => void;
 }
+
+const avatarUrl = (id: number) => `https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-${(id % 10) + 1}.png`;
 
 function SortableTh({ children, reversed, sorted, onSort }: SortableThProps) {
   const Icon = sorted ? (reversed ? IconChevronUp : IconChevronDown) : IconSelector;
@@ -135,9 +96,13 @@ function Th({ children }: ThProps) {
   );
 }
 
-export default function PeopleTable() {
+interface PeopleTableProps {
+  people: PeopleTableRow[];
+}
+
+export default function PeopleTable({ people }: PeopleTableProps) {
   const [search, setSearch] = useState("");
-  const [sortedData, setSortedData] = useState(data);
+  const [sortedData, setSortedData] = useState(people);
   const [sortBy, setSortBy] = useState<keyof SortableRowData | null>(null);
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
 
@@ -145,21 +110,21 @@ export default function PeopleTable() {
     const reversed = field === sortBy ? !reverseSortDirection : false;
     setReverseSortDirection(reversed);
     setSortBy(field);
-    setSortedData(sortData(data, { sortBy: field, reversed, search }));
+    setSortedData(sortData(people, { sortBy: field, reversed, search }));
   };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = event.currentTarget;
     setSearch(value);
-    setSortedData(sortData(data, { sortBy, reversed: reverseSortDirection, search: value }));
+    setSortedData(sortData(people, { sortBy, reversed: reverseSortDirection, search: value }));
   };
 
   const rows = sortedData.map((item) => (
-    <Table.Tr key={item.name}>
+    <Table.Tr key={item.id}>
       <Table.Td>
         <Anchor href="/people/1">
           <Group gap="sm" wrap="nowrap">
-            <Avatar size={30} src={item.avatar} radius={30} />
+            <Avatar size={30} src={avatarUrl(item.id)} radius={30} />
             <Text fz="sm" fw={500}>
               {item.name}
             </Text>
