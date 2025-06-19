@@ -32,7 +32,7 @@ export async function loadInitialData(store: AppStore) {
     api.collective.getState().then((response) => {
       store.dispatch(collectiveLoaded(response.data.collective));
       store.dispatch(peopleLoaded(response.data.people));
-      store.dispatch(intervalsLoaded(response.data.intervals));
+      store.dispatch(intervalsLoaded({ allIntervals: response.data.intervals, currentInterval: response.data.current_interval }));
     });
   }
 }

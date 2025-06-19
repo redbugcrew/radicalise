@@ -1,12 +1,12 @@
 import { Group, ActionIcon, Text, Stack } from "@mantine/core";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
-import type { DateInterval } from "../store/intervals";
-import type { DateOnly } from "@urbdyn/date-only";
+import { DateOnly } from "@urbdyn/date-only";
+import type { Interval } from "../api/Api";
 
 interface IntervalSelectorProps {
-  intervals: DateInterval[];
-  currentInterval: DateInterval | null;
-  onChangeInterval: (interval: DateInterval) => void;
+  intervals: Interval[];
+  currentInterval: Interval | null;
+  onChangeInterval: (interval: Interval) => void;
 }
 
 function DateText({ date }: { date: DateOnly }) {
@@ -18,8 +18,8 @@ function DateText({ date }: { date: DateOnly }) {
 
 interface IntervalNavigationButtonProps {
   variant: "previous" | "next";
-  to: DateInterval | null;
-  onChange: (interval: DateInterval) => void;
+  to: Interval | null;
+  onChange: (interval: Interval) => void;
 }
 
 function IntervalNavigationButton({ variant, to, onChange }: IntervalNavigationButtonProps) {
@@ -54,7 +54,7 @@ export default function IntervalSelector({ intervals, currentInterval, onChangeI
           Interval {currentInterval.id}
         </Text>
         <Text span c="dimmed">
-          <DateText date={currentInterval.start_date} /> - <DateText date={currentInterval.end_date} />
+          <DateText date={DateOnly.fromString(currentInterval.start_date)} /> - <DateText date={DateOnly.fromString(currentInterval.end_date)} />
         </Text>
       </Stack>
       <IntervalNavigationButton variant="next" to={nextInterval} onChange={onChangeInterval} />

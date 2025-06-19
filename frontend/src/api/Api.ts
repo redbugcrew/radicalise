@@ -23,6 +23,7 @@ export interface Collective {
 
 export interface InitialData {
   collective: Collective;
+  current_interval: Interval;
   intervals: Interval[];
   people: Person[];
 }
