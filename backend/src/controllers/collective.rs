@@ -4,7 +4,7 @@ use sqlx::SqlitePool;
 use utoipa::ToSchema;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
-use crate::entities::{Collective, Interval, Involvement, InvolvementStatus, Person};
+use crate::entities::{Collective, Group, Interval, Involvement, InvolvementStatus, Person};
 
 #[derive(Serialize, Deserialize, ToSchema)]
 struct IntervalInvolvementData {
@@ -16,6 +16,7 @@ struct IntervalInvolvementData {
 struct InitialData {
     pub collective: Collective,
     pub people: Vec<Person>,
+    pub groups: Vec<Group>,
     pub intervals: Vec<Interval>,
     pub current_interval: Interval,
     pub involvements: IntervalInvolvementData,
@@ -49,6 +50,10 @@ async fn get_state(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse 
                 .fetch_all(&pool)
                 .await;
 
+            let groups_result = sqlx::query_as!(Group, "SELECT * FROM groups")
+                .fetch_all(&pool)
+                .await;
+
             let intervals_result = sqlx::query_as!(
                 Interval,
                 "SELECT id, start_date, end_date FROM intervals WHERE collective_id = ?",
@@ -68,12 +73,14 @@ async fn get_state(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse 
             if intervals_result.is_err()
                 || people_result.is_err()
                 || current_interval_result.is_err()
+                || groups_result.is_err()
             {
                 return (StatusCode::NOT_FOUND, ()).into_response();
             }
             let people = people_result.unwrap();
             let intervals = intervals_result.unwrap();
             let current_interval = current_interval_result.unwrap();
+            let groups = groups_result.unwrap();
 
             let collective_involvements_result =
                 find_all_group_involvements(current_interval.id, COLLECTIVE_GROUP_ID, &pool).await;
@@ -89,6 +96,7 @@ async fn get_state(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse 
             let initial_data = InitialData {
                 collective,
                 people,
+                groups,
                 intervals,
                 current_interval,
                 involvements: IntervalInvolvementData {
@@ -159,7 +167,7 @@ async fn find_all_crew_involvements(
         LEFT JOIN groups ON involvements.group_id = groups.id
         WHERE
           (start_interval_id <= ? AND (end_interval_id IS NULL OR end_interval_id >= ?)) AND
-          groups.type = ?",
+          groups.group_type = ?",
         interval_id,
         interval_id,
         "crew",

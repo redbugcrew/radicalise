@@ -21,9 +21,18 @@ export interface Collective {
   name?: string | null;
 }
 
+export interface Group {
+  description?: string | null;
+  group_type: string;
+  /** @format int64 */
+  id: number;
+  name: string;
+}
+
 export interface InitialData {
   collective: Collective;
   current_interval: Interval;
+  groups: Group[];
   intervals: Interval[];
   involvements: IntervalInvolvementData;
   people: Person[];

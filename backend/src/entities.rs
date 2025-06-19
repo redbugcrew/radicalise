@@ -56,3 +56,11 @@ pub struct Involvement {
     pub end_interval_id: Option<i64>,
     pub status: InvolvementStatus,
 }
+
+#[derive(Serialize, Deserialize, ToSchema)]
+pub struct Group {
+    pub id: i64,
+    pub name: String,
+    pub group_type: String,
+    pub description: Option<String>,
+}
