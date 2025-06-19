@@ -7,7 +7,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 use crate::entities::{Collective, Interval, Involvement, InvolvementStatus, Person};
 
 #[derive(Serialize, Deserialize, ToSchema)]
-struct InitialInvolvementsData {
+struct IntervalInvolvementData {
     pub collective_involvements: Vec<Involvement>,
     pub crew_involvements: Vec<Involvement>,
 }
@@ -18,7 +18,7 @@ struct InitialData {
     pub people: Vec<Person>,
     pub intervals: Vec<Interval>,
     pub current_interval: Interval,
-    pub involvements: InitialInvolvementsData,
+    pub involvements: IntervalInvolvementData,
 }
 
 const COLLECTIVE_GROUP_ID: i64 = 1;
@@ -91,7 +91,7 @@ async fn get_state(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse 
                 people,
                 intervals,
                 current_interval,
-                involvements: InitialInvolvementsData {
+                involvements: IntervalInvolvementData {
                     collective_involvements,
                     crew_involvements,
                 },
@@ -103,7 +103,7 @@ async fn get_state(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse 
 }
 
 #[utoipa::path(get, path = "/interval/{interval_id}/involvements", responses(
-        (status = 200, description = "Involvements successfully", body = Vec<Involvement>),
+        (status = 200, description = "Fetched Involvements successfully", body = IntervalInvolvementData),
         (status = NOT_FOUND, description = "Not found", body = ())
     ), params(
             ("interval_id" = i64, Path, description = "Interval ID")
@@ -112,16 +112,22 @@ async fn get_involvements(
     Path(interval_id): Path<i64>,
     Extension(pool): Extension<SqlitePool>,
 ) -> impl IntoResponse {
-    let involvements_result =
+    let collective_involvements_result =
         find_all_group_involvements(interval_id, COLLECTIVE_GROUP_ID, &pool).await;
+    let crew_involvements_result = find_all_crew_involvements(interval_id, &pool).await;
 
-    match involvements_result {
-        Ok(involvements) => (StatusCode::OK, Json(involvements)).into_response(),
-        Err(e) => {
-            println!("Error fetching involvements: {:?}", e);
-            return (StatusCode::NOT_FOUND, ()).into_response();
-        }
+    if collective_involvements_result.is_err() || crew_involvements_result.is_err() {
+        return (StatusCode::NOT_FOUND, ()).into_response();
     }
+    let collective_involvements = collective_involvements_result.unwrap();
+    let crew_involvements = crew_involvements_result.unwrap();
+
+    let result = IntervalInvolvementData {
+        collective_involvements,
+        crew_involvements,
+    };
+
+    return (StatusCode::OK, Json(result)).into_response();
 }
 
 async fn find_all_group_involvements(

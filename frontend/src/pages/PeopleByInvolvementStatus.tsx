@@ -1,4 +1,4 @@
-import { Tabs } from "@mantine/core";
+import { Tabs, Text } from "@mantine/core";
 import { PeopleTable } from "../components";
 import { InvolvementStatus, type Involvement } from "../api/Api";
 import { useAppSelector } from "../store";
@@ -6,7 +6,6 @@ import { capitalCase } from "change-case";
 import { useState } from "react";
 import type { PeopleState } from "../store/people";
 import type { PeopleTableRow } from "../components/PeopleTable/PeopleTable";
-import { IconMapPlus } from "@tabler/icons-react";
 
 type InvolvementsHashById = Map<number, Involvement[]>;
 type InvolvementsHashByStatus = Map<InvolvementStatus, Involvement[]>;
@@ -38,8 +37,6 @@ function hashInvolvementsByPerson(involvements: Involvement[] | undefined): Invo
 }
 
 function peopleForInvolvements(involvements: Involvement[], allCrewInvolvements: InvolvementsHashById, allPeople: PeopleState): PeopleTableRow[] {
-  console.log("applying crew involvements", allCrewInvolvements);
-
   return involvements.map((involvement) => {
     const person = allPeople[involvement.person_id];
     const crewInvolvements = allCrewInvolvements.get(person.id) || [];
@@ -58,9 +55,10 @@ function peopleForInvolvements(involvements: Involvement[], allCrewInvolvements:
 interface PeopleByInvolvementStatusProps {
   involvements: Involvement[];
   crewEnrolments?: Involvement[];
+  tableKey?: string;
 }
 
-export default function PeopleByInvolvementStatus({ involvements, crewEnrolments }: PeopleByInvolvementStatusProps) {
+export default function PeopleByInvolvementStatus({ involvements, crewEnrolments, tableKey }: PeopleByInvolvementStatusProps) {
   const states = [InvolvementStatus.Participating, InvolvementStatus.OnHiatus];
   const [activeState, setActiveState] = useState<InvolvementStatus>(states[0]);
 
@@ -87,7 +85,7 @@ export default function PeopleByInvolvementStatus({ involvements, crewEnrolments
 
       {states.map((state) => (
         <Tabs.Panel value={state} key={state} pt="md">
-          <PeopleTable people={peopleForInvolvements(hashedInvolvements.get(state) || [], hashedCrewEnrolments, allPeople)} />
+          <PeopleTable key={tableKey} people={peopleForInvolvements(hashedInvolvements.get(state) || [], hashedCrewEnrolments, allPeople)} />
         </Tabs.Panel>
       ))}
     </Tabs>

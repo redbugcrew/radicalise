@@ -25,13 +25,8 @@ export interface InitialData {
   collective: Collective;
   current_interval: Interval;
   intervals: Interval[];
-  involvements: InitialInvolvementsData;
+  involvements: IntervalInvolvementData;
   people: Person[];
-}
-
-export interface InitialInvolvementsData {
-  collective_involvements: Involvement[];
-  crew_involvements: Involvement[];
 }
 
 export interface Interval {
@@ -39,6 +34,11 @@ export interface Interval {
   /** @format int64 */
   id: number;
   start_date: string;
+}
+
+export interface IntervalInvolvementData {
+  collective_involvements: Involvement[];
+  crew_involvements: Involvement[];
 }
 
 export interface Involvement {
@@ -279,7 +279,7 @@ export class Api<
      * @request GET:/collective/interval/{interval_id}/involvements
      */
     getInvolvements: (intervalId: number, params: RequestParams = {}) =>
-      this.request<Involvement[], any>({
+      this.request<IntervalInvolvementData, any>({
         path: `/collective/interval/${intervalId}/involvements`,
         method: "GET",
         format: "json",

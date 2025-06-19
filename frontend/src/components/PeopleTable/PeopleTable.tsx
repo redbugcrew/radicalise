@@ -119,6 +119,8 @@ export default function PeopleTable({ people }: PeopleTableProps) {
     setSortedData(sortData(people, { sortBy, reversed: reverseSortDirection, search: value }));
   };
 
+  console.log("data", sortedData);
+
   const rows = sortedData.map((item) => (
     <Table.Tr key={item.id}>
       <Table.Td>

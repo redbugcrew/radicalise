@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Api, type Interval, type Involvement } from "../api/Api";
 import { useAppSelector } from "../store";
 import PeopleByInvolvementStatus from "./PeopleByInvolvementStatus";
+import type { InvolvementsState } from "../store/involvements";
 
 interface PeopleForIntervalProps {
   interval: Interval;
@@ -9,14 +10,13 @@ interface PeopleForIntervalProps {
 
 export default function PeopleForInterval({ interval }: PeopleForIntervalProps) {
   const currentInterval = useAppSelector((state) => state.intervals.currentInterval);
-  const currentCollectiveInvolvements = useAppSelector((state) => state.involvements.collective_involvements);
-  const currentCrewInvolvements = useAppSelector((state) => state.involvements.crew_involvements);
+  const currentInvolvements: InvolvementsState = useAppSelector((state) => state.involvements);
 
-  const [involvements, setInvolvements] = useState<Involvement[] | null>(null);
+  const [involvements, setInvolvements] = useState<InvolvementsState | null>(null);
 
   useEffect(() => {
     if (currentInterval && currentInterval.id == interval.id) {
-      setInvolvements(currentCollectiveInvolvements);
+      setInvolvements(currentInvolvements);
     } else {
       const api = new Api({
         baseURL: "http://localhost:8000",
@@ -25,7 +25,6 @@ export default function PeopleForInterval({ interval }: PeopleForIntervalProps) 
       api.collective
         .getInvolvements(interval.id)
         .then((response) => {
-          // Assuming the API returns an array of involvements
           setInvolvements(response.data);
         })
         .catch((error) => {
@@ -33,7 +32,7 @@ export default function PeopleForInterval({ interval }: PeopleForIntervalProps) 
           setInvolvements(null);
         });
     }
-  }, [interval, currentInterval, currentCollectiveInvolvements]);
+  }, [interval.id, currentInterval, currentInvolvements]);
 
-  return involvements && <PeopleByInvolvementStatus key={interval.id} involvements={involvements} crewEnrolments={currentCrewInvolvements} />;
+  return involvements && <PeopleByInvolvementStatus key={interval.id} involvements={involvements.collective_involvements} crewEnrolments={involvements.crew_involvements} tableKey={interval.id} />;
 }
