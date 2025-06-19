@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Api, type Interval, type Involvement } from "../api/Api";
+import { Api, type Interval } from "../api/Api";
 import { useAppSelector } from "../store";
 import PeopleByInvolvementStatus from "./PeopleByInvolvementStatus";
 import type { InvolvementsState } from "../store/involvements";

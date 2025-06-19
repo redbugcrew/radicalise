@@ -1,4 +1,4 @@
-import { Tabs, Text } from "@mantine/core";
+import { Tabs } from "@mantine/core";
 import { PeopleTable } from "../components";
 import { InvolvementStatus, type Involvement } from "../api/Api";
 import { useAppSelector } from "../store";
@@ -55,7 +55,7 @@ function peopleForInvolvements(involvements: Involvement[], allCrewInvolvements:
 interface PeopleByInvolvementStatusProps {
   involvements: Involvement[];
   crewEnrolments?: Involvement[];
-  tableKey?: string;
+  tableKey?: React.Key;
 }
 
 export default function PeopleByInvolvementStatus({ involvements, crewEnrolments, tableKey }: PeopleByInvolvementStatusProps) {
