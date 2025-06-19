@@ -5,7 +5,7 @@ import { useAppSelector } from "../store";
 import { capitalCase } from "change-case";
 import { useState } from "react";
 import type { PeopleState } from "../store/people";
-import type { GroupState } from "../store/groups";
+import type { GroupsState } from "../store/groups";
 import type { PeopleTableRow } from "../components/PeopleTable/PeopleTable";
 
 type InvolvementsHashById = Map<number, Involvement[]>;
@@ -37,7 +37,7 @@ function hashInvolvementsByPerson(involvements: Involvement[] | undefined): Invo
   return map;
 }
 
-function peopleForInvolvements(involvements: Involvement[], allCrewInvolvements: InvolvementsHashById, allPeople: PeopleState, allGroups: GroupState): PeopleTableRow[] {
+function peopleForInvolvements(involvements: Involvement[], allCrewInvolvements: InvolvementsHashById, allPeople: PeopleState, allGroups: GroupsState): PeopleTableRow[] {
   return involvements.map((involvement) => {
     const person = allPeople[involvement.person_id];
     const crewInvolvements = allCrewInvolvements.get(person.id) || [];

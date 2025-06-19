@@ -7,4 +7,9 @@ export default defineConfig({
   build: {
     sourcemap: false,
   },
+  resolve: {
+    alias: {
+      "@tabler/icons-react": "@tabler/icons-react/dist/esm/icons/index.mjs",
+    },
+  },
 });

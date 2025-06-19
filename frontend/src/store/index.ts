@@ -25,6 +25,11 @@ export const useAppDispatch = useDispatch.withTypes<AppDispatch>();
 export const useAppSelector = useSelector.withTypes<RootState>();
 export const useAppStore = useStore.withTypes<AppStore>();
 
+// const initialDataLoaded = (data: any) => ({
+//   type: "initialDataLoaded",
+//   payload: data,
+// });
+
 export async function loadInitialData(store: AppStore) {
   const api = new Api({
     baseURL: "http://localhost:8000",
