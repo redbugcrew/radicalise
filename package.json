@@ -1,0 +1,12 @@
+{
+  "name": "radicalise",
+  "private": true,
+  "version": "0.1.0",
+  "devDependencies": {
+    "@j-ulrich/release-it-regex-bumper": "^5.0.0",
+    "release-it": "^18.1.0"
+  },
+  "scripts": {
+    "release": "release-it"
+  }
+}

@@ -4,3 +4,6 @@
 
 # Database
 *.sqlite
+
+# Javascript
+node_modules/
