@@ -1,7 +1,7 @@
 import { Api } from "./Api";
 
 function getApiUrl(): string {
-  const apiUrl = import.meta.env.VITE_API_HOST || "/api";
+  const apiUrl = import.meta.env.VITE_API_HOST || "/";
   return apiUrl;
 }
 
