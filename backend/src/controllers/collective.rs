@@ -33,7 +33,8 @@ pub fn router() -> OpenApiRouter {
 
 #[utoipa::path(get, path = "/", responses(
         (status = 200, description = "Collective found successfully", body = InitialData),
-        (status = NOT_FOUND, description = "Collective was not found", body = ())
+        (status = NOT_FOUND, description = "Collective was not found", body = ()),
+        (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
     ),)]
 async fn get_state(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse {
     let collective_result = sqlx::query_as!(
@@ -75,7 +76,7 @@ async fn get_state(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse 
                 || current_interval_result.is_err()
                 || groups_result.is_err()
             {
-                return (StatusCode::NOT_FOUND, ()).into_response();
+                return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
             }
             let people = people_result.unwrap();
             let intervals = intervals_result.unwrap();
@@ -88,7 +89,7 @@ async fn get_state(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse 
                 find_all_crew_involvements(current_interval.id, &pool).await; // Assuming crew group ID is 2
 
             if collective_involvements_result.is_err() || crew_involvements_result.is_err() {
-                return (StatusCode::NOT_FOUND, ()).into_response();
+                return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
             }
             let collective_involvements = collective_involvements_result.unwrap();
             let crew_involvements = crew_involvements_result.unwrap();

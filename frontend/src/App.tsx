@@ -1,5 +1,5 @@
 import Layout from "./pages/Layout";
-import { RouterProvider, createBrowserRouter, type LoaderFunction } from "react-router-dom";
+import { Navigate, RouterProvider, createBrowserRouter, type LoaderFunction } from "react-router-dom";
 import { Provider as ReduxProvider } from "react-redux";
 import store, { loadInitialData, type AppStore } from "./store";
 
@@ -25,6 +25,10 @@ const router = createBrowserRouter([
     element: <Layout />,
     loader: withStore(loadInitialData, store),
     children: [
+      {
+        path: "",
+        element: <Navigate to="people" replace />,
+      },
       {
         path: "dashboard",
         element: <Dashboard />,

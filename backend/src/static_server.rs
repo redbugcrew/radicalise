@@ -13,6 +13,14 @@ lazy_static! {
 }
 
 pub async fn frontend_handler(uri: Uri) -> Result<Response<Body>, (StatusCode, String)> {
+    if uri.path().starts_with("/api") {
+        println!(
+            "API call detected, not serving static files for URI: {}",
+            uri
+        );
+        return Err((StatusCode::NOT_FOUND, "API endpoint not found".to_string()));
+    }
+
     let res = serve_dir(uri.clone(), FRONTEND_PATH.clone()).await?;
 
     match res.status() {

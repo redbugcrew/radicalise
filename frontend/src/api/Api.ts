@@ -246,7 +246,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 0.1.4
+ * @version 0.1.9
  * @license
  */
 export class Api<
