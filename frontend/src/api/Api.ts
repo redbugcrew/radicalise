@@ -246,36 +246,35 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 0.1.0
+ * @version 0.1.4
  * @license
  */
 export class Api<
   SecurityDataType extends unknown,
 > extends HttpClient<SecurityDataType> {
-  auth = {
+  api = {
     /**
      * No description
      *
      * @name ForgotPassword
-     * @request POST:/auth/forgot_password
+     * @request POST:/api/auth/forgot_password
      */
     forgotPassword: (params: RequestParams = {}) =>
       this.request<string, any>({
-        path: `/auth/forgot_password`,
+        path: `/api/auth/forgot_password`,
         method: "POST",
         ...params,
       }),
-  };
-  collective = {
+
     /**
      * No description
      *
      * @name GetState
-     * @request GET:/collective
+     * @request GET:/api/collective
      */
     getState: (params: RequestParams = {}) =>
       this.request<InitialData, any>({
-        path: `/collective`,
+        path: `/api/collective`,
         method: "GET",
         format: "json",
         ...params,
@@ -285,11 +284,11 @@ export class Api<
      * No description
      *
      * @name GetInvolvements
-     * @request GET:/collective/interval/{interval_id}/involvements
+     * @request GET:/api/collective/interval/{interval_id}/involvements
      */
     getInvolvements: (intervalId: number, params: RequestParams = {}) =>
       this.request<IntervalInvolvementData, any>({
-        path: `/collective/interval/${intervalId}/involvements`,
+        path: `/api/collective/interval/${intervalId}/involvements`,
         method: "GET",
         format: "json",
         ...params,

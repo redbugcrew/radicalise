@@ -28,8 +28,7 @@ async fn main() {
 
     let (router, api) = OpenApiRouter::with_openapi(ApiDoc::openapi())
         .route("/", get(|| async { "Hello, World!" }))
-        .nest("/auth", crate::auth::router())
-        .nest("/collective", crate::controllers::collective::router())
+        .nest("/api", crate::controllers::router())
         .split_for_parts();
 
     let router = router

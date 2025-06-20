@@ -39,7 +39,7 @@ export async function loadInitialData(store: AppStore) {
 
   if (!dataHasLoaded) {
     console.log("Loading initial data from API...");
-    api.collective.getState().then((response) => {
+    api.api.getState().then((response) => {
       store.dispatch(peopleLoaded(response.data.people));
       store.dispatch(groupsLoaded(response.data.groups));
       store.dispatch(intervalsLoaded({ allIntervals: response.data.intervals, currentInterval: response.data.current_interval }));

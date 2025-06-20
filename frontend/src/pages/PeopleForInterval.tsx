@@ -22,7 +22,7 @@ export default function PeopleForInterval({ interval }: PeopleForIntervalProps) 
         baseURL: "http://localhost:8000",
       });
 
-      api.collective
+      api.api
         .getInvolvements(interval.id)
         .then((response) => {
           setInvolvements(response.data);
