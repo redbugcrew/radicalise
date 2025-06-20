@@ -17,7 +17,7 @@ function withStore(func: (store: AppStore) => void, store: AppStore): LoaderFunc
   return wrappedFunc;
 }
 
-function loadParticipants(store: AppStore): void {}
+function loadParticipants(_store: AppStore): void {}
 
 const router = createBrowserRouter([
   {
