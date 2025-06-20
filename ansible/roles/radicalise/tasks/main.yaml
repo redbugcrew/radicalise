@@ -1,0 +1,50 @@
+- name: Ensure LoRes Node stack is configured
+  community.docker.docker_stack:
+    state: present
+    name: radicalise
+    compose:
+      - services:
+          radicalise:
+            image: ghcr.io/brassica-collective/radicalise:latest
+            ports:
+              - target: 2022
+                published: 2022
+                protocol: udp
+                mode: host
+              - target: 2023
+                published: 2023
+                protocol: udp
+                mode: host
+              # - target: 80
+              #   published: 80
+            environment:
+              DATABASE_URL: "sqlite:/data/radicalise.sqlite"
+            volumes:
+              - data:/data
+            networks:
+              - proxy
+            deploy:
+              replicas: 1
+              restart_policy:
+                delay: 10s
+                max_attempts: 10
+                window: 60s
+              labels:
+                traefik.enable: "true"
+                traefik.http.routers.radicalise.rule: "Host(`{{ inventory_hostname }}`)"
+                traefik.http.routers.radicalise.entryPoints: websecure
+                traefik.http.routers.radicalise.service: radicalise
+                traefik.http.services.radicalise.loadbalancer.server.port: 8000
+                shepherd.enable: "true"
+            # healthcheck:
+            #   test: ["CMD", "curl", "-f", "http://localhost/"]
+            #   interval: 30s
+            #   timeout: 20s
+            #   retries: 3
+
+        networks:
+          proxy:
+            external: true
+
+        volumes:
+          data:

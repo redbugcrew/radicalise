@@ -1,0 +1,8 @@
+---
+- hosts:
+    - brassica.radhousing.org
+  roles:
+    - docker_swarm_manager
+    - traefik
+    - shepherd
+    - radicalise
