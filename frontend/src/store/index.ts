@@ -1,5 +1,4 @@
 import { useDispatch, useSelector, useStore } from "react-redux";
-import { Api } from "../api/Api";
 import { configureStore } from "@reduxjs/toolkit";
 import collectiveReducer, { collectiveLoaded } from "./collective";
 import peopleReducer, { peopleLoaded } from "./people";
