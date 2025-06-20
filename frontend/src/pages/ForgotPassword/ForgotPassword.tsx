@@ -10,7 +10,7 @@ export default function ForgotPassword() {
 
   const onSubmit = () => {
     console.log("Sending to API");
-    api.auth.forgotPassword();
+    api.api.forgotPassword();
   };
   ``;
   return (

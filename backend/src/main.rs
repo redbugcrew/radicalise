@@ -1,15 +1,16 @@
-use axum::{Extension, routing::get};
+use axum::{Extension, response::Redirect, routing::get};
 use tower_http::cors::{Any, CorsLayer};
 use utoipa::OpenApi;
 use utoipa_axum::router::OpenApiRouter;
 use utoipa_swagger_ui::SwaggerUi;
 
-use crate::database::prepare_database;
+use crate::{database::prepare_database, static_server::frontend_handler};
 
 mod auth;
 mod controllers;
 mod database;
 mod entities;
+mod static_server;
 
 #[macro_use]
 extern crate lazy_static;
@@ -27,12 +28,13 @@ async fn main() {
         .expect("Failed to prepare database");
 
     let (router, api) = OpenApiRouter::with_openapi(ApiDoc::openapi())
-        .route("/", get(|| async { "Hello, World!" }))
+        .route("/", get(|| async { Redirect::to("/app/") }))
         .nest("/api", crate::controllers::router())
         .split_for_parts();
 
     let router = router
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", api.clone()))
+        .nest_service("/app", get(frontend_handler))
         .layer(cors)
         .layer(Extension(pool));
 
