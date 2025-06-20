@@ -29,6 +29,8 @@ RUN cp /app/target/$(cat /app/.platform)/release/radicalise /app/radicalise
 FROM ubuntu AS runner
 COPY --from=rustbuilder /app/radicalise /app/backend/radicalise
 COPY --from=vitebuilder /app/dist /app/frontend
+ENV FRONTEND_PATH=/app/frontend
+ENV DATABASE_URL=sqlite:/app/radicalise.sqlite
 EXPOSE 8000
 WORKDIR /app/backend
 CMD ["./radicalise"]
