@@ -1,4 +1,4 @@
-use axum::{Extension, response::Redirect, routing::get};
+use axum::{Extension, routing::get};
 use tower_http::cors::{Any, CorsLayer};
 use utoipa::OpenApi;
 use utoipa_axum::router::OpenApiRouter;
@@ -28,13 +28,12 @@ async fn main() {
         .expect("Failed to prepare database");
 
     let (router, api) = OpenApiRouter::with_openapi(ApiDoc::openapi())
-        .route("/", get(|| async { Redirect::to("/app/") }))
         .nest("/api", crate::controllers::router())
         .split_for_parts();
 
     let router = router
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", api.clone()))
-        .nest_service("/app", get(frontend_handler))
+        .fallback_service(get(frontend_handler))
         .layer(cors)
         .layer(Extension(pool));
 

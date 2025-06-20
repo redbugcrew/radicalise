@@ -19,45 +19,40 @@ function withStore(func: (store: AppStore) => void, store: AppStore): LoaderFunc
 
 function loadParticipants(_store: AppStore): void {}
 
-const router = createBrowserRouter(
-  [
-    {
-      path: "/",
-      element: <Layout />,
-      loader: withStore(loadInitialData, store),
-      children: [
-        {
-          path: "dashboard",
-          element: <Dashboard />,
-        },
-        {
-          path: "people",
-          element: <People />,
-          loader: withStore(loadParticipants, store),
-        },
-        {
-          path: "people/new",
-          element: <NewPerson />,
-        },
-        {
-          path: "people/:personId",
-          element: <Person />,
-        },
-      ],
-    },
-    {
-      path: "login",
-      element: <Login />,
-    },
-    {
-      path: "forgot_password",
-      element: <ForgotPassword />,
-    },
-  ],
+const router = createBrowserRouter([
   {
-    basename: "/app",
-  }
-);
+    path: "/",
+    element: <Layout />,
+    loader: withStore(loadInitialData, store),
+    children: [
+      {
+        path: "dashboard",
+        element: <Dashboard />,
+      },
+      {
+        path: "people",
+        element: <People />,
+        loader: withStore(loadParticipants, store),
+      },
+      {
+        path: "people/new",
+        element: <NewPerson />,
+      },
+      {
+        path: "people/:personId",
+        element: <Person />,
+      },
+    ],
+  },
+  {
+    path: "login",
+    element: <Login />,
+  },
+  {
+    path: "forgot_password",
+    element: <ForgotPassword />,
+  },
+]);
 
 function App() {
   return (
