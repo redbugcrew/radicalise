@@ -1,12 +1,10 @@
 import { IconArrowLeft } from "@tabler/icons-react";
 import { Anchor, Box, Button, Center, Container, Group, Paper, Text, TextInput, Title } from "@mantine/core";
 import classes from "./ForgotPassword.module.css";
-import { Api } from "../../api/Api";
+import { getApi } from "../../api";
 
 export default function ForgotPassword() {
-  const api = new Api({
-    baseURL: "http://localhost:8000",
-  });
+  const api = getApi();
 
   const onSubmit = () => {
     console.log("Sending to API");

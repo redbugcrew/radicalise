@@ -6,6 +6,7 @@ import peopleReducer, { peopleLoaded } from "./people";
 import intervalsReducer, { intervalsLoaded } from "./intervals";
 import involvementsReducer, { involvementsLoaded } from "./involvements";
 import groupsReducer, { groupsLoaded } from "./groups";
+import { getApi } from "../api";
 
 const store = configureStore({
   reducer: {
@@ -31,9 +32,7 @@ export const useAppStore = useStore.withTypes<AppStore>();
 // });
 
 export async function loadInitialData(store: AppStore) {
-  const api = new Api({
-    baseURL: "http://localhost:8000",
-  });
+  const api = getApi();
 
   const dataHasLoaded = store.getState().collective;
 
