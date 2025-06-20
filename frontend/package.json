@@ -1,11 +1,12 @@
 {
   "name": "ralicalise",
   "private": true,
-  "version": "0.1.1",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "check-build": "tsc --noEmit",
     "lint": "eslint .",
     "preview": "vite preview",
     "swagger": "npx swagger-typescript-api generate --path http://localhost:8000/api-docs/openapi.json --output src/api --http-client fetch --clean"

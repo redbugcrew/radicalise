@@ -23,6 +23,6 @@
     }
   },
   "hooks": {
-    "after:bump": ["cd backend && cargo build"]
+    "after:bump": ["cd frontend && npm run check-build && cd .. && cd backend && cargo build"]
   }
 }
