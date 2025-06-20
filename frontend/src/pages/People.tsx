@@ -10,10 +10,10 @@ import PeopleForInterval from "./PeopleForInterval";
 export default function People() {
   const intervals = useAppSelector((state) => state.intervals);
 
-  const [currentInterval, setCurrentInterval] = useState<Interval | null>(null);
+  const [selectedInterval, setSelectedInterval] = useState<Interval | null>(null);
   useEffect(() => {
-    if (intervals.currentInterval != currentInterval) {
-      setCurrentInterval(intervals.currentInterval);
+    if (intervals.currentInterval != selectedInterval) {
+      setSelectedInterval(intervals.currentInterval);
     }
   }, [intervals.currentInterval]);
 
@@ -27,8 +27,8 @@ export default function People() {
           </ActionIcon>
         </Anchor>
       </Group>
-      <IntervalSelector intervals={intervals.allIntervals} currentInterval={currentInterval} onChangeInterval={setCurrentInterval} />
-      {currentInterval && <PeopleForInterval interval={currentInterval} />}
+      <IntervalSelector intervals={intervals.allIntervals} selectedInterval={selectedInterval} currentInterval={intervals.currentInterval} onChangeInterval={setSelectedInterval} />
+      {selectedInterval && <PeopleForInterval interval={selectedInterval} />}
     </Stack>
   );
 }
