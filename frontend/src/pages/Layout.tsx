@@ -4,6 +4,7 @@ import { IconHome2, IconUsers } from "@tabler/icons-react";
 import { Link, Outlet } from "react-router-dom";
 import { NavLink } from "../components";
 import { useAppSelector } from "../store";
+import packageJson from "../../package.json";
 
 export default function Layout() {
   const [opened, { toggle }] = useDisclosure();
@@ -15,6 +16,7 @@ export default function Layout() {
         <Group h="100%" px="md">
           <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
           <Link to="/">{collective ? collective.name : "Radicalise!"}</Link>
+          <Link to={packageJson.homepage + "/releases/tag/v" + packageJson.version}>v{packageJson.version}</Link>
         </Group>
       </AppShell.Header>
       <AppShell.Navbar p="md">
