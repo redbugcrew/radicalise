@@ -1,4 +1,4 @@
-import { Button, Checkbox, Container, Group, Paper, PasswordInput, TextInput, Title } from "@mantine/core";
+import { Button, Container, Group, Paper, PasswordInput, TextInput, Title } from "@mantine/core";
 import classes from "../Auth.module.css";
 import { Anchor } from "../../../components";
 import { useForm } from "@mantine/form";
@@ -22,9 +22,9 @@ export default function Login() {
     const api = getApi();
     api.api
       .login({ email, password })
-      .then(() => {
+      .then(({ data }) => {
         // Handle successful login
-        console.log("Login successful");
+        console.log("Login successful", data);
       })
       .catch((error) => {
         console.error("Login failed:", error);
@@ -43,7 +43,6 @@ export default function Login() {
           <TextInput label="Email" placeholder="Your email" required radius="md" {...form.getInputProps("email")} />
           <PasswordInput label="Password" placeholder="Your password" required mt="md" radius="md" {...form.getInputProps("password")} />
           <Group justify="space-between" mt="lg">
-            <Checkbox label="Remember me" />
             <Anchor href="../forgot_password" size="sm">
               Forgot password?
             </Anchor>

@@ -4,7 +4,7 @@ use axum::{
     response::IntoResponse,
 };
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use sqlx::SqlitePool;
 use utoipa::ToSchema;
 use utoipa_axum::{router::OpenApiRouter, routes};
@@ -14,6 +14,7 @@ use crate::auth::{
     auth_email::reset_password_email,
     auth_repo::{AuthRepo, AuthRepoError},
     passwords::{hash_password, verify_password},
+    tokens::build_login_token,
 };
 
 pub fn auth_router() -> OpenApiRouter {
@@ -108,10 +109,16 @@ struct LoginRequest {
     password: String,
 }
 
+#[derive(ToSchema, Serialize)]
+struct LoginResponse {
+    user_id: i64,
+    token: String,
+}
+
 #[utoipa::path(
     post, path = "/login",
     responses(
-        (status = OK, body = String),
+        (status = OK, body = LoginResponse),
         (status = INTERNAL_SERVER_ERROR, body = String),
         (status = UNAUTHORIZED, body = String)
     ),
@@ -133,7 +140,15 @@ async fn login(
     let hashed_password = user.hashed_password.unwrap();
 
     if verify_password(&hashed_password, &payload.password) {
-        Ok((StatusCode::OK, ()).into_response())
+        let token = build_login_token(user.id).map_err(|_| {
+            (StatusCode::INTERNAL_SERVER_ERROR, "Failed to create token").into_response()
+        })?;
+        let response = LoginResponse {
+            user_id: user.id,
+            token,
+        };
+
+        Ok((StatusCode::OK, axum::Json(response)).into_response())
     } else {
         Err((StatusCode::UNAUTHORIZED, "Invalid credentials").into_response())
     }
