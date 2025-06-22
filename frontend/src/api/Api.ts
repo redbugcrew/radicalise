@@ -74,6 +74,11 @@ export interface Person {
   id: number;
 }
 
+export interface ResetPasswordRequest {
+  password: string;
+  token: string;
+}
+
 import type {
   AxiosInstance,
   AxiosRequestConfig,
@@ -250,7 +255,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 0.1.10
+ * @version 0.1.12
  * @license
  */
 export class Api<
@@ -266,6 +271,21 @@ export class Api<
     forgotPassword: (data: ForgotPasswordRequest, params: RequestParams = {}) =>
       this.request<string, string>({
         path: `/api/auth/forgot_password`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ResetPassword
+     * @request POST:/api/auth/reset_password
+     */
+    resetPassword: (data: ResetPasswordRequest, params: RequestParams = {}) =>
+      this.request<string, string>({
+        path: `/api/auth/reset_password`,
         method: "POST",
         body: data,
         type: ContentType.Json,

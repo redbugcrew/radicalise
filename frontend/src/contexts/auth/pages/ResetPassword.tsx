@@ -1,8 +1,22 @@
 import { Button, Container, Paper, PasswordInput, Title } from "@mantine/core";
 import classes from "../Auth.module.css";
 import { useForm } from "@mantine/form";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { getApi } from "../../../api";
 
 export default function ResetPassword() {
+  const [searchParams, _setSearchParams] = useSearchParams();
+  let navigate = useNavigate();
+  const token = searchParams.get("token");
+
+  if (!token) {
+    return (
+      <Container size={420} my={40}>
+        Error: Token is missing
+      </Container>
+    );
+  }
+
   const form = useForm({
     mode: "uncontrolled",
     initialValues: {
@@ -15,7 +29,16 @@ export default function ResetPassword() {
   });
 
   const onSubmit = ({ password }: { password: string }) => {
-    console.log("Resetting password to:", password);
+    const api = getApi();
+    api.api
+      .resetPassword({ token, password })
+      .then(() => {
+        navigate("../login", { replace: true });
+      })
+      .catch((error: any) => {
+        console.error("Error resetting password:", error);
+        form.setErrors({ password: "Failed to reset password. Please try again." });
+      });
   };
 
   return (
@@ -24,8 +47,6 @@ export default function ResetPassword() {
         <Title ta="center" className={classes.title}>
           Reset your password
         </Title>
-
-        {form.errors.password}
 
         <Paper withBorder shadow="sm" p={22} mt={30} radius="md">
           <PasswordInput label="New password" placeholder="Your new password" required radius="md" key={form.key("password")} {...form.getInputProps("password")} />
