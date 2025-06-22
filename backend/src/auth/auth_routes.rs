@@ -9,7 +9,10 @@ use utoipa::ToSchema;
 use utoipa_axum::{router::OpenApiRouter, routes};
 use uuid::Uuid;
 
-use crate::auth::auth_repo::{AuthRepo, AuthRepoError};
+use crate::auth::{
+    auth_email::hello_world_email,
+    auth_repo::{AuthRepo, AuthRepoError},
+};
 
 pub fn auth_router() -> OpenApiRouter {
     OpenApiRouter::new().routes(routes!(forgot_password))
@@ -31,6 +34,7 @@ struct ForgotPasswordRequest {
 )]
 async fn forgot_password(
     Extension(pool): Extension<SqlitePool>,
+    Extension(resend): Extension<resend_rs::Resend>,
     axum::extract::Json(payload): axum::extract::Json<ForgotPasswordRequest>,
 ) -> Result<Response<axum::body::Body>, Response<axum::body::Body>> {
     let repo = AuthRepo::new(&pool);
@@ -52,6 +56,8 @@ async fn forgot_password(
         user.email.as_deref().unwrap_or("No email provided"),
         password_reset_token
     );
+
+    hello_world_email(&resend, payload.email.clone(), password_reset_token.clone()).await;
 
     // Here you would implement the logic for handling the forgot password request
     // For now, we will just return a placeholder response

@@ -1,4 +1,5 @@
 use axum::{Extension, routing::get};
+use resend_rs::Resend;
 use tower_http::cors::{Any, CorsLayer};
 use utoipa::OpenApi;
 use utoipa_axum::router::OpenApiRouter;
@@ -27,6 +28,8 @@ async fn main() {
         .await
         .expect("Failed to prepare database");
 
+    let resend = Resend::new("re_xxxxxxxxx"); // Replace with your actual Resend API key
+
     let (router, api) = OpenApiRouter::with_openapi(ApiDoc::openapi())
         .nest("/api", crate::controllers::router())
         .split_for_parts();
@@ -35,7 +38,8 @@ async fn main() {
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", api.clone()))
         .fallback_service(get(frontend_handler))
         .layer(cors)
-        .layer(Extension(pool));
+        .layer(Extension(pool))
+        .layer(Extension(resend));
 
     let app = router.into_make_service();
 
