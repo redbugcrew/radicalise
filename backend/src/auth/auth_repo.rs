@@ -5,6 +5,7 @@ pub struct AuthUser {
     pub id: i64,
     pub display_name: String,
     pub email: Option<String>,
+    pub hashed_password: Option<String>,
 }
 
 pub enum AuthRepoError {
@@ -24,7 +25,7 @@ impl<'a> AuthRepo<'a> {
     pub async fn user_for_email(&self, email: String) -> Result<AuthUser, AuthRepoError> {
         sqlx::query_as!(
             AuthUser,
-            "SELECT id, display_name, email FROM people WHERE email = ?",
+            "SELECT id, display_name, email, hashed_password FROM people WHERE email = ?",
             email
         )
         .fetch_one(self.pool)

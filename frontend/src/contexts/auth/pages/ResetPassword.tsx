@@ -43,7 +43,7 @@ export default function ResetPassword() {
 
   return (
     <Container size={420} my={40}>
-      <form onSubmit={form.onSubmit((values) => onSubmit(values))}>
+      <form onSubmit={form.onSubmit(onSubmit)}>
         <Title ta="center" className={classes.title}>
           Reset your password
         </Title>

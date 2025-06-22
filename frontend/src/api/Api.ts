@@ -68,6 +68,11 @@ export interface Involvement {
   status: InvolvementStatus;
 }
 
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
 export interface Person {
   display_name: string;
   /** @format int64 */
@@ -271,6 +276,21 @@ export class Api<
     forgotPassword: (data: ForgotPasswordRequest, params: RequestParams = {}) =>
       this.request<string, string>({
         path: `/api/auth/forgot_password`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name Login
+     * @request POST:/api/auth/login
+     */
+    login: (data: LoginRequest, params: RequestParams = {}) =>
+      this.request<string, string>({
+        path: `/api/auth/login`,
         method: "POST",
         body: data,
         type: ContentType.Json,

@@ -2,6 +2,7 @@ use resend_rs::{
     Resend,
     types::{CreateEmailBaseOptions, CreateEmailResponse},
 };
+use urlencoding::encode;
 
 pub async fn reset_password_email(
     resend: &Resend,
@@ -16,8 +17,9 @@ pub async fn reset_password_email(
         std::env::var("BASE_URL").unwrap_or_else(|_| "http://localhost:5173".to_string());
 
     let html_content = format!(
-        "<p>Please click the link below to reset your password.</p><p><a href=\"{}/reset_password?token={}\">Reset Password</a></p>",
-        base_url, token
+        "<p>Please click the link below to reset your password.</p><p><a href=\"{}/auth/reset_password?token={}\">Reset Password</a></p>",
+        base_url,
+        encode(&token)
     );
 
     let email = CreateEmailBaseOptions::new(from, to, subject).with_html(&html_content);

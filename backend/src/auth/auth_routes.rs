@@ -1,13 +1,9 @@
-use argon2::{
-    Argon2,
-    password_hash::{PasswordHasher, SaltString},
-};
 use axum::{
     Extension,
     http::{Response, StatusCode},
     response::IntoResponse,
 };
-use rand::rngs::OsRng;
+
 use serde::Deserialize;
 use sqlx::SqlitePool;
 use utoipa::ToSchema;
@@ -17,12 +13,14 @@ use uuid::Uuid;
 use crate::auth::{
     auth_email::reset_password_email,
     auth_repo::{AuthRepo, AuthRepoError},
+    passwords::{hash_password, verify_password},
 };
 
 pub fn auth_router() -> OpenApiRouter {
     OpenApiRouter::new()
         .routes(routes!(forgot_password))
         .routes(routes!(reset_password))
+        .routes(routes!(login))
 }
 
 #[derive(ToSchema, Deserialize)]
@@ -104,6 +102,43 @@ async fn reset_password(
     Ok((StatusCode::OK, ()).into_response())
 }
 
+#[derive(ToSchema, Deserialize)]
+struct LoginRequest {
+    email: String,
+    password: String,
+}
+
+#[utoipa::path(
+    post, path = "/login",
+    responses(
+        (status = OK, body = String),
+        (status = INTERNAL_SERVER_ERROR, body = String),
+        (status = UNAUTHORIZED, body = String)
+    ),
+    request_body(content = LoginRequest, description = "Attempt to log in", content_type = "application/json")
+)]
+async fn login(
+    Extension(pool): Extension<SqlitePool>,
+    axum::extract::Json(payload): axum::extract::Json<LoginRequest>,
+) -> Result<Response<axum::body::Body>, Response<axum::body::Body>> {
+    let repo = AuthRepo::new(&pool);
+    let user = repo
+        .user_for_email(payload.email.clone())
+        .await
+        .map_err(repo_error_handler)?;
+
+    if user.hashed_password.is_none() {
+        return Err((StatusCode::UNAUTHORIZED, "No password set").into_response());
+    }
+    let hashed_password = user.hashed_password.unwrap();
+
+    if verify_password(&hashed_password, &payload.password) {
+        Ok((StatusCode::OK, ()).into_response())
+    } else {
+        Err((StatusCode::UNAUTHORIZED, "Invalid credentials").into_response())
+    }
+}
+
 fn repo_error_handler(error: AuthRepoError) -> Response<axum::body::Body> {
     let result = match error {
         crate::auth::auth_repo::AuthRepoError::UserNotFound => (StatusCode::UNAUTHORIZED, ()),
@@ -112,16 +147,4 @@ fn repo_error_handler(error: AuthRepoError) -> Response<axum::body::Body> {
         }
     };
     result.into_response()
-}
-
-fn hash_password(password: &str) -> Result<String, argon2::password_hash::Error> {
-    let salt = SaltString::generate(&mut OsRng);
-
-    Argon2::default()
-        .hash_password(password.as_bytes(), &salt)
-        .map_err(|e| {
-            eprintln!("Error while hashing password: {}", e);
-            e
-        })
-        .map(|hash| hash.to_string())
 }
