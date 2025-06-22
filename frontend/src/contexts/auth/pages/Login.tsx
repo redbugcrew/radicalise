@@ -28,7 +28,9 @@ export default function Login() {
         console.log("writing cookie");
       })
       .catch((error) => {
-        console.error("Login failed:", error);
+        // Handle login error
+        console.error("Login failed", error);
+        form.setFieldError("password", "Invalid email or password");
       });
   };
 
