@@ -41,7 +41,9 @@ impl<'a> AuthRepo<'a> {
         token: String,
     ) -> Result<(), AuthRepoError> {
         sqlx::query!(
-            "UPDATE people SET password_reset_token = ?, password_reset_token_issued_at = datetime('now') WHERE id = ?",
+            "UPDATE people
+            SET password_reset_token = ?, password_reset_token_issued_at = datetime('now')
+            WHERE id = ?",
             token,
             user_id
         )
@@ -50,6 +52,38 @@ impl<'a> AuthRepo<'a> {
         .map_err(log_and_return_db_error)?;
 
         Ok(())
+    }
+
+    pub async fn set_password_if_token_valid(
+        &self,
+        token: String,
+        new_hashed_password: String,
+        hours_token_valid: u32,
+    ) -> Result<(), AuthRepoError> {
+        if token.is_empty() {
+            return Err(AuthRepoError::UserNotFound);
+        }
+
+        let interval = format!("+{} hours", hours_token_valid);
+
+        let result = sqlx::query!(
+            "UPDATE people
+            SET hashed_password = ?, password_reset_token = NULL, password_reset_token_issued_at = NULL
+            WHERE
+              password_reset_token = ? AND datetime('now') < datetime(password_reset_token_issued_at, ?)",
+            new_hashed_password,
+            token,
+            interval
+        )
+        .execute(self.pool)
+        .await
+        .map_err(log_and_return_db_error)?;
+
+        if result.rows_affected() == 0 {
+            Err(AuthRepoError::UserNotFound)
+        } else {
+            Ok(())
+        }
     }
 }
 

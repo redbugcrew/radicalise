@@ -5,8 +5,10 @@ edition = "2024"
 
 [dependencies]
 anyhow = "1.0.98"
+argon2 = "0.5.3"
 axum = "0.8.4"
 lazy_static = "1.5.0"
+rand = "0.8"
 resend-rs = "0.15.0"
 serde = "1.0.219"
 sqlx = { version = "0.8.6", features = ["runtime-tokio-native-tls", "sqlite"] }
