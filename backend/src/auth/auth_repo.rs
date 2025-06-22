@@ -34,6 +34,23 @@ impl<'a> AuthRepo<'a> {
             _ => log_and_return_db_error(error),
         })
     }
+
+    pub async fn set_password_reset_token(
+        &self,
+        user_id: &i64,
+        token: String,
+    ) -> Result<(), AuthRepoError> {
+        sqlx::query!(
+            "UPDATE people SET password_reset_token = ?, password_reset_token_issued_at = datetime('now') WHERE id = ?",
+            token,
+            user_id
+        )
+        .execute(self.pool)
+        .await
+        .map_err(log_and_return_db_error)?;
+
+        Ok(())
+    }
 }
 
 fn log_and_return_db_error(error: sqlx::Error) -> AuthRepoError {
