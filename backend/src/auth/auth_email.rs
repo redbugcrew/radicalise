@@ -1,6 +1,13 @@
-use resend_rs::{Resend, types::CreateEmailBaseOptions};
+use resend_rs::{
+    Resend,
+    types::{CreateEmailBaseOptions, CreateEmailResponse},
+};
 
-pub async fn hello_world_email(resend: &Resend, email: String, token: String) {
+pub async fn reset_password_email(
+    resend: &Resend,
+    email: String,
+    token: String,
+) -> Result<CreateEmailResponse, resend_rs::Error> {
     let from = "RADicalise <noreply@radicalise.radhousing.org>";
     let to = [email];
     let subject = "Reset your RADicalise password";
@@ -15,14 +22,5 @@ pub async fn hello_world_email(resend: &Resend, email: String, token: String) {
 
     let email = CreateEmailBaseOptions::new(from, to, subject).with_html(&html_content);
 
-    let result = resend.emails.send(email).await;
-
-    match result {
-        Ok(response) => {
-            println!("Email sent successfully: {:?}", response);
-        }
-        Err(e) => {
-            eprintln!("Failed to send email: {}", e);
-        }
-    }
+    resend.emails.send(email).await
 }

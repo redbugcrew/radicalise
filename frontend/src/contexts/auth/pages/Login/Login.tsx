@@ -1,6 +1,6 @@
 import { Button, Checkbox, Container, Group, Paper, PasswordInput, TextInput, Title } from "@mantine/core";
 import classes from "./Login.module.css";
-import { Anchor } from "../../components";
+import { Anchor } from "../../../../components";
 
 export default function Login() {
   return (

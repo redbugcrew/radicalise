@@ -8,7 +8,8 @@ import store, { loadInitialData, type AppStore } from "./store";
 import "@mantine/core/styles.css";
 
 import { MantineProvider } from "@mantine/core";
-import { Login, ForgotPassword, Dashboard, NewPerson, People, Person } from "./pages";
+import { Dashboard, NewPerson, People, Person } from "./pages";
+import { Login, ForgotPassword } from "./contexts/auth";
 
 function withStore(func: (store: AppStore) => void, store: AppStore): LoaderFunction<any> {
   const wrappedFunc: LoaderFunction<any> = async () => {

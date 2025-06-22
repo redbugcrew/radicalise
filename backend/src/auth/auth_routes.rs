@@ -10,7 +10,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 use uuid::Uuid;
 
 use crate::auth::{
-    auth_email::hello_world_email,
+    auth_email::reset_password_email,
     auth_repo::{AuthRepo, AuthRepoError},
 };
 
@@ -57,11 +57,14 @@ async fn forgot_password(
         password_reset_token
     );
 
-    hello_world_email(&resend, payload.email.clone(), password_reset_token.clone()).await;
+    reset_password_email(&resend, payload.email.clone(), password_reset_token.clone())
+        .await
+        .map_err(|e| {
+            eprintln!("Failed to send reset password email: {}", e);
+            (StatusCode::INTERNAL_SERVER_ERROR, "Failed to send email").into_response()
+        })?;
 
-    // Here you would implement the logic for handling the forgot password request
-    // For now, we will just return a placeholder response
-    Ok((StatusCode::INTERNAL_SERVER_ERROR, ()).into_response())
+    Ok((StatusCode::OK, ()).into_response())
 }
 
 fn repo_error_handler(error: AuthRepoError) -> Response<axum::body::Body> {
