@@ -9,7 +9,7 @@ import "@mantine/core/styles.css";
 
 import { MantineProvider } from "@mantine/core";
 import { Dashboard, NewPerson, People, Person } from "./pages";
-import { Login, ForgotPassword } from "./contexts/auth";
+import { buildRoutes as buildAuthRoutes } from "./contexts/auth";
 
 function withStore(func: (store: AppStore) => void, store: AppStore): LoaderFunction<any> {
   const wrappedFunc: LoaderFunction<any> = async () => {
@@ -50,12 +50,8 @@ const router = createBrowserRouter([
     ],
   },
   {
-    path: "login",
-    element: <Login />,
-  },
-  {
-    path: "forgot_password",
-    element: <ForgotPassword />,
+    path: "/auth",
+    children: buildAuthRoutes(),
   },
 ]);
 
