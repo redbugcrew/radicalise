@@ -21,7 +21,7 @@ async fn main() {
     #[openapi()]
     struct ApiDoc;
 
-    let cors = CorsLayer::new().allow_origin(Any); // Allow all origins (open policy)
+    let cors = CorsLayer::new().allow_origin(Any).allow_headers(Any); // Allow all origins (open policy)
 
     let pool = prepare_database()
         .await

@@ -34,6 +34,11 @@ async fn forgot_password(
     Extension(pool): Extension<SqlitePool>,
     axum::extract::Json(payload): axum::extract::Json<ForgotPasswordRequest>,
 ) -> Result<Response<axum::body::Body>, Response<axum::body::Body>> {
+    println!(
+        "Handling forgot password request for email {}",
+        payload.email.clone()
+    );
+
     let repo = AuthRepo::new(&pool);
 
     let _user = repo
