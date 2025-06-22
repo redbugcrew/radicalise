@@ -21,6 +21,10 @@ export interface Collective {
   name?: string | null;
 }
 
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
 export interface Group {
   description?: string | null;
   group_type: string;
@@ -246,7 +250,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 0.1.9
+ * @version 0.1.10
  * @license
  */
 export class Api<
@@ -259,10 +263,12 @@ export class Api<
      * @name ForgotPassword
      * @request POST:/api/auth/forgot_password
      */
-    forgotPassword: (params: RequestParams = {}) =>
-      this.request<string, any>({
+    forgotPassword: (data: ForgotPasswordRequest, params: RequestParams = {}) =>
+      this.request<string, string>({
         path: `/api/auth/forgot_password`,
         method: "POST",
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
 

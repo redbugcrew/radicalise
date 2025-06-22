@@ -9,9 +9,11 @@ export default function ForgotPassword() {
 
   const onSubmit = () => {
     console.log("Sending to API");
-    api.api.forgotPassword();
+    api.api.forgotPassword({
+      email: "<your_email>",
+    });
   };
-  ``;
+
   return (
     <Container size={460} my={30}>
       <Title className={classes.title} ta="center">
