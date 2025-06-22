@@ -1,3 +1,5 @@
+use std::env;
+
 use axum::{Extension, routing::get};
 use resend_rs::Resend;
 use tower_http::cors::{Any, CorsLayer};
@@ -28,7 +30,9 @@ async fn main() {
         .await
         .expect("Failed to prepare database");
 
-    let resend = Resend::new("re_xxxxxxxxx"); // Replace with your actual Resend API key
+    let resend_key =
+        env::var("RESEND_API_KEY").unwrap_or_else(|_| "YOUR-RESEND-KEY-HERE".to_string());
+    let resend = Resend::new(&resend_key);
 
     let (router, api) = OpenApiRouter::with_openapi(ApiDoc::openapi())
         .nest("/api", crate::controllers::router())
