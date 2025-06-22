@@ -25,6 +25,7 @@ export default function Login() {
       .then(({ data }) => {
         // Handle successful login
         console.log("Login successful", data);
+        console.log("writing cookie");
       })
       .catch((error) => {
         console.error("Login failed:", error);

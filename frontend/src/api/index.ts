@@ -9,5 +9,6 @@ export function getApi() {
   const apiUrl = getApiUrl();
   return new Api({
     baseURL: apiUrl,
+    withCredentials: true,
   });
 }

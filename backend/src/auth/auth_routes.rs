@@ -1,11 +1,12 @@
 use axum::{
     Extension,
-    http::{Response, StatusCode},
+    http::{Response, StatusCode, header},
     response::IntoResponse,
 };
-
+use axum_extra::extract::cookie::{Cookie, SameSite};
 use serde::{Deserialize, Serialize};
 use sqlx::SqlitePool;
+use time::Duration;
 use utoipa::ToSchema;
 use utoipa_axum::{router::OpenApiRouter, routes};
 use uuid::Uuid;
@@ -145,10 +146,21 @@ async fn login(
         })?;
         let response = LoginResponse {
             user_id: user.id,
-            token,
+            token: token.clone(),
         };
 
-        Ok((StatusCode::OK, axum::Json(response)).into_response())
+        let cookie = Cookie::build(("token", token.to_owned()))
+            .path("/")
+            .max_age(Duration::hours(1))
+            .same_site(SameSite::Lax);
+
+        let mut response = (StatusCode::OK, axum::Json(response)).into_response();
+
+        response
+            .headers_mut()
+            .insert(header::SET_COOKIE, cookie.to_string().parse().unwrap());
+
+        Ok(response)
     } else {
         Err((StatusCode::UNAUTHORIZED, "Invalid credentials").into_response())
     }

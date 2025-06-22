@@ -1,8 +1,8 @@
 use std::env;
 
-use axum::{Extension, routing::get};
+use axum::{Extension, http::header, routing::get};
 use resend_rs::Resend;
-use tower_http::cors::{Any, CorsLayer};
+use tower_http::cors::CorsLayer;
 use utoipa::OpenApi;
 use utoipa_axum::router::OpenApiRouter;
 use utoipa_swagger_ui::SwaggerUi;
@@ -24,7 +24,13 @@ async fn main() {
     #[openapi()]
     struct ApiDoc;
 
-    let cors = CorsLayer::new().allow_origin(Any).allow_headers(Any); // Allow all origins (open policy)
+    let base_url =
+        std::env::var("BASE_URL").unwrap_or_else(|_| "http://localhost:5173".to_string());
+
+    let cors = CorsLayer::new()
+        .allow_origin(base_url.parse::<header::HeaderValue>().unwrap())
+        .allow_headers([header::AUTHORIZATION, header::ACCEPT, header::CONTENT_TYPE])
+        .allow_credentials(true);
 
     let pool = prepare_database()
         .await
