@@ -1,4 +1,4 @@
-- name: Ensure LoRes Node stack is configured
+- name: Ensure Radicalise stack is configured
   community.docker.docker_stack:
     state: present
     name: radicalise
