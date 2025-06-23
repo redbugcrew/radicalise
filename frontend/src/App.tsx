@@ -1,5 +1,5 @@
 import Layout from "./pages/Layout";
-import { Navigate, RouterProvider, createBrowserRouter, redirect, type LoaderFunction } from "react-router-dom";
+import { Navigate, RouterProvider, createBrowserRouter, type LoaderFunction } from "react-router-dom";
 import { Provider as ReduxProvider } from "react-redux";
 import store, { loadInitialData, type AppStore } from "./store";
 
