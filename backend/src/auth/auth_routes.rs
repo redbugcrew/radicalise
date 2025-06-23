@@ -129,6 +129,16 @@ async fn login(
     Extension(pool): Extension<SqlitePool>,
     axum::extract::Json(payload): axum::extract::Json<LoginRequest>,
 ) -> Result<Response<axum::body::Body>, Response<axum::body::Body>> {
+    // let user = match auth_session.authenticate(creds.clone()).await {
+    //     Ok(Some(user)) => user,
+    //     Ok(None) => return StatusCode::UNAUTHORIZED.into_response(),
+    //     Err(_) => return StatusCode::INTERNAL_SERVER_ERROR.into_response(),
+    // };
+
+    // if auth_session.login(&user).await.is_err() {
+    //     return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+    // }
+
     let repo = AuthRepo::new(&pool);
     let user = repo
         .user_for_email(payload.email.clone())
