@@ -74,7 +74,9 @@ async fn main() {
     let (router, api) = OpenApiRouter::with_openapi(ApiDoc::openapi())
         .nest(
             "/api",
-            crate::controllers::router().route_layer(login_required!(AppAuthBackend)),
+            OpenApiRouter::new()
+                .nest("/auth", crate::auth::router())
+                .merge(crate::controllers::router().route_layer(login_required!(AppAuthBackend))),
         )
         .split_for_parts();
 
