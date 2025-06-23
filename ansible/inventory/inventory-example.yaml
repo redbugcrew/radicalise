@@ -1,3 +1,5 @@
+# Copy this file to "inventory.yaml" to use it.
+# Populate it with your own hosts and variables.
 all:
   vars:
     ansible_become: true
@@ -10,3 +12,5 @@ all:
       ansible_ssh_user: root
       ansible_become: false
       traefik_acme_email: jade@hopepunk.me
+      resend_api_key: YOUR_KEY_HERE
+      base_url: YOUR SITE URL HERE

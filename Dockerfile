@@ -31,9 +31,6 @@ COPY --from=rustbuilder /app/radicalise /app/backend/radicalise
 COPY --from=vitebuilder /app/dist /app/frontend
 ENV FRONTEND_PATH=/app/frontend
 ENV DATABASE_URL=sqlite:/app/radicalise.sqlite
-ENV BASE_URL=https://brassica.radhousing.org
-# This is a dummy API key for Resend, replace with your own
-ENV RESEND_API_KEY="re_5uyJm6AS_CC6yeWxUy7cqsC2krPCMMwkj"
 EXPOSE 8000
 WORKDIR /app/backend
 CMD ["./radicalise"]
