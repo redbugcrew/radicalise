@@ -68,7 +68,6 @@ async fn main() {
     // EMAIL
     let resend_key =
         env::var("RESEND_API_KEY").unwrap_or_else(|_| "YOUR-RESEND-KEY-HERE".to_string());
-    println!("Using Resend API key: {}", resend_key);
 
     let client = reqwest::Client::builder()
         .user_agent("Radicalise/1.0")

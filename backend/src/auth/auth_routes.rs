@@ -64,8 +64,8 @@ async fn forgot_password(
 
     reset_password_email(&resend, payload.email.clone(), password_reset_token.clone())
         .await
-        .map_err(|_| {
-            eprintln!("Failed to send reset password email");
+        .map_err(|e| {
+            eprintln!("Failed to send reset password email: {}", e);
             (StatusCode::INTERNAL_SERVER_ERROR, "Failed to send email").into_response()
         })?;
 
