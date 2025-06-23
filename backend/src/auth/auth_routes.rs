@@ -1,21 +1,19 @@
 use axum::{
     Extension,
-    http::{Response, StatusCode, header},
+    http::{Response, StatusCode},
     response::IntoResponse,
 };
-use axum_extra::extract::cookie::{Cookie, SameSite};
 use serde::{Deserialize, Serialize};
 use sqlx::SqlitePool;
-use time::Duration;
 use utoipa::ToSchema;
 use utoipa_axum::{router::OpenApiRouter, routes};
 use uuid::Uuid;
 
 use crate::auth::{
+    auth_backend::{AuthSession, Credentials},
     auth_email::reset_password_email,
     auth_repo::{AuthRepo, AuthRepoError},
-    passwords::{hash_password, verify_password},
-    tokens::build_login_token,
+    passwords::hash_password,
 };
 
 pub fn auth_router() -> OpenApiRouter {
@@ -104,16 +102,9 @@ async fn reset_password(
     Ok((StatusCode::OK, ()).into_response())
 }
 
-#[derive(ToSchema, Deserialize)]
-struct LoginRequest {
-    email: String,
-    password: String,
-}
-
 #[derive(ToSchema, Serialize)]
 struct LoginResponse {
     user_id: i64,
-    token: String,
 }
 
 #[utoipa::path(
@@ -123,57 +114,29 @@ struct LoginResponse {
         (status = INTERNAL_SERVER_ERROR, body = String),
         (status = UNAUTHORIZED, body = String)
     ),
-    request_body(content = LoginRequest, description = "Attempt to log in", content_type = "application/json")
+    request_body(content = Credentials, description = "Attempt to log in", content_type = "application/json")
 )]
 async fn login(
-    Extension(pool): Extension<SqlitePool>,
-    axum::extract::Json(payload): axum::extract::Json<LoginRequest>,
+    mut auth_session: AuthSession,
+    axum::extract::Json(creds): axum::extract::Json<Credentials>,
 ) -> Result<Response<axum::body::Body>, Response<axum::body::Body>> {
-    // let user = match auth_session.authenticate(creds.clone()).await {
-    //     Ok(Some(user)) => user,
-    //     Ok(None) => return StatusCode::UNAUTHORIZED.into_response(),
-    //     Err(_) => return StatusCode::INTERNAL_SERVER_ERROR.into_response(),
-    // };
+    let user = match auth_session.authenticate(creds.clone()).await {
+        Ok(Some(user)) => user,
+        Ok(None) => {
+            return Err((StatusCode::UNAUTHORIZED, "Invalid credentials").into_response());
+        }
+        Err(_) => return Err(StatusCode::INTERNAL_SERVER_ERROR.into_response()),
+    };
 
-    // if auth_session.login(&user).await.is_err() {
-    //     return StatusCode::INTERNAL_SERVER_ERROR.into_response();
-    // }
-
-    let repo = AuthRepo::new(&pool);
-    let user = repo
-        .user_for_email(payload.email.clone())
-        .await
-        .map_err(repo_error_handler)?;
-
-    if user.hashed_password.is_none() {
-        return Err((StatusCode::UNAUTHORIZED, "No password set").into_response());
+    if auth_session.login(&user).await.is_err() {
+        return Err(StatusCode::INTERNAL_SERVER_ERROR.into_response());
     }
-    let hashed_password = user.hashed_password.unwrap();
 
-    if verify_password(&hashed_password, &payload.password) {
-        let token = build_login_token(user.id).map_err(|_| {
-            (StatusCode::INTERNAL_SERVER_ERROR, "Failed to create token").into_response()
-        })?;
-        let response = LoginResponse {
-            user_id: user.id,
-            token: token.clone(),
-        };
-
-        let cookie = Cookie::build(("token", token.to_owned()))
-            .path("/")
-            .max_age(Duration::hours(1))
-            .same_site(SameSite::Lax);
-
-        let mut response = (StatusCode::OK, axum::Json(response)).into_response();
-
-        response
-            .headers_mut()
-            .insert(header::SET_COOKIE, cookie.to_string().parse().unwrap());
-
-        Ok(response)
-    } else {
-        Err((StatusCode::UNAUTHORIZED, "Invalid credentials").into_response())
-    }
+    return Ok((
+        StatusCode::OK,
+        axum::Json(LoginResponse { user_id: user.id }),
+    )
+        .into_response());
 }
 
 fn repo_error_handler(error: AuthRepoError) -> Response<axum::body::Body> {

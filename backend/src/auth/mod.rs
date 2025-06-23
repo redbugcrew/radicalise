@@ -5,7 +5,6 @@ mod auth_email;
 mod auth_repo;
 pub mod auth_routes;
 mod passwords;
-mod tokens;
 
 pub fn router() -> utoipa_axum::router::OpenApiRouter {
     auth_router()

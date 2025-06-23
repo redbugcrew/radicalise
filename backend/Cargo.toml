@@ -8,11 +8,9 @@ anyhow = "1.0.98"
 argon2 = "0.5.3"
 async-trait = "0.1.88"
 axum = "0.8.4"
-axum-extra = { version = "0.10.1", features = ["cookie"] }
 axum-login = "0.17.0"
 chrono = "0.4.41"
 cookie = { version = "0.18.1", features = ["signed"] }
-jsonwebtoken = "9.3.1"
 lazy_static = "1.5.0"
 password-auth = "1.0.0"
 rand = "0.8"
