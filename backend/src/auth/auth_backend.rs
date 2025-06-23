@@ -7,8 +7,8 @@ use tokio::task;
 
 #[derive(Clone, Serialize, Deserialize, FromRow)]
 pub struct User {
-    id: i64,
-    pub username: String,
+    pub id: i64,
+    pub email: String,
     password: String,
 }
 
@@ -18,7 +18,7 @@ impl std::fmt::Debug for User {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("User")
             .field("id", &self.id)
-            .field("username", &self.username)
+            .field("email", &self.email)
             .field("password", &"[redacted]")
             .finish()
     }
@@ -43,9 +43,8 @@ impl AuthUser for User {
 // to authenticate requests with the backend.
 #[derive(Debug, Clone, Deserialize)]
 pub struct Credentials {
-    pub username: String,
+    pub email: String,
     pub password: String,
-    pub next: Option<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -78,10 +77,12 @@ impl AuthnBackend for AppAuthBackend {
         &self,
         creds: Self::Credentials,
     ) -> Result<Option<Self::User>, Self::Error> {
-        let user: Option<Self::User> = sqlx::query_as("select * from users where username = ? ")
-            .bind(creds.username)
-            .fetch_optional(&self.db)
-            .await?;
+        let user: Option<Self::User> = sqlx::query_as(
+            "SELECT id, email, hashed_password as password FROM people WHERE email = ? ",
+        )
+        .bind(creds.email)
+        .fetch_optional(&self.db)
+        .await?;
 
         // Verifying the password is blocking and potentially slow, so we'll do so via
         // `spawn_blocking`.
@@ -94,10 +95,12 @@ impl AuthnBackend for AppAuthBackend {
     }
 
     async fn get_user(&self, user_id: &UserId<Self>) -> Result<Option<Self::User>, Self::Error> {
-        let user = sqlx::query_as("select * from users where id = ?")
-            .bind(user_id)
-            .fetch_optional(&self.db)
-            .await?;
+        let user = sqlx::query_as(
+            "SELECT id, email, hashed_password as password FROM people WHERE id = ?",
+        )
+        .bind(user_id)
+        .fetch_optional(&self.db)
+        .await?;
 
         Ok(user)
     }
