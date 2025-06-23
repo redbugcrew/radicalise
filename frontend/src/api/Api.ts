@@ -21,6 +21,11 @@ export interface Collective {
   name?: string | null;
 }
 
+export interface Credentials {
+  email: string;
+  password: string;
+}
+
 export interface ForgotPasswordRequest {
   email: string;
 }
@@ -68,9 +73,9 @@ export interface Involvement {
   status: InvolvementStatus;
 }
 
-export interface LoginRequest {
-  email: string;
-  password: string;
+export interface LoginResponse {
+  /** @format int64 */
+  user_id: number;
 }
 
 export interface Person {
@@ -260,7 +265,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 0.1.12
+ * @version 0.1.15
  * @license
  */
 export class Api<
@@ -288,12 +293,13 @@ export class Api<
      * @name Login
      * @request POST:/api/auth/login
      */
-    login: (data: LoginRequest, params: RequestParams = {}) =>
-      this.request<string, string>({
+    login: (data: Credentials, params: RequestParams = {}) =>
+      this.request<LoginResponse, string>({
         path: `/api/auth/login`,
         method: "POST",
         body: data,
         type: ContentType.Json,
+        format: "json",
         ...params,
       }),
 
