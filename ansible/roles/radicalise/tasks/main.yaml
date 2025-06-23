@@ -6,9 +6,6 @@
       - services:
           radicalise:
             image: ghcr.io/brassica-collective/radicalise:latest
-            ports:
-              # - target: 80
-              #   published: 80
             environment:
               DATABASE_URL: "sqlite:/data/radicalise.sqlite"
               BASE_URL: "{{ base_url }}"

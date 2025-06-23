@@ -9,6 +9,7 @@
       - docker.io
       - python3-docker
       - python3-jsondiff
+      - ca-certificates
 
 # Ref https://docs.ansible.com/ansible/latest/collections/community/docker/docker_swarm_module.html#examples
 - name: Init a new swarm with default parameters
