@@ -1556,7 +1556,6 @@ name = "radicalise"
 version = "0.1.15"
 dependencies = [
  "anyhow",
- "argon2",
  "async-trait",
  "axum",
  "axum-login",
@@ -1564,7 +1563,6 @@ dependencies = [
  "cookie",
  "lazy_static",
  "password-auth",
- "rand 0.8.5",
  "resend-rs",
  "serde",
  "sqlx",

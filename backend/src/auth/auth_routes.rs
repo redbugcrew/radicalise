@@ -3,6 +3,7 @@ use axum::{
     http::{Response, StatusCode},
     response::IntoResponse,
 };
+use password_auth::generate_hash;
 use serde::{Deserialize, Serialize};
 use sqlx::SqlitePool;
 use utoipa::ToSchema;
@@ -13,7 +14,6 @@ use crate::auth::{
     auth_backend::{AuthSession, Credentials},
     auth_email::reset_password_email,
     auth_repo::{AuthRepo, AuthRepoError},
-    passwords::hash_password,
 };
 
 pub fn auth_router() -> OpenApiRouter {
@@ -92,8 +92,7 @@ async fn reset_password(
     axum::extract::Json(payload): axum::extract::Json<ResetPasswordRequest>,
 ) -> Result<Response<axum::body::Body>, Response<axum::body::Body>> {
     let repo = AuthRepo::new(&pool);
-    let hashed_password = hash_password(&payload.password)
-        .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response())?;
+    let hashed_password = generate_hash(&payload.password);
 
     repo.set_password_if_token_valid(payload.token, hashed_password, 24)
         .await

@@ -5,7 +5,6 @@ edition = "2024"
 
 [dependencies]
 anyhow = "1.0.98"
-argon2 = "0.5.3"
 async-trait = "0.1.88"
 axum = "0.8.4"
 axum-login = "0.17.0"
@@ -13,7 +12,6 @@ chrono = "0.4.41"
 cookie = { version = "0.18.1", features = ["signed"] }
 lazy_static = "1.5.0"
 password-auth = "1.0.0"
-rand = "0.8"
 resend-rs = "0.15.0"
 serde = "1.0.219"
 sqlx = { version = "0.8.6", features = ["runtime-tokio-native-tls", "sqlite"] }
