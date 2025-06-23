@@ -7,20 +7,13 @@
           radicalise:
             image: ghcr.io/brassica-collective/radicalise:latest
             ports:
-              - target: 2022
-                published: 2022
-                protocol: udp
-                mode: host
-              - target: 2023
-                published: 2023
-                protocol: udp
-                mode: host
               # - target: 80
               #   published: 80
             environment:
               DATABASE_URL: "sqlite:/data/radicalise.sqlite"
               BASE_URL: "{{ base_url }}"
               RESEND_API_KEY: "{{ resend_api_key }}"
+              RUST_LOG: "debug"
             volumes:
               - data:/data
             networks:

@@ -8,7 +8,7 @@ pub async fn reset_password_email(
     resend: &Resend,
     email: String,
     token: String,
-) -> Result<CreateEmailResponse, resend_rs::Error> {
+) -> Result<CreateEmailResponse, ()> {
     let from = "RADicalise <noreply@radicalise.radhousing.org>";
     let to = [email];
     let subject = "Reset your RADicalise password";
@@ -24,5 +24,51 @@ pub async fn reset_password_email(
 
     let email = CreateEmailBaseOptions::new(from, to, subject).with_html(&html_content);
 
-    resend.emails.send(email).await
+    let result: Result<CreateEmailResponse, resend_rs::Error> = resend.emails.send(email).await;
+
+    match result {
+        Ok(response) => {
+            println!("Reset password email sent successfully: {:?}", response);
+            Ok(response)
+        }
+        Err(e) => match e {
+            resend_rs::Error::Http(error) => {
+                let reqwest_error: reqwest::Error = error;
+
+                if reqwest_error.is_timeout() {
+                    eprintln!("Request timed out: {}", reqwest_error);
+                } else if reqwest_error.is_connect() {
+                    eprintln!("Connection error: {}", reqwest_error);
+                } else if reqwest_error.is_status() {
+                    eprintln!("HTTP status error: {}", reqwest_error);
+                } else {
+                    eprintln!("Other HTTP error: {}", reqwest_error);
+                }
+
+                eprintln!("HTTP Error: {}", reqwest_error);
+                Err(())
+            }
+            resend_rs::Error::Resend(error) => {
+                eprintln!("Resend Error: {}", error);
+                Err(())
+            }
+            resend_rs::Error::RateLimit {
+                ratelimit_limit,
+                ratelimit_remaining,
+                ratelimit_reset,
+            } => {
+                eprintln!(
+                    "Rate Limit Error: {} - {} - {}",
+                    ratelimit_limit.unwrap_or(0),
+                    ratelimit_remaining.unwrap_or(0),
+                    ratelimit_reset.unwrap_or(0)
+                );
+                Err(())
+            }
+            other_error => {
+                eprintln!("An unexpected error occurred: {}", other_error);
+                Err(())
+            }
+        },
+    }
 }
