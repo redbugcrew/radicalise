@@ -38,7 +38,20 @@ pub async fn reset_password_email(
                 if reqwest_error.is_timeout() {
                     eprintln!("Request timed out: {}", reqwest_error);
                 } else if reqwest_error.is_connect() {
+                    let status = reqwest_error.status();
+                    let url = reqwest_error.url();
+
                     eprintln!("Connection error: {}", reqwest_error);
+
+                    if let Some(status_code) = status {
+                        eprintln!("Status code: {}", status_code);
+                    }
+
+                    if let Some(url) = url {
+                        eprintln!("Error URL: {}", url);
+                    }
+
+                    // get more detail about this error
                 } else if reqwest_error.is_status() {
                     eprintln!("HTTP status error: {}", reqwest_error);
                 } else {
