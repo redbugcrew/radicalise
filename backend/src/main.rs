@@ -1,6 +1,6 @@
 use axum::{Extension, http::header, routing::get};
 use axum_login::{
-    AuthManagerLayerBuilder,
+    AuthManagerLayerBuilder, login_required,
     tower_sessions::{Expiry, SessionManagerLayer},
 };
 use cookie::Key;
@@ -72,7 +72,10 @@ async fn main() {
 
     // ROUTES
     let (router, api) = OpenApiRouter::with_openapi(ApiDoc::openapi())
-        .nest("/api", crate::controllers::router())
+        .nest(
+            "/api",
+            crate::controllers::router().route_layer(login_required!(AppAuthBackend)),
+        )
         .split_for_parts();
 
     let router = router

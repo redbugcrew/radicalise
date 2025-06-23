@@ -3,8 +3,11 @@ import classes from "../Auth.module.css";
 import { Anchor } from "../../../components";
 import { useForm } from "@mantine/form";
 import { getApi } from "../../../api";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
+  const navigate = useNavigate();
+
   const form = useForm({
     mode: "uncontrolled",
     initialValues: {
@@ -25,7 +28,7 @@ export default function Login() {
       .then(({ data }) => {
         // Handle successful login
         console.log("Login successful", data);
-        console.log("writing cookie");
+        navigate("/");
       })
       .catch((error) => {
         // Handle login error
