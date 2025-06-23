@@ -6,6 +6,7 @@ import intervalsReducer, { intervalsLoaded } from "./intervals";
 import involvementsReducer, { involvementsLoaded } from "./involvements";
 import groupsReducer, { groupsLoaded } from "./groups";
 import { getApi } from "../api";
+import { redirect } from "react-router-dom";
 
 const store = configureStore({
   reducer: {
@@ -37,14 +38,28 @@ export async function loadInitialData(store: AppStore) {
 
   if (!dataHasLoaded) {
     console.log("Loading initial data from API...");
-    api.api.getState().then((response) => {
-      store.dispatch(peopleLoaded(response.data.people));
-      store.dispatch(groupsLoaded(response.data.groups));
-      store.dispatch(intervalsLoaded({ allIntervals: response.data.intervals, currentInterval: response.data.current_interval }));
-      store.dispatch(involvementsLoaded(response.data.involvements));
-      store.dispatch(collectiveLoaded(response.data.collective));
-    });
+    return api.api
+      .getState()
+      .then((response) => {
+        store.dispatch(peopleLoaded(response.data.people));
+        store.dispatch(groupsLoaded(response.data.groups));
+        store.dispatch(intervalsLoaded({ allIntervals: response.data.intervals, currentInterval: response.data.current_interval }));
+        store.dispatch(involvementsLoaded(response.data.involvements));
+        store.dispatch(collectiveLoaded(response.data.collective));
+
+        return null;
+      })
+      .catch((error) => {
+        if (error.response.status === 401) {
+          console.error("Unauthorized:", error);
+          return redirect("/auth/login");
+        } else {
+          console.error("Error loading initial data:", error);
+          return null;
+        }
+      });
   }
+  return null;
 }
 
 export default store;

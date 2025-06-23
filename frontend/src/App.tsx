@@ -1,5 +1,5 @@
 import Layout from "./pages/Layout";
-import { Navigate, RouterProvider, createBrowserRouter, type LoaderFunction } from "react-router-dom";
+import { Navigate, RouterProvider, createBrowserRouter, redirect, type LoaderFunction } from "react-router-dom";
 import { Provider as ReduxProvider } from "react-redux";
 import store, { loadInitialData, type AppStore } from "./store";
 
@@ -11,7 +11,7 @@ import { MantineProvider } from "@mantine/core";
 import { Dashboard, NewPerson, People, Person } from "./pages";
 import { buildRoutes as buildAuthRoutes } from "./contexts/auth";
 
-function withStore(func: (store: AppStore) => void, store: AppStore): LoaderFunction<any> {
+function withStore(func: (store: AppStore) => any, store: AppStore): LoaderFunction<any> {
   const wrappedFunc: LoaderFunction<any> = async () => {
     return func(store);
   };
