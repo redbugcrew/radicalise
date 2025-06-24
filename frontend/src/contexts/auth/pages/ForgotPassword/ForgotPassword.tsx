@@ -52,7 +52,7 @@ export default function ForgotPassword() {
           <Text fz="sm" ta="center" mb="md">
             We sent you an email with a link to reset your password.
           </Text>
-          <Anchor href="/login" c="dimmed" size="sm" className={classes.control}>
+          <Anchor href="../login" c="dimmed" size="sm" className={classes.control}>
             <Center inline>
               <IconArrowLeft size={12} stroke={1.5} />
               <Box ml={5}>Back to the login page</Box>
