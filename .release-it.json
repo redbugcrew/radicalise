@@ -24,6 +24,6 @@
   },
   "hooks": {
     "before:bump": ["cd frontend && npm run check-build"],
-    "after:bump": ["cd backend && cargo build && cargo sqlx prepare"]
+    "after:bump": ["cd backend && DATABASE_URL=sqlite:radicalise.sqlite cargo sqlx prepare && cargo build"]
   }
 }
