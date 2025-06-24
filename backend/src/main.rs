@@ -40,6 +40,11 @@ async fn main() {
     // CORS
     let cors = CorsLayer::new()
         .allow_origin(base_url.parse::<header::HeaderValue>().unwrap())
+        .allow_origin(
+            "http://localhost:5173"
+                .parse::<header::HeaderValue>()
+                .unwrap(),
+        )
         .allow_headers([header::AUTHORIZATION, header::ACCEPT, header::CONTENT_TYPE])
         .allow_credentials(true);
 
@@ -78,21 +83,17 @@ async fn main() {
 
     // ROUTES
     let (router, api) = OpenApiRouter::with_openapi(ApiDoc::openapi())
-        .nest(
-            "/api",
-            OpenApiRouter::new()
-                .nest("/auth", crate::auth::router())
-                .merge(crate::controllers::router().route_layer(login_required!(AppAuthBackend))),
-        )
+        .nest("/public_api", crate::auth::router())
+        .nest("/private_api", crate::controllers::router())
         .split_for_parts();
 
     let router = router
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", api.clone()))
         .fallback_service(get(frontend_handler))
-        .layer(cors)
         .layer(Extension(pool))
         .layer(Extension(resend))
-        .layer(auth_layer);
+        .layer(auth_layer)
+        .layer(cors);
 
     // SERVICE
     let app = router.into_make_service();
@@ -104,3 +105,5 @@ async fn main() {
 
     axum::serve(listener, app).await.unwrap();
 }
+
+// route_layer(login_required!(AppAuthBackend))

@@ -25,7 +25,7 @@ export default function ForgotPassword() {
   const api = getApi();
 
   const onSubmit = ({ email }: { email: string }) => {
-    api.api
+    api.publicApi
       .forgotPassword({ email })
       .then(() => {
         setResult("sent");

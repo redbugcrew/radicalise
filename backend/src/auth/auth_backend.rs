@@ -10,7 +10,7 @@ use utoipa::ToSchema;
 pub struct User {
     pub id: i64,
     pub email: String,
-    password: String,
+    hashed_password: String,
 }
 
 // Here we've implemented `Debug` manually to avoid accidentally logging the
@@ -20,7 +20,7 @@ impl std::fmt::Debug for User {
         f.debug_struct("User")
             .field("id", &self.id)
             .field("email", &self.email)
-            .field("password", &"[redacted]")
+            .field("hashed_password", &"[redacted]")
             .finish()
     }
 }
@@ -33,7 +33,7 @@ impl AuthUser for User {
     }
 
     fn session_auth_hash(&self) -> &[u8] {
-        self.password.as_bytes() // We use the password hash as the auth
+        self.hashed_password.as_bytes() // We use the password hash as the auth
         // hash--what this means
         // is when the user changes their password the
         // auth session becomes invalid.
@@ -78,21 +78,47 @@ impl AuthnBackend for AppAuthBackend {
         &self,
         creds: Self::Credentials,
     ) -> Result<Option<Self::User>, Self::Error> {
-        let user: Option<Self::User> = sqlx::query_as(
-            "SELECT id, email, hashed_password as password FROM people WHERE email = ? ",
-        )
-        .bind(creds.email)
-        .fetch_optional(&self.db)
-        .await?;
+        println!("Authenticating user with email: {}", creds.email);
+
+        let user: Option<Self::User> =
+            sqlx::query_as("SELECT id, email, hashed_password FROM people WHERE email = ? ")
+                .bind(creds.email.clone())
+                .fetch_optional(&self.db)
+                .await?;
+
+        println!("Credentials provided: {:?}", creds.password.clone());
+
+        // If no user was found, we return `None`.
+        if user.is_none() {
+            println!("No user found for email: {}", creds.email.clone());
+            return Ok(None);
+        }
+        let user = user.unwrap();
+
+        println!("User found: {:?}", user.email.clone());
 
         // Verifying the password is blocking and potentially slow, so we'll do so via
         // `spawn_blocking`.
-        task::spawn_blocking(|| {
-            // We're using password-based authentication--this works by comparing our form
-            // input with an argon2 password hash.
-            Ok(user.filter(|user| verify_password(creds.password, &user.password).is_ok()))
+        let hashed_password = user.hashed_password.clone();
+        let password = creds.password.clone();
+
+        let result: bool = task::spawn_blocking(move || {
+            let verify_result = verify_password(password, &hashed_password);
+
+            match verify_result {
+                Ok(_) => {
+                    println!("Password verification succeeded");
+                    true
+                }
+                Err(e) => {
+                    println!("Password verification failed: {}", e);
+                    false
+                }
+            }
         })
-        .await?
+        .await?;
+
+        if result { Ok(Some(user)) } else { Ok(None) }
     }
 
     async fn get_user(&self, user_id: &UserId<Self>) -> Result<Option<Self::User>, Self::Error> {

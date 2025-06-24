@@ -30,7 +30,7 @@ export default function ResetPassword() {
 
   const onSubmit = ({ password }: { password: string }) => {
     const api = getApi();
-    api.api
+    api.publicApi
       .resetPassword({ token, password })
       .then(() => {
         navigate("../login", { replace: true });

@@ -94,6 +94,11 @@ async fn reset_password(
     let repo = AuthRepo::new(&pool);
     let hashed_password = generate_hash(&payload.password);
 
+    println!(
+        "Resetting password for token: {}, with password {}, with hashed password: {}",
+        payload.token, payload.password, hashed_password
+    );
+
     repo.set_password_if_token_valid(payload.token, hashed_password, 24)
         .await
         .map_err(repo_error_handler)?;
@@ -119,6 +124,8 @@ async fn login(
     mut auth_session: AuthSession,
     axum::extract::Json(creds): axum::extract::Json<Credentials>,
 ) -> Result<Response<axum::body::Body>, Response<axum::body::Body>> {
+    println!("Attempting to log in with credentials: {:?}", creds);
+
     let user = match auth_session.authenticate(creds.clone()).await {
         Ok(Some(user)) => user,
         Ok(None) => {
@@ -126,6 +133,8 @@ async fn login(
         }
         Err(_) => return Err(StatusCode::INTERNAL_SERVER_ERROR.into_response()),
     };
+
+    println!("User authenticated: {:?}", user);
 
     if auth_session.login(&user).await.is_err() {
         return Err(StatusCode::INTERNAL_SERVER_ERROR.into_response());

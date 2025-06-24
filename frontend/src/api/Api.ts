@@ -265,22 +265,51 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 0.1.15
+ * @version 0.2.8
  * @license
  */
 export class Api<
   SecurityDataType extends unknown,
 > extends HttpClient<SecurityDataType> {
-  api = {
+  privateApi = {
+    /**
+     * No description
+     *
+     * @name GetState
+     * @request GET:/private_api/collective
+     */
+    getState: (params: RequestParams = {}) =>
+      this.request<InitialData, any>({
+        path: `/private_api/collective`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GetInvolvements
+     * @request GET:/private_api/collective/interval/{interval_id}/involvements
+     */
+    getInvolvements: (intervalId: number, params: RequestParams = {}) =>
+      this.request<IntervalInvolvementData, any>({
+        path: `/private_api/collective/interval/${intervalId}/involvements`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+  };
+  publicApi = {
     /**
      * No description
      *
      * @name ForgotPassword
-     * @request POST:/api/auth/forgot_password
+     * @request POST:/public_api/forgot_password
      */
     forgotPassword: (data: ForgotPasswordRequest, params: RequestParams = {}) =>
       this.request<string, string>({
-        path: `/api/auth/forgot_password`,
+        path: `/public_api/forgot_password`,
         method: "POST",
         body: data,
         type: ContentType.Json,
@@ -291,11 +320,11 @@ export class Api<
      * No description
      *
      * @name Login
-     * @request POST:/api/auth/login
+     * @request POST:/public_api/login
      */
     login: (data: Credentials, params: RequestParams = {}) =>
       this.request<LoginResponse, string>({
-        path: `/api/auth/login`,
+        path: `/public_api/login`,
         method: "POST",
         body: data,
         type: ContentType.Json,
@@ -307,42 +336,14 @@ export class Api<
      * No description
      *
      * @name ResetPassword
-     * @request POST:/api/auth/reset_password
+     * @request POST:/public_api/reset_password
      */
     resetPassword: (data: ResetPasswordRequest, params: RequestParams = {}) =>
       this.request<string, string>({
-        path: `/api/auth/reset_password`,
+        path: `/public_api/reset_password`,
         method: "POST",
         body: data,
         type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name GetState
-     * @request GET:/api/collective
-     */
-    getState: (params: RequestParams = {}) =>
-      this.request<InitialData, any>({
-        path: `/api/collective`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name GetInvolvements
-     * @request GET:/api/collective/interval/{interval_id}/involvements
-     */
-    getInvolvements: (intervalId: number, params: RequestParams = {}) =>
-      this.request<IntervalInvolvementData, any>({
-        path: `/api/collective/interval/${intervalId}/involvements`,
-        method: "GET",
-        format: "json",
         ...params,
       }),
   };

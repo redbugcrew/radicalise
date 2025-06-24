@@ -21,7 +21,7 @@ export default function PeopleForInterval({ interval }: PeopleForIntervalProps) 
     } else {
       const api = getApi();
 
-      api.api
+      api.privateApi
         .getInvolvements(interval.id)
         .then((response) => {
           setInvolvements(response.data);

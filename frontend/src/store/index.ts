@@ -38,7 +38,7 @@ export async function loadInitialData(store: AppStore) {
 
   if (!dataHasLoaded) {
     console.log("Loading initial data from API...");
-    return api.api
+    return api.privateApi
       .getState()
       .then((response) => {
         store.dispatch(peopleLoaded(response.data.people));

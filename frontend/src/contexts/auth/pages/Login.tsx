@@ -23,7 +23,7 @@ export default function Login() {
 
   const onSubmit = ({ email, password }: { email: string; password: string }) => {
     const api = getApi();
-    api.api
+    api.publicApi
       .login({ email, password })
       .then(({ data }) => {
         // Handle successful login

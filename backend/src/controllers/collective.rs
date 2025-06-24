@@ -37,6 +37,8 @@ pub fn router() -> OpenApiRouter {
         (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
     ),)]
 async fn get_state(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse {
+    println!("Fetching initial data for collective...");
+
     let collective_result = sqlx::query_as!(
         Collective,
         "SELECT id, name FROM groups WHERE id = ?",
