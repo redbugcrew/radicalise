@@ -57,7 +57,14 @@ async fn main() {
     // EMAIL
     let resend_key =
         env::var("RESEND_API_KEY").unwrap_or_else(|_| "YOUR-RESEND-KEY-HERE".to_string());
-    let resend = Resend::new(&resend_key);
+
+    let client = reqwest::Client::builder()
+        .user_agent("Radicalise/1.0")
+        .use_rustls_tls()
+        .build()
+        .expect("Failed to build reqwest client");
+
+    let resend = Resend::with_client(&resend_key, client);
 
     // ROUTES
     let (router, api) = OpenApiRouter::with_openapi(ApiDoc::openapi())
