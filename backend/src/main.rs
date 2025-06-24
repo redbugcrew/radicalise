@@ -3,13 +3,11 @@ use axum_login::{
     AuthManagerLayerBuilder, login_required,
     tower_sessions::{Expiry, SessionManagerLayer},
 };
-use cookie::Key;
 use resend_rs::Resend;
-use sqlx::SqlitePool;
 use std::env;
 use time::Duration;
 use tower_http::cors::CorsLayer;
-use tower_sessions_sqlx_store::SqliteStore;
+use tower_sessions::MemoryStore;
 use utoipa::OpenApi;
 use utoipa_axum::router::OpenApiRouter;
 use utoipa_swagger_ui::SwaggerUi;
@@ -49,19 +47,10 @@ async fn main() {
         .expect("Failed to prepare database");
 
     // SESSION MANAGEMENT
-    let key = Key::generate();
-    let session_store_pool = SqlitePool::connect("sqlite::memory:")
-        .await
-        .expect("Failed to start in-memory SQLite session store");
-    let session_store = SqliteStore::new(session_store_pool);
-    session_store
-        .migrate()
-        .await
-        .expect("Failed to migrate session store");
+    let session_store = MemoryStore::default();
     let session_layer = SessionManagerLayer::new(session_store)
         .with_secure(false)
-        .with_expiry(Expiry::OnInactivity(Duration::days(30)))
-        .with_signed(key);
+        .with_expiry(Expiry::OnInactivity(Duration::days(30)));
     let backend = AppAuthBackend::new(pool.clone());
     let auth_layer = AuthManagerLayerBuilder::new(backend, session_layer).build();
 
