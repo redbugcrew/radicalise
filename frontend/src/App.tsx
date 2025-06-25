@@ -49,7 +49,7 @@ const router = createBrowserRouter([
         element: <Person />,
       },
       {
-        path: "my_participation/:id",
+        path: "my_participation/:intervalId",
         element: <MyParticipation />,
       },
     ],

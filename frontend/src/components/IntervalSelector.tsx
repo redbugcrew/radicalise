@@ -2,19 +2,13 @@ import { Group, ActionIcon, Text, Stack, Button } from "@mantine/core";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import { DateOnly } from "@urbdyn/date-only";
 import type { Interval } from "../api/Api";
+import DateText from "./DateText";
 
 interface IntervalSelectorProps {
   intervals: Interval[];
   selectedInterval: Interval | null;
   currentInterval?: Interval | null;
   onChangeInterval: (interval: Interval) => void;
-}
-
-function DateText({ date }: { date: DateOnly }) {
-  const dateTime = new Date(date.year, date.month - 1, date.day);
-  const options: Intl.DateTimeFormatOptions = { day: "numeric", month: "long" };
-  const formattedDate = dateTime.toLocaleDateString("en-US", options);
-  return <Text span>{formattedDate}</Text>;
 }
 
 interface IntervalNavigationButtonProps {
@@ -56,7 +50,7 @@ export default function IntervalSelector({ intervals, selectedInterval, currentI
         </Text>
 
         <Text span c="dimmed">
-          <DateText date={DateOnly.fromString(selectedInterval.start_date)} /> - <DateText date={DateOnly.fromString(selectedInterval.end_date)} />
+          <DateText date={selectedInterval.start_date} /> - <DateText date={selectedInterval.end_date} />
         </Text>
         {currentInterval && selectedInterval.id !== currentInterval.id && (
           <Button variant="filled" size="xs" onClick={() => onChangeInterval(currentInterval)} mt="md">

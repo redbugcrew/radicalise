@@ -16,19 +16,28 @@ interface MyParticipationFormData {
 
 type StepProps = {
   form: ReturnType<typeof useForm<MyParticipationFormData>>;
+  readOnly?: boolean;
 };
 
-function CapacityStep({ form }: StepProps) {
+function CapacityStep({ form, readOnly }: StepProps) {
   return (
     <Stack>
-      <Textarea label="Wellbeing" description="How is your wellbeing and energy? What is likely to impact it positively or negatively?" key={form.key("wellbeing")} {...form.getInputProps("wellbeing")} />
       <Textarea
+        disabled={readOnly}
+        label="Wellbeing"
+        description="How is your wellbeing and energy? What is likely to impact it positively or negatively?"
+        key={form.key("wellbeing")}
+        {...form.getInputProps("wellbeing")}
+      />
+      <Textarea
+        disabled={readOnly}
         label="Focus"
         description="Where are you likely to be directing your time, energy and attention? Do you have any commitments, events or responsibilities coming up?"
         key={form.key("focus")}
         {...form.getInputProps("focus")}
       />
       <Textarea
+        disabled={readOnly}
         label="Capacity"
         description="Given the context of your life (above), how would you describe your capacity to participate in the Brassica Collective this interval"
         key={form.key("capacity")}
@@ -40,7 +49,7 @@ function CapacityStep({ form }: StepProps) {
 
 type MinimumParticipationStepProps = StepProps & {};
 
-function MinimumParticipationStep({ form }: MinimumParticipationStepProps) {
+function MinimumParticipationStep({ form, readOnly }: MinimumParticipationStepProps) {
   const [showOptOut, setShowOptOut] = useState(form.values.participation_status === "OptOut");
   const [showHiatus, setShowHiatus] = useState(form.values.opt_out_type === "Hiatus");
 
@@ -58,6 +67,7 @@ function MinimumParticipationStep({ form }: MinimumParticipationStepProps) {
         label="Participation status"
         description="Would you like to participate in the Brassica Collective this interval?"
         placeholder="Pick value"
+        disabled={readOnly}
         data={[
           { label: "Opt-in", value: "OptIn" },
           { label: "Opt-out", value: "OptOut" },
@@ -71,6 +81,7 @@ function MinimumParticipationStep({ form }: MinimumParticipationStepProps) {
             label="Opt-out Type"
             description="How would you like to opt-out?"
             placeholder="Pick value"
+            disabled={readOnly}
             data={[
               { label: "Pause for now (hiatus)", value: "Hiatus" },
               { label: "Leave indefinately (exit)", value: "Exit" },
@@ -78,21 +89,21 @@ function MinimumParticipationStep({ form }: MinimumParticipationStepProps) {
             key={form.key("opt_out_type")}
             {...form.getInputProps("opt_out_type")}
           />
-          {showHiatus && <DatePickerInput label="Planned return date" description="We'll give you a reminder one week before hand (if we've coded that bit)" placeholder="Pick date" />}
+          {showHiatus && <DatePickerInput disabled={readOnly} label="Planned return date" description="We'll give you a reminder one week before hand (if we've coded that bit)" placeholder="Pick date" />}
         </>
       )}
     </Stack>
   );
 }
 
-function AdditionalParticipationStep() {
-  return <div>Step 3 content: Get full access</div>;
-}
+// function AdditionalParticipationStep() {
+//   return <div>Step 3 content: Get full access</div>;
+// }
 
-export default function MyParticipation() {
+export default function ParticipationForm({ readOnly = false }: { readOnly?: boolean }) {
   const [step, setStep] = useState(0);
   const minStep = 0;
-  const maxStep = 2;
+  const maxStep = 1;
 
   const form = useForm<MyParticipationFormData>({
     mode: "uncontrolled",
@@ -147,37 +158,29 @@ export default function MyParticipation() {
   };
 
   return (
-    <Container>
-      <Stack gap={0} mb="xl">
-        <Title order={1} size="h2">
-          Participating in Interval 10
-        </Title>
-        <Text>June 12th - July 17th</Text>
-      </Stack>
+    <form>
+      <Stepper active={step} onStepClick={setStepIfValid} iconSize={32}>
+        <Stepper.Step label="Capacity">
+          <CapacityStep form={form} readOnly={readOnly} />
+        </Stepper.Step>
+        <Stepper.Step label="Minimum Participation">
+          <MinimumParticipationStep form={form} readOnly={readOnly} />
+        </Stepper.Step>
+        {/* <Stepper.Step label="Additional Participation">
+          <AdditionalParticipationStep />
+        </Stepper.Step> */}
+        <Stepper.Completed>Completed, click back button to get to previous step</Stepper.Completed>
+      </Stepper>
 
-      <form>
-        <Stepper active={step} onStepClick={setStepIfValid} iconSize={32}>
-          <Stepper.Step label="Capacity">
-            <CapacityStep form={form} />
-          </Stepper.Step>
-          <Stepper.Step label="Minimum Participation">
-            <MinimumParticipationStep form={form} />
-          </Stepper.Step>
-          <Stepper.Step label="Additional Participation">
-            <AdditionalParticipationStep />
-          </Stepper.Step>
-          <Stepper.Completed>Completed, click back button to get to previous step</Stepper.Completed>
-        </Stepper>
-
-        <Group justify="center" mt="xl">
-          {step > minStep && (
-            <Button variant="default" onClick={prevStep}>
-              Back
-            </Button>
-          )}
-          {step < maxStep && <Button onClick={nextStepIfValid}>Next step</Button>}
-        </Group>
-      </form>
-    </Container>
+      <Group justify="center" mt="xl">
+        {step > minStep && (
+          <Button variant="default" onClick={prevStep}>
+            Back
+          </Button>
+        )}
+        {step < maxStep && <Button onClick={nextStepIfValid}>Next step</Button>}
+        {step === maxStep && !readOnly && <Button type="submit">Submit</Button>}
+      </Group>
+    </form>
   );
 }
