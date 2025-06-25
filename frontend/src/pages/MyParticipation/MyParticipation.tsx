@@ -1,28 +1,35 @@
 import { Container, Title, Stepper, Group, Button, Text, Stack, Textarea, Select } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
+import { useForm } from "@mantine/form";
 import { useState } from "react";
 
-function CapacityStep() {
+interface MyParticipationFormData {
+  wellbeing: string;
+  focus: string;
+  capacity: string;
+}
+
+type StepProps = {
+  form: ReturnType<typeof useForm<MyParticipationFormData>>;
+};
+
+function CapacityStep({ form }: StepProps) {
   return (
-    <form>
-      <Stack>
-        <Textarea label="Wellbeing" description="How is your wellbeing and energy? What is likely to impact it positively or negatively?" placeholder="Input placeholder" />{" "}
-        <Textarea label="Focus" description="Where are you likely to be directing your time, energy and attention? Do you have any commitments, events or responsibilities coming up?" placeholder="Input placeholder" />
-        <Textarea label="Capacity" description="Given the context of your life (above), how would you describe your capacity to participate in the Brassica Collective this interval" placeholder="Input placeholder" />
-      </Stack>
-    </form>
+    <Stack>
+      <Textarea label="Wellbeing" description="How is your wellbeing and energy? What is likely to impact it positively or negatively?" {...form.getInputProps("wellbeing")} />
+      <Textarea label="Focus" description="Where are you likely to be directing your time, energy and attention? Do you have any commitments, events or responsibilities coming up?" {...form.getInputProps("focus")} />
+      <Textarea label="Capacity" description="Given the context of your life (above), how would you describe your capacity to participate in the Brassica Collective this interval" {...form.getInputProps("capacity")} />
+    </Stack>
   );
 }
 
 function MinimumParticipationStep() {
   return (
-    <form>
-      <Stack>
-        <Select label="Participation status" description="Would you like to participate in the Brassica Collective this interval?" placeholder="Pick value" data={["Opt-out", "Opt-in"]} />
-        <Select label="Opt-out Details" description="How would you like to opt-out?" placeholder="Pick value" data={["Pause for now (hiatus)", "Leave indefinately (exit)"]} />
-        <DatePickerInput label="Planned return date" description="We'll give you a reminder one week before hand (if we've coded that bit)" placeholder="Pick date" />
-      </Stack>
-    </form>
+    <Stack>
+      <Select label="Participation status" description="Would you like to participate in the Brassica Collective this interval?" placeholder="Pick value" data={["Opt-out", "Opt-in"]} />
+      <Select label="Opt-out Details" description="How would you like to opt-out?" placeholder="Pick value" data={["Pause for now (hiatus)", "Leave indefinately (exit)"]} />
+      <DatePickerInput label="Planned return date" description="We'll give you a reminder one week before hand (if we've coded that bit)" placeholder="Pick date" />
+    </Stack>
   );
 }
 
@@ -31,9 +38,38 @@ function AdditionalParticipationStep() {
 }
 
 export default function MyParticipation() {
-  const [active, setActive] = useState(1);
-  const nextStep = () => setActive((current) => (current < 3 ? current + 1 : current));
-  const prevStep = () => setActive((current) => (current > 0 ? current - 1 : current));
+  const [step, setStep] = useState(0);
+  const minStep = 0;
+  const maxStep = 2;
+
+  const form = useForm<MyParticipationFormData>({
+    mode: "uncontrolled",
+    initialValues: {
+      wellbeing: "",
+      focus: "",
+      capacity: "",
+    },
+
+    validate: (values) => {
+      if (step === 0) {
+        return {
+          wellbeing: values.wellbeing.length > 0 ? null : "Wellbeing is required",
+          focus: values.focus.length > 0 ? null : "Focus is required",
+          capacity: values.capacity.length > 0 ? null : "Capacity is required",
+        };
+      }
+      return {};
+    },
+  });
+
+  const prevStep = () => setStep((current) => (current > minStep ? current - 1 : current));
+  const nextStep = () => setStep((current) => (current < maxStep ? current + 1 : current));
+  const nextStepIfValid = () => {
+    if (form.validate().hasErrors) {
+      return;
+    }
+    nextStep();
+  };
 
   return (
     <Container>
@@ -44,25 +80,29 @@ export default function MyParticipation() {
         <Text>June 12th - July 17th</Text>
       </Stack>
 
-      <Stepper active={active} onStepClick={setActive} iconSize={32}>
-        <Stepper.Step label="Capacity">
-          <CapacityStep />
-        </Stepper.Step>
-        <Stepper.Step label="Minimum Participation">
-          <MinimumParticipationStep />
-        </Stepper.Step>
-        <Stepper.Step label="Additional Participation">
-          <AdditionalParticipationStep />
-        </Stepper.Step>
-        <Stepper.Completed>Completed, click back button to get to previous step</Stepper.Completed>
-      </Stepper>
+      <form>
+        <Stepper active={step} onStepClick={setStep} iconSize={32}>
+          <Stepper.Step label="Capacity">
+            <CapacityStep form={form} />
+          </Stepper.Step>
+          <Stepper.Step label="Minimum Participation">
+            <MinimumParticipationStep />
+          </Stepper.Step>
+          <Stepper.Step label="Additional Participation">
+            <AdditionalParticipationStep />
+          </Stepper.Step>
+          <Stepper.Completed>Completed, click back button to get to previous step</Stepper.Completed>
+        </Stepper>
 
-      <Group justify="center" mt="xl">
-        <Button variant="default" onClick={prevStep}>
-          Back
-        </Button>
-        <Button onClick={nextStep}>Next step</Button>
-      </Group>
+        <Group justify="center" mt="xl">
+          {step > minStep && (
+            <Button variant="default" onClick={prevStep}>
+              Back
+            </Button>
+          )}
+          {step < maxStep && <Button onClick={nextStepIfValid}>Next step</Button>}
+        </Group>
+      </form>
     </Container>
   );
 }
