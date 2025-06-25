@@ -4,11 +4,13 @@ use sqlx::SqlitePool;
 use utoipa::ToSchema;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
-use crate::entities::{Collective, Group, Interval, Involvement, InvolvementStatus, Person};
+use crate::entities::{
+    Collective, CollectiveInvolvement, Group, Interval, Involvement, InvolvementStatus, Person,
+};
 
 #[derive(Serialize, Deserialize, ToSchema)]
 struct IntervalInvolvementData {
-    pub collective_involvements: Vec<Involvement>,
+    pub collective_involvements: Vec<CollectiveInvolvement>,
     pub crew_involvements: Vec<Involvement>,
 }
 
@@ -84,7 +86,7 @@ async fn get_state(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse 
             let groups = groups_result.unwrap();
 
             let collective_involvements_result =
-                find_all_group_involvements(current_interval.id, COLLECTIVE_GROUP_ID, &pool).await;
+                find_all_collective_involvements(current_interval.id, &pool).await;
             let crew_involvements_result =
                 find_all_crew_involvements(current_interval.id, &pool).await; // Assuming crew group ID is 2
 
@@ -121,8 +123,7 @@ async fn get_involvements(
     Path(interval_id): Path<i64>,
     Extension(pool): Extension<SqlitePool>,
 ) -> impl IntoResponse {
-    let collective_involvements_result =
-        find_all_group_involvements(interval_id, COLLECTIVE_GROUP_ID, &pool).await;
+    let collective_involvements_result = find_all_collective_involvements(interval_id, &pool).await;
     let crew_involvements_result = find_all_crew_involvements(interval_id, &pool).await;
 
     if collective_involvements_result.is_err() || crew_involvements_result.is_err() {
@@ -139,20 +140,21 @@ async fn get_involvements(
     return (StatusCode::OK, Json(result)).into_response();
 }
 
-async fn find_all_group_involvements(
+async fn find_all_collective_involvements(
     interval_id: i64,
-    group_id: i64,
     pool: &SqlitePool,
-) -> Result<Vec<Involvement>, sqlx::Error> {
+) -> Result<Vec<CollectiveInvolvement>, sqlx::Error> {
+    let collective_id = COLLECTIVE_ID;
+
     sqlx::query_as!(
-        Involvement,
-        "SELECT id, person_id, group_id, interval_id, status as \"status: InvolvementStatus\"
-        FROM group_involvements
+        CollectiveInvolvement,
+        "SELECT id, person_id, collective_id, interval_id, status as \"status: InvolvementStatus\"
+        FROM collective_involvements
         WHERE
           interval_id = ? AND
-          group_id = ?",
+          collective_id = ?",
         interval_id,
-        group_id
+        collective_id
     )
     .fetch_all(pool)
     .await

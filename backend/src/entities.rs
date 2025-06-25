@@ -57,6 +57,15 @@ pub struct Involvement {
 }
 
 #[derive(Serialize, Deserialize, ToSchema)]
+pub struct CollectiveInvolvement {
+    pub id: i64,
+    pub person_id: i64,
+    pub collective_id: i64,
+    pub interval_id: i64,
+    pub status: InvolvementStatus,
+}
+
+#[derive(Serialize, Deserialize, ToSchema)]
 pub struct Group {
     pub id: i64,
     pub name: String,
