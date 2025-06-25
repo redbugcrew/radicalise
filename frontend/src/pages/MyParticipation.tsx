@@ -1,5 +1,5 @@
 import { Container, Stack, Title, Text } from "@mantine/core";
-import ParticipationForm from "../components/ParticipationForm";
+import ParticipationForm, { type MyParticipationFormData } from "../components/ParticipationForm";
 import { useAppSelector } from "../store";
 import { useParams } from "react-router-dom";
 import DateText from "../components/DateText";
@@ -39,6 +39,10 @@ export default function MyParticipation() {
     return <Text>Error: You were not participating in this interval.</Text>;
   }
 
+  const onSubmit = (values: MyParticipationFormData) => {
+    console.log("Form submitted with values:", values);
+  };
+
   return (
     <Container>
       <Stack gap={0} mb="xl">
@@ -49,7 +53,7 @@ export default function MyParticipation() {
           <DateText date={interval.start_date} /> - <DateText date={interval.end_date} />
         </Text>
       </Stack>
-      <ParticipationForm readOnly={readOnly} involvement={involvement} key={involvement?.id || "fresh"} />
+      <ParticipationForm readOnly={readOnly} involvement={involvement} key={involvement?.id || "fresh"} onSubmit={onSubmit} />
     </Container>
   );
 }

@@ -4,7 +4,7 @@ import { useForm } from "@mantine/form";
 import { useState } from "react";
 import type { CollectiveInvolvementWithDetails, OptOutType, ParticipationIntention } from "../api/Api";
 
-interface MyParticipationFormData {
+export interface MyParticipationFormData {
   wellbeing: string;
   focus: string;
   capacity: string;
@@ -62,7 +62,7 @@ function MinimumParticipationStep({ form, readOnly }: MinimumParticipationStepPr
   return (
     <Stack>
       <Select
-        label="Participation status"
+        label="Participation intention"
         description="Would you like to participate in the Brassica Collective this interval?"
         placeholder="Pick value"
         disabled={readOnly}
@@ -70,8 +70,8 @@ function MinimumParticipationStep({ form, readOnly }: MinimumParticipationStepPr
           { label: "Opt-in", value: "OptIn" },
           { label: "Opt-out", value: "OptOut" },
         ]}
-        key={form.key("participation_status")}
-        {...form.getInputProps("participation_status")}
+        key={form.key("participation_intention")}
+        {...form.getInputProps("participation_intention")}
       />
       {showOptOut && (
         <>
@@ -101,9 +101,10 @@ function MinimumParticipationStep({ form, readOnly }: MinimumParticipationStepPr
 type ParticipationFormProps = {
   readOnly?: boolean;
   involvement?: CollectiveInvolvementWithDetails | null;
+  onSubmit: (data: MyParticipationFormData) => void;
 };
 
-export default function ParticipationForm({ readOnly = false, involvement = null }: ParticipationFormProps) {
+export default function ParticipationForm({ readOnly = false, involvement = null, onSubmit }: ParticipationFormProps) {
   const [step, setStep] = useState(0);
   const minStep = 0;
   const maxStep = 1;
@@ -132,7 +133,7 @@ export default function ParticipationForm({ readOnly = false, involvement = null
       if (step === 1) {
         results = {
           ...results,
-          participation_intention: values.participation_intention ? null : "Participation status is required",
+          participation_intention: values.participation_intention ? null : "Participation intention is required",
         };
         if (values.participation_intention === "OptOut") {
           results = {
@@ -161,7 +162,7 @@ export default function ParticipationForm({ readOnly = false, involvement = null
   };
 
   return (
-    <form>
+    <form onSubmit={form.onSubmit(onSubmit, (errors) => console.log("Form submission errors:", errors))}>
       <Stepper active={step} onStepClick={setStepIfValid} iconSize={32}>
         <Stepper.Step label="Capacity">
           <CapacityStep form={form} readOnly={readOnly} />
