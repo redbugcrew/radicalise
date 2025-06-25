@@ -1,9 +1,9 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { Involvement } from "../api/Api";
+import type { CollectiveInvolvement, CrewInvolvement } from "../api/Api";
 
 export type InvolvementsState = {
-  collective_involvements: Involvement[];
-  crew_involvements: Involvement[];
+  collective_involvements: CollectiveInvolvement[];
+  crew_involvements: CrewInvolvement[];
 };
 
 const involvementsSlice = createSlice({
