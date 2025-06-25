@@ -5,20 +5,20 @@ use utoipa::ToSchema;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::entities::{
-    Collective, CollectiveInvolvement, Group, Interval, Involvement, InvolvementStatus, Person,
+    Collective, CollectiveInvolvement, Crew, CrewInvolvement, Interval, InvolvementStatus, Person,
 };
 
 #[derive(Serialize, Deserialize, ToSchema)]
 struct IntervalInvolvementData {
     pub collective_involvements: Vec<CollectiveInvolvement>,
-    pub crew_involvements: Vec<Involvement>,
+    pub crew_involvements: Vec<CrewInvolvement>,
 }
 
 #[derive(Serialize, Deserialize, ToSchema)]
 struct InitialData {
     pub collective: Collective,
     pub people: Vec<Person>,
-    pub groups: Vec<Group>,
+    pub crews: Vec<Crew>,
     pub intervals: Vec<Interval>,
     pub current_interval: Interval,
     pub involvements: IntervalInvolvementData,
@@ -53,7 +53,7 @@ async fn get_state(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse 
                 .fetch_all(&pool)
                 .await;
 
-            let groups_result = sqlx::query_as!(Group, "SELECT * FROM groups")
+            let crews_result = sqlx::query_as!(Crew, "SELECT id, name, description FROM crews")
                 .fetch_all(&pool)
                 .await;
 
@@ -76,14 +76,14 @@ async fn get_state(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse 
             if intervals_result.is_err()
                 || people_result.is_err()
                 || current_interval_result.is_err()
-                || groups_result.is_err()
+                || crews_result.is_err()
             {
                 return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
             }
             let people = people_result.unwrap();
             let intervals = intervals_result.unwrap();
             let current_interval = current_interval_result.unwrap();
-            let groups = groups_result.unwrap();
+            let crews = crews_result.unwrap();
 
             let collective_involvements_result =
                 find_all_collective_involvements(current_interval.id, &pool).await;
@@ -99,7 +99,7 @@ async fn get_state(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse 
             let initial_data = InitialData {
                 collective,
                 people,
-                groups,
+                crews,
                 intervals,
                 current_interval,
                 involvements: IntervalInvolvementData {
@@ -163,17 +163,15 @@ async fn find_all_collective_involvements(
 async fn find_all_crew_involvements(
     interval_id: i64,
     pool: &SqlitePool,
-) -> Result<Vec<Involvement>, sqlx::Error> {
+) -> Result<Vec<CrewInvolvement>, sqlx::Error> {
     sqlx::query_as!(
-        Involvement,
-        "SELECT group_involvements.id, person_id, group_id, interval_id, status as \"status: InvolvementStatus\"
-        FROM group_involvements
-        LEFT JOIN groups ON group_involvements.group_id = groups.id
+        CrewInvolvement,
+        "SELECT crew_involvements.id, person_id, crew_id, interval_id, status as \"status: InvolvementStatus\"
+        FROM crew_involvements
+        LEFT JOIN groups ON crew_involvements.crew_id = groups.id
         WHERE
-          interval_id = ? AND
-          groups.group_type = ?",
-        interval_id,
-        "crew",
+          interval_id = ?",
+        interval_id
     )
     .fetch_all(pool)
     .await

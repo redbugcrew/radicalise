@@ -48,10 +48,10 @@ impl TryFrom<String> for InvolvementStatus {
 }
 
 #[derive(Serialize, Deserialize, ToSchema)]
-pub struct Involvement {
+pub struct CrewInvolvement {
     pub id: i64,
     pub person_id: i64,
-    pub group_id: i64,
+    pub crew_id: i64,
     pub interval_id: i64,
     pub status: InvolvementStatus,
 }
@@ -66,9 +66,8 @@ pub struct CollectiveInvolvement {
 }
 
 #[derive(Serialize, Deserialize, ToSchema)]
-pub struct Group {
+pub struct Crew {
     pub id: i64,
     pub name: String,
-    pub group_type: String,
     pub description: Option<String>,
 }

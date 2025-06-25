@@ -1,43 +1,43 @@
 import { Tabs } from "@mantine/core";
 import { PeopleTable } from "../components";
-import { InvolvementStatus, type Involvement } from "../api/Api";
+import { InvolvementStatus, type CollectiveInvolvement, type CrewInvolvement } from "../api/Api";
 import { useAppSelector } from "../store";
 import { capitalCase } from "change-case";
 import { useState } from "react";
 import type { PeopleState } from "../store/people";
-import type { GroupsState } from "../store/groups";
 import type { PeopleTableRow } from "../components/PeopleTable/PeopleTable";
+import type { CrewsState } from "../store/crews";
 
-type InvolvementsHashById = Map<number, Involvement[]>;
-type InvolvementsHashByStatus = Map<InvolvementStatus, Involvement[]>;
+type HashById<T> = Map<number, T[]>;
+type HashByStatus<T> = Map<InvolvementStatus, T[]>;
 
-function hashInvolvementsByStatus(involvements: Involvement[]): InvolvementsHashByStatus {
-  const map = new Map<InvolvementStatus, Involvement[]>();
-  involvements.forEach((involvement) => {
-    const status = InvolvementStatus[involvement.status as keyof typeof InvolvementStatus];
+function hashByStatus<T extends { status: InvolvementStatus }>(records: T[]): HashByStatus<T> {
+  const map = new Map<InvolvementStatus, T[]>();
+  records.forEach((record) => {
+    const status = InvolvementStatus[record.status as keyof typeof InvolvementStatus];
     if (!map.has(status)) {
       map.set(status, []);
     }
-    map.get(status)?.push(involvement);
+    map.get(status)?.push(record);
   });
   return map;
 }
 
-function hashInvolvementsByPerson(involvements: Involvement[] | undefined): InvolvementsHashById {
-  const map = new Map<number, Involvement[]>();
+function hashByPerson<T extends { person_id: number }>(records: T[] | undefined): HashById<T> {
+  const map = new Map<number, T[]>();
 
-  if (!involvements) return map;
+  if (!records) return map;
 
-  involvements.forEach((involvement) => {
-    if (!map.has(involvement.person_id)) {
-      map.set(involvement.person_id, []);
+  records.forEach((record) => {
+    if (!map.has(record.person_id)) {
+      map.set(record.person_id, []);
     }
-    map.get(involvement.person_id)?.push(involvement);
+    map.get(record.person_id)?.push(record);
   });
   return map;
 }
 
-function peopleForInvolvements(involvements: Involvement[], allCrewInvolvements: InvolvementsHashById, allPeople: PeopleState, allGroups: GroupsState): PeopleTableRow[] {
+function peopleForInvolvements(involvements: CollectiveInvolvement[], allCrewInvolvements: HashById<CrewInvolvement>, allPeople: PeopleState, allCrews: CrewsState): PeopleTableRow[] {
   return involvements.map((involvement) => {
     const person = allPeople[involvement.person_id];
     const crewInvolvements = allCrewInvolvements.get(person.id) || [];
@@ -45,14 +45,14 @@ function peopleForInvolvements(involvements: Involvement[], allCrewInvolvements:
     return {
       id: person.id,
       name: person.display_name,
-      groups: crewInvolvements.map((crewInvolvement) => allGroups[crewInvolvement.group_id] || null).filter((group) => group),
+      crews: crewInvolvements.map((crewInvolvement) => allCrews[crewInvolvement.crew_id] || null).filter((crew) => crew),
     };
   });
 }
 
 interface PeopleByInvolvementStatusProps {
-  involvements: Involvement[];
-  crewEnrolments?: Involvement[];
+  involvements: CollectiveInvolvement[];
+  crewEnrolments?: CrewInvolvement[];
   tableKey?: React.Key;
 }
 
@@ -66,11 +66,11 @@ export default function PeopleByInvolvementStatus({ involvements, crewEnrolments
     setActiveState(InvolvementStatus[value as keyof typeof InvolvementStatus]);
   };
 
-  const hashedInvolvements = hashInvolvementsByStatus(involvements);
-  const hashedCrewEnrolments = hashInvolvementsByPerson(crewEnrolments);
+  const hashedInvolvements = hashByStatus(involvements);
+  const hashedCrewEnrolments = hashByPerson(crewEnrolments);
 
   const allPeople = useAppSelector((state) => state.people);
-  const allGroups = useAppSelector((state) => state.groups);
+  const allCrews = useAppSelector((state) => state.crews);
 
   return (
     <Tabs value={activeState} onChange={setActiveTab}>
@@ -84,7 +84,7 @@ export default function PeopleByInvolvementStatus({ involvements, crewEnrolments
 
       {states.map((state) => (
         <Tabs.Panel value={state} key={state} pt="md">
-          <PeopleTable key={tableKey} people={peopleForInvolvements(hashedInvolvements.get(state) || [], hashedCrewEnrolments, allPeople, allGroups)} />
+          <PeopleTable key={tableKey} people={peopleForInvolvements(hashedInvolvements.get(state) || [], hashedCrewEnrolments, allPeople, allCrews)} />
         </Tabs.Panel>
       ))}
     </Tabs>

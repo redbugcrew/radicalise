@@ -21,27 +21,50 @@ export interface Collective {
   name?: string | null;
 }
 
+export interface CollectiveInvolvement {
+  /** @format int64 */
+  collective_id: number;
+  /** @format int64 */
+  id: number;
+  /** @format int64 */
+  interval_id: number;
+  /** @format int64 */
+  person_id: number;
+  status: InvolvementStatus;
+}
+
 export interface Credentials {
   email: string;
   password: string;
+}
+
+export interface Crew {
+  description?: string | null;
+  /** @format int64 */
+  id: number;
+  name: string;
+}
+
+export interface CrewInvolvement {
+  /** @format int64 */
+  crew_id: number;
+  /** @format int64 */
+  id: number;
+  /** @format int64 */
+  interval_id: number;
+  /** @format int64 */
+  person_id: number;
+  status: InvolvementStatus;
 }
 
 export interface ForgotPasswordRequest {
   email: string;
 }
 
-export interface Group {
-  description?: string | null;
-  group_type: string;
-  /** @format int64 */
-  id: number;
-  name: string;
-}
-
 export interface InitialData {
   collective: Collective;
+  crews: Crew[];
   current_interval: Interval;
-  groups: Group[];
   intervals: Interval[];
   involvements: IntervalInvolvementData;
   people: Person[];
@@ -55,22 +78,8 @@ export interface Interval {
 }
 
 export interface IntervalInvolvementData {
-  collective_involvements: Involvement[];
-  crew_involvements: Involvement[];
-}
-
-export interface Involvement {
-  /** @format int64 */
-  end_interval_id?: number | null;
-  /** @format int64 */
-  group_id: number;
-  /** @format int64 */
-  id: number;
-  /** @format int64 */
-  person_id: number;
-  /** @format int64 */
-  start_interval_id: number;
-  status: InvolvementStatus;
+  collective_involvements: CollectiveInvolvement[];
+  crew_involvements: CrewInvolvement[];
 }
 
 export interface LoginResponse {
@@ -265,7 +274,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 0.1.15
+ * @version 0.3.2
  * @license
  */
 export class Api<

@@ -4,7 +4,7 @@ import { IconChevronDown, IconChevronUp, IconSearch, IconSelector } from "@table
 import { useState } from "react";
 import classes from "./PeopleTable.module.css";
 
-interface Group {
+interface Crew {
   id: number;
   name: string;
 }
@@ -16,12 +16,12 @@ interface SortableRowData {
 export interface PeopleTableRow {
   id: number;
   name: string;
-  groups: Group[];
+  crews: Crew[];
 }
 
 function matchesFilter(item: PeopleTableRow, query: string) {
   const lowerQuery = query.toLowerCase();
-  return item.name.toLowerCase().includes(lowerQuery) || item.groups.some((group) => group.name.toLowerCase().includes(lowerQuery));
+  return item.name.toLowerCase().includes(lowerQuery) || item.crews.some((crew) => crew.name.toLowerCase().includes(lowerQuery));
 }
 
 function filterData(data: PeopleTableRow[], search: string) {
@@ -48,7 +48,7 @@ function sortData(data: PeopleTableRow[], payload: { sortBy: keyof SortableRowDa
   );
 }
 
-const groupColours: Record<number, string> = {
+const crewColours: Record<number, string> = {
   2: "blue",
   3: "cyan",
   4: "pink",
@@ -119,8 +119,6 @@ export default function PeopleTable({ people }: PeopleTableProps) {
     setSortedData(sortData(people, { sortBy, reversed: reverseSortDirection, search: value }));
   };
 
-  console.log("data", sortedData);
-
   const rows = sortedData.map((item) => (
     <Table.Tr key={item.id}>
       <Table.Td>
@@ -135,9 +133,9 @@ export default function PeopleTable({ people }: PeopleTableProps) {
       </Table.Td>
 
       <Table.Td>
-        {item.groups.map((group) => (
-          <Badge key={group.id} color={groupColours[group.id] || "gray"} variant="light" mr={5}>
-            {group.name}
+        {item.crews.map((crew) => (
+          <Badge key={crew.id} color={crewColours[crew.id] || "gray"} variant="light" mr={5}>
+            {crew.name}
           </Badge>
         ))}
       </Table.Td>
@@ -153,7 +151,7 @@ export default function PeopleTable({ people }: PeopleTableProps) {
             <SortableTh sorted={sortBy == "name"} reversed={reverseSortDirection} onSort={() => setSorting("name")}>
               Name
             </SortableTh>
-            <Th>Groups(s)</Th>
+            <Th>Crew(s)</Th>
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>{rows}</Table.Tbody>
