@@ -74,7 +74,7 @@ export default function MyParticipation() {
           <DateText date={interval.start_date} /> - <DateText date={interval.end_date} />
         </Text>
       </Stack>
-      <ParticipationForm readOnly={readOnly} involvement={involvement} key={involvement?.id || "fresh"} onSubmit={onSubmit} />
+      <ParticipationForm readOnly={readOnly} involvement={involvement} key={involvement?.id || `fresh-${interval.id}`} onSubmit={onSubmit} />
     </Container>
   );
 }
