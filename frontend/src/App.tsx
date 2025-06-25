@@ -8,7 +8,7 @@ import store, { loadInitialData, type AppStore } from "./store";
 import "@mantine/core/styles.css";
 
 import { MantineProvider } from "@mantine/core";
-import { Dashboard, NewPerson, People, Person } from "./pages";
+import { Dashboard, NewPerson, People, Person, MyParticipation } from "./pages";
 import { buildRoutes as buildAuthRoutes } from "./contexts/auth";
 
 function withStore(func: (store: AppStore) => any, store: AppStore): LoaderFunction<any> {
@@ -46,6 +46,10 @@ const router = createBrowserRouter([
       {
         path: "people/:personId",
         element: <Person />,
+      },
+      {
+        path: "my_participation/:id",
+        element: <MyParticipation />,
       },
     ],
   },
