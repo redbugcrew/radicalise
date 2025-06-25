@@ -3,10 +3,15 @@ import { DatePickerInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { useState } from "react";
 
+type ParticipationStatus = "OptOut" | "OptIn";
+type OptOutType = "Hiatus" | "Exit";
+
 interface MyParticipationFormData {
   wellbeing: string;
   focus: string;
   capacity: string;
+  participation_status: ParticipationStatus | null;
+  opt_out_type: OptOutType | null;
 }
 
 type StepProps = {
@@ -16,19 +21,66 @@ type StepProps = {
 function CapacityStep({ form }: StepProps) {
   return (
     <Stack>
-      <Textarea label="Wellbeing" description="How is your wellbeing and energy? What is likely to impact it positively or negatively?" {...form.getInputProps("wellbeing")} />
-      <Textarea label="Focus" description="Where are you likely to be directing your time, energy and attention? Do you have any commitments, events or responsibilities coming up?" {...form.getInputProps("focus")} />
-      <Textarea label="Capacity" description="Given the context of your life (above), how would you describe your capacity to participate in the Brassica Collective this interval" {...form.getInputProps("capacity")} />
+      <Textarea label="Wellbeing" description="How is your wellbeing and energy? What is likely to impact it positively or negatively?" key={form.key("wellbeing")} {...form.getInputProps("wellbeing")} />
+      <Textarea
+        label="Focus"
+        description="Where are you likely to be directing your time, energy and attention? Do you have any commitments, events or responsibilities coming up?"
+        key={form.key("focus")}
+        {...form.getInputProps("focus")}
+      />
+      <Textarea
+        label="Capacity"
+        description="Given the context of your life (above), how would you describe your capacity to participate in the Brassica Collective this interval"
+        key={form.key("capacity")}
+        {...form.getInputProps("capacity")}
+      />
     </Stack>
   );
 }
 
-function MinimumParticipationStep() {
+type MinimumParticipationStepProps = StepProps & {};
+
+function MinimumParticipationStep({ form }: MinimumParticipationStepProps) {
+  const [showOptOut, setShowOptOut] = useState(form.values.participation_status === "OptOut");
+  const [showHiatus, setShowHiatus] = useState(form.values.opt_out_type === "Hiatus");
+
+  form.watch("participation_status", ({ value }) => {
+    setShowOptOut(value === "OptOut");
+  });
+
+  form.watch("opt_out_type", ({ value }) => {
+    setShowHiatus(value === "Hiatus");
+  });
+
   return (
     <Stack>
-      <Select label="Participation status" description="Would you like to participate in the Brassica Collective this interval?" placeholder="Pick value" data={["Opt-out", "Opt-in"]} />
-      <Select label="Opt-out Details" description="How would you like to opt-out?" placeholder="Pick value" data={["Pause for now (hiatus)", "Leave indefinately (exit)"]} />
-      <DatePickerInput label="Planned return date" description="We'll give you a reminder one week before hand (if we've coded that bit)" placeholder="Pick date" />
+      <Select
+        label="Participation status"
+        description="Would you like to participate in the Brassica Collective this interval?"
+        placeholder="Pick value"
+        data={[
+          { label: "Opt-in", value: "OptIn" },
+          { label: "Opt-out", value: "OptOut" },
+        ]}
+        key={form.key("participation_status")}
+        {...form.getInputProps("participation_status")}
+      />
+      {showOptOut && (
+        <>
+          <Select
+            label="Opt-out Type"
+            description="How would you like to opt-out?"
+            placeholder="Pick value"
+            data={[
+              { label: "Pause for now (hiatus)", value: "Hiatus" },
+              { label: "Leave indefinately (exit)", value: "Exit" },
+            ]}
+            key={form.key("opt_out_type")}
+            {...form.getInputProps("opt_out_type")}
+          />
+          {showHiatus && <DatePickerInput label="Planned return date" description="We'll give you a reminder one week before hand (if we've coded that bit)" placeholder="Pick date" />}
+        </>
+      )}
     </Stack>
   );
 }
@@ -48,17 +100,35 @@ export default function MyParticipation() {
       wellbeing: "",
       focus: "",
       capacity: "",
+      participation_status: null,
+      opt_out_type: null,
     },
 
     validate: (values) => {
+      let results = {};
+
       if (step === 0) {
-        return {
+        results = {
+          ...results,
           wellbeing: values.wellbeing.length > 0 ? null : "Wellbeing is required",
           focus: values.focus.length > 0 ? null : "Focus is required",
           capacity: values.capacity.length > 0 ? null : "Capacity is required",
         };
       }
-      return {};
+      if (step === 1) {
+        results = {
+          ...results,
+          participation_status: values.participation_status ? null : "Participation status is required",
+        };
+        if (values.participation_status === "OptOut") {
+          results = {
+            ...results,
+            opt_out_type: values.opt_out_type ? null : "Opt-out type is required",
+          };
+        }
+      }
+
+      return results;
     },
   });
 
@@ -69,6 +139,11 @@ export default function MyParticipation() {
       return;
     }
     nextStep();
+  };
+  const setStepIfValid = (newStep: number) => {
+    if (newStep <= step || (newStep === step + 1 && !form.validate().hasErrors)) {
+      setStep(newStep);
+    }
   };
 
   return (
@@ -81,12 +156,12 @@ export default function MyParticipation() {
       </Stack>
 
       <form>
-        <Stepper active={step} onStepClick={setStep} iconSize={32}>
+        <Stepper active={step} onStepClick={setStepIfValid} iconSize={32}>
           <Stepper.Step label="Capacity">
             <CapacityStep form={form} />
           </Stepper.Step>
           <Stepper.Step label="Minimum Participation">
-            <MinimumParticipationStep />
+            <MinimumParticipationStep form={form} />
           </Stepper.Step>
           <Stepper.Step label="Additional Participation">
             <AdditionalParticipationStep />
