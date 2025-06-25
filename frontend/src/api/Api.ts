@@ -10,9 +10,20 @@
  * ---------------------------------------------------------------
  */
 
+export enum ParticipationIntention {
+  OptIn = "OptIn",
+  OptOut = "OptOut",
+}
+
+export enum OptOutType {
+  Hiatus = "Hiatus",
+  Exit = "Exit",
+}
+
 export enum InvolvementStatus {
   Participating = "Participating",
   OnHiatus = "OnHiatus",
+  Exiting = "Exiting",
 }
 
 export interface Collective {
@@ -32,6 +43,24 @@ export interface CollectiveInvolvement {
   /** @format int64 */
   person_id: number;
   status: InvolvementStatus;
+}
+
+export interface CollectiveInvolvementWithDetails {
+  capacity?: string | null;
+  /** @format int64 */
+  collective_id: number;
+  focus?: string | null;
+  /** @format int64 */
+  id: number;
+  /** @format int64 */
+  interval_id: number;
+  opt_out_planned_return_date?: string | null;
+  opt_out_type?: null | OptOutType;
+  participation_intention?: null | ParticipationIntention;
+  /** @format int64 */
+  person_id: number;
+  status: InvolvementStatus;
+  wellbeing?: string | null;
 }
 
 export interface Credentials {
@@ -275,7 +304,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 0.3.2
+ * @version 0.4.0
  * @license
  */
 export class Api<
@@ -351,6 +380,20 @@ export class Api<
     getInvolvements: (intervalId: number, params: RequestParams = {}) =>
       this.request<IntervalInvolvementData, any>({
         path: `/api/collective/interval/${intervalId}/involvements`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name MyParticipation
+     * @request GET:/api/collective/interval/{interval_id}/my_participation
+     */
+    myParticipation: (intervalId: number, params: RequestParams = {}) =>
+      this.request<null | CollectiveInvolvementWithDetails, any>({
+        path: `/api/collective/interval/${intervalId}/my_participation`,
         method: "GET",
         format: "json",
         ...params,

@@ -26,6 +26,7 @@ pub struct Interval {
 pub enum InvolvementStatus {
     Participating,
     OnHiatus,
+    Exiting,
 }
 
 impl FromStr for InvolvementStatus {
@@ -35,6 +36,7 @@ impl FromStr for InvolvementStatus {
         match s {
             "Participating" => Ok(InvolvementStatus::Participating),
             "OnHiatus" => Ok(InvolvementStatus::OnHiatus),
+            "Exiting" => Ok(InvolvementStatus::Exiting),
             _ => Err(()),
         }
     }
@@ -45,6 +47,58 @@ impl TryFrom<String> for InvolvementStatus {
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
         InvolvementStatus::from_str(&value)
+    }
+}
+
+#[derive(Serialize, Deserialize, ToSchema, sqlx::Type)]
+pub enum ParticipationIntention {
+    OptIn,
+    OptOut,
+}
+
+impl FromStr for ParticipationIntention {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "OptIn" => Ok(ParticipationIntention::OptIn),
+            "OptOut" => Ok(ParticipationIntention::OptOut),
+            _ => Err(()),
+        }
+    }
+}
+
+impl TryFrom<String> for ParticipationIntention {
+    type Error = ();
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        ParticipationIntention::from_str(&value)
+    }
+}
+
+#[derive(Serialize, Deserialize, ToSchema, sqlx::Type)]
+pub enum OptOutType {
+    Hiatus,
+    Exit,
+}
+
+impl FromStr for OptOutType {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "Hiatus" => Ok(OptOutType::Hiatus),
+            "Exit" => Ok(OptOutType::Exit),
+            _ => Err(()),
+        }
+    }
+}
+
+impl TryFrom<String> for OptOutType {
+    type Error = ();
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        OptOutType::from_str(&value)
     }
 }
 
@@ -64,6 +118,21 @@ pub struct CollectiveInvolvement {
     pub collective_id: i64,
     pub interval_id: i64,
     pub status: InvolvementStatus,
+}
+
+#[derive(Serialize, Deserialize, ToSchema)]
+pub struct CollectiveInvolvementWithDetails {
+    pub id: i64,
+    pub person_id: i64,
+    pub collective_id: i64,
+    pub interval_id: i64,
+    pub status: InvolvementStatus,
+    pub wellbeing: Option<String>,
+    pub focus: Option<String>,
+    pub capacity: Option<String>,
+    pub participation_intention: Option<ParticipationIntention>,
+    pub opt_out_type: Option<OptOutType>,
+    pub opt_out_planned_return_date: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, ToSchema)]

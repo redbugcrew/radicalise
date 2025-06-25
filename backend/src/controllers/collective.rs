@@ -5,7 +5,8 @@ use utoipa::ToSchema;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::entities::{
-    Collective, CollectiveInvolvement, Crew, CrewInvolvement, Interval, InvolvementStatus, Person,
+    Collective, CollectiveInvolvement, CollectiveInvolvementWithDetails, Crew, CrewInvolvement,
+    Interval, InvolvementStatus, OptOutType, ParticipationIntention, Person,
 };
 
 #[derive(Serialize, Deserialize, ToSchema)]
@@ -31,6 +32,7 @@ pub fn router() -> OpenApiRouter {
     OpenApiRouter::new()
         .routes(routes!(get_state))
         .routes(routes!(get_involvements))
+        .routes(routes!(my_participation))
 }
 
 #[utoipa::path(get, path = "/", responses(
@@ -138,6 +140,35 @@ async fn get_involvements(
     };
 
     return (StatusCode::OK, Json(result)).into_response();
+}
+
+#[utoipa::path(get, path = "/interval/{interval_id}/my_participation", responses(
+        (status = 200, description = "Fetched my participation successfully", body = Option<CollectiveInvolvementWithDetails>),
+        (status = NOT_FOUND, description = "Not found", body = ())
+    ), params(
+            ("interval_id" = i64, Path, description = "Interval ID")
+        ),)]
+async fn my_participation(
+    Path(interval_id): Path<i64>,
+    Extension(pool): Extension<SqlitePool>,
+) -> impl IntoResponse {
+    let result = sqlx::query_as!(
+        CollectiveInvolvementWithDetails,
+        "SELECT id, person_id, collective_id, interval_id, status as \"status: InvolvementStatus\",
+         wellbeing, focus, capacity, participation_intention as \"participation_intention: ParticipationIntention\",
+         opt_out_type as \"opt_out_type: OptOutType\", opt_out_planned_return_date
+        FROM collective_involvements
+        WHERE interval_id = ?",
+        interval_id
+    )
+    .fetch_optional(&pool)
+    .await;
+
+    match result {
+        Ok(Some(data)) => (StatusCode::OK, Json(data)).into_response(),
+        Ok(None) => (StatusCode::NOT_FOUND, ()).into_response(),
+        Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
+    }
 }
 
 async fn find_all_collective_involvements(
