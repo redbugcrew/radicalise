@@ -1,8 +1,12 @@
 import { Button, Card, Container, Title, Stack, Text } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
+import { useAppSelector } from "../../store";
+import { useNextInterval } from "../../store/intervals";
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { currentInterval } = useAppSelector((state) => state.intervals);
+  const nextInterval = useNextInterval();
 
   return (
     <Container>
@@ -10,21 +14,28 @@ export default function Dashboard() {
         My Dashboard
       </Title>
       <Stack gap="md">
-        <Card>
-          <Title order={2} size="md" mb="xs">
-            This interval
-          </Title>
-          <Text>¯\_(ツ)_/¯</Text>
-        </Card>
+        {currentInterval && (
+          <Card>
+            <Title order={2} size="md" mb="xs">
+              This interval {currentInterval.id}
+            </Title>
+            <Button mt="md" radius="md" onClick={() => navigate(`/my_participation/${currentInterval.id}`)}>
+              Update your participation
+            </Button>
+          </Card>
+        )}
 
-        <Card>
-          <Title order={2} size="md">
-            Next interval
-          </Title>
-          <Button fullWidth mt="md" radius="md" onClick={() => navigate("/my_participation/3")}>
-            Plan your participation
-          </Button>
-        </Card>
+        {nextInterval && (
+          <Card>
+            <Title order={2} size="md">
+              Next interval:
+              {nextInterval.id}
+            </Title>
+            <Button mt="md" radius="md" onClick={() => navigate(`/my_participation/${nextInterval.id}`)}>
+              Plan your participation
+            </Button>
+          </Card>
+        )}
       </Stack>
     </Container>
   );

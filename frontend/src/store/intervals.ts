@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { Interval } from "../api/Api";
+import { useAppSelector } from "./index";
 
 export type IntervalsState = {
   allIntervals: Interval[];
@@ -23,3 +24,15 @@ export const { intervalsLoaded } = intervalsSlice.actions;
 
 // Export the slice reducer as the default export
 export default intervalsSlice.reducer;
+
+export function useNextInterval(): Interval | null {
+  const { allIntervals, currentInterval } = useAppSelector((state) => state.intervals);
+  if (!currentInterval) return null;
+
+  const currentIntervalIndex = allIntervals.findIndex((i) => i.id === currentInterval.id);
+  if (currentIntervalIndex === -1 || currentIntervalIndex === allIntervals.length - 1) {
+    return null; // No next interval if current is the last one or not found
+  }
+
+  return allIntervals[currentIntervalIndex + 1];
+}
