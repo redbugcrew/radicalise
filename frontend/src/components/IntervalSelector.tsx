@@ -1,6 +1,5 @@
 import { Group, ActionIcon, Text, Stack, Button } from "@mantine/core";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
-import { DateOnly } from "@urbdyn/date-only";
 import type { Interval } from "../api/Api";
 import DateText from "./DateText";
 

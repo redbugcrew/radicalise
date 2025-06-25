@@ -1,4 +1,4 @@
-import { Button, Card, Container, Title, Stack, Text } from "@mantine/core";
+import { Button, Card, Container, Title, Stack } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import { useAppSelector } from "../../store";
 import { useNextInterval } from "../../store/intervals";
