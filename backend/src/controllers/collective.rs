@@ -146,11 +146,11 @@ async fn find_all_group_involvements(
 ) -> Result<Vec<Involvement>, sqlx::Error> {
     sqlx::query_as!(
         Involvement,
-        "SELECT id, person_id, group_id, start_interval_id, end_interval_id, status as \"status: InvolvementStatus\" FROM involvements
+        "SELECT id, person_id, group_id, interval_id, status as \"status: InvolvementStatus\"
+        FROM group_involvements
         WHERE
-          (start_interval_id <= ? AND (end_interval_id IS NULL OR end_interval_id >= ?)) AND
+          interval_id = ? AND
           group_id = ?",
-        interval_id,
         interval_id,
         group_id
     )
@@ -164,12 +164,12 @@ async fn find_all_crew_involvements(
 ) -> Result<Vec<Involvement>, sqlx::Error> {
     sqlx::query_as!(
         Involvement,
-        "SELECT involvements.id, person_id, group_id, start_interval_id, end_interval_id, status as \"status: InvolvementStatus\" FROM involvements
-        LEFT JOIN groups ON involvements.group_id = groups.id
+        "SELECT group_involvements.id, person_id, group_id, interval_id, status as \"status: InvolvementStatus\"
+        FROM group_involvements
+        LEFT JOIN groups ON group_involvements.group_id = groups.id
         WHERE
-          (start_interval_id <= ? AND (end_interval_id IS NULL OR end_interval_id >= ?)) AND
+          interval_id = ? AND
           groups.group_type = ?",
-        interval_id,
         interval_id,
         "crew",
     )

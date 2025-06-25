@@ -52,8 +52,7 @@ pub struct Involvement {
     pub id: i64,
     pub person_id: i64,
     pub group_id: i64,
-    pub start_interval_id: i64,
-    pub end_interval_id: Option<i64>,
+    pub interval_id: i64,
     pub status: InvolvementStatus,
 }
 
