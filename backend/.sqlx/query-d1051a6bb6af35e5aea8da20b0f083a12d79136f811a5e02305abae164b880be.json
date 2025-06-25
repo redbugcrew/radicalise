@@ -1,0 +1,44 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id, person_id, collective_id, interval_id, status as \"status: InvolvementStatus\"\n        FROM collective_involvements\n        WHERE\n          interval_id = ? AND\n          collective_id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer"
+      },
+      {
+        "name": "person_id",
+        "ordinal": 1,
+        "type_info": "Integer"
+      },
+      {
+        "name": "collective_id",
+        "ordinal": 2,
+        "type_info": "Integer"
+      },
+      {
+        "name": "interval_id",
+        "ordinal": 3,
+        "type_info": "Integer"
+      },
+      {
+        "name": "status: InvolvementStatus",
+        "ordinal": 4,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "d1051a6bb6af35e5aea8da20b0f083a12d79136f811a5e02305abae164b880be"
+}

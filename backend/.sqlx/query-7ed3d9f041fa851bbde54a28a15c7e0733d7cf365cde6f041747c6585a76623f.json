@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT id, name FROM groups WHERE id = ?",
+  "query": "SELECT id, name, description FROM crews",
   "describe": {
     "columns": [
       {
@@ -12,15 +12,21 @@
         "name": "name",
         "ordinal": 1,
         "type_info": "Text"
+      },
+      {
+        "name": "description",
+        "ordinal": 2,
+        "type_info": "Text"
       }
     ],
     "parameters": {
-      "Right": 1
+      "Right": 0
     },
     "nullable": [
       false,
-      false
+      false,
+      true
     ]
   },
-  "hash": "57bc392cb9df9dbe20a0d48a53a3edfbaf229e8d52be0128d9defd0898182630"
+  "hash": "7ed3d9f041fa851bbde54a28a15c7e0733d7cf365cde6f041747c6585a76623f"
 }

@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT * FROM groups",
+  "query": "SELECT id, name, description FROM collectives WHERE id = ?",
   "describe": {
     "columns": [
       {
@@ -9,30 +9,24 @@
         "type_info": "Integer"
       },
       {
-        "name": "description",
+        "name": "name",
         "ordinal": 1,
         "type_info": "Text"
       },
       {
-        "name": "name",
+        "name": "description",
         "ordinal": 2,
-        "type_info": "Text"
-      },
-      {
-        "name": "group_type",
-        "ordinal": 3,
         "type_info": "Text"
       }
     ],
     "parameters": {
-      "Right": 0
+      "Right": 1
     },
     "nullable": [
       false,
-      true,
       false,
-      false
+      true
     ]
   },
-  "hash": "edcb1d8e096ca4e7fa84b546c244a0f19f6db3befb235a225531b62eb59ad68f"
+  "hash": "eeeb69520901c614ce9af93dd2dcb16581e303a745be6fa09242cc346c493cce"
 }

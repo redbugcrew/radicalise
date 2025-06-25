@@ -41,7 +41,7 @@ pub fn router() -> OpenApiRouter {
 async fn get_state(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse {
     let collective_result = sqlx::query_as!(
         Collective,
-        "SELECT id, name FROM groups WHERE id = ?",
+        "SELECT id, name, description FROM collectives WHERE id = ?",
         COLLECTIVE_GROUP_ID
     )
     .fetch_one(&pool)
@@ -168,7 +168,6 @@ async fn find_all_crew_involvements(
         CrewInvolvement,
         "SELECT crew_involvements.id, person_id, crew_id, interval_id, status as \"status: InvolvementStatus\"
         FROM crew_involvements
-        LEFT JOIN groups ON crew_involvements.crew_id = groups.id
         WHERE
           interval_id = ?",
         interval_id

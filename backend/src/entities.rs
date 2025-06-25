@@ -6,6 +6,7 @@ use utoipa::ToSchema;
 pub struct Collective {
     pub id: i64,
     pub name: Option<String>,
+    pub description: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, ToSchema)]
