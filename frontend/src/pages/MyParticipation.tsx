@@ -1,14 +1,21 @@
 import { Container, Stack, Title, Text } from "@mantine/core";
 import ParticipationForm, { type MyParticipationFormData } from "../components/ParticipationForm";
 import { useAppSelector } from "../store";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import DateText from "../components/DateText";
 import { useEffect, useState } from "react";
 import { getApi } from "../api";
-import type { CollectiveInvolvementWithDetails } from "../api/Api";
+import type { CollectiveInvolvementWithDetails, MyParticipationInput } from "../api/Api";
 
 export default function MyParticipation() {
   const { allIntervals, currentInterval } = useAppSelector((state) => state.intervals);
+  const { collective } = useAppSelector((state) => state);
+  const navigate = useNavigate();
+
+  if (!collective) {
+    return <Text>Error: Collective not found.</Text>;
+  }
+
   const { intervalId } = useParams();
   const intervalIdNumber = Number(intervalId);
   const api = getApi();
@@ -40,7 +47,21 @@ export default function MyParticipation() {
   }
 
   const onSubmit = (values: MyParticipationFormData) => {
-    console.log("Form submitted with values:", values);
+    const inputData: MyParticipationInput = {
+      collective_id: collective.id,
+      ...involvement,
+      ...values,
+    };
+
+    api.api
+      .updateMyParticipation(interval.id, inputData)
+      .then((response) => {
+        console.log("Participation updated successfully", response);
+        navigate("/dashboard");
+      })
+      .catch((error) => {
+        console.error("Error updating participation:", error);
+      });
   };
 
   return (

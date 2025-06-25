@@ -10,6 +10,7 @@ export interface MyParticipationFormData {
   capacity: string;
   participation_intention: ParticipationIntention | null;
   opt_out_type: OptOutType | null;
+  opt_out_planned_return_date: string | null;
 }
 
 type StepProps = {
@@ -87,7 +88,16 @@ function MinimumParticipationStep({ form, readOnly }: MinimumParticipationStepPr
             key={form.key("opt_out_type")}
             {...form.getInputProps("opt_out_type")}
           />
-          {showHiatus && <DatePickerInput disabled={readOnly} label="Planned return date" description="We'll give you a reminder one week before hand (if we've coded that bit)" placeholder="Pick date" />}
+          {showHiatus && (
+            <DatePickerInput
+              disabled={readOnly}
+              label="Planned return date"
+              description="We'll give you a reminder one week before hand (if we've coded that bit)"
+              placeholder="Pick date"
+              key={form.key("opt_out_planned_return_date")}
+              {...form.getInputProps("opt_out_planned_return_date")}
+            />
+          )}
         </>
       )}
     </Stack>
@@ -117,6 +127,7 @@ export default function ParticipationForm({ readOnly = false, involvement = null
       capacity: involvement?.capacity || "",
       participation_intention: involvement?.participation_intention || null,
       opt_out_type: involvement?.opt_out_type || null,
+      opt_out_planned_return_date: involvement?.opt_out_planned_return_date || null,
     },
 
     validate: (values) => {
@@ -140,6 +151,12 @@ export default function ParticipationForm({ readOnly = false, involvement = null
             ...results,
             opt_out_type: values.opt_out_type ? null : "Opt-out type is required",
           };
+          if (values.opt_out_type === "Hiatus") {
+            results = {
+              ...results,
+              opt_out_planned_return_date: values.opt_out_planned_return_date ? null : "Planned return date is required",
+            };
+          }
         }
       }
 

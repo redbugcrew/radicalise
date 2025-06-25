@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::str::FromStr;
+use std::{clone, str::FromStr};
 use utoipa::ToSchema;
 
 #[derive(Serialize, Deserialize, ToSchema)]
@@ -50,7 +50,7 @@ impl TryFrom<String> for InvolvementStatus {
     }
 }
 
-#[derive(Serialize, Deserialize, ToSchema, sqlx::Type)]
+#[derive(Serialize, Deserialize, ToSchema, sqlx::Type, clone::Clone)]
 pub enum ParticipationIntention {
     OptIn,
     OptOut,

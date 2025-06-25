@@ -117,6 +117,17 @@ export interface LoginResponse {
   user_id: number;
 }
 
+export interface MyParticipationInput {
+  capacity?: string | null;
+  /** @format int64 */
+  collective_id: number;
+  focus?: string | null;
+  opt_out_planned_return_date?: string | null;
+  opt_out_type?: null | OptOutType;
+  participation_intention?: null | ParticipationIntention;
+  wellbeing?: string | null;
+}
+
 export interface Person {
   display_name: string;
   /** @format int64 */
@@ -407,7 +418,7 @@ export class Api<
      */
     updateMyParticipation: (
       intervalId: number,
-      data: CollectiveInvolvementWithDetails,
+      data: MyParticipationInput,
       params: RequestParams = {},
     ) =>
       this.request<null | CollectiveInvolvementWithDetails, any>({

@@ -176,6 +176,17 @@ async fn my_participation(
     }
 }
 
+#[derive(Serialize, Deserialize, ToSchema)]
+pub struct MyParticipationInput {
+    pub collective_id: i64,
+    pub wellbeing: Option<String>,
+    pub focus: Option<String>,
+    pub capacity: Option<String>,
+    pub participation_intention: Option<ParticipationIntention>,
+    pub opt_out_type: Option<OptOutType>,
+    pub opt_out_planned_return_date: Option<String>,
+}
+
 #[utoipa::path(
     post,
     path = "/interval/{interval_id}/my_participation",
@@ -183,7 +194,7 @@ async fn my_participation(
         ("interval_id" = i64, Path, description = "Interval ID")
     ),
     request_body(
-        content = CollectiveInvolvementWithDetails, description = "Detailed involvement",
+        content = MyParticipationInput, description = "Detailed involvement",
         content_type = "application/json"
     ),
     responses(
@@ -195,18 +206,19 @@ async fn update_my_participation(
     Path(interval_id): Path<i64>,
     Extension(pool): Extension<SqlitePool>,
     auth_session: AuthSession,
-    axum::extract::Json(involvement): axum::extract::Json<CollectiveInvolvementWithDetails>,
+    axum::extract::Json(input): axum::extract::Json<MyParticipationInput>,
 ) -> impl IntoResponse {
     match auth_session.user {
         Some(user) => {
-            if involvement.person_id != user.id {
-                return (
-                    StatusCode::FORBIDDEN,
-                    "You can only update your own participation",
-                )
-                    .into_response();
-            } else {
-                let result = sqlx::query!(
+            let status: InvolvementStatus = input.participation_intention.clone().map_or(
+                InvolvementStatus::Participating,
+                |intention| match intention {
+                    ParticipationIntention::OptIn => InvolvementStatus::Participating,
+                    ParticipationIntention::OptOut => InvolvementStatus::OnHiatus,
+                },
+            );
+
+            let result = sqlx::query!(
                     "INSERT INTO collective_involvements (person_id, collective_id, interval_id, status, wellbeing, focus, capacity, participation_intention, opt_out_type, opt_out_planned_return_date)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     ON CONFLICT(person_id, collective_id, interval_id) DO UPDATE SET
@@ -218,35 +230,35 @@ async fn update_my_participation(
                         opt_out_type = excluded.opt_out_type,
                         opt_out_planned_return_date = excluded.opt_out_planned_return_date",
                     user.id,
-                    involvement.collective_id,
+                    input.collective_id,
                     interval_id,
-                    involvement.status,
-                    involvement.wellbeing,
-                    involvement.focus,
-                    involvement.capacity,
-                    involvement.participation_intention,
-                    involvement.opt_out_type,
-                    involvement.opt_out_planned_return_date
+                    status,
+                    input.wellbeing,
+                    input.focus,
+                    input.capacity,
+                    input.participation_intention,
+                    input.opt_out_type,
+                    input.opt_out_planned_return_date
                 )
                 .execute(&pool)
                 .await;
 
-                if result.is_err() {
-                    eprintln!("Error updating involvement: {:?}", result.err());
-                    return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
-                }
+            if result.is_err() {
+                eprintln!("Error updating involvement: {:?}", result.err());
+                return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
+            }
 
-                // Fetch the updated involvement to return
-                let output_result = find_detailed_involvement(interval_id, user.id, &pool).await;
-                match output_result {
-                    Ok(Some(updated_involvement)) => {
-                        return (StatusCode::OK, Json(updated_involvement)).into_response();
-                    }
-                    Ok(None) => return (StatusCode::NOT_FOUND, ()).into_response(),
-                    Err(_) => return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
+            // Fetch the updated involvement to return
+            let output_result = find_detailed_involvement(interval_id, user.id, &pool).await;
+            match output_result {
+                Ok(Some(updated_involvement)) => {
+                    return (StatusCode::OK, Json(updated_involvement)).into_response();
                 }
+                Ok(None) => return (StatusCode::NOT_FOUND, ()).into_response(),
+                Err(_) => return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
             }
         }
+
         None => return (StatusCode::UNAUTHORIZED, ()).into_response(),
     }
 }
