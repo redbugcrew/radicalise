@@ -4,9 +4,12 @@ use sqlx::SqlitePool;
 use utoipa::ToSchema;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
-use crate::entities::{
-    Collective, CollectiveInvolvement, CollectiveInvolvementWithDetails, Crew, CrewInvolvement,
-    Interval, InvolvementStatus, OptOutType, ParticipationIntention, Person,
+use crate::{
+    auth::auth_backend::AuthSession,
+    entities::{
+        Collective, CollectiveInvolvement, CollectiveInvolvementWithDetails, Crew, CrewInvolvement,
+        Interval, InvolvementStatus, OptOutType, ParticipationIntention, Person,
+    },
 };
 
 #[derive(Serialize, Deserialize, ToSchema)]
@@ -151,23 +154,32 @@ async fn get_involvements(
 async fn my_participation(
     Path(interval_id): Path<i64>,
     Extension(pool): Extension<SqlitePool>,
+    auth_session: AuthSession,
 ) -> impl IntoResponse {
-    let result = sqlx::query_as!(
-        CollectiveInvolvementWithDetails,
-        "SELECT id, person_id, collective_id, interval_id, status as \"status: InvolvementStatus\",
-         wellbeing, focus, capacity, participation_intention as \"participation_intention: ParticipationIntention\",
-         opt_out_type as \"opt_out_type: OptOutType\", opt_out_planned_return_date
-        FROM collective_involvements
-        WHERE interval_id = ?",
-        interval_id
-    )
-    .fetch_optional(&pool)
-    .await;
+    match auth_session.user {
+        Some(user) => {
+            let result = sqlx::query_as!(
+                CollectiveInvolvementWithDetails,
+                "SELECT id, person_id, collective_id, interval_id, status as \"status: InvolvementStatus\",
+                wellbeing, focus, capacity, participation_intention as \"participation_intention: ParticipationIntention\",
+                opt_out_type as \"opt_out_type: OptOutType\", opt_out_planned_return_date
+                FROM collective_involvements
+                WHERE
+                  interval_id = ? AND
+                  person_id = ?",
+                interval_id,
+                user.id
+            )
+            .fetch_optional(&pool)
+            .await;
 
-    match result {
-        Ok(Some(data)) => (StatusCode::OK, Json(data)).into_response(),
-        Ok(None) => (StatusCode::NOT_FOUND, ()).into_response(),
-        Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
+            match result {
+                Ok(Some(data)) => (StatusCode::OK, Json(data)).into_response(),
+                Ok(None) => (StatusCode::NOT_FOUND, ()).into_response(),
+                Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
+            }
+        }
+        None => return (StatusCode::UNAUTHORIZED, ()).into_response(),
     }
 }
 

@@ -1,16 +1,14 @@
-import { Container, Title, Stepper, Group, Button, Text, Stack, Textarea, Select } from "@mantine/core";
+import { Stepper, Group, Button, Stack, Textarea, Select } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { useState } from "react";
-
-type ParticipationStatus = "OptOut" | "OptIn";
-type OptOutType = "Hiatus" | "Exit";
+import type { CollectiveInvolvementWithDetails, OptOutType, ParticipationIntention } from "../api/Api";
 
 interface MyParticipationFormData {
   wellbeing: string;
   focus: string;
   capacity: string;
-  participation_status: ParticipationStatus | null;
+  participation_intention: ParticipationIntention | null;
   opt_out_type: OptOutType | null;
 }
 
@@ -50,10 +48,10 @@ function CapacityStep({ form, readOnly }: StepProps) {
 type MinimumParticipationStepProps = StepProps & {};
 
 function MinimumParticipationStep({ form, readOnly }: MinimumParticipationStepProps) {
-  const [showOptOut, setShowOptOut] = useState(form.values.participation_status === "OptOut");
+  const [showOptOut, setShowOptOut] = useState(form.values.participation_intention === "OptOut");
   const [showHiatus, setShowHiatus] = useState(form.values.opt_out_type === "Hiatus");
 
-  form.watch("participation_status", ({ value }) => {
+  form.watch("participation_intention", ({ value }) => {
     setShowOptOut(value === "OptOut");
   });
 
@@ -100,7 +98,12 @@ function MinimumParticipationStep({ form, readOnly }: MinimumParticipationStepPr
 //   return <div>Step 3 content: Get full access</div>;
 // }
 
-export default function ParticipationForm({ readOnly = false }: { readOnly?: boolean }) {
+type ParticipationFormProps = {
+  readOnly?: boolean;
+  involvement?: CollectiveInvolvementWithDetails | null;
+};
+
+export default function ParticipationForm({ readOnly = false, involvement = null }: ParticipationFormProps) {
   const [step, setStep] = useState(0);
   const minStep = 0;
   const maxStep = 1;
@@ -108,11 +111,11 @@ export default function ParticipationForm({ readOnly = false }: { readOnly?: boo
   const form = useForm<MyParticipationFormData>({
     mode: "uncontrolled",
     initialValues: {
-      wellbeing: "",
-      focus: "",
-      capacity: "",
-      participation_status: null,
-      opt_out_type: null,
+      wellbeing: involvement?.wellbeing || "",
+      focus: involvement?.focus || "",
+      capacity: involvement?.capacity || "",
+      participation_intention: involvement?.participation_intention || null,
+      opt_out_type: involvement?.opt_out_type || null,
     },
 
     validate: (values) => {
@@ -129,9 +132,9 @@ export default function ParticipationForm({ readOnly = false }: { readOnly?: boo
       if (step === 1) {
         results = {
           ...results,
-          participation_status: values.participation_status ? null : "Participation status is required",
+          participation_intention: values.participation_intention ? null : "Participation status is required",
         };
-        if (values.participation_status === "OptOut") {
+        if (values.participation_intention === "OptOut") {
           results = {
             ...results,
             opt_out_type: values.opt_out_type ? null : "Opt-out type is required",
