@@ -13,11 +13,13 @@ use utoipa_axum::router::OpenApiRouter;
 use utoipa_swagger_ui::SwaggerUi;
 
 use crate::{
-    auth::auth_backend::AppAuthBackend, database::prepare_database, static_server::frontend_handler,
+    api::api_router, auth::auth_backend::AppAuthBackend, database::prepare_database,
+    static_server::frontend_handler,
 };
 
+mod api;
 mod auth;
-mod controllers;
+mod collective;
 mod database;
 mod entities;
 mod static_server;
@@ -72,7 +74,7 @@ async fn main() {
             "/api",
             OpenApiRouter::new()
                 .nest("/auth", crate::auth::router())
-                .merge(crate::controllers::router().route_layer(login_required!(AppAuthBackend))),
+                .merge(api_router().route_layer(login_required!(AppAuthBackend))),
         )
         .split_for_parts();
 

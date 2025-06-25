@@ -6,11 +6,17 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     auth::auth_backend::AuthSession,
+    collective::repo::{
+        COLLECTIVE_ID, find_all_collective_involvements, find_all_crew_involvements,
+        find_detailed_involvement,
+    },
     entities::{
         Collective, CollectiveInvolvement, CollectiveInvolvementWithDetails, Crew, CrewInvolvement,
         Interval, InvolvementStatus, OptOutType, ParticipationIntention, Person,
     },
 };
+
+mod repo;
 
 #[derive(Serialize, Deserialize, ToSchema)]
 struct IntervalInvolvementData {
@@ -27,9 +33,6 @@ struct InitialData {
     pub current_interval: Interval,
     pub involvements: IntervalInvolvementData,
 }
-
-const COLLECTIVE_GROUP_ID: i64 = 1;
-const COLLECTIVE_ID: i64 = 1;
 
 pub fn router() -> OpenApiRouter {
     OpenApiRouter::new()
@@ -48,7 +51,7 @@ async fn get_state(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse 
     let collective_result = sqlx::query_as!(
         Collective,
         "SELECT id, name, description FROM collectives WHERE id = ?",
-        COLLECTIVE_GROUP_ID
+        COLLECTIVE_ID
     )
     .fetch_one(&pool)
     .await;
@@ -261,61 +264,4 @@ async fn update_my_participation(
 
         None => return (StatusCode::UNAUTHORIZED, ()).into_response(),
     }
-}
-
-async fn find_all_collective_involvements(
-    interval_id: i64,
-    pool: &SqlitePool,
-) -> Result<Vec<CollectiveInvolvement>, sqlx::Error> {
-    let collective_id = COLLECTIVE_ID;
-
-    sqlx::query_as!(
-        CollectiveInvolvement,
-        "SELECT id, person_id, collective_id, interval_id, status as \"status: InvolvementStatus\"
-        FROM collective_involvements
-        WHERE
-          interval_id = ? AND
-          collective_id = ?",
-        interval_id,
-        collective_id
-    )
-    .fetch_all(pool)
-    .await
-}
-
-async fn find_all_crew_involvements(
-    interval_id: i64,
-    pool: &SqlitePool,
-) -> Result<Vec<CrewInvolvement>, sqlx::Error> {
-    sqlx::query_as!(
-        CrewInvolvement,
-        "SELECT crew_involvements.id, person_id, crew_id, interval_id, status as \"status: InvolvementStatus\"
-        FROM crew_involvements
-        WHERE
-          interval_id = ?",
-        interval_id
-    )
-    .fetch_all(pool)
-    .await
-}
-
-async fn find_detailed_involvement(
-    interval_id: i64,
-    person_id: i64,
-    pool: &SqlitePool,
-) -> Result<Option<CollectiveInvolvementWithDetails>, sqlx::Error> {
-    sqlx::query_as!(
-        CollectiveInvolvementWithDetails,
-        "SELECT id, person_id, collective_id, interval_id, status as \"status: InvolvementStatus\",
-        wellbeing, focus, capacity, participation_intention as \"participation_intention: ParticipationIntention\",
-        opt_out_type as \"opt_out_type: OptOutType\", opt_out_planned_return_date
-        FROM collective_involvements
-        WHERE
-            interval_id = ? AND
-            person_id = ?",
-        interval_id,
-        person_id
-    )
-    .fetch_optional(pool)
-    .await
 }
