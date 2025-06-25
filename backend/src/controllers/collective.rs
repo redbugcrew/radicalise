@@ -36,6 +36,7 @@ pub fn router() -> OpenApiRouter {
         .routes(routes!(get_state))
         .routes(routes!(get_involvements))
         .routes(routes!(my_participation))
+        .routes(routes!(update_my_participation))
 }
 
 #[utoipa::path(get, path = "/", responses(
@@ -145,12 +146,17 @@ async fn get_involvements(
     return (StatusCode::OK, Json(result)).into_response();
 }
 
-#[utoipa::path(get, path = "/interval/{interval_id}/my_participation", responses(
+#[utoipa::path(
+    get,
+    path = "/interval/{interval_id}/my_participation",
+    params(
+        ("interval_id" = i64, Path, description = "Interval ID")
+    ),
+    responses(
         (status = 200, description = "Fetched my participation successfully", body = Option<CollectiveInvolvementWithDetails>),
         (status = NOT_FOUND, description = "Not found", body = ())
-    ), params(
-            ("interval_id" = i64, Path, description = "Interval ID")
-        ),)]
+    ),
+)]
 async fn my_participation(
     Path(interval_id): Path<i64>,
     Extension(pool): Extension<SqlitePool>,
@@ -158,25 +164,87 @@ async fn my_participation(
 ) -> impl IntoResponse {
     match auth_session.user {
         Some(user) => {
-            let result = sqlx::query_as!(
-                CollectiveInvolvementWithDetails,
-                "SELECT id, person_id, collective_id, interval_id, status as \"status: InvolvementStatus\",
-                wellbeing, focus, capacity, participation_intention as \"participation_intention: ParticipationIntention\",
-                opt_out_type as \"opt_out_type: OptOutType\", opt_out_planned_return_date
-                FROM collective_involvements
-                WHERE
-                  interval_id = ? AND
-                  person_id = ?",
-                interval_id,
-                user.id
-            )
-            .fetch_optional(&pool)
-            .await;
+            let result = find_detailed_involvement(interval_id, user.id, &pool).await;
 
             match result {
                 Ok(Some(data)) => (StatusCode::OK, Json(data)).into_response(),
                 Ok(None) => (StatusCode::NOT_FOUND, ()).into_response(),
                 Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
+            }
+        }
+        None => return (StatusCode::UNAUTHORIZED, ()).into_response(),
+    }
+}
+
+#[utoipa::path(
+    post,
+    path = "/interval/{interval_id}/my_participation",
+    params(
+        ("interval_id" = i64, Path, description = "Interval ID")
+    ),
+    request_body(
+        content = CollectiveInvolvementWithDetails, description = "Detailed involvement",
+        content_type = "application/json"
+    ),
+    responses(
+        (status = 200, description = "Updated my participation successfully", body = Option<CollectiveInvolvementWithDetails>),
+        (status = NOT_FOUND, description = "Not found", body = ())
+    ),
+)]
+async fn update_my_participation(
+    Path(interval_id): Path<i64>,
+    Extension(pool): Extension<SqlitePool>,
+    auth_session: AuthSession,
+    axum::extract::Json(involvement): axum::extract::Json<CollectiveInvolvementWithDetails>,
+) -> impl IntoResponse {
+    match auth_session.user {
+        Some(user) => {
+            if involvement.person_id != user.id {
+                return (
+                    StatusCode::FORBIDDEN,
+                    "You can only update your own participation",
+                )
+                    .into_response();
+            } else {
+                let result = sqlx::query!(
+                    "INSERT INTO collective_involvements (person_id, collective_id, interval_id, status, wellbeing, focus, capacity, participation_intention, opt_out_type, opt_out_planned_return_date)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ON CONFLICT(person_id, collective_id, interval_id) DO UPDATE SET
+                        status = excluded.status,
+                        wellbeing = excluded.wellbeing,
+                        focus = excluded.focus,
+                        capacity = excluded.capacity,
+                        participation_intention = excluded.participation_intention,
+                        opt_out_type = excluded.opt_out_type,
+                        opt_out_planned_return_date = excluded.opt_out_planned_return_date",
+                    user.id,
+                    involvement.collective_id,
+                    interval_id,
+                    involvement.status,
+                    involvement.wellbeing,
+                    involvement.focus,
+                    involvement.capacity,
+                    involvement.participation_intention,
+                    involvement.opt_out_type,
+                    involvement.opt_out_planned_return_date
+                )
+                .execute(&pool)
+                .await;
+
+                if result.is_err() {
+                    eprintln!("Error updating involvement: {:?}", result.err());
+                    return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
+                }
+
+                // Fetch the updated involvement to return
+                let output_result = find_detailed_involvement(interval_id, user.id, &pool).await;
+                match output_result {
+                    Ok(Some(updated_involvement)) => {
+                        return (StatusCode::OK, Json(updated_involvement)).into_response();
+                    }
+                    Ok(None) => return (StatusCode::NOT_FOUND, ()).into_response(),
+                    Err(_) => return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
+                }
             }
         }
         None => return (StatusCode::UNAUTHORIZED, ()).into_response(),
@@ -216,5 +284,26 @@ async fn find_all_crew_involvements(
         interval_id
     )
     .fetch_all(pool)
+    .await
+}
+
+async fn find_detailed_involvement(
+    interval_id: i64,
+    person_id: i64,
+    pool: &SqlitePool,
+) -> Result<Option<CollectiveInvolvementWithDetails>, sqlx::Error> {
+    sqlx::query_as!(
+        CollectiveInvolvementWithDetails,
+        "SELECT id, person_id, collective_id, interval_id, status as \"status: InvolvementStatus\",
+        wellbeing, focus, capacity, participation_intention as \"participation_intention: ParticipationIntention\",
+        opt_out_type as \"opt_out_type: OptOutType\", opt_out_planned_return_date
+        FROM collective_involvements
+        WHERE
+            interval_id = ? AND
+            person_id = ?",
+        interval_id,
+        person_id
+    )
+    .fetch_optional(pool)
     .await
 }
