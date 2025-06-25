@@ -16,6 +16,7 @@ export enum InvolvementStatus {
 }
 
 export interface Collective {
+  description?: string | null;
   /** @format int64 */
   id: number;
   name?: string | null;
