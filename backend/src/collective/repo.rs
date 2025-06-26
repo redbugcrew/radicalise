@@ -1,11 +1,39 @@
+use serde::{Deserialize, Serialize};
 use sqlx::SqlitePool;
+use utoipa::ToSchema;
 
 use crate::entities::{
-    CollectiveInvolvement, CollectiveInvolvementWithDetails, CrewInvolvement, InvolvementStatus,
-    OptOutType, ParticipationIntention,
+    Collective, CollectiveInvolvement, CollectiveInvolvementWithDetails, Crew, CrewInvolvement,
+    Interval, InvolvementStatus, OptOutType, ParticipationIntention, Person,
 };
 
+#[derive(Serialize, Deserialize, ToSchema)]
+pub struct IntervalInvolvementData {
+    pub collective_involvements: Vec<CollectiveInvolvement>,
+    pub crew_involvements: Vec<CrewInvolvement>,
+}
+
+#[derive(Serialize, Deserialize, ToSchema)]
+pub struct InitialData {
+    pub collective: Collective,
+    pub people: Vec<Person>,
+    pub crews: Vec<Crew>,
+    pub intervals: Vec<Interval>,
+    pub current_interval: Interval,
+    pub involvements: IntervalInvolvementData,
+}
+
 pub const COLLECTIVE_ID: i64 = 1;
+
+pub async fn find_collective(pool: &SqlitePool) -> Result<Collective, sqlx::Error> {
+    sqlx::query_as!(
+        Collective,
+        "SELECT id, name, description FROM collectives WHERE id = ?",
+        COLLECTIVE_ID
+    )
+    .fetch_one(pool)
+    .await
+}
 
 pub async fn find_all_collective_involvements(
     interval_id: i64,
@@ -62,4 +90,85 @@ pub async fn find_detailed_involvement(
     )
     .fetch_optional(pool)
     .await
+}
+
+pub async fn upsert_detailed_involvement(
+    involvement: CollectiveInvolvementWithDetails,
+    pool: &SqlitePool,
+) -> Result<(), sqlx::Error> {
+    let result = sqlx::query!(
+        "INSERT INTO collective_involvements (person_id, collective_id, interval_id, status, wellbeing, focus, capacity, participation_intention, opt_out_type, opt_out_planned_return_date)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(person_id, collective_id, interval_id) DO UPDATE SET
+            status = excluded.status,
+            wellbeing = excluded.wellbeing,
+            focus = excluded.focus,
+            capacity = excluded.capacity,
+            participation_intention = excluded.participation_intention,
+            opt_out_type = excluded.opt_out_type,
+            opt_out_planned_return_date = excluded.opt_out_planned_return_date",
+        involvement.person_id,
+        involvement.collective_id,
+        involvement.interval_id,
+        involvement.status,
+        involvement.wellbeing,
+        involvement.focus,
+        involvement.capacity,
+        involvement.participation_intention,
+        involvement.opt_out_type,
+        involvement.opt_out_planned_return_date
+    )
+    .execute(pool)
+    .await?;
+
+    if result.rows_affected() == 0 {
+        return Err(sqlx::Error::RowNotFound);
+    } else {
+        Ok(())
+    }
+}
+
+pub async fn find_initial_data_for_collective(
+    collective: Collective,
+    pool: &SqlitePool,
+) -> Result<InitialData, sqlx::Error> {
+    let people = sqlx::query_as!(Person, "SELECT id, display_name FROM people")
+        .fetch_all(pool)
+        .await?;
+
+    let crews = sqlx::query_as!(Crew, "SELECT id, name, description FROM crews")
+        .fetch_all(pool)
+        .await?;
+
+    let intervals = sqlx::query_as!(
+        Interval,
+        "SELECT id, start_date, end_date FROM intervals WHERE collective_id = ?",
+        collective.id
+    )
+    .fetch_all(pool)
+    .await?;
+
+    let current_interval = sqlx::query_as!(
+                Interval,
+                "SELECT id, start_date, end_date FROM intervals WHERE collective_id = ? AND start_date <= date('now') AND (end_date IS NULL OR end_date >= date('now'))",
+                collective.id
+            )
+            .fetch_one(pool)
+            .await?;
+
+    let collective_involvements =
+        find_all_collective_involvements(current_interval.id, pool).await?;
+    let crew_involvements = find_all_crew_involvements(current_interval.id, pool).await?;
+
+    Ok(InitialData {
+        collective,
+        people,
+        crews,
+        intervals,
+        current_interval,
+        involvements: IntervalInvolvementData {
+            collective_involvements,
+            crew_involvements,
+        },
+    })
 }
