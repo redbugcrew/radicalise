@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT id, person_id, collective_id, interval_id, status as \"status: InvolvementStatus\",\n        wellbeing, focus, capacity, participation_intention as \"participation_intention: ParticipationIntention\",\n        opt_out_type as \"opt_out_type: OptOutType\", opt_out_planned_return_date\n        FROM collective_involvements\n        WHERE\n            interval_id = ? AND\n            person_id = ?",
+  "query": "SELECT id, person_id, collective_id, interval_id, status as \"status: InvolvementStatus\",\n        wellbeing, focus, capacity, participation_intention as \"participation_intention: ParticipationIntention\",\n        opt_out_type as \"opt_out_type: OptOutType\", opt_out_planned_return_date\n        FROM collective_involvements\n        WHERE\n            collective_id = ? AND\n            person_id = ? AND\n            interval_id = ?",
   "describe": {
     "columns": [
       {
@@ -60,7 +60,7 @@
       }
     ],
     "parameters": {
-      "Right": 2
+      "Right": 3
     },
     "nullable": [
       false,
@@ -76,5 +76,5 @@
       true
     ]
   },
-  "hash": "b25ffba5e92d972304801c79d27ba6b18106b6451bbf7aa72af7c50eb7ac2f65"
+  "hash": "e75789e62da2d33a70685477f77f0be78ca59709432e58505b616efb1c487e34"
 }

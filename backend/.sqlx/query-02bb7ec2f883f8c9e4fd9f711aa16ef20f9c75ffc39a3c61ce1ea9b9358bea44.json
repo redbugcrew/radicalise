@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT id, start_date, end_date FROM intervals WHERE collective_id = ? AND start_date <= date('now') AND (end_date IS NULL OR end_date >= date('now'))",
+  "query": "SELECT id, start_date, end_date\n        FROM intervals\n        WHERE\n            collective_id = ? AND\n            start_date <= date('now') AND (end_date IS NULL OR end_date >= date('now'))\n        ORDER BY id ASC\n        LIMIT 1",
   "describe": {
     "columns": [
       {
@@ -28,5 +28,5 @@
       false
     ]
   },
-  "hash": "f35f281df1f60f890775640184f2661bff0012dc8f619e867ddba12fe93f1eac"
+  "hash": "02bb7ec2f883f8c9e4fd9f711aa16ef20f9c75ffc39a3c61ce1ea9b9358bea44"
 }
