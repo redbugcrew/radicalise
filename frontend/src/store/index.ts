@@ -5,6 +5,7 @@ import peopleReducer, { peopleLoaded } from "./people";
 import intervalsReducer, { intervalsLoaded } from "./intervals";
 import involvementsReducer, { involvementsLoaded } from "./involvements";
 import crewsReducer, { crewsLoaded } from "./crews";
+import meReducer, { meLoaded } from "./me";
 import { getApi } from "../api";
 import { redirect } from "react-router-dom";
 
@@ -15,6 +16,7 @@ const store = configureStore({
     intervals: intervalsReducer,
     involvements: involvementsReducer,
     crews: crewsReducer,
+    me: meReducer,
   },
 });
 

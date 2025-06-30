@@ -21,7 +21,8 @@ mod api;
 mod auth;
 mod collective;
 mod database;
-mod entities;
+mod me;
+mod shared;
 mod static_server;
 
 #[macro_use]

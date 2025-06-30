@@ -117,6 +117,10 @@ export interface LoginResponse {
   user_id: number;
 }
 
+export interface MyInitialData {
+  collective_involvements: CollectiveInvolvementWithDetails[];
+}
+
 export interface MyParticipationInput {
   capacity?: string | null;
   /** @format int64 */
@@ -315,7 +319,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 0.4.0
+ * @version 0.5.2
  * @license
  */
 export class Api<
@@ -426,6 +430,22 @@ export class Api<
         method: "POST",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GetState2
+     * @request GET:/api/me
+     * @originalName getState
+     * @duplicate
+     */
+    getState2: (params: RequestParams = {}) =>
+      this.request<MyInitialData, any>({
+        path: `/api/me`,
+        method: "GET",
         format: "json",
         ...params,
       }),

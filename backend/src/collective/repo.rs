@@ -2,9 +2,12 @@ use serde::{Deserialize, Serialize};
 use sqlx::SqlitePool;
 use utoipa::ToSchema;
 
-use crate::entities::{
-    Collective, CollectiveInvolvement, CollectiveInvolvementWithDetails, Crew, CrewInvolvement,
-    Interval, InvolvementStatus, OptOutType, ParticipationIntention, Person,
+use crate::shared::{
+    COLLECTIVE_ID,
+    entities::{
+        Collective, CollectiveInvolvement, CollectiveInvolvementWithDetails, Crew, CrewInvolvement,
+        Interval, InvolvementStatus, OptOutType, ParticipationIntention, Person,
+    },
 };
 
 #[derive(Serialize, Deserialize, ToSchema)]
@@ -23,13 +26,14 @@ pub struct InitialData {
     pub involvements: IntervalInvolvementData,
 }
 
-pub const COLLECTIVE_ID: i64 = 1;
-
-pub async fn find_collective(pool: &SqlitePool) -> Result<Collective, sqlx::Error> {
+pub async fn find_collective(
+    collective_id: i64,
+    pool: &SqlitePool,
+) -> Result<Collective, sqlx::Error> {
     sqlx::query_as!(
         Collective,
         "SELECT id, name, description FROM collectives WHERE id = ?",
-        COLLECTIVE_ID
+        collective_id
     )
     .fetch_one(pool)
     .await

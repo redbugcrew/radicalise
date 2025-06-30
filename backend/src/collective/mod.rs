@@ -7,8 +7,11 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 use crate::{
     auth::auth_backend::AuthSession,
     collective::repo::{InitialData, IntervalInvolvementData},
-    entities::{
-        CollectiveInvolvementWithDetails, InvolvementStatus, OptOutType, ParticipationIntention,
+    shared::{
+        COLLECTIVE_ID,
+        entities::{
+            CollectiveInvolvementWithDetails, InvolvementStatus, OptOutType, ParticipationIntention,
+        },
     },
 };
 
@@ -28,7 +31,7 @@ pub fn router() -> OpenApiRouter {
         (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
     ),)]
 async fn get_state(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse {
-    let collective_result = repo::find_collective(&pool).await;
+    let collective_result = repo::find_collective(COLLECTIVE_ID, &pool).await;
 
     match collective_result {
         Ok(collective) => {
