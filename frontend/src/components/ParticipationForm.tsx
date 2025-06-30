@@ -1,4 +1,4 @@
-import { Stepper, Group, Button, Stack, Textarea, Select, Title, Switch, Text, Card } from "@mantine/core";
+import { Stepper, Group, Button, Stack, Textarea, Select, Title, Switch, Card } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { useState } from "react";

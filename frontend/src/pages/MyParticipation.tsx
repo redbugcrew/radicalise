@@ -6,7 +6,6 @@ import DateText from "../components/DateText";
 import { useEffect, useState } from "react";
 import { getApi } from "../api";
 import type { CollectiveInvolvementWithDetails, MyParticipationInput } from "../api/Api";
-import { getMatchingInvolvementInterval } from "../store/involvements";
 
 export default function MyParticipation() {
   const { allIntervals, currentInterval } = useAppSelector((state) => state.intervals);
