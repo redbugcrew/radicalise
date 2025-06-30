@@ -1,4 +1,4 @@
-import { Stepper, Group, Button, Stack, Textarea, Select, Title, Switch, Text } from "@mantine/core";
+import { Stepper, Group, Button, Stack, Textarea, Select, Title, Switch, Text, Card } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { useState } from "react";
@@ -124,18 +124,22 @@ function AdditionalParticipationStep({ intervalId }: AdditionalParticipationStep
     <Stack>
       <Title order={3}>Crews</Title>
       {crews.map((crew) => (
-        <Stack key={crew.id} gap="md">
-          <Stack gap="xs">
-            <Title order={4}>{crew.name}</Title>
-            <Switch />
-            <Group>
-              {forCrew(crewInvolvements, crew.id).map((involvement) => {
-                const person = people[involvement.person_id];
-                return person && <PersonBadge key={involvement.id} person={person} />;
-              })}
-            </Group>
+        <Card>
+          <Stack key={crew.id} gap="md">
+            <Stack gap="xs">
+              <Group justify="space-between">
+                <Title order={4}>{crew.name}</Title>
+                <Switch />
+              </Group>
+              <Group>
+                {forCrew(crewInvolvements, crew.id).map((involvement) => {
+                  const person = people[involvement.person_id];
+                  return person && <PersonBadge key={involvement.id} person={person} />;
+                })}
+              </Group>
+            </Stack>
           </Stack>
-        </Stack>
+        </Card>
       ))}
     </Stack>
   );
