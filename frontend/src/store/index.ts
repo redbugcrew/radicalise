@@ -5,9 +5,10 @@ import peopleReducer, { peopleLoaded } from "./people";
 import intervalsReducer, { intervalsLoaded } from "./intervals";
 import involvementsReducer, { involvementsLoaded } from "./involvements";
 import crewsReducer, { crewsLoaded } from "./crews";
-import meReducer, { meLoaded } from "./me";
+import meReducer, { meLoaded, myIntervalDataChanged } from "./me";
 import { getApi } from "../api";
 import { redirect } from "react-router-dom";
+import type { MeEvent } from "../api/Api";
 
 const store = configureStore({
   reducer: {
@@ -84,6 +85,17 @@ export async function loadInitialData(store: AppStore) {
     return loadMeData(store, api).then(() => loadCollectiveData(store, api));
   }
   return null;
+}
+
+export async function handleMeEvent(event: MeEvent) {
+  console.log("Handling MeEvent:", event);
+  if (event.MyIntervalDataChanged) {
+    store.dispatch(myIntervalDataChanged(event.MyIntervalDataChanged));
+  }
+}
+
+export async function handleMeEvents(events: MeEvent[]) {
+  events.forEach((event) => handleMeEvent(event));
 }
 
 export default store;

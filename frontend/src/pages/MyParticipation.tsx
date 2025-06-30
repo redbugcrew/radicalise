@@ -1,6 +1,6 @@
 import { Container, Stack, Title, Text } from "@mantine/core";
 import ParticipationForm, { type MyParticipationFormData } from "../components/ParticipationForm";
-import { useAppSelector } from "../store";
+import { handleMeEvents, useAppSelector } from "../store";
 import { useNavigate, useParams } from "react-router-dom";
 import DateText from "../components/DateText";
 import { useEffect, useState } from "react";
@@ -9,7 +9,7 @@ import type { CollectiveInvolvementWithDetails, MyParticipationInput } from "../
 
 export default function MyParticipation() {
   const { allIntervals, currentInterval } = useAppSelector((state) => state.intervals);
-  const { collective } = useAppSelector((state) => state);
+  const collective = useAppSelector((state) => state.collective);
   const navigate = useNavigate();
 
   if (!collective) {
@@ -57,6 +57,7 @@ export default function MyParticipation() {
       .updateMyParticipation(interval.id, inputData)
       .then((response) => {
         console.log("Participation updated successfully", response);
+        handleMeEvents(response.data);
         navigate("/dashboard");
       })
       .catch((error) => {

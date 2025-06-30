@@ -6,7 +6,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     auth::auth_backend::AuthSession,
-    me::repo::MyInitialData,
+    me::{events::MeEvent, repo::MyInitialData},
     shared::{
         COLLECTIVE_ID,
         entities::{
@@ -15,6 +15,7 @@ use crate::{
     },
 };
 
+mod events;
 mod repo;
 
 pub fn router() -> OpenApiRouter {
@@ -95,11 +96,11 @@ pub struct MyParticipationInput {
         ("interval_id" = i64, Path, description = "Interval ID")
     ),
     request_body(
-        content = MyParticipationInput, description = "Detailed involvement",
+        content = MyParticipationInput,
         content_type = "application/json"
     ),
     responses(
-        (status = 200, description = "Updated my participation successfully", body = Option<CollectiveInvolvementWithDetails>),
+        (status = 200, description = "Updated my participation successfully", body = Vec<MeEvent>),
         (status = NOT_FOUND, description = "Not found", body = ())
     ),
 )]
@@ -144,12 +145,12 @@ async fn update_my_participation(
 
             // Fetch the updated involvement to return
             let output_result =
-                repo::find_detailed_involvement(COLLECTIVE_ID, user.id, interval_id, &pool).await;
+                repo::find_interval_data_for_me(COLLECTIVE_ID, user.id, interval_id, &pool).await;
             match output_result {
-                Ok(Some(updated_involvement)) => {
-                    return (StatusCode::OK, Json(updated_involvement)).into_response();
+                Ok(interval_data) => {
+                    let events = vec![MeEvent::MyIntervalDataChanged(interval_data)];
+                    return (StatusCode::OK, Json(events)).into_response();
                 }
-                Ok(None) => return (StatusCode::NOT_FOUND, ()).into_response(),
                 Err(_) => return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
             }
         }

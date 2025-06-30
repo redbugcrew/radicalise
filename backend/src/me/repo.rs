@@ -81,7 +81,7 @@ pub async fn upsert_detailed_involvement(
     }
 }
 
-pub async fn find_initial_interval_data_for_me(
+pub async fn find_interval_data_for_me(
     collective_id: i64,
     person_id: i64,
     interval_id: i64,
@@ -105,10 +105,8 @@ pub async fn find_initial_data_for_me(
     let next_interval = find_next_interval(collective_id, current_interval.id, pool).await?;
 
     let current =
-        find_initial_interval_data_for_me(collective_id, person_id, current_interval.id, pool)
-            .await?;
-    let next =
-        find_initial_interval_data_for_me(collective_id, person_id, next_interval.id, pool).await?;
+        find_interval_data_for_me(collective_id, person_id, current_interval.id, pool).await?;
+    let next = find_interval_data_for_me(collective_id, person_id, next_interval.id, pool).await?;
 
     Ok(MyInitialData {
         current_interval: Some(current),

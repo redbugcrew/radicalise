@@ -117,6 +117,10 @@ export interface LoginResponse {
   user_id: number;
 }
 
+export type MeEvent = {
+  MyIntervalDataChanged: MyIntervalData;
+};
+
 export interface MyInitialData {
   current_interval?: null | MyIntervalData;
   next_interval?: null | MyIntervalData;
@@ -432,7 +436,7 @@ export class Api<
       data: MyParticipationInput,
       params: RequestParams = {},
     ) =>
-      this.request<null | CollectiveInvolvementWithDetails, any>({
+      this.request<MeEvent[], any>({
         path: `/api/me/interval/${intervalId}/my_participation`,
         method: "POST",
         body: data,
