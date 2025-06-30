@@ -6,6 +6,7 @@ import type { CollectiveInvolvementWithDetails, Crew, Interval, OptOutType, Part
 import { IconLock } from "@tabler/icons-react";
 import { useAppSelector } from "../store";
 import { forCrew, getMatchingInvolvementInterval } from "../store/involvements";
+import { PersonBadge } from ".";
 
 export interface MyParticipationFormData {
   wellbeing: string;
@@ -130,7 +131,7 @@ function AdditionalParticipationStep({ intervalId }: AdditionalParticipationStep
             <Group>
               {forCrew(crewInvolvements, crew.id).map((involvement) => {
                 const person = people[involvement.person_id];
-                return person && <Text key={involvement.id}>{person.display_name}</Text>;
+                return person && <PersonBadge key={involvement.id} person={person} />;
               })}
             </Group>
           </Stack>

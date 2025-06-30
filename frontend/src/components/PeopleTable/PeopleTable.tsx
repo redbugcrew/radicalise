@@ -3,6 +3,7 @@ import { Anchor } from "../";
 import { IconChevronDown, IconChevronUp, IconSearch, IconSelector } from "@tabler/icons-react";
 import { useState } from "react";
 import classes from "./PeopleTable.module.css";
+import { avatarUrl } from "../PersonBadge/PersonBadge";
 
 interface Crew {
   id: number;
@@ -61,8 +62,6 @@ interface SortableThProps {
   sorted: boolean;
   onSort: () => void;
 }
-
-const avatarUrl = (id: number) => `https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-${(id % 10) + 1}.png`;
 
 function SortableTh({ children, reversed, sorted, onSort }: SortableThProps) {
   const Icon = sorted ? (reversed ? IconChevronUp : IconChevronDown) : IconSelector;
