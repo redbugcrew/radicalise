@@ -1,9 +1,10 @@
-import { Stepper, Group, Button, Stack, Textarea, Select } from "@mantine/core";
+import { Stepper, Group, Button, Stack, Textarea, Select, Title, Switch } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { useState } from "react";
-import type { CollectiveInvolvementWithDetails, OptOutType, ParticipationIntention } from "../api/Api";
+import type { CollectiveInvolvementWithDetails, Crew, OptOutType, ParticipationIntention } from "../api/Api";
 import { IconLock } from "@tabler/icons-react";
+import { useAppSelector } from "../store";
 
 export interface MyParticipationFormData {
   wellbeing: string;
@@ -105,8 +106,20 @@ function MinimumParticipationStep({ form, readOnly }: MinimumParticipationStepPr
   );
 }
 
-function AdditionalParticipationStep() {
-  return <div>Here we put crew opt-ins</div>;
+function AdditionalParticipationStep({ crews }: { crews: Crew[] }) {
+  return (
+    <Stack>
+      <Title order={3}>Crews</Title>
+      {crews.map((crew) => (
+        <Stack key={crew.id} gap="md">
+          <Stack gap="xs">
+            <Title order={4}>{crew.name}</Title>
+            <Switch />
+          </Stack>
+        </Stack>
+      ))}
+    </Stack>
+  );
 }
 
 type ParticipationFormProps = {
@@ -118,6 +131,8 @@ type ParticipationFormProps = {
 export default function ParticipationForm({ readOnly = false, involvement = null, onSubmit }: ParticipationFormProps) {
   const [step, setStep] = useState(0);
   const [additionalParticipationActive, setAdditionalParticipationActive] = useState(involvement?.participation_intention === "OptIn");
+  const crews = useAppSelector((state) => Object.values(state.crews));
+
   const minStep = 0;
   const maxStep = additionalParticipationActive ? 2 : 1;
 
@@ -198,7 +213,7 @@ export default function ParticipationForm({ readOnly = false, involvement = null
           <MinimumParticipationStep form={form} readOnly={readOnly} />
         </Stepper.Step>
         <Stepper.Step label="Additional Participation" disabled={!additionalParticipationActive} allowStepSelect={additionalParticipationActive} icon={additionalParticipationActive ? null : <IconLock size={24} />}>
-          <AdditionalParticipationStep />
+          <AdditionalParticipationStep crews={crews} />
         </Stepper.Step>
 
         <Stepper.Completed>Completed, click back button to get to previous step</Stepper.Completed>
