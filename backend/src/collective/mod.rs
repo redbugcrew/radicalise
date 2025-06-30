@@ -57,6 +57,7 @@ async fn get_involvements(
     let crew_involvements = crew_involvements_result.unwrap();
 
     let result = IntervalInvolvementData {
+        interval_id,
         collective_involvements,
         crew_involvements,
     };

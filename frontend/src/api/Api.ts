@@ -110,6 +110,8 @@ export interface Interval {
 export interface IntervalInvolvementData {
   collective_involvements: CollectiveInvolvement[];
   crew_involvements: CrewInvolvement[];
+  /** @format int64 */
+  interval_id: number;
 }
 
 export interface LoginResponse {

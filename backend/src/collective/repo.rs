@@ -13,6 +13,7 @@ use crate::shared::{
 
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct IntervalInvolvementData {
+    pub interval_id: i64,
     pub collective_involvements: Vec<CollectiveInvolvement>,
     pub crew_involvements: Vec<CrewInvolvement>,
 }
@@ -97,10 +98,11 @@ pub async fn find_initial_data_for_collective(
     .await?;
 
     let current_interval = find_current_interval(collective.id, pool).await?;
+    let current_interval_id = current_interval.id.clone();
 
     let collective_involvements =
         find_all_collective_involvements(current_interval.id, pool).await?;
-    let crew_involvements = find_all_crew_involvements(current_interval.id, pool).await?;
+    let crew_involvements = find_all_crew_involvements(current_interval_id.clone(), pool).await?;
 
     Ok(InitialData {
         collective,
@@ -109,6 +111,7 @@ pub async fn find_initial_data_for_collective(
         intervals,
         current_interval,
         involvements: IntervalInvolvementData {
+            interval_id: current_interval_id.clone(),
             collective_involvements,
             crew_involvements,
         },
