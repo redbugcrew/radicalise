@@ -3,6 +3,7 @@ import { DatePickerInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { useState } from "react";
 import type { CollectiveInvolvementWithDetails, OptOutType, ParticipationIntention } from "../api/Api";
+import { IconLock } from "@tabler/icons-react";
 
 export interface MyParticipationFormData {
   wellbeing: string;
@@ -104,9 +105,9 @@ function MinimumParticipationStep({ form, readOnly }: MinimumParticipationStepPr
   );
 }
 
-// function AdditionalParticipationStep() {
-//   return <div>Step 3 content: Get full access</div>;
-// }
+function AdditionalParticipationStep() {
+  return <div>Here we put crew opt-ins</div>;
+}
 
 type ParticipationFormProps = {
   readOnly?: boolean;
@@ -116,8 +117,9 @@ type ParticipationFormProps = {
 
 export default function ParticipationForm({ readOnly = false, involvement = null, onSubmit }: ParticipationFormProps) {
   const [step, setStep] = useState(0);
+  const [additionalParticipationActive, setAdditionalParticipationActive] = useState(involvement?.participation_intention === "OptIn");
   const minStep = 0;
-  const maxStep = 1;
+  const maxStep = additionalParticipationActive ? 2 : 1;
 
   const form = useForm<MyParticipationFormData>({
     mode: "uncontrolled",
@@ -164,6 +166,10 @@ export default function ParticipationForm({ readOnly = false, involvement = null
     },
   });
 
+  form.watch("participation_intention", ({ value }) => {
+    setAdditionalParticipationActive(value === "OptIn");
+  });
+
   const prevStep = () => setStep((current) => (current > minStep ? current - 1 : current));
   const nextStep = () => setStep((current) => (current < maxStep ? current + 1 : current));
   const nextStepIfValid = () => {
@@ -173,7 +179,11 @@ export default function ParticipationForm({ readOnly = false, involvement = null
     nextStep();
   };
   const setStepIfValid = (newStep: number) => {
-    if (newStep <= step || (newStep === step + 1 && !form.validate().hasErrors)) {
+    const formValid = !form.validate().hasErrors;
+
+    if (newStep <= step || (newStep === step + 1 && formValid)) {
+      // if (newStep === 2 && !additionalParticipationActive) return;
+
       setStep(newStep);
     }
   };
@@ -187,9 +197,10 @@ export default function ParticipationForm({ readOnly = false, involvement = null
         <Stepper.Step label="Minimum Participation">
           <MinimumParticipationStep form={form} readOnly={readOnly} />
         </Stepper.Step>
-        {/* <Stepper.Step label="Additional Participation">
+        <Stepper.Step label="Additional Participation" disabled={!additionalParticipationActive} allowStepSelect={additionalParticipationActive} icon={additionalParticipationActive ? null : <IconLock size={24} />}>
           <AdditionalParticipationStep />
-        </Stepper.Step> */}
+        </Stepper.Step>
+
         <Stepper.Completed>Completed, click back button to get to previous step</Stepper.Completed>
       </Stepper>
 

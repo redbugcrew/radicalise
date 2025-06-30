@@ -51,7 +51,7 @@ function MyIntervalPartipationCard({ interval, data, current = true }: MyInterva
         <ParticipationBadge involvement={collective_involvement || null} />
       </Group>
 
-      <Button mt="md" radius="md" onClick={() => navigate(`/my_participation/${interval.id}`)}>
+      <Button variant={current ? "outline" : "filled"} mt="md" radius="md" onClick={() => navigate(`/my_participation/${interval.id}`)}>
         {current ? "Update" : "Plan"} your participation
       </Button>
     </Card>
