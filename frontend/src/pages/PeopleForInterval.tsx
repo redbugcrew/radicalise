@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { type Interval } from "../api/Api";
+import { type Interval, type IntervalInvolvementData } from "../api/Api";
 import { useAppSelector } from "../store";
 import PeopleByInvolvementStatus from "./PeopleByInvolvementStatus";
 import type { InvolvementsState } from "../store/involvements";
@@ -11,13 +11,15 @@ interface PeopleForIntervalProps {
 
 export default function PeopleForInterval({ interval }: PeopleForIntervalProps) {
   const currentInterval = useAppSelector((state) => state.intervals.currentInterval);
-  const currentInvolvements: InvolvementsState = useAppSelector((state) => state.involvements);
+  const involvementState: InvolvementsState = useAppSelector((state) => state.involvements);
 
-  const [involvements, setInvolvements] = useState<InvolvementsState | null>(null);
+  const [involvements, setInvolvements] = useState<IntervalInvolvementData | null>(null);
 
   useEffect(() => {
-    if (currentInterval && currentInterval.id == interval.id) {
-      setInvolvements(currentInvolvements);
+    if (involvementState.current_interval?.interval_id === interval.id) {
+      setInvolvements(involvementState.current_interval || null);
+    } else if (involvementState.next_interval?.interval_id === interval.id) {
+      setInvolvements(involvementState.next_interval || null);
     } else {
       const api = getApi();
 
@@ -31,7 +33,7 @@ export default function PeopleForInterval({ interval }: PeopleForIntervalProps) 
           setInvolvements(null);
         });
     }
-  }, [interval.id, currentInterval, currentInvolvements]);
+  }, [interval.id, currentInterval, involvementState]);
 
   return involvements && <PeopleByInvolvementStatus key={interval.id} involvements={involvements.collective_involvements} crewEnrolments={involvements.crew_involvements} tableKey={interval.id} />;
 }

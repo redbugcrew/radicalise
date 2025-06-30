@@ -25,7 +25,7 @@ pub async fn find_next_interval(
     collective_id: i64,
     current_interval_id: i64,
     pool: &SqlitePool,
-) -> Result<Interval, sqlx::Error> {
+) -> Result<Option<Interval>, sqlx::Error> {
     sqlx::query_as!(
         Interval,
         "SELECT id, start_date, end_date
@@ -38,6 +38,6 @@ pub async fn find_next_interval(
         collective_id,
         current_interval_id
     )
-    .fetch_one(pool)
+    .fetch_optional(pool)
     .await
 }

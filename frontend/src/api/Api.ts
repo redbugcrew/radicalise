@@ -96,7 +96,7 @@ export interface InitialData {
   crews: Crew[];
   current_interval: Interval;
   intervals: Interval[];
-  involvements: IntervalInvolvementData;
+  involvements: InvolvementData;
   people: Person[];
 }
 
@@ -112,6 +112,11 @@ export interface IntervalInvolvementData {
   crew_involvements: CrewInvolvement[];
   /** @format int64 */
   interval_id: number;
+}
+
+export interface InvolvementData {
+  current_interval?: null | IntervalInvolvementData;
+  next_interval?: null | IntervalInvolvementData;
 }
 
 export interface LoginResponse {
@@ -332,7 +337,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 0.5.2
+ * @version 0.5.3
  * @license
  */
 export class Api<

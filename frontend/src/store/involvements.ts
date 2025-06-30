@@ -1,16 +1,30 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { CollectiveInvolvement, CollectiveInvolvementWithDetails, IntervalInvolvementData, MyIntervalData } from "../api/Api";
+import type { CollectiveInvolvement, CollectiveInvolvementWithDetails, MyIntervalData, InvolvementData } from "../api/Api";
 
-export type InvolvementsState = IntervalInvolvementData | null;
+export type InvolvementsState = InvolvementData;
 
 function removeInvolvementDetails(input: CollectiveInvolvementWithDetails): CollectiveInvolvement {
   const { id, collective_id, interval_id, person_id, status } = input;
   return { id, collective_id, interval_id, person_id, status };
 }
 
+function upsertCollectiveInvolvement(involvements: CollectiveInvolvement[], newInvolvement: CollectiveInvolvement): CollectiveInvolvement[] {
+  const existingIndex = involvements.findIndex((inv) => inv.id === newInvolvement.id);
+  if (existingIndex !== -1) {
+    // Update existing involvement
+    return involvements.map((inv, index) => (index === existingIndex ? newInvolvement : inv));
+  } else {
+    // Add new involvement
+    return [...involvements, newInvolvement];
+  }
+}
+
 const involvementsSlice = createSlice({
   name: "involvements",
-  initialState: null as InvolvementsState,
+  initialState: {
+    current_interval: null,
+    next_interval: null,
+  } as InvolvementsState,
   reducers: {
     involvementsLoaded: (_state: InvolvementsState, action: PayloadAction<InvolvementsState>) => action.payload,
   },
@@ -24,13 +38,29 @@ const involvementsSlice = createSlice({
         if (!detailedInvolvement) return state;
         const involvement = removeInvolvementDetails(detailedInvolvement);
 
-        if (state.interval_id === payload.interval_id) {
-          const new_involvements = state.collective_involvements.filter((inv) => inv.id !== involvement.id);
+        if (state.current_interval && state.current_interval.interval_id === payload.interval_id) {
+          const new_involvements = upsertCollectiveInvolvement(state.current_interval.collective_involvements, involvement);
           return {
             ...state,
-            collective_involvements: new_involvements.concat([involvement]),
+            current_interval: {
+              ...state.current_interval,
+              collective_involvements: new_involvements,
+            },
           };
         }
+
+        if (state.next_interval && state.next_interval.interval_id === payload.interval_id) {
+          const new_involvements = upsertCollectiveInvolvement(state.next_interval.collective_involvements, involvement);
+          return {
+            ...state,
+            next_interval: {
+              ...state.next_interval,
+              collective_involvements: new_involvements,
+            },
+          };
+        }
+
+        return state;
       }
     );
   },

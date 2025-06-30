@@ -104,12 +104,17 @@ pub async fn find_initial_data_for_me(
     let current_interval = find_current_interval(collective_id, pool).await?;
     let next_interval = find_next_interval(collective_id, current_interval.id, pool).await?;
 
-    let current =
+    let current_interval_data =
         find_interval_data_for_me(collective_id, person_id, current_interval.id, pool).await?;
-    let next = find_interval_data_for_me(collective_id, person_id, next_interval.id, pool).await?;
+
+    let next_interval_data = if let Some(interval) = next_interval {
+        Some(find_interval_data_for_me(collective_id, person_id, interval.id, pool).await?)
+    } else {
+        None
+    };
 
     Ok(MyInitialData {
-        current_interval: Some(current),
-        next_interval: Some(next),
+        current_interval: Some(current_interval_data),
+        next_interval: next_interval_data,
     })
 }

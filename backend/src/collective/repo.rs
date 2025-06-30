@@ -8,7 +8,7 @@ use crate::shared::{
         Collective, CollectiveInvolvement, Crew, CrewInvolvement, Interval, InvolvementStatus,
         Person,
     },
-    repo::find_current_interval,
+    repo::{find_current_interval, find_next_interval},
 };
 
 #[derive(Serialize, Deserialize, ToSchema)]
@@ -19,13 +19,19 @@ pub struct IntervalInvolvementData {
 }
 
 #[derive(Serialize, Deserialize, ToSchema)]
+pub struct InvolvementData {
+    pub current_interval: Option<IntervalInvolvementData>,
+    pub next_interval: Option<IntervalInvolvementData>,
+}
+
+#[derive(Serialize, Deserialize, ToSchema)]
 pub struct InitialData {
     pub collective: Collective,
     pub people: Vec<Person>,
     pub crews: Vec<Crew>,
     pub intervals: Vec<Interval>,
     pub current_interval: Interval,
-    pub involvements: IntervalInvolvementData,
+    pub involvements: InvolvementData,
 }
 
 pub async fn find_collective(
@@ -77,6 +83,20 @@ pub async fn find_all_crew_involvements(
     .await
 }
 
+async fn find_interval_involvement_data(
+    interval_id: i64,
+    pool: &SqlitePool,
+) -> Result<IntervalInvolvementData, sqlx::Error> {
+    let collective_involvements = find_all_collective_involvements(interval_id, pool).await?;
+    let crew_involvements = find_all_crew_involvements(interval_id, pool).await?;
+
+    Ok(IntervalInvolvementData {
+        interval_id,
+        collective_involvements,
+        crew_involvements,
+    })
+}
+
 pub async fn find_initial_data_for_collective(
     collective: Collective,
     pool: &SqlitePool,
@@ -99,10 +119,14 @@ pub async fn find_initial_data_for_collective(
 
     let current_interval = find_current_interval(collective.id, pool).await?;
     let current_interval_id = current_interval.id.clone();
+    let next_interval = find_next_interval(collective.id, current_interval_id, pool).await?;
 
-    let collective_involvements =
-        find_all_collective_involvements(current_interval.id, pool).await?;
-    let crew_involvements = find_all_crew_involvements(current_interval_id.clone(), pool).await?;
+    let current_interval_data = find_interval_involvement_data(current_interval_id, pool).await?;
+    let next_interval_data = if let Some(interval) = next_interval {
+        Some(find_interval_involvement_data(interval.id, pool).await?)
+    } else {
+        None
+    };
 
     Ok(InitialData {
         collective,
@@ -110,10 +134,9 @@ pub async fn find_initial_data_for_collective(
         crews,
         intervals,
         current_interval,
-        involvements: IntervalInvolvementData {
-            interval_id: current_interval_id.clone(),
-            collective_involvements,
-            crew_involvements,
+        involvements: InvolvementData {
+            current_interval: Some(current_interval_data),
+            next_interval: next_interval_data,
         },
     })
 }
