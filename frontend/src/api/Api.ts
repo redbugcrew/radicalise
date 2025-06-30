@@ -119,6 +119,8 @@ export interface LoginResponse {
 
 export interface MyInitialData {
   collective_involvements: CollectiveInvolvementWithDetails[];
+  /** @format int64 */
+  current_interval_id: number;
 }
 
 export interface MyParticipationInput {
@@ -375,10 +377,10 @@ export class Api<
     /**
      * No description
      *
-     * @name GetState
+     * @name GetCollectiveState
      * @request GET:/api/collective
      */
-    getState: (params: RequestParams = {}) =>
+    getCollectiveState: (params: RequestParams = {}) =>
       this.request<InitialData, any>({
         path: `/api/collective`,
         method: "GET",
@@ -437,12 +439,10 @@ export class Api<
     /**
      * No description
      *
-     * @name GetState2
+     * @name GetMyState
      * @request GET:/api/me
-     * @originalName getState
-     * @duplicate
      */
-    getState2: (params: RequestParams = {}) =>
+    getMyState: (params: RequestParams = {}) =>
       this.request<MyInitialData, any>({
         path: `/api/me`,
         method: "GET",

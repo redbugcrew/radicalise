@@ -8,6 +8,7 @@ use crate::shared::{
         Collective, CollectiveInvolvement, CollectiveInvolvementWithDetails, Crew, CrewInvolvement,
         Interval, InvolvementStatus, OptOutType, ParticipationIntention, Person,
     },
+    repo::find_current_interval,
 };
 
 #[derive(Serialize, Deserialize, ToSchema)]
@@ -152,13 +153,7 @@ pub async fn find_initial_data_for_collective(
     .fetch_all(pool)
     .await?;
 
-    let current_interval = sqlx::query_as!(
-                Interval,
-                "SELECT id, start_date, end_date FROM intervals WHERE collective_id = ? AND start_date <= date('now') AND (end_date IS NULL OR end_date >= date('now'))",
-                collective.id
-            )
-            .fetch_one(pool)
-            .await?;
+    let current_interval = find_current_interval(collective.id, pool).await?;
 
     let collective_involvements =
         find_all_collective_involvements(current_interval.id, pool).await?;

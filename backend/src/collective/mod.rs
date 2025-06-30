@@ -19,7 +19,7 @@ mod repo;
 
 pub fn router() -> OpenApiRouter {
     OpenApiRouter::new()
-        .routes(routes!(get_state))
+        .routes(routes!(get_collective_state))
         .routes(routes!(get_involvements))
         .routes(routes!(my_participation))
         .routes(routes!(update_my_participation))
@@ -30,7 +30,7 @@ pub fn router() -> OpenApiRouter {
         (status = NOT_FOUND, description = "Collective was not found", body = ()),
         (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
     ),)]
-async fn get_state(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse {
+async fn get_collective_state(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse {
     let collective_result = repo::find_collective(COLLECTIVE_ID, &pool).await;
 
     match collective_result {

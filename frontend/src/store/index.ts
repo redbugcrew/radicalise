@@ -33,6 +33,47 @@ export const useAppStore = useStore.withTypes<AppStore>();
 //   payload: data,
 // });
 
+async function loadCollectiveData(store: AppStore, api: ReturnType<typeof getApi>): Promise<Response | null> {
+  return api.api
+    .getCollectiveState()
+    .then((response) => {
+      store.dispatch(peopleLoaded(response.data.people));
+      store.dispatch(crewsLoaded(response.data.crews));
+      store.dispatch(intervalsLoaded({ allIntervals: response.data.intervals, currentInterval: response.data.current_interval }));
+      store.dispatch(involvementsLoaded(response.data.involvements));
+      store.dispatch(collectiveLoaded(response.data.collective));
+
+      return null;
+    })
+    .catch((error) => {
+      if (error.response.status === 401) {
+        console.error("Unauthorized:", error);
+        return redirect("/auth/login");
+      } else {
+        console.error("Error loading initial data:", error);
+        return null;
+      }
+    });
+}
+
+async function loadMeData(store: AppStore, api: ReturnType<typeof getApi>): Promise<Response | null> {
+  return api.api
+    .getMyState()
+    .then((response) => {
+      store.dispatch(meLoaded(response.data));
+      return null;
+    })
+    .catch((error) => {
+      if (error.response.status === 401) {
+        console.error("Unauthorized:", error);
+        return redirect("/auth/login");
+      } else {
+        console.error("Error loading 'me' data:", error);
+        return null;
+      }
+    });
+}
+
 export async function loadInitialData(store: AppStore) {
   const api = getApi();
 
@@ -40,26 +81,7 @@ export async function loadInitialData(store: AppStore) {
 
   if (!dataHasLoaded) {
     console.log("Loading initial data from API...");
-    return api.api
-      .getState()
-      .then((response) => {
-        store.dispatch(peopleLoaded(response.data.people));
-        store.dispatch(crewsLoaded(response.data.crews));
-        store.dispatch(intervalsLoaded({ allIntervals: response.data.intervals, currentInterval: response.data.current_interval }));
-        store.dispatch(involvementsLoaded(response.data.involvements));
-        store.dispatch(collectiveLoaded(response.data.collective));
-
-        return null;
-      })
-      .catch((error) => {
-        if (error.response.status === 401) {
-          console.error("Unauthorized:", error);
-          return redirect("/auth/login");
-        } else {
-          console.error("Error loading initial data:", error);
-          return null;
-        }
-      });
+    return loadMeData(store, api).then(() => loadCollectiveData(store, api));
   }
   return null;
 }

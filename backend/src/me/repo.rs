@@ -2,12 +2,16 @@ use serde::{Deserialize, Serialize};
 use sqlx::SqlitePool;
 use utoipa::ToSchema;
 
-use crate::shared::entities::{
-    CollectiveInvolvementWithDetails, InvolvementStatus, OptOutType, ParticipationIntention,
+use crate::shared::{
+    entities::{
+        CollectiveInvolvementWithDetails, InvolvementStatus, OptOutType, ParticipationIntention,
+    },
+    repo::find_current_interval,
 };
 
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct MyInitialData {
+    pub current_interval_id: i64,
     pub collective_involvements: Vec<CollectiveInvolvementWithDetails>,
 }
 
@@ -38,13 +42,15 @@ pub async fn find_detailed_involvements(
 pub async fn find_initial_data_for_me(
     collective_id: i64,
     person_id: i64,
-    current_interval_id: i64,
     pool: &SqlitePool,
 ) -> Result<MyInitialData, sqlx::Error> {
+    let current_interval = find_current_interval(collective_id, pool).await?;
+
     let my_involvements =
-        find_detailed_involvements(person_id, collective_id, current_interval_id, pool).await?;
+        find_detailed_involvements(person_id, collective_id, current_interval.id, pool).await?;
 
     Ok(MyInitialData {
+        current_interval_id: current_interval.id,
         collective_involvements: my_involvements,
     })
 }

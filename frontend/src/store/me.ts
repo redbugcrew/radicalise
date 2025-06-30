@@ -1,13 +1,11 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { MyInitialData, CollectiveInvolvementWithDetails } from "../api/Api";
+import type { MyInitialData } from "../api/Api";
 
-export type MeState = MyInitialData;
+export type MeState = MyInitialData | null;
 
 const meSlice = createSlice({
   name: "me",
-  initialState: {
-    my_involvements: [] as CollectiveInvolvementWithDetails[],
-  } as MyInitialData,
+  initialState: null as MeState,
   reducers: {
     meLoaded: (_state: MeState, action: PayloadAction<MeState>) => action.payload,
   },
