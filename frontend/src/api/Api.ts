@@ -118,12 +118,12 @@ export interface LoginResponse {
 }
 
 export interface MyInitialData {
-  current?: null | MyIntervalData;
-  next?: null | MyIntervalData;
+  current_interval?: null | MyIntervalData;
+  next_interval?: null | MyIntervalData;
 }
 
 export interface MyIntervalData {
-  collective_involvements: CollectiveInvolvementWithDetails[];
+  collective_involvement?: null | CollectiveInvolvementWithDetails;
   /** @format int64 */
   interval_id: number;
 }
@@ -410,12 +410,12 @@ export class Api<
     /**
      * No description
      *
-     * @name MyParticipation
-     * @request GET:/api/collective/interval/{interval_id}/my_participation
+     * @name GetMyState
+     * @request GET:/api/me
      */
-    myParticipation: (intervalId: number, params: RequestParams = {}) =>
-      this.request<null | CollectiveInvolvementWithDetails, any>({
-        path: `/api/collective/interval/${intervalId}/my_participation`,
+    getMyState: (params: RequestParams = {}) =>
+      this.request<MyInitialData, any>({
+        path: `/api/me`,
         method: "GET",
         format: "json",
         ...params,
@@ -425,7 +425,7 @@ export class Api<
      * No description
      *
      * @name UpdateMyParticipation
-     * @request POST:/api/collective/interval/{interval_id}/my_participation
+     * @request POST:/api/me/interval/{interval_id}/my_participation
      */
     updateMyParticipation: (
       intervalId: number,
@@ -433,7 +433,7 @@ export class Api<
       params: RequestParams = {},
     ) =>
       this.request<null | CollectiveInvolvementWithDetails, any>({
-        path: `/api/collective/interval/${intervalId}/my_participation`,
+        path: `/api/me/interval/${intervalId}/my_participation`,
         method: "POST",
         body: data,
         type: ContentType.Json,
@@ -444,12 +444,12 @@ export class Api<
     /**
      * No description
      *
-     * @name GetMyState
-     * @request GET:/api/me
+     * @name MyParticipation
+     * @request GET:/api/me/participation/interval/{interval_id}
      */
-    getMyState: (params: RequestParams = {}) =>
-      this.request<MyInitialData, any>({
-        path: `/api/me`,
+    myParticipation: (intervalId: number, params: RequestParams = {}) =>
+      this.request<null | CollectiveInvolvementWithDetails, any>({
+        path: `/api/me/participation/interval/${intervalId}`,
         method: "GET",
         format: "json",
         ...params,
