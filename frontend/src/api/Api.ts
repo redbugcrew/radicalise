@@ -118,9 +118,14 @@ export interface LoginResponse {
 }
 
 export interface MyInitialData {
+  current?: null | MyIntervalData;
+  next?: null | MyIntervalData;
+}
+
+export interface MyIntervalData {
   collective_involvements: CollectiveInvolvementWithDetails[];
   /** @format int64 */
-  current_interval_id: number;
+  interval_id: number;
 }
 
 export interface MyParticipationInput {

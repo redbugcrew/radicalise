@@ -6,21 +6,27 @@ use crate::shared::{
     entities::{
         CollectiveInvolvementWithDetails, InvolvementStatus, OptOutType, ParticipationIntention,
     },
-    repo::find_current_interval,
+    repo::{find_current_interval, find_next_interval},
 };
 
 #[derive(Serialize, Deserialize, ToSchema)]
-pub struct MyInitialData {
-    pub current_interval_id: i64,
-    pub collective_involvements: Vec<CollectiveInvolvementWithDetails>,
+pub struct MyIntervalData {
+    pub interval_id: i64,
+    pub collective_involvement: Option<CollectiveInvolvementWithDetails>,
 }
 
-pub async fn find_detailed_involvements(
-    person_id: i64,
+#[derive(Serialize, Deserialize, ToSchema)]
+pub struct MyInitialData {
+    current: Option<MyIntervalData>,
+    next: Option<MyIntervalData>,
+}
+
+pub async fn find_detailed_involvement(
     collective_id: i64,
-    start_interval_id: i64,
+    person_id: i64,
+    interval_id: i64,
     pool: &SqlitePool,
-) -> Result<Vec<CollectiveInvolvementWithDetails>, sqlx::Error> {
+) -> Result<Option<CollectiveInvolvementWithDetails>, sqlx::Error> {
     sqlx::query_as!(
         CollectiveInvolvementWithDetails,
         "SELECT id, person_id, collective_id, interval_id, status as \"status: InvolvementStatus\",
@@ -30,13 +36,64 @@ pub async fn find_detailed_involvements(
         WHERE
             collective_id = ? AND
             person_id = ? AND
-            interval_id >= ?",
+            interval_id = ?",
         collective_id,
         person_id,
-        start_interval_id
+        interval_id,
     )
-    .fetch_all(pool)
+    .fetch_optional(pool)
     .await
+}
+
+pub async fn upsert_detailed_involvement(
+    involvement: CollectiveInvolvementWithDetails,
+    pool: &SqlitePool,
+) -> Result<(), sqlx::Error> {
+    let result = sqlx::query!(
+        "INSERT INTO collective_involvements (person_id, collective_id, interval_id, status, wellbeing, focus, capacity, participation_intention, opt_out_type, opt_out_planned_return_date)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(person_id, collective_id, interval_id) DO UPDATE SET
+            status = excluded.status,
+            wellbeing = excluded.wellbeing,
+            focus = excluded.focus,
+            capacity = excluded.capacity,
+            participation_intention = excluded.participation_intention,
+            opt_out_type = excluded.opt_out_type,
+            opt_out_planned_return_date = excluded.opt_out_planned_return_date",
+        involvement.person_id,
+        involvement.collective_id,
+        involvement.interval_id,
+        involvement.status,
+        involvement.wellbeing,
+        involvement.focus,
+        involvement.capacity,
+        involvement.participation_intention,
+        involvement.opt_out_type,
+        involvement.opt_out_planned_return_date
+    )
+    .execute(pool)
+    .await?;
+
+    if result.rows_affected() == 0 {
+        return Err(sqlx::Error::RowNotFound);
+    } else {
+        Ok(())
+    }
+}
+
+pub async fn find_initial_interval_data_for_me(
+    collective_id: i64,
+    person_id: i64,
+    interval_id: i64,
+    pool: &SqlitePool,
+) -> Result<MyIntervalData, sqlx::Error> {
+    let involvement =
+        find_detailed_involvement(collective_id, person_id, interval_id, pool).await?;
+
+    Ok(MyIntervalData {
+        interval_id,
+        collective_involvement: involvement,
+    })
 }
 
 pub async fn find_initial_data_for_me(
@@ -45,12 +102,16 @@ pub async fn find_initial_data_for_me(
     pool: &SqlitePool,
 ) -> Result<MyInitialData, sqlx::Error> {
     let current_interval = find_current_interval(collective_id, pool).await?;
+    let next_interval = find_next_interval(collective_id, current_interval.id, pool).await?;
 
-    let my_involvements =
-        find_detailed_involvements(person_id, collective_id, current_interval.id, pool).await?;
+    let current =
+        find_initial_interval_data_for_me(collective_id, person_id, current_interval.id, pool)
+            .await?;
+    let next =
+        find_initial_interval_data_for_me(collective_id, person_id, next_interval.id, pool).await?;
 
     Ok(MyInitialData {
-        current_interval_id: current_interval.id,
-        collective_involvements: my_involvements,
+        current: Some(current),
+        next: Some(next),
     })
 }

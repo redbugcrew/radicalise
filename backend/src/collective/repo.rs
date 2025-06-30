@@ -5,8 +5,8 @@ use utoipa::ToSchema;
 use crate::shared::{
     COLLECTIVE_ID,
     entities::{
-        Collective, CollectiveInvolvement, CollectiveInvolvementWithDetails, Crew, CrewInvolvement,
-        Interval, InvolvementStatus, OptOutType, ParticipationIntention, Person,
+        Collective, CollectiveInvolvement, Crew, CrewInvolvement, Interval, InvolvementStatus,
+        Person,
     },
     repo::find_current_interval,
 };
@@ -74,63 +74,6 @@ pub async fn find_all_crew_involvements(
     )
     .fetch_all(pool)
     .await
-}
-
-pub async fn find_detailed_involvement(
-    interval_id: i64,
-    person_id: i64,
-    pool: &SqlitePool,
-) -> Result<Option<CollectiveInvolvementWithDetails>, sqlx::Error> {
-    sqlx::query_as!(
-        CollectiveInvolvementWithDetails,
-        "SELECT id, person_id, collective_id, interval_id, status as \"status: InvolvementStatus\",
-        wellbeing, focus, capacity, participation_intention as \"participation_intention: ParticipationIntention\",
-        opt_out_type as \"opt_out_type: OptOutType\", opt_out_planned_return_date
-        FROM collective_involvements
-        WHERE
-            interval_id = ? AND
-            person_id = ?",
-        interval_id,
-        person_id
-    )
-    .fetch_optional(pool)
-    .await
-}
-
-pub async fn upsert_detailed_involvement(
-    involvement: CollectiveInvolvementWithDetails,
-    pool: &SqlitePool,
-) -> Result<(), sqlx::Error> {
-    let result = sqlx::query!(
-        "INSERT INTO collective_involvements (person_id, collective_id, interval_id, status, wellbeing, focus, capacity, participation_intention, opt_out_type, opt_out_planned_return_date)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(person_id, collective_id, interval_id) DO UPDATE SET
-            status = excluded.status,
-            wellbeing = excluded.wellbeing,
-            focus = excluded.focus,
-            capacity = excluded.capacity,
-            participation_intention = excluded.participation_intention,
-            opt_out_type = excluded.opt_out_type,
-            opt_out_planned_return_date = excluded.opt_out_planned_return_date",
-        involvement.person_id,
-        involvement.collective_id,
-        involvement.interval_id,
-        involvement.status,
-        involvement.wellbeing,
-        involvement.focus,
-        involvement.capacity,
-        involvement.participation_intention,
-        involvement.opt_out_type,
-        involvement.opt_out_planned_return_date
-    )
-    .execute(pool)
-    .await?;
-
-    if result.rows_affected() == 0 {
-        return Err(sqlx::Error::RowNotFound);
-    } else {
-        Ok(())
-    }
 }
 
 pub async fn find_initial_data_for_collective(
