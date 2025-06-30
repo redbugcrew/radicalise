@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { CollectiveInvolvement, CollectiveInvolvementWithDetails, MyIntervalData, InvolvementData } from "../api/Api";
+import type { CollectiveInvolvement, CollectiveInvolvementWithDetails, MyIntervalData, InvolvementData, IntervalInvolvementData, CrewInvolvement } from "../api/Api";
 
 export type InvolvementsState = InvolvementData;
 
@@ -17,6 +17,20 @@ function upsertCollectiveInvolvement(involvements: CollectiveInvolvement[], newI
     // Add new involvement
     return [...involvements, newInvolvement];
   }
+}
+
+export function getMatchingInvolvementInterval(involvements: InvolvementsState, intervalId: number): IntervalInvolvementData | null {
+  if (involvements.current_interval && involvements.current_interval.interval_id === intervalId) {
+    return involvements.current_interval;
+  }
+  if (involvements.next_interval && involvements.next_interval.interval_id === intervalId) {
+    return involvements.next_interval;
+  }
+  return null;
+}
+
+export function forCrew(involvements: CrewInvolvement[], crewId: number): CrewInvolvement[] {
+  return involvements.filter((involvement) => involvement.crew_id === crewId);
 }
 
 const involvementsSlice = createSlice({

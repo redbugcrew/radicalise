@@ -1,10 +1,11 @@
-import { Stepper, Group, Button, Stack, Textarea, Select, Title, Switch } from "@mantine/core";
+import { Stepper, Group, Button, Stack, Textarea, Select, Title, Switch, Text } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { useState } from "react";
-import type { CollectiveInvolvementWithDetails, Crew, OptOutType, ParticipationIntention } from "../api/Api";
+import type { CollectiveInvolvementWithDetails, Crew, Interval, OptOutType, ParticipationIntention } from "../api/Api";
 import { IconLock } from "@tabler/icons-react";
 import { useAppSelector } from "../store";
+import { forCrew, getMatchingInvolvementInterval } from "../store/involvements";
 
 export interface MyParticipationFormData {
   wellbeing: string;
@@ -106,7 +107,18 @@ function MinimumParticipationStep({ form, readOnly }: MinimumParticipationStepPr
   );
 }
 
-function AdditionalParticipationStep({ crews }: { crews: Crew[] }) {
+interface AdditionalParticipationStepProps {
+  intervalId: number;
+}
+
+function AdditionalParticipationStep({ intervalId }: AdditionalParticipationStepProps) {
+  const involvements = useAppSelector((state) => state.involvements);
+  const crews = useAppSelector((state) => Object.values(state.crews) as Crew[]);
+  const people = useAppSelector((state) => state.people);
+
+  const involvementInterval = getMatchingInvolvementInterval(involvements, intervalId);
+  const crewInvolvements = involvementInterval?.crew_involvements || [];
+
   return (
     <Stack>
       <Title order={3}>Crews</Title>
@@ -115,6 +127,12 @@ function AdditionalParticipationStep({ crews }: { crews: Crew[] }) {
           <Stack gap="xs">
             <Title order={4}>{crew.name}</Title>
             <Switch />
+            <Group>
+              {forCrew(crewInvolvements, crew.id).map((involvement) => {
+                const person = people[involvement.person_id];
+                return person && <Text key={involvement.id}>{person.display_name}</Text>;
+              })}
+            </Group>
           </Stack>
         </Stack>
       ))}
@@ -122,16 +140,16 @@ function AdditionalParticipationStep({ crews }: { crews: Crew[] }) {
   );
 }
 
-type ParticipationFormProps = {
+interface ParticipationFormProps {
   readOnly?: boolean;
   involvement?: CollectiveInvolvementWithDetails | null;
+  interval: Interval;
   onSubmit: (data: MyParticipationFormData) => void;
-};
+}
 
-export default function ParticipationForm({ readOnly = false, involvement = null, onSubmit }: ParticipationFormProps) {
+export default function ParticipationForm({ interval, readOnly = false, involvement = null, onSubmit }: ParticipationFormProps) {
   const [step, setStep] = useState(0);
   const [additionalParticipationActive, setAdditionalParticipationActive] = useState(involvement?.participation_intention === "OptIn");
-  const crews = useAppSelector((state) => Object.values(state.crews));
 
   const minStep = 0;
   const maxStep = additionalParticipationActive ? 2 : 1;
@@ -213,7 +231,7 @@ export default function ParticipationForm({ readOnly = false, involvement = null
           <MinimumParticipationStep form={form} readOnly={readOnly} />
         </Stepper.Step>
         <Stepper.Step label="Additional Participation" disabled={!additionalParticipationActive} allowStepSelect={additionalParticipationActive} icon={additionalParticipationActive ? null : <IconLock size={24} />}>
-          <AdditionalParticipationStep crews={crews} />
+          <AdditionalParticipationStep intervalId={interval.id} />
         </Stepper.Step>
 
         <Stepper.Completed>Completed, click back button to get to previous step</Stepper.Completed>

@@ -6,10 +6,12 @@ import DateText from "../components/DateText";
 import { useEffect, useState } from "react";
 import { getApi } from "../api";
 import type { CollectiveInvolvementWithDetails, MyParticipationInput } from "../api/Api";
+import { getMatchingInvolvementInterval } from "../store/involvements";
 
 export default function MyParticipation() {
   const { allIntervals, currentInterval } = useAppSelector((state) => state.intervals);
   const collective = useAppSelector((state) => state.collective);
+
   const navigate = useNavigate();
 
   if (!collective) {
@@ -28,6 +30,7 @@ export default function MyParticipation() {
   if (!currentInterval) {
     return <Text>Error: Current interval not found.</Text>;
   }
+
   const readOnly = intervalIdNumber < currentInterval.id;
 
   const [involvement, setInvolvement] = useState<CollectiveInvolvementWithDetails | null>(null);
@@ -75,7 +78,7 @@ export default function MyParticipation() {
           <DateText date={interval.start_date} /> - <DateText date={interval.end_date} />
         </Text>
       </Stack>
-      <ParticipationForm readOnly={readOnly} involvement={involvement} key={involvement?.id || `fresh-${interval.id}`} onSubmit={onSubmit} />
+      <ParticipationForm readOnly={readOnly} involvement={involvement} key={involvement?.id || `fresh-${interval.id}`} onSubmit={onSubmit} interval={interval} />
     </Container>
   );
 }
