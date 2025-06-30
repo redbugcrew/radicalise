@@ -14,7 +14,7 @@ interface MyIntervalPartipationCardProps {
 function ParticipationBadge({ involvement }: { involvement: CollectiveInvolvementWithDetails | null }) {
   if (!involvement) return <Badge color="gray">No intention</Badge>;
 
-  const { participation_intention, opt_out_type, opt_out_planned_return_date } = involvement;
+  const { participation_intention, opt_out_type } = involvement;
 
   switch (participation_intention) {
     case "OptIn":
