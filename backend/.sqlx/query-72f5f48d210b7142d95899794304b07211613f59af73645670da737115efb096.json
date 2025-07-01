@@ -1,0 +1,44 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id, person_id, crew_id, interval_id, status as \"status: InvolvementStatus\"\n        FROM crew_involvements\n        WHERE person_id = ? AND interval_id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer"
+      },
+      {
+        "name": "person_id",
+        "ordinal": 1,
+        "type_info": "Integer"
+      },
+      {
+        "name": "crew_id",
+        "ordinal": 2,
+        "type_info": "Integer"
+      },
+      {
+        "name": "interval_id",
+        "ordinal": 3,
+        "type_info": "Integer"
+      },
+      {
+        "name": "status: InvolvementStatus",
+        "ordinal": 4,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "72f5f48d210b7142d95899794304b07211613f59af73645670da737115efb096"
+}
