@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { CollectiveInvolvement, CollectiveInvolvementWithDetails, MyIntervalData, InvolvementData, IntervalInvolvementData, CrewInvolvement } from "../api/Api";
+import { type WritableDraft } from "immer";
 
 export type InvolvementsState = InvolvementData;
 
@@ -37,6 +38,11 @@ export function forPerson<T extends { person_id: number }>(involvements: T[], pe
   return involvements.filter((involvement) => involvement.person_id === personId);
 }
 
+function updateCrewInvolvementForPerson(crewInvolvements: WritableDraft<CrewInvolvement>[], personInvolvements: CrewInvolvement[], personId: number): WritableDraft<CrewInvolvement>[] {
+  const withoutPerson = crewInvolvements.filter((involvement) => involvement.person_id !== personId);
+  return withoutPerson.concat(personInvolvements);
+}
+
 const involvementsSlice = createSlice({
   name: "involvements",
   initialState: {
@@ -55,28 +61,16 @@ const involvementsSlice = createSlice({
         const detailedInvolvement = payload.collective_involvement;
         if (!detailedInvolvement) return state;
         const involvement = removeInvolvementDetails(detailedInvolvement);
+        const person_id = involvement.person_id;
 
-        if (state.current_interval && state.current_interval.interval_id === payload.interval_id) {
-          const new_involvements = upsertCollectiveInvolvement(state.current_interval.collective_involvements, involvement);
-          return {
-            ...state,
-            current_interval: {
-              ...state.current_interval,
-              collective_involvements: new_involvements,
-            },
-          };
-        }
+        const interval_keys: (keyof InvolvementsState)[] = ["current_interval", "next_interval"];
 
-        if (state.next_interval && state.next_interval.interval_id === payload.interval_id) {
-          const new_involvements = upsertCollectiveInvolvement(state.next_interval.collective_involvements, involvement);
-          return {
-            ...state,
-            next_interval: {
-              ...state.next_interval,
-              collective_involvements: new_involvements,
-            },
-          };
-        }
+        interval_keys.forEach((key) => {
+          if (state && state[key] && state[key].interval_id === payload.interval_id) {
+            state[key].collective_involvements = upsertCollectiveInvolvement(state[key].collective_involvements, involvement);
+            state[key].crew_involvements = updateCrewInvolvementForPerson(state[key].crew_involvements, forPerson(payload.crew_involvements, person_id), person_id);
+          }
+        });
 
         return state;
       }

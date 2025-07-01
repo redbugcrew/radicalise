@@ -22,7 +22,7 @@ pub struct Interval {
     pub end_date: String,
 }
 
-#[derive(Serialize, Deserialize, ToSchema, sqlx::Type, Clone)]
+#[derive(Serialize, Deserialize, ToSchema, sqlx::Type, Clone, Debug)]
 pub enum InvolvementStatus {
     Participating,
     OnHiatus,
@@ -102,7 +102,7 @@ impl TryFrom<String> for OptOutType {
     }
 }
 
-#[derive(Serialize, Deserialize, ToSchema, Clone)]
+#[derive(Serialize, Deserialize, ToSchema, Clone, Debug)]
 pub struct CrewInvolvement {
     pub id: i64,
     pub person_id: i64,

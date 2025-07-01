@@ -137,6 +137,7 @@ export interface MyInitialData {
 
 export interface MyIntervalData {
   collective_involvement?: null | CollectiveInvolvementWithDetails;
+  crew_involvements: CrewInvolvement[];
   /** @format int64 */
   interval_id: number;
 }

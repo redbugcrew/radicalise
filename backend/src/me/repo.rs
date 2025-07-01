@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use sqlx::SqlitePool;
+use sqlx::{QueryBuilder, Sqlite, SqlitePool};
 use utoipa::ToSchema;
 
 use crate::shared::{
@@ -14,6 +14,7 @@ use crate::shared::{
 pub struct MyIntervalData {
     pub interval_id: i64,
     pub collective_involvement: Option<CollectiveInvolvementWithDetails>,
+    pub crew_involvements: Vec<CrewInvolvement>,
 }
 
 #[derive(Serialize, Deserialize, ToSchema)]
@@ -92,9 +93,12 @@ pub async fn find_interval_data_for_me(
     let involvement =
         find_detailed_involvement(collective_id, person_id, interval_id, pool).await?;
 
+    let crew_involvements = find_crew_involvements(person_id, interval_id, pool).await?;
+
     Ok(MyIntervalData {
         interval_id,
         collective_involvement: involvement,
+        crew_involvements,
     })
 }
 
@@ -128,17 +132,7 @@ pub async fn update_crew_participations(
     crew_ids: Vec<i64>,
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
-    let existing = sqlx::query_as!(
-        CrewInvolvement,
-        "
-        SELECT id, person_id, crew_id, interval_id, status as \"status: InvolvementStatus\"
-        FROM crew_involvements
-        WHERE person_id = ? AND interval_id = ?",
-        person_id,
-        interval_id
-    )
-    .fetch_all(pool)
-    .await?;
+    let existing = find_crew_involvements(person_id, interval_id, pool).await?;
 
     // Involvements to remove
     let to_remove: Vec<CrewInvolvement> = existing
@@ -164,10 +158,30 @@ pub async fn update_crew_participations(
         })
         .collect();
 
+    println!("Deleting crew participations {:?}", to_remove);
     delete_crew_involvements(to_remove, pool).await?;
+
+    println!("Adding crew participations {:?}", to_add);
     add_crew_involvements(to_add, pool).await?;
 
     Ok(())
+}
+
+pub async fn find_crew_involvements(
+    person_id: i64,
+    interval_id: i64,
+    pool: &SqlitePool,
+) -> Result<Vec<CrewInvolvement>, sqlx::Error> {
+    sqlx::query_as!(
+        CrewInvolvement,
+        "SELECT id, person_id, crew_id, interval_id, status as \"status: InvolvementStatus\"
+        FROM crew_involvements
+        WHERE person_id = ? AND interval_id = ?",
+        person_id,
+        interval_id
+    )
+    .fetch_all(pool)
+    .await
 }
 
 pub async fn delete_crew_involvements(
@@ -175,24 +189,19 @@ pub async fn delete_crew_involvements(
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
     if involvements.is_empty() {
+        println!("No crew involvements to delete");
         return Ok(()); // Nothing to delete
     }
 
-    let involvement_ids: Vec<i64> = involvements.iter().map(|i| i.id).collect();
-    let ids_string = involvement_ids
-        .iter()
-        .map(|id| id.to_string())
-        .collect::<Vec<String>>()
-        .join(", ");
+    let mut query_builder: QueryBuilder<Sqlite> =
+        QueryBuilder::new("DELETE FROM crew_involvements WHERE id IN (");
+    let mut separated = query_builder.separated(", ");
+    for value_type in involvements.iter() {
+        separated.push_bind(value_type.id);
+    }
+    separated.push_unseparated(") ");
 
-    sqlx::query!(
-        "DELETE FROM crew_involvements
-        WHERE
-            id IN (?)",
-        ids_string
-    )
-    .execute(pool)
-    .await?;
+    query_builder.build().execute(pool).await?;
 
     Ok(())
 }
