@@ -1,5 +1,5 @@
 import { Stack, Title } from "@mantine/core";
-import { CrewsTable } from "../components";
+import { CrewsList } from "../components";
 import { useAppSelector } from "../store";
 
 export default function Crews() {
@@ -11,7 +11,7 @@ export default function Crews() {
   return (
     <Stack>
       <Title order={1}>Crews</Title>
-      <CrewsTable crews={crews} involvements={involvements} people={people} />
+      <CrewsList crews={crews} involvements={involvements} people={people} />
     </Stack>
   );
 }

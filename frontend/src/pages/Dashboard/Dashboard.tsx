@@ -1,9 +1,12 @@
 import { Button, Card, Container, Title, Stack, Text, Badge, Group } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import { useAppSelector } from "../../store";
-import type { CollectiveInvolvementWithDetails, Interval, MyIntervalData } from "../../api/Api";
+import type { CollectiveInvolvementWithDetails, CrewInvolvement, Interval, MyIntervalData } from "../../api/Api";
 import DateText from "../../components/DateText";
 import classes from "./Dashboard.module.css";
+import { CrewsList } from "../../components";
+import { forPerson } from "../../store/involvements";
+import { compareStrings } from "../../utilities/comparison";
 
 interface MyIntervalPartipationCardProps {
   interval: Interval;
@@ -58,6 +61,26 @@ function MyIntervalPartipationCard({ interval, data, current = true }: MyInterva
   );
 }
 
+function MyCrews({ personId, myInvolvements }: { personId: number; myInvolvements: CrewInvolvement[] }) {
+  const people = useAppSelector((state) => state.people);
+  const crews = useAppSelector((state) => state.crews);
+  const allInvolvements = useAppSelector((state) => state.involvements.current_interval?.crew_involvements || []);
+
+  const myCrews = myInvolvements
+    .map((involvement) => crews[involvement.crew_id])
+    .filter(Boolean)
+    .sort(compareStrings("name"));
+
+  if (myCrews.length === 0) return null;
+
+  return (
+    <Stack>
+      <Title order={2}>My Crews</Title>
+      <CrewsList involvements={allInvolvements} people={people} crews={myCrews} highlightPersonId={personId} />
+    </Stack>
+  );
+}
+
 export default function Dashboard() {
   const intervals = useAppSelector((state) => state.intervals);
 
@@ -82,9 +105,12 @@ export default function Dashboard() {
       <Title order={1} mb="md">
         My Dashboard
       </Title>
-      <Stack gap="md">
-        {current_interval && myData.current_interval && <MyIntervalPartipationCard interval={current_interval} data={myData.current_interval} current={true} />}
-        {next_interval && myData.next_interval && <MyIntervalPartipationCard interval={next_interval} data={myData.next_interval} current={false} />}
+      <Stack gap="lg">
+        <Stack gap="md">
+          {current_interval && myData.current_interval && <MyIntervalPartipationCard interval={current_interval} data={myData.current_interval} current={true} />}
+          {next_interval && myData.next_interval && <MyIntervalPartipationCard interval={next_interval} data={myData.next_interval} current={false} />}
+        </Stack>
+        {myData.current_interval && <MyCrews personId={myData.person_id} myInvolvements={myData.current_interval.crew_involvements} />}
       </Stack>
     </Container>
   );
