@@ -1,0 +1,12 @@
+.card {
+  border-width: 2px;
+  border-style: solid;
+  border-color: transparent;
+}
+
+.empty {
+  border-style: dashed;
+  border-width: 2px;
+  border-color: var(--mantine-color-dark-1);
+  background-color: var(--mantine-color-dark-4);
+}

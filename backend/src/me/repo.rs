@@ -4,7 +4,8 @@ use utoipa::ToSchema;
 
 use crate::shared::{
     entities::{
-        CollectiveInvolvementWithDetails, InvolvementStatus, OptOutType, ParticipationIntention,
+        CollectiveInvolvementWithDetails, CrewInvolvement, InvolvementStatus, OptOutType,
+        ParticipationIntention,
     },
     repo::{find_current_interval, find_next_interval},
 };
@@ -119,4 +120,107 @@ pub async fn find_initial_data_for_me(
         current_interval: Some(current_interval_data),
         next_interval: next_interval_data,
     })
+}
+
+pub async fn update_crew_participations(
+    person_id: i64,
+    interval_id: i64,
+    crew_ids: Vec<i64>,
+    pool: &SqlitePool,
+) -> Result<(), sqlx::Error> {
+    let existing = sqlx::query_as!(
+        CrewInvolvement,
+        "
+        SELECT id, person_id, crew_id, interval_id, status as \"status: InvolvementStatus\"
+        FROM crew_involvements
+        WHERE person_id = ? AND interval_id = ?",
+        person_id,
+        interval_id
+    )
+    .fetch_all(pool)
+    .await?;
+
+    // Involvements to remove
+    let to_remove: Vec<CrewInvolvement> = existing
+        .iter()
+        .filter(|involvement| !crew_ids.contains(&involvement.crew_id))
+        .cloned()
+        .collect();
+
+    // Involvements to add
+    let to_add: Vec<CrewInvolvement> = crew_ids
+        .iter()
+        .filter(|&&crew_id| {
+            !existing
+                .iter()
+                .any(|involvement| involvement.crew_id == crew_id)
+        })
+        .map(|&crew_id| CrewInvolvement {
+            id: 0, // This will be set when inserting into the database
+            person_id,
+            crew_id,
+            interval_id,
+            status: InvolvementStatus::Participating,
+        })
+        .collect();
+
+    delete_crew_involvements(to_remove, pool).await?;
+    add_crew_involvements(to_add, pool).await?;
+
+    Ok(())
+}
+
+pub async fn delete_crew_involvements(
+    involvements: Vec<CrewInvolvement>,
+    pool: &SqlitePool,
+) -> Result<(), sqlx::Error> {
+    if involvements.is_empty() {
+        return Ok(()); // Nothing to delete
+    }
+
+    let involvement_ids: Vec<i64> = involvements.iter().map(|i| i.id).collect();
+    let ids_string = involvement_ids
+        .iter()
+        .map(|id| id.to_string())
+        .collect::<Vec<String>>()
+        .join(", ");
+
+    sqlx::query!(
+        "DELETE FROM crew_involvements
+        WHERE
+            id IN (?)",
+        ids_string
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(())
+}
+
+pub async fn add_crew_involvements(
+    involvements: Vec<CrewInvolvement>,
+    pool: &SqlitePool,
+) -> Result<(), sqlx::Error> {
+    if involvements.is_empty() {
+        return Ok(()); // Nothing to add
+    }
+
+    let mut transaction = pool.begin().await?;
+
+    for involvement in involvements {
+        sqlx::query!(
+            "INSERT INTO crew_involvements (person_id, crew_id, interval_id, status)
+            VALUES (?, ?, ?, ?)",
+            involvement.person_id,
+            involvement.crew_id,
+            involvement.interval_id,
+            involvement.status
+        )
+        .execute(&mut *transaction)
+        .await?;
+    }
+
+    transaction.commit().await?;
+
+    Ok(())
 }

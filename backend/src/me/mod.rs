@@ -87,6 +87,7 @@ pub struct MyParticipationInput {
     pub participation_intention: Option<ParticipationIntention>,
     pub opt_out_type: Option<OptOutType>,
     pub opt_out_planned_return_date: Option<String>,
+    pub crew_ids: Option<Vec<i64>>,
 }
 
 #[utoipa::path(
@@ -141,6 +142,20 @@ async fn update_my_participation(
             if result.is_err() {
                 eprintln!("Error updating involvement: {:?}", result.err());
                 return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
+            }
+
+            if let Some(crew_ids) = input.crew_ids {
+                // Update crew participations
+                let crew_result =
+                    repo::update_crew_participations(user.id, interval_id, crew_ids, &pool).await;
+
+                if crew_result.is_err() {
+                    eprintln!(
+                        "Error updating crew participations: {:?}",
+                        crew_result.err()
+                    );
+                    return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
+                }
             }
 
             // Fetch the updated involvement to return

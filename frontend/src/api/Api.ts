@@ -145,6 +145,7 @@ export interface MyParticipationInput {
   capacity?: string | null;
   /** @format int64 */
   collective_id: number;
+  crew_ids?: any[] | null;
   focus?: string | null;
   opt_out_planned_return_date?: string | null;
   opt_out_type?: null | OptOutType;
@@ -339,7 +340,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 0.5.4
+ * @version 0.5.5
  * @license
  */
 export class Api<
