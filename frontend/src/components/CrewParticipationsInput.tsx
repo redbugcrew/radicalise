@@ -3,28 +3,23 @@ import { forCrew } from "../store/involvements";
 import type { Crew, CrewInvolvement } from "../api/Api";
 import type { PeopleObjectMap } from "../store/people";
 import { PersonBadge } from ".";
-
-type FormFieldChange<T> = {
-  previousValue: T;
-  value: T;
-  touched: boolean;
-  dirty: boolean;
-};
+import { useUncontrolled } from "@mantine/hooks";
 
 interface CrewParticipationToggleProps {
+  checked?: boolean;
   personId: number;
   crew: Crew;
   crewInvolvements: CrewInvolvement[];
   people: PeopleObjectMap;
   disabled?: boolean;
-  onChange?: (change: FormFieldChange<string[]>) => void;
+  onChange?: (change: boolean) => void;
 }
 
-function CrewParticipationToggle({ personId, crew, crewInvolvements, people, disabled, onChange }: CrewParticipationToggleProps) {
+function CrewParticipationToggle({ checked, personId, crew, crewInvolvements, people, disabled, onChange }: CrewParticipationToggleProps) {
   const otherInvolvements = crewInvolvements.filter((involvement) => involvement.person_id !== personId);
 
-  const sampleOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    console.log("Sample onChange event:", event);
+  const handleOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (onChange) onChange(event.target.checked);
   };
 
   return (
@@ -33,13 +28,14 @@ function CrewParticipationToggle({ personId, crew, crewInvolvements, people, dis
         <Stack gap="xs">
           <Group justify="space-between">
             <Title order={4}>{crew.name}</Title>
-            <Switch disabled={disabled} onChange={sampleOnChange} />
+            <Switch disabled={disabled} checked={checked} onChange={handleOnChange} />
           </Group>
           <Group>
             {otherInvolvements.map((involvement) => {
               const person = people[involvement.person_id];
               return person && <PersonBadge key={involvement.id} person={person} />;
             })}
+            {checked && <PersonBadge person={people[personId]} />}
           </Group>
         </Stack>
       </Stack>
@@ -66,27 +62,52 @@ type CrewParticipationsInputProps = GetInputPropsReturnType & {
   crewInvolvements: CrewInvolvement[];
 };
 
+function upsertId(arr: number[], id: number): number[] {
+  const result = removeId(arr, id);
+  result.push(id);
+  return result;
+}
+
+function removeId(arr: number[], id: number): number[] {
+  return arr.filter((item) => item !== id);
+}
+
+function toggleId(arr: number[], id: number, checked: boolean): number[] {
+  if (checked) {
+    return upsertId(arr, id);
+  }
+  return removeId(arr, id);
+}
+
 export default function CrewParticipationsInput({ crews, personId, people, disabled, crewInvolvements, ...rest }: CrewParticipationsInputProps) {
-  const onToggleChange = (crewId: number, change: FormFieldChange<string[]>) => {
-    console.log("Toggle change for crew:", crewId, change);
-    if (rest.onChange) {
-      rest.onChange([crewId]);
+  const [value, setValue] = useUncontrolled<number[]>({
+    value: rest.value,
+    defaultValue: rest.defaultValue,
+    finalValue: [],
+    onChange: rest.onChange,
+  });
+
+  const handleChange = (crewId: number, itemValue: boolean) => {
+    if (!disabled) {
+      const newValue = toggleId(value, crewId, itemValue);
+      console.log("new value", newValue);
+      setValue(newValue);
     }
   };
 
   return (
     <Input.Wrapper {...rest}>
       <Stack>
-        <p>{JSON.stringify(rest)}</p>
         {crews.map((crew) => (
           <CrewParticipationToggle
             key={crew.id}
             personId={personId}
+            checked={value.includes(crew.id)}
             crew={crew}
             crewInvolvements={forCrew(crewInvolvements, crew.id)}
             people={people}
             disabled={disabled}
-            onChange={(change) => onToggleChange(crew.id, change)}
+            onChange={(change) => handleChange(crew.id, change)}
           />
         ))}
       </Stack>

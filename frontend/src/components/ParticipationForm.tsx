@@ -188,12 +188,12 @@ export default function ParticipationForm({ personId, interval, readOnly = false
           }
         }
       }
-      if (step === 2) {
-        results = {
-          ...results,
-          crew_ids: values.crew_ids.length > 1000 ? null : "At least 1000 crew is required",
-        };
-      }
+      // if (step === 2) {
+      //   results = {
+      //     ...results,
+      //     crew_ids: values.crew_ids.length > 1000 ? null : "At least 1000 crew is required",
+      //   };
+      // }
 
       return results;
     },
@@ -204,7 +204,7 @@ export default function ParticipationForm({ personId, interval, readOnly = false
   });
 
   form.watch("crew_ids", (value) => {
-    console.log("Crew IDs changed:", value);
+    console.log("Crew IDs changed:", value.value);
   });
 
   const prevStep = () => setStep((current) => (current > minStep ? current - 1 : current));
