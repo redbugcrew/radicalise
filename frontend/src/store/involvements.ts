@@ -33,6 +33,10 @@ export function forCrew(involvements: CrewInvolvement[], crewId: number): CrewIn
   return involvements.filter((involvement) => involvement.crew_id === crewId);
 }
 
+export function forPerson<T extends { person_id: number }>(involvements: T[], personId: number): T[] {
+  return involvements.filter((involvement) => involvement.person_id === personId);
+}
+
 const involvementsSlice = createSlice({
   name: "involvements",
   initialState: {

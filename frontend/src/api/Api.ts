@@ -131,6 +131,8 @@ export type MeEvent = {
 export interface MyInitialData {
   current_interval?: null | MyIntervalData;
   next_interval?: null | MyIntervalData;
+  /** @format int64 */
+  person_id: number;
 }
 
 export interface MyIntervalData {
@@ -337,7 +339,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 0.5.3
+ * @version 0.5.4
  * @license
  */
 export class Api<

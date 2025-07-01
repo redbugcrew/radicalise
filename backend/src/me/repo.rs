@@ -17,8 +17,9 @@ pub struct MyIntervalData {
 
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct MyInitialData {
-    current_interval: Option<MyIntervalData>,
-    next_interval: Option<MyIntervalData>,
+    pub person_id: i64,
+    pub current_interval: Option<MyIntervalData>,
+    pub next_interval: Option<MyIntervalData>,
 }
 
 pub async fn find_detailed_involvement(
@@ -114,6 +115,7 @@ pub async fn find_initial_data_for_me(
     };
 
     Ok(MyInitialData {
+        person_id,
         current_interval: Some(current_interval_data),
         next_interval: next_interval_data,
     })

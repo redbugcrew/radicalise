@@ -1,12 +1,12 @@
-import { Stepper, Group, Button, Stack, Textarea, Select, Title, Switch, Card } from "@mantine/core";
+import { Stepper, Group, Button, Stack, Textarea, Select, Title } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { useState } from "react";
-import type { CollectiveInvolvementWithDetails, Crew, Interval, OptOutType, ParticipationIntention } from "../api/Api";
+import type { CollectiveInvolvementWithDetails, Crew, CrewInvolvement, Interval, OptOutType, ParticipationIntention } from "../api/Api";
 import { IconLock } from "@tabler/icons-react";
 import { useAppSelector } from "../store";
-import { forCrew, getMatchingInvolvementInterval } from "../store/involvements";
-import { PersonBadge } from ".";
+import { forPerson, getMatchingInvolvementInterval } from "../store/involvements";
+import { CrewParticipationsInput } from ".";
 
 export interface MyParticipationFormData {
   wellbeing: string;
@@ -15,6 +15,7 @@ export interface MyParticipationFormData {
   participation_intention: ParticipationIntention | null;
   opt_out_type: OptOutType | null;
   opt_out_planned_return_date: string | null;
+  crew_ids: number[];
 }
 
 type StepProps = {
@@ -109,50 +110,37 @@ function MinimumParticipationStep({ form, readOnly }: MinimumParticipationStepPr
 }
 
 interface AdditionalParticipationStepProps {
-  intervalId: number;
+  personId: number;
+  crewInvolvements: CrewInvolvement[];
+  form: ReturnType<typeof useForm<MyParticipationFormData>>;
+  readOnly?: boolean;
 }
 
-function AdditionalParticipationStep({ intervalId }: AdditionalParticipationStepProps) {
-  const involvements = useAppSelector((state) => state.involvements);
-  const crews = useAppSelector((state) => Object.values(state.crews) as Crew[]);
+function AdditionalParticipationStep({ form, readOnly, personId, crewInvolvements }: AdditionalParticipationStepProps) {
+  const crewsMap = useAppSelector((state) => state.crews);
+  const crews = Object.values(crewsMap) as Crew[];
   const people = useAppSelector((state) => state.people);
-
-  const involvementInterval = getMatchingInvolvementInterval(involvements, intervalId);
-  const crewInvolvements = involvementInterval?.crew_involvements || [];
 
   return (
     <Stack>
       <Title order={3}>Crews</Title>
-      {crews.map((crew) => (
-        <Card>
-          <Stack key={crew.id} gap="md">
-            <Stack gap="xs">
-              <Group justify="space-between">
-                <Title order={4}>{crew.name}</Title>
-                <Switch />
-              </Group>
-              <Group>
-                {forCrew(crewInvolvements, crew.id).map((involvement) => {
-                  const person = people[involvement.person_id];
-                  return person && <PersonBadge key={involvement.id} person={person} />;
-                })}
-              </Group>
-            </Stack>
-          </Stack>
-        </Card>
-      ))}
+      <CrewParticipationsInput personId={personId} crews={crews} people={people} disabled={readOnly} crewInvolvements={crewInvolvements} key={form.key("crew_ids")} {...form.getInputProps("crew_ids")} />
     </Stack>
   );
 }
 
 interface ParticipationFormProps {
+  personId: number;
   readOnly?: boolean;
   involvement?: CollectiveInvolvementWithDetails | null;
   interval: Interval;
   onSubmit: (data: MyParticipationFormData) => void;
 }
 
-export default function ParticipationForm({ interval, readOnly = false, involvement = null, onSubmit }: ParticipationFormProps) {
+export default function ParticipationForm({ personId, interval, readOnly = false, involvement = null, onSubmit }: ParticipationFormProps) {
+  const involvements = useAppSelector((state) => state.involvements);
+  const involvementInterval = getMatchingInvolvementInterval(involvements, interval.id);
+  const crewInvolvements = involvementInterval?.crew_involvements || [];
   const [step, setStep] = useState(0);
   const [additionalParticipationActive, setAdditionalParticipationActive] = useState(involvement?.participation_intention === "OptIn");
 
@@ -168,10 +156,11 @@ export default function ParticipationForm({ interval, readOnly = false, involvem
       participation_intention: involvement?.participation_intention || null,
       opt_out_type: involvement?.opt_out_type || null,
       opt_out_planned_return_date: involvement?.opt_out_planned_return_date || null,
+      crew_ids: forPerson(crewInvolvements, personId).map((involvement) => involvement.crew_id),
     },
 
     validate: (values) => {
-      let results = {};
+      let results = {} as Record<keyof MyParticipationFormData, string | null>;
 
       if (step === 0) {
         results = {
@@ -199,6 +188,12 @@ export default function ParticipationForm({ interval, readOnly = false, involvem
           }
         }
       }
+      if (step === 2) {
+        results = {
+          ...results,
+          crew_ids: values.crew_ids.length > 1000 ? null : "At least 1000 crew is required",
+        };
+      }
 
       return results;
     },
@@ -206,6 +201,10 @@ export default function ParticipationForm({ interval, readOnly = false, involvem
 
   form.watch("participation_intention", ({ value }) => {
     setAdditionalParticipationActive(value === "OptIn");
+  });
+
+  form.watch("crew_ids", (value) => {
+    console.log("Crew IDs changed:", value);
   });
 
   const prevStep = () => setStep((current) => (current > minStep ? current - 1 : current));
@@ -236,7 +235,7 @@ export default function ParticipationForm({ interval, readOnly = false, involvem
           <MinimumParticipationStep form={form} readOnly={readOnly} />
         </Stepper.Step>
         <Stepper.Step label="Additional Participation" disabled={!additionalParticipationActive} allowStepSelect={additionalParticipationActive} icon={additionalParticipationActive ? null : <IconLock size={24} />}>
-          <AdditionalParticipationStep intervalId={interval.id} />
+          <AdditionalParticipationStep form={form} readOnly={readOnly} personId={personId} crewInvolvements={crewInvolvements} />
         </Stepper.Step>
 
         <Stepper.Completed>Completed, click back button to get to previous step</Stepper.Completed>

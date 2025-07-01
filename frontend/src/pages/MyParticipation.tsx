@@ -10,12 +10,12 @@ import type { CollectiveInvolvementWithDetails, MyParticipationInput } from "../
 export default function MyParticipation() {
   const { allIntervals, currentInterval } = useAppSelector((state) => state.intervals);
   const collective = useAppSelector((state) => state.collective);
+  const personId = useAppSelector((state) => state.me?.person_id);
 
   const navigate = useNavigate();
 
-  if (!collective) {
-    return <Text>Error: Collective not found.</Text>;
-  }
+  if (!collective) return <Text>Error: Collective not found.</Text>;
+  if (!personId) return <Text>Error: Person ID not found.</Text>;
 
   const { intervalId } = useParams();
   const intervalIdNumber = Number(intervalId);
@@ -77,7 +77,7 @@ export default function MyParticipation() {
           <DateText date={interval.start_date} /> - <DateText date={interval.end_date} />
         </Text>
       </Stack>
-      <ParticipationForm readOnly={readOnly} involvement={involvement} key={involvement?.id || `fresh-${interval.id}`} onSubmit={onSubmit} interval={interval} />
+      <ParticipationForm readOnly={readOnly} personId={personId} involvement={involvement} key={involvement?.id || `fresh-${interval.id}`} onSubmit={onSubmit} interval={interval} />
     </Container>
   );
 }
