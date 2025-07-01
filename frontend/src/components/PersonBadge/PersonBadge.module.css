@@ -3,3 +3,8 @@
   border-radius: var(--mantine-radius-lg);
   padding-right: var(--mantine-spacing-md);
 }
+
+.PersonBadge.primary {
+  background-color: var(--mantine-color-blue-5);
+  color: var(--mantine-color-dark-9);
+}

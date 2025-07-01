@@ -35,7 +35,7 @@ function CrewParticipationToggle({ checked, personId, crew, crewInvolvements, pe
               const person = people[involvement.person_id];
               return person && <PersonBadge key={involvement.id} person={person} />;
             })}
-            {checked && <PersonBadge person={people[personId]} />}
+            {checked && <PersonBadge person={people[personId]} variant="primary" />}
           </Group>
         </Stack>
       </Stack>

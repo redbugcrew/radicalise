@@ -8,13 +8,20 @@ export const avatarUrl = (id: number) => {
   return `https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-${number}.png`;
 };
 
-export default function PersonBadge({ person }: { person: Person | null }) {
+interface PersonBadgeProps {
+  person: Person | null;
+  variant?: "default" | "primary";
+}
+
+export default function PersonBadge({ person, variant = "default" }: PersonBadgeProps) {
   if (!person) {
     return null;
   }
 
+  const groupClasses = [classes.PersonBadge, classes[variant]].filter(Boolean).join(" ");
+
   return (
-    <Group gap="xs" className={classes.PersonBadge}>
+    <Group gap="xs" className={groupClasses}>
       <Avatar size={30} src={avatarUrl(person.id)} radius={30} />
       <Text fz="sm" fw={500}>
         {person.display_name}
