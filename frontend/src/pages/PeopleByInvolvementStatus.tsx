@@ -7,35 +7,7 @@ import { useState } from "react";
 import type { PeopleState } from "../store/people";
 import type { PeopleTableRow } from "../components/PeopleTable/PeopleTable";
 import type { CrewsState } from "../store/crews";
-
-type HashById<T> = Map<number, T[]>;
-type HashByStatus<T> = Map<InvolvementStatus, T[]>;
-
-function hashByStatus<T extends { status: InvolvementStatus }>(records: T[]): HashByStatus<T> {
-  const map = new Map<InvolvementStatus, T[]>();
-  records.forEach((record) => {
-    const status = InvolvementStatus[record.status as keyof typeof InvolvementStatus];
-    if (!map.has(status)) {
-      map.set(status, []);
-    }
-    map.get(status)?.push(record);
-  });
-  return map;
-}
-
-function hashByPerson<T extends { person_id: number }>(records: T[] | undefined): HashById<T> {
-  const map = new Map<number, T[]>();
-
-  if (!records) return map;
-
-  records.forEach((record) => {
-    if (!map.has(record.person_id)) {
-      map.set(record.person_id, []);
-    }
-    map.get(record.person_id)?.push(record);
-  });
-  return map;
-}
+import { hashByPerson, hashByStatus, type HashById } from "../utilities/hashing";
 
 function peopleForInvolvements(involvements: CollectiveInvolvement[], allCrewInvolvements: HashById<CrewInvolvement>, allPeople: PeopleState, allCrews: CrewsState): PeopleTableRow[] {
   return involvements.map((involvement) => {
