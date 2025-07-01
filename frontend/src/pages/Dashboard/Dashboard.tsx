@@ -5,7 +5,6 @@ import type { CollectiveInvolvementWithDetails, CrewInvolvement, Interval, MyInt
 import DateText from "../../components/DateText";
 import classes from "./Dashboard.module.css";
 import { CrewsList } from "../../components";
-import { forPerson } from "../../store/involvements";
 import { compareStrings } from "../../utilities/comparison";
 
 interface MyIntervalPartipationCardProps {
