@@ -1,8 +1,9 @@
-import { Group, Stack, Table } from "@mantine/core";
+import { Card, Group, Stack, Title, Text } from "@mantine/core";
 import type { Crew, CrewInvolvement } from "../api/Api";
 import { hashByNumber } from "../utilities/hashing";
 import PersonBadge from "./PersonBadge/PersonBadge";
 import type { PeopleObjectMap } from "../store/people";
+import { compareStrings } from "../utilities/comparison";
 
 interface CrewsTableProps {
   crews: Crew[];
@@ -14,34 +15,32 @@ export default function CrewsTable({ crews, involvements, people }: CrewsTablePr
   const involvementsHash = hashByNumber<CrewInvolvement>(involvements, "crew_id");
 
   return (
-    <Stack align="stretch">
-      <Table verticalSpacing="sm">
-        <Table.Thead>
-          <Table.Tr>
-            <Table.Th>Name</Table.Th>
-            <Table.Th>Description</Table.Th>
-            <Table.Th>Participant(s)</Table.Th>
-          </Table.Tr>
-        </Table.Thead>
-        <Table.Tbody>
-          {crews.map((crew) => {
-            const crewInvolvements = involvementsHash.get(crew.id) || [];
-            return (
-              <Table.Tr key={crew.id}>
-                <Table.Td>{crew.name}</Table.Td>
-                <Table.Td>{crew.description}</Table.Td>
-                <Table.Td>
-                  <Group>
-                    {crewInvolvements.map((involvement) => (
-                      <PersonBadge key={involvement.id} person={people[involvement.person_id]} />
-                    ))}
-                  </Group>
-                </Table.Td>
-              </Table.Tr>
-            );
-          })}
-        </Table.Tbody>
-      </Table>
+    <Stack>
+      {crews.map((crew) => {
+        const crewInvolvements = involvementsHash.get(crew.id) || [];
+        const crewPeople = crewInvolvements
+          .map((involvement) => people[involvement.person_id])
+          .filter(Boolean)
+          .sort(compareStrings("display_name"));
+
+        return (
+          <Card withBorder>
+            <Stack gap="md">
+              <Stack gap={0}>
+                <Title order={2} size="h4">
+                  {crew.name}
+                </Title>
+                <Text>{crew.description}</Text>
+              </Stack>
+              <Group>
+                {crewPeople.map((person) => {
+                  return <PersonBadge key={person.id} person={person} />;
+                })}
+              </Group>
+            </Stack>
+          </Card>
+        );
+      })}
     </Stack>
   );
 }

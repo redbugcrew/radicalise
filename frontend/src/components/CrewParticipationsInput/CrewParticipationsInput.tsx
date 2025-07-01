@@ -6,6 +6,7 @@ import { PersonBadge } from "../";
 import { useUncontrolled } from "@mantine/hooks";
 import { IconScale } from "@tabler/icons-react";
 import styles from "./CrewParticipationsInput.module.css";
+import { compareStrings } from "../../utilities/comparison";
 
 interface CrewParticipationToggleProps {
   checked?: boolean;
@@ -19,12 +20,16 @@ interface CrewParticipationToggleProps {
 
 function CrewParticipationToggle({ checked, personId, crew, crewInvolvements, people, disabled, onChange }: CrewParticipationToggleProps) {
   const otherInvolvements = crewInvolvements.filter((involvement) => involvement.person_id !== personId);
+  const otherPeople = otherInvolvements
+    .map((involvement) => people[involvement.person_id])
+    .filter(Boolean)
+    .sort(compareStrings("display_name"));
 
   const handleOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (onChange) onChange(event.target.checked);
   };
 
-  const peopleOnCrew = otherInvolvements.length + (checked ? 1 : 0);
+  const peopleOnCrew = otherPeople.length + (checked ? 1 : 0);
 
   return (
     <Card className={[styles.card, peopleOnCrew ? undefined : styles.empty].join(" ")}>
@@ -35,9 +40,8 @@ function CrewParticipationToggle({ checked, personId, crew, crewInvolvements, pe
             <Switch disabled={disabled} checked={checked} onChange={handleOnChange} />
           </Group>
           <Group mih={42}>
-            {otherInvolvements.map((involvement) => {
-              const person = people[involvement.person_id];
-              return person && <PersonBadge key={involvement.id} person={person} />;
+            {otherPeople.map((person) => {
+              return person && <PersonBadge key={person.id} person={person} />;
             })}
             {checked && <PersonBadge person={people[personId]} variant="primary" />}
           </Group>
