@@ -1,0 +1,32 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO intervals (start_date, end_date)\n         VALUES (?, ?)\n         RETURNING id, start_date, end_date",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer"
+      },
+      {
+        "name": "start_date",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "end_date",
+        "ordinal": 2,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "f919200b9126e16247104b2e60a8a5d13f1d1ba92ea35255e1a0877654ad8415"
+}

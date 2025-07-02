@@ -1,7 +1,6 @@
 import { Container, Title, Text, Stack } from "@mantine/core";
 import { IntervalForm } from "../../components";
 import { useAppSelector } from "../../store";
-import type { Interval } from "../../api/Api";
 
 export default function NewInterval() {
   const intervals = useAppSelector((state) => state.intervals.allIntervals);

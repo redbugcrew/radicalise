@@ -25,12 +25,6 @@ type StepProps = {
 };
 
 function CapacityStep({ form, readOnly }: StepProps) {
-  let wellbeingValue = null;
-
-  form.watch("wellbeing", ({ value }) => {
-    wellbeingValue = value;
-  });
-
   return (
     <Stack>
       <ComboTextArea
