@@ -9,7 +9,7 @@ import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
 
 import { MantineProvider } from "@mantine/core";
-import { Dashboard, NewPerson, People, Person, MyParticipation, Crews, Intervals } from "./pages";
+import { Dashboard, NewPerson, People, Person, MyParticipation, Crews, Intervals, NewInterval } from "./pages";
 import { buildRoutes as buildAuthRoutes } from "./contexts/auth";
 
 function withStore(func: (store: AppStore) => any, store: AppStore): LoaderFunction<any> {
@@ -52,6 +52,10 @@ const router = createBrowserRouter([
       {
         path: "intervals",
         element: <Intervals />,
+      },
+      {
+        path: "intervals/new",
+        element: <NewInterval />,
       },
       {
         path: "my_participation/:intervalId",
