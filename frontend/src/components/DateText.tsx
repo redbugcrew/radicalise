@@ -1,15 +1,21 @@
 import { Text } from "@mantine/core";
-import { DateOnly } from "@urbdyn/date-only";
+import { dateStringToDateTime } from "../utilities/date";
+import { format, isThisYear } from "date-fns";
 
-export default function DateText({ date }: { date: DateOnly | null | string }) {
-  if (!date) return null;
+interface DateTextProps {
+  date: Date | null | string;
+  formatString?: string;
+}
 
+export default function DateText({ date, formatString }: DateTextProps) {
   if (typeof date === "string") {
-    date = DateOnly.fromString(date);
+    date = dateStringToDateTime(date);
   }
 
-  const dateTime = new Date(date.year, date.month - 1, date.day);
-  const options: Intl.DateTimeFormatOptions = { day: "numeric", month: "long" };
-  const formattedDate = dateTime.toLocaleDateString("en-US", options);
+  if (!date) return null;
+
+  const finalFormatString = formatString || "LLL d" + (isThisYear(date) ? "" : ", yyyy");
+
+  const formattedDate = format(date, finalFormatString);
   return <Text span>{formattedDate}</Text>;
 }

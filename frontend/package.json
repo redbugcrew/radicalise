@@ -27,6 +27,7 @@
     "@urbdyn/date-only": "^0.1.0",
     "axios": "^1.9.0",
     "change-case": "^5.4.4",
+    "date-fns": "^4.1.0",
     "immer": "^10.1.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

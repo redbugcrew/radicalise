@@ -5,3 +5,4 @@ export { default as IntervalSelector } from "./IntervalSelector";
 export { default as PersonBadge } from "./PersonBadge/PersonBadge";
 export { default as CrewParticipationsInput } from "./CrewParticipationsInput/CrewParticipationsInput";
 export { default as CrewsList } from "./CrewsList";
+export { default as IntervalsTable } from "./IntervalsTable";

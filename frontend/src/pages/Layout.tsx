@@ -1,6 +1,6 @@
 import { AppShell, Burger, Container, Group } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { IconHome2, IconUsers, IconUsersGroup } from "@tabler/icons-react";
+import { IconCalendar, IconHome2, IconUsers, IconUsersGroup } from "@tabler/icons-react";
 import { Link, Outlet } from "react-router-dom";
 import { NavLink } from "../components";
 import { useAppSelector } from "../store";
@@ -20,9 +20,10 @@ export default function Layout() {
         </Group>
       </AppShell.Header>
       <AppShell.Navbar p="md">
-        <NavLink label="Dashboard" href="dashboard" leftSection={<IconHome2 size={16} />} onClick={toggle} />
-        <NavLink label="People" href="people" leftSection={<IconUsers size={16} />} onClick={toggle} />
-        <NavLink label="Crews" href="crews" leftSection={<IconUsersGroup size={16} />} onClick={toggle} />
+        <NavLink label="Dashboard" href="dashboard" leftSection={<IconHome2 size={18} />} onClick={toggle} />
+        <NavLink label="People" href="people" leftSection={<IconUsers size={18} />} onClick={toggle} />
+        <NavLink label="Crews" href="crews" leftSection={<IconUsersGroup size={18} />} onClick={toggle} />
+        <NavLink label="Intervals" href="intervals" leftSection={<IconCalendar size={18} />} onClick={toggle} />
       </AppShell.Navbar>
       <AppShell.Main>
         <Container p={0}>{collective && <Outlet />}</Container>
