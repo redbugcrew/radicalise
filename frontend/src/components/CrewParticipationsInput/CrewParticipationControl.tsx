@@ -5,14 +5,16 @@ import { PersonBadge } from "../";
 import styles from "./CrewParticipationsInput.module.css";
 import { compareStrings } from "../../utilities/comparison";
 
+type CrewParticipationData = boolean;
+
 interface CrewParticipationToggleProps {
-  checked?: boolean;
+  checked?: CrewParticipationData;
   personId: number;
   crew: Crew;
   crewInvolvements: CrewInvolvement[];
   people: PeopleObjectMap;
   disabled?: boolean;
-  onChange?: (change: boolean) => void;
+  onChange?: (change: CrewParticipationData) => void;
 }
 
 export default function CrewParticipationControl({ checked, personId, crew, crewInvolvements, people, disabled, onChange }: CrewParticipationToggleProps) {
@@ -30,20 +32,38 @@ export default function CrewParticipationControl({ checked, personId, crew, crew
 
   return (
     <Card className={[styles.card, peopleOnCrew ? undefined : styles.empty].join(" ")}>
-      <Stack key={crew.id} gap="md">
-        <Stack gap="xs">
-          <Group justify="space-between">
-            <Title order={4}>{crew.name}</Title>
-            <Switch disabled={disabled} checked={checked} onChange={handleOnChange} />
-          </Group>
-          <Group mih={42}>
-            {otherPeople.map((person) => {
-              return person && <PersonBadge key={person.id} person={person} />;
-            })}
-            {checked && <PersonBadge person={people[personId]} variant="primary" />}
-          </Group>
+      <Card.Section withBorder inheritPadding py="xs">
+        <Stack key={crew.id} gap="md">
+          <Stack gap="xs">
+            <Group justify="space-between">
+              <Title order={4}>{crew.name}</Title>
+              <Switch disabled={disabled} checked={checked} onChange={handleOnChange} />
+            </Group>
+            <Group mih={42}>
+              {otherPeople.map((person) => {
+                return person && <PersonBadge key={person.id} person={person} />;
+              })}
+              {checked && <PersonBadge person={people[personId]} variant="primary" />}
+            </Group>
+          </Stack>
         </Stack>
-      </Stack>
+      </Card.Section>
+      <Card.Section withBorder inheritPadding py="xs">
+        <Stack key={crew.id} gap="md">
+          <Stack gap="xs">
+            <Group justify="space-between">
+              <Title order={5}>Convenor</Title>
+              <Switch disabled={disabled} checked={checked} onChange={handleOnChange} />
+            </Group>
+            <Group mih={42}>
+              {otherPeople.map((person) => {
+                return person && <PersonBadge key={person.id} person={person} />;
+              })}
+              {checked && <PersonBadge person={people[personId]} variant="primary" />}
+            </Group>
+          </Stack>
+        </Stack>
+      </Card.Section>
     </Card>
   );
 }
