@@ -4,9 +4,15 @@ import type { PeopleObjectMap } from "../../store/people";
 import type { Crew, CrewInvolvement } from "../../api/Api";
 import { useUncontrolled } from "@mantine/hooks";
 import { IconScale } from "@tabler/icons-react";
-import CrewParticipationControl, { type CrewParticipationData } from "./CrewParticipationControl";
+import CrewParticipationControl, { type CrewParticipationControlData } from "./CrewParticipationControl";
 
-type CrewParticipationsData = number[];
+export interface CrewParticipationData {
+  crew_id: number;
+  convenor: boolean;
+  volunteered_convenor: boolean;
+}
+
+export type CrewParticipationsData = CrewParticipationData[];
 
 interface GetInputPropsReturnType {
   onChange: any;
@@ -27,21 +33,42 @@ type CrewParticipationsInputProps = GetInputPropsReturnType & {
   crewInvolvements: CrewInvolvement[];
 };
 
-function upsertId(arr: number[], id: number): number[] {
-  const result = removeId(arr, id);
-  result.push(id);
+function upsertData(arr: CrewParticipationsData, record: CrewParticipationData): CrewParticipationsData {
+  const result = removeData(arr, record);
+  result.push(record);
   return result;
 }
 
-function removeId(arr: number[], id: number): number[] {
-  return arr.filter((item) => item !== id);
+function removeData(arr: CrewParticipationsData, record: CrewParticipationData): CrewParticipationsData {
+  return arr.filter((item) => item.crew_id !== record.crew_id);
 }
 
-function toggleId(arr: number[], id: number, checked: boolean): number[] {
+function toggleData(arr: CrewParticipationsData, record: CrewParticipationData, checked: boolean): CrewParticipationsData {
   if (checked) {
-    return upsertId(arr, id);
+    return upsertData(arr, record);
   }
-  return removeId(arr, id);
+  return removeData(arr, record);
+}
+
+function hasCrew(arr: CrewParticipationsData, crewId: number): boolean {
+  return arr.some((item) => item.crew_id === crewId);
+}
+
+export function dataFromInvolvements(crewInvolvements: CrewInvolvement[]): CrewParticipationsData {
+  return crewInvolvements.map((involvement) => ({
+    crew_id: involvement.crew_id,
+    convenor: involvement.convenor,
+    volunteered_convenor: involvement.volunteered_convenor,
+  }));
+}
+
+function toControlData(data: CrewParticipationsData, crewId: number): CrewParticipationControlData {
+  const record = data.find((item) => item.crew_id === crewId);
+  return {
+    participating: !!record,
+    convenor: record?.convenor || false,
+    volunteered_convenor: record?.volunteered_convenor || false,
+  };
 }
 
 export default function CrewParticipationsInput({ crews, personId, people, disabled, crewInvolvements, ...rest }: CrewParticipationsInputProps) {
@@ -52,9 +79,14 @@ export default function CrewParticipationsInput({ crews, personId, people, disab
     onChange: rest.onChange,
   });
 
-  const handleChange = (crewId: number, itemValue: CrewParticipationData) => {
+  const handleChange = (crewId: number, itemValue: CrewParticipationControlData) => {
     if (!disabled) {
-      const newValue = toggleId(value, crewId, itemValue.participating);
+      const newRecord = {
+        crew_id: crewId,
+        convenor: itemValue.convenor,
+        volunteered_convenor: itemValue.volunteered_convenor,
+      };
+      const newValue = toggleData(value, newRecord, itemValue.participating);
       setValue(newValue);
     }
   };
@@ -71,7 +103,7 @@ export default function CrewParticipationsInput({ crews, personId, people, disab
             <CrewParticipationControl
               key={crew.id}
               personId={personId}
-              value={value.includes(crew.id) ? { participating: true } : { participating: false }}
+              value={toControlData(value, crew.id)}
               crew={crew}
               crewInvolvements={forCrew(crewInvolvements, crew.id)}
               people={people}

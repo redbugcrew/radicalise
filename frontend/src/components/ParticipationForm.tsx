@@ -8,6 +8,7 @@ import { useAppSelector } from "../store";
 import { forPerson, getMatchingInvolvementInterval } from "../store/involvements";
 import { ComboTextArea, CrewParticipationsInput } from ".";
 import type { ArrayOfStringTuples } from "./forms/ComboTextArea";
+import { dataFromInvolvements, type CrewParticipationsData } from "./CrewParticipationsInput/CrewParticipationsInput";
 
 export interface MyParticipationFormData {
   wellbeing: string;
@@ -16,7 +17,7 @@ export interface MyParticipationFormData {
   participation_intention: ParticipationIntention | null;
   opt_out_type: OptOutType | null;
   opt_out_planned_return_date: string | null;
-  crew_ids: number[];
+  crew_involvements: CrewParticipationsData;
 }
 
 type StepProps = {
@@ -152,7 +153,7 @@ function AdditionalParticipationStep({ form, readOnly, personId, crewInvolvement
       <Title order={3}>Crews</Title>
       <p>{JSON.stringify(form)}</p>
 
-      <CrewParticipationsInput personId={personId} crews={crews} people={people} disabled={readOnly} crewInvolvements={crewInvolvements} key={form.key("crew_ids")} {...form.getInputProps("crew_ids")} />
+      <CrewParticipationsInput personId={personId} crews={crews} people={people} disabled={readOnly} crewInvolvements={crewInvolvements} key={form.key("crew_involvements")} {...form.getInputProps("crew_involvements")} />
     </Stack>
   );
 }
@@ -184,7 +185,7 @@ export default function ParticipationForm({ personId, interval, readOnly = false
       participation_intention: involvement?.participation_intention || null,
       opt_out_type: involvement?.opt_out_type || null,
       opt_out_planned_return_date: involvement?.opt_out_planned_return_date || null,
-      crew_ids: forPerson(crewInvolvements, personId).map((involvement) => involvement.crew_id),
+      crew_involvements: dataFromInvolvements(forPerson(crewInvolvements, personId)),
     },
 
     validate: (values) => {
