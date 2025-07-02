@@ -154,7 +154,8 @@ pub async fn update_crew_participations(
             person_id,
             crew_id,
             interval_id,
-            status: InvolvementStatus::Participating,
+            convenor: false,
+            volunteered_convenor: false,
         })
         .collect();
 
@@ -174,7 +175,7 @@ pub async fn find_crew_involvements(
 ) -> Result<Vec<CrewInvolvement>, sqlx::Error> {
     sqlx::query_as!(
         CrewInvolvement,
-        "SELECT id, person_id, crew_id, interval_id, status as \"status: InvolvementStatus\"
+        "SELECT id, person_id, crew_id, interval_id, convenor, volunteered_convenor
         FROM crew_involvements
         WHERE person_id = ? AND interval_id = ?",
         person_id,
@@ -218,12 +219,13 @@ pub async fn add_crew_involvements(
 
     for involvement in involvements {
         sqlx::query!(
-            "INSERT INTO crew_involvements (person_id, crew_id, interval_id, status)
-            VALUES (?, ?, ?, ?)",
+            "INSERT INTO crew_involvements (person_id, crew_id, interval_id, convenor, volunteered_convenor)
+            VALUES (?, ?, ?, ?, ?)",
             involvement.person_id,
             involvement.crew_id,
             involvement.interval_id,
-            involvement.status
+            involvement.convenor,
+            involvement.volunteered_convenor
         )
         .execute(&mut *transaction)
         .await?;

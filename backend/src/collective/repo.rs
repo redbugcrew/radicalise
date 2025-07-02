@@ -73,7 +73,7 @@ pub async fn find_all_crew_involvements(
 ) -> Result<Vec<CrewInvolvement>, sqlx::Error> {
     sqlx::query_as!(
         CrewInvolvement,
-        "SELECT crew_involvements.id, person_id, crew_id, interval_id, status as \"status: InvolvementStatus\"
+        "SELECT crew_involvements.id, person_id, crew_id, interval_id, convenor, volunteered_convenor
         FROM crew_involvements
         WHERE
           interval_id = ?",

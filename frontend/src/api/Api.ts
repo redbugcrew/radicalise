@@ -76,6 +76,7 @@ export interface Crew {
 }
 
 export interface CrewInvolvement {
+  convenor: boolean;
   /** @format int64 */
   crew_id: number;
   /** @format int64 */
@@ -84,7 +85,7 @@ export interface CrewInvolvement {
   interval_id: number;
   /** @format int64 */
   person_id: number;
-  status: InvolvementStatus;
+  volunteered_convenor: boolean;
 }
 
 export interface ForgotPasswordRequest {
@@ -341,7 +342,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 0.5.8
+ * @version 0.5.9
  * @license
  */
 export class Api<

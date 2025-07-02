@@ -6,6 +6,8 @@ import { useUncontrolled } from "@mantine/hooks";
 import { IconScale } from "@tabler/icons-react";
 import CrewParticipationControl, { type CrewParticipationData } from "./CrewParticipationControl";
 
+type CrewParticipationsData = number[];
+
 interface GetInputPropsReturnType {
   onChange: any;
   value?: any;
@@ -43,7 +45,7 @@ function toggleId(arr: number[], id: number, checked: boolean): number[] {
 }
 
 export default function CrewParticipationsInput({ crews, personId, people, disabled, crewInvolvements, ...rest }: CrewParticipationsInputProps) {
-  const [value, setValue] = useUncontrolled<number[]>({
+  const [value, setValue] = useUncontrolled<CrewParticipationsData>({
     value: rest.value,
     defaultValue: rest.defaultValue,
     finalValue: [],

@@ -150,6 +150,8 @@ function AdditionalParticipationStep({ form, readOnly, personId, crewInvolvement
   return (
     <Stack>
       <Title order={3}>Crews</Title>
+      <p>{JSON.stringify(form)}</p>
+
       <CrewParticipationsInput personId={personId} crews={crews} people={people} disabled={readOnly} crewInvolvements={crewInvolvements} key={form.key("crew_ids")} {...form.getInputProps("crew_ids")} />
     </Stack>
   );

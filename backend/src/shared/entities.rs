@@ -108,7 +108,8 @@ pub struct CrewInvolvement {
     pub person_id: i64,
     pub crew_id: i64,
     pub interval_id: i64,
-    pub status: InvolvementStatus,
+    pub convenor: bool,
+    pub volunteered_convenor: bool,
 }
 
 #[derive(Serialize, Deserialize, ToSchema)]
