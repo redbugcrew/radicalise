@@ -21,6 +21,7 @@ mod api;
 mod auth;
 mod collective;
 mod database;
+mod intervals;
 mod me;
 mod shared;
 mod static_server;

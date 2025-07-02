@@ -341,7 +341,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 0.5.5
+ * @version 0.5.8
  * @license
  */
 export class Api<
@@ -418,6 +418,22 @@ export class Api<
       this.request<IntervalInvolvementData, any>({
         path: `/api/collective/interval/${intervalId}/involvements`,
         method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CreateInterval
+     * @request POST:/api/intervals
+     */
+    createInterval: (data: Interval, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/intervals`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),

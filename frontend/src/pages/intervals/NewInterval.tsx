@@ -1,11 +1,13 @@
-import { Stack, Title } from "@mantine/core";
+import { Container, Title } from "@mantine/core";
+import { IntervalForm } from "../../components";
 
 export default function NewInterval() {
   return (
-    <Stack>
-      <Title order={1}>New Interval</Title>
-      <p>Interval creation form will go here.</p>
-      {/* Placeholder for the form component */}
-    </Stack>
+    <Container>
+      <Title order={1} mb="md">
+        New Interval
+      </Title>
+      <IntervalForm />
+    </Container>
   );
 }

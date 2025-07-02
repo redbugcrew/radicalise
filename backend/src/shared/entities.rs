@@ -15,7 +15,7 @@ pub struct Person {
     pub display_name: String,
 }
 
-#[derive(Serialize, Deserialize, ToSchema)]
+#[derive(Serialize, Deserialize, ToSchema, Debug)]
 pub struct Interval {
     pub id: i64,
     pub start_date: String,

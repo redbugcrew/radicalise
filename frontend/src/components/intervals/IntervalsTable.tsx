@@ -1,7 +1,7 @@
 import { Table } from "@mantine/core";
-import type { Interval } from "../api/Api";
-import DateText from "./DateText";
-import { dateStringToDateTime } from "../utilities/date";
+import type { Interval } from "../../api/Api";
+import DateText from "./../DateText";
+import { dateStringToDateTime } from "../../utilities/date";
 import { differenceInDays } from "date-fns";
 
 interface IntervalsTableProps {
