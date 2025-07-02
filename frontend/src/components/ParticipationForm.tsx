@@ -165,8 +165,6 @@ export default function ParticipationForm({ personId, interval, readOnly = false
       if (step === 0) {
         results = {
           ...results,
-          wellbeing: values.wellbeing.length > 0 ? null : "Wellbeing is required",
-          focus: values.focus.length > 0 ? null : "Focus is required",
           capacity: values.capacity.length > 0 ? null : "Capacity is required",
         };
       }
@@ -200,15 +198,14 @@ export default function ParticipationForm({ personId, interval, readOnly = false
   const prevStep = () => setStep((current) => (current > minStep ? current - 1 : current));
   const nextStep = () => setStep((current) => (current < maxStep ? current + 1 : current));
   const nextStepIfValid = () => {
-    if (form.validate().hasErrors) {
-      return;
-    }
+    if (!readOnly && form.validate().hasErrors) return;
+
     nextStep();
   };
   const setStepIfValid = (newStep: number) => {
-    const formValid = !form.validate().hasErrors;
+    if (!readOnly && form.validate().hasErrors) return;
 
-    if (newStep <= step || (newStep === step + 1 && formValid)) {
+    if (newStep <= step || newStep === step + 1) {
       // if (newStep === 2 && !additionalParticipationActive) return;
 
       setStep(newStep);
