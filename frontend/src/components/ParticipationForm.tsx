@@ -6,7 +6,8 @@ import type { CollectiveInvolvementWithDetails, Crew, CrewInvolvement, Interval,
 import { IconLock } from "@tabler/icons-react";
 import { useAppSelector } from "../store";
 import { forPerson, getMatchingInvolvementInterval } from "../store/involvements";
-import { CrewParticipationsInput } from ".";
+import { ComboTextArea, CrewParticipationsInput } from ".";
+import type { ArrayOfStringTuples } from "./forms/ComboTextArea";
 
 export interface MyParticipationFormData {
   wellbeing: string;
@@ -24,25 +25,56 @@ type StepProps = {
 };
 
 function CapacityStep({ form, readOnly }: StepProps) {
+  let wellbeingValue = null;
+
+  form.watch("wellbeing", ({ value }) => {
+    wellbeingValue = value;
+  });
+
   return (
     <Stack>
-      <Textarea
+      <ComboTextArea
         disabled={readOnly}
+        rows={4}
         label="Wellbeing"
-        description="How is your wellbeing and energy? What is likely to impact it positively or negatively?"
+        description="How is your wellbeing and energy?"
         key={form.key("wellbeing")}
+        hints={
+          [
+            ["Excitable", "I'm feeling excitable"],
+            ["Determined", "I'm feeling determined"],
+            ["Mostly well", "I'm feeling mostly well"],
+            ["Up and down", "I'm feeling up and down"],
+            ["A bit meh", "I'm feeling a bit meh"],
+            ["Overwhelmed", "I'm feeling overwhelmed"],
+            ["Exhausted", "I'm feeling exhausted"],
+          ] as ArrayOfStringTuples
+        }
         {...form.getInputProps("wellbeing")}
       />
-      <Textarea
+      <ComboTextArea
         disabled={readOnly}
         label="Focus"
+        rows={4}
         description="Where are you likely to be directing your time, energy and attention? Do you have any commitments, events or responsibilities coming up?"
+        hints={
+          [
+            ["surviving", "I'm focusing on surviving"],
+            ["care responsibilities", "I'm focusing on care responsibilities"],
+            ["generating income", "I'm focusing on generating income"],
+            ["travel", "I'm focused on travel opportunities"],
+            ["study", "I'm focusing on learning opportunities"],
+            ["community projects", "I'm contributing to community projects"],
+            ["social connection", "I'm nourishing my social connections"],
+          ] as ArrayOfStringTuples
+        }
         key={form.key("focus")}
         {...form.getInputProps("focus")}
       />
       <Textarea
         disabled={readOnly}
         label="Capacity"
+        rows={4}
         description="Given the context of your life (above), how would you describe your capacity to participate in the Brassica Collective this interval"
         key={form.key("capacity")}
         {...form.getInputProps("capacity")}
@@ -148,7 +180,7 @@ export default function ParticipationForm({ personId, interval, readOnly = false
   const maxStep = additionalParticipationActive ? 2 : 1;
 
   const form = useForm<MyParticipationFormData>({
-    mode: "uncontrolled",
+    mode: "controlled",
     initialValues: {
       wellbeing: involvement?.wellbeing || "",
       focus: involvement?.focus || "",
