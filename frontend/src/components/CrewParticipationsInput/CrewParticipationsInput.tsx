@@ -4,7 +4,7 @@ import type { PeopleObjectMap } from "../../store/people";
 import type { Crew, CrewInvolvement } from "../../api/Api";
 import { useUncontrolled } from "@mantine/hooks";
 import { IconScale } from "@tabler/icons-react";
-import CrewParticipationControl from "./CrewParticipationControl";
+import CrewParticipationControl, { type CrewParticipationData } from "./CrewParticipationControl";
 
 interface GetInputPropsReturnType {
   onChange: any;
@@ -50,9 +50,9 @@ export default function CrewParticipationsInput({ crews, personId, people, disab
     onChange: rest.onChange,
   });
 
-  const handleChange = (crewId: number, itemValue: boolean) => {
+  const handleChange = (crewId: number, itemValue: CrewParticipationData) => {
     if (!disabled) {
-      const newValue = toggleId(value, crewId, itemValue);
+      const newValue = toggleId(value, crewId, itemValue.participating);
       setValue(newValue);
     }
   };
@@ -69,7 +69,7 @@ export default function CrewParticipationsInput({ crews, personId, people, disab
             <CrewParticipationControl
               key={crew.id}
               personId={personId}
-              checked={value.includes(crew.id)}
+              value={value.includes(crew.id) ? { participating: true } : { participating: false }}
               crew={crew}
               crewInvolvements={forCrew(crewInvolvements, crew.id)}
               people={people}

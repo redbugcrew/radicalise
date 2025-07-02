@@ -5,10 +5,12 @@ import { PersonBadge } from "../";
 import styles from "./CrewParticipationsInput.module.css";
 import { compareStrings } from "../../utilities/comparison";
 
-type CrewParticipationData = boolean;
+export interface CrewParticipationData {
+  participating: boolean;
+}
 
 interface CrewParticipationToggleProps {
-  checked?: CrewParticipationData;
+  value: CrewParticipationData;
   personId: number;
   crew: Crew;
   crewInvolvements: CrewInvolvement[];
@@ -17,7 +19,7 @@ interface CrewParticipationToggleProps {
   onChange?: (change: CrewParticipationData) => void;
 }
 
-export default function CrewParticipationControl({ checked, personId, crew, crewInvolvements, people, disabled, onChange }: CrewParticipationToggleProps) {
+export default function CrewParticipationControl({ value, personId, crew, crewInvolvements, people, disabled, onChange }: CrewParticipationToggleProps) {
   const otherInvolvements = crewInvolvements.filter((involvement) => involvement.person_id !== personId);
   const otherPeople = otherInvolvements
     .map((involvement) => people[involvement.person_id])
@@ -25,10 +27,12 @@ export default function CrewParticipationControl({ checked, personId, crew, crew
     .sort(compareStrings("display_name"));
 
   const handleOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (onChange) onChange(event.target.checked);
+    const checked = event.target.checked;
+
+    if (onChange) onChange({ participating: checked });
   };
 
-  const peopleOnCrew = otherPeople.length + (checked ? 1 : 0);
+  const peopleOnCrew = otherPeople.length + (value ? 1 : 0);
 
   return (
     <Card className={[styles.card, peopleOnCrew ? undefined : styles.empty].join(" ")}>
@@ -37,33 +41,33 @@ export default function CrewParticipationControl({ checked, personId, crew, crew
           <Stack gap="xs">
             <Group justify="space-between">
               <Title order={4}>{crew.name}</Title>
-              <Switch disabled={disabled} checked={checked} onChange={handleOnChange} />
+              <Switch disabled={disabled} checked={value.participating} onChange={handleOnChange} />
             </Group>
             <Group mih={42}>
               {otherPeople.map((person) => {
                 return person && <PersonBadge key={person.id} person={person} />;
               })}
-              {checked && <PersonBadge person={people[personId]} variant="primary" />}
+              {value && <PersonBadge person={people[personId]} variant="primary" />}
             </Group>
           </Stack>
         </Stack>
       </Card.Section>
-      <Card.Section withBorder inheritPadding py="xs">
+      {/* <Card.Section withBorder inheritPadding py="xs">
         <Stack key={crew.id} gap="md">
           <Stack gap="xs">
             <Group justify="space-between">
               <Title order={5}>Convenor</Title>
-              <Switch disabled={disabled} checked={checked} onChange={handleOnChange} />
+              <Switch disabled={disabled} checked={value.participating} onChange={handleOnChange} />
             </Group>
             <Group mih={42}>
               {otherPeople.map((person) => {
                 return person && <PersonBadge key={person.id} person={person} />;
               })}
-              {checked && <PersonBadge person={people[personId]} variant="primary" />}
+              {value && <PersonBadge person={people[personId]} variant="primary" />}
             </Group>
           </Stack>
         </Stack>
-      </Card.Section>
+      </Card.Section> */}
     </Card>
   );
 }
