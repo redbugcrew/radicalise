@@ -1,9 +1,10 @@
 import { Card, Group, Stack, Switch, Title } from "@mantine/core";
 import type { PeopleObjectMap } from "../../store/people";
-import type { Crew, CrewInvolvement } from "../../api/Api";
+import type { Crew, CrewInvolvement, Person } from "../../api/Api";
 import { PersonBadge } from "../";
 import styles from "./CrewParticipationsInput.module.css";
-import { compareStrings } from "../../utilities/comparison";
+import { asPeopleAlphaSorted, notForPerson } from "../../store/involvements";
+import PersonBadgeGroup from "../PersonBadge/PersonBadgeGroup";
 
 export interface CrewParticipationControlData {
   participating: boolean;
@@ -21,12 +22,44 @@ interface CrewParticipationToggleProps {
   onChange?: (change: CrewParticipationControlData) => void;
 }
 
+function applyValue(crewInvolvements: CrewInvolvement[], crewId: number, personId: number, value: CrewParticipationControlData): CrewInvolvement[] {
+  const result = crewInvolvements.filter((involvement) => involvement.person_id !== personId);
+  if (value.participating) {
+    result.push({
+      id: 0, // dummy value
+      interval_id: 0, // dummy value
+      crew_id: crewId,
+      person_id: personId,
+      convenor: value.convenor,
+      volunteered_convenor: value.volunteered_convenor,
+    });
+  }
+  return result;
+}
+
+function forConvenor(crewInvolvements: CrewInvolvement[]): CrewInvolvement[] {
+  return crewInvolvements.filter((involvement) => involvement.volunteered_convenor);
+}
+
+function sortMeLast(people: Person[], me: Person): Person[] {
+  const meInList = people.find((person) => person.id === me.id);
+  const listWithoutMe = people.filter((person) => person.id !== me.id);
+
+  if (meInList) {
+    return [...listWithoutMe, meInList];
+  }
+  return people;
+}
+
+function displayPeople(involvements: CrewInvolvement[], people: PeopleObjectMap, me: Person): Person[] {
+  return sortMeLast(asPeopleAlphaSorted(involvements, people), me);
+}
+
 export default function CrewParticipationControl({ value, personId, crew, crewInvolvements, people, disabled, onChange }: CrewParticipationToggleProps) {
-  const otherInvolvements = crewInvolvements.filter((involvement) => involvement.person_id !== personId);
-  const otherPeople = otherInvolvements
-    .map((involvement) => people[involvement.person_id])
-    .filter(Boolean)
-    .sort(compareStrings("display_name"));
+  const person = people[personId];
+  if (!person) return <p>Person not found</p>;
+
+  const formInvolvements = applyValue(crewInvolvements, crew.id, personId, value);
 
   const handleOnChangeParticipating = (event: React.ChangeEvent<HTMLInputElement>) => {
     const checked = event.target.checked;
@@ -40,7 +73,10 @@ export default function CrewParticipationControl({ value, personId, crew, crewIn
     if (onChange) onChange({ ...value, volunteered_convenor: checked });
   };
 
-  const peopleOnCrew = otherPeople.length + (value ? 1 : 0);
+  const orderedPeople = displayPeople(formInvolvements, people, person);
+  const orderedConvenorVolunteers = displayPeople(forConvenor(formInvolvements), people, person);
+
+  const peopleOnCrew = formInvolvements.length > 0;
 
   return (
     <Card className={[styles.card, peopleOnCrew ? undefined : styles.empty].join(" ")}>
@@ -51,12 +87,7 @@ export default function CrewParticipationControl({ value, personId, crew, crewIn
               <Title order={4}>{crew.name}</Title>
               <Switch disabled={disabled} checked={value.participating} onChange={handleOnChangeParticipating} />
             </Group>
-            <Group mih={42}>
-              {otherPeople.map((person) => {
-                return person && <PersonBadge key={person.id} person={person} />;
-              })}
-              {value.participating && <PersonBadge person={people[personId]} variant="primary" />}
-            </Group>
+            <PersonBadgeGroup people={orderedPeople} highlightMe={person} />
           </Stack>
         </Stack>
       </Card.Section>
@@ -67,12 +98,7 @@ export default function CrewParticipationControl({ value, personId, crew, crewIn
               <Title order={5}>Convenor</Title>
               {value.participating && <Switch disabled={disabled} checked={value.volunteered_convenor} onChange={handleOnChangeVolunteeredConvenor} />}
             </Group>
-            <Group mih={42}>
-              {otherPeople.map((person) => {
-                return person && <PersonBadge key={person.id} person={person} />;
-              })}
-              {value.participating && value.volunteered_convenor && <PersonBadge person={people[personId]} variant="primary" />}
-            </Group>
+            <PersonBadgeGroup people={orderedConvenorVolunteers} highlightMe={person} />
           </Stack>
         </Stack>
       </Card.Section>

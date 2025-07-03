@@ -1,6 +1,8 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { CollectiveInvolvement, CollectiveInvolvementWithDetails, MyIntervalData, InvolvementData, IntervalInvolvementData, CrewInvolvement } from "../api/Api";
+import type { CollectiveInvolvement, CollectiveInvolvementWithDetails, MyIntervalData, InvolvementData, IntervalInvolvementData, CrewInvolvement, Person } from "../api/Api";
 import { type WritableDraft } from "immer";
+import type { PeopleObjectMap } from "./people";
+import { compareStrings } from "../utilities/comparison";
 
 export type InvolvementsState = InvolvementData;
 
@@ -36,6 +38,17 @@ export function forCrew(involvements: CrewInvolvement[], crewId: number): CrewIn
 
 export function forPerson<T extends { person_id: number }>(involvements: T[], personId: number): T[] {
   return involvements.filter((involvement) => involvement.person_id === personId);
+}
+
+export function notForPerson<T extends { person_id: number }>(involvements: T[], personId: number): T[] {
+  return involvements.filter((involvement) => involvement.person_id !== personId);
+}
+
+export function asPeopleAlphaSorted<T extends { person_id: number }>(involvements: T[], people: PeopleObjectMap): Person[] {
+  return involvements
+    .map((involvement) => people[involvement.person_id])
+    .filter(Boolean)
+    .sort(compareStrings("display_name"));
 }
 
 function updateCrewInvolvementForPerson(crewInvolvements: WritableDraft<CrewInvolvement>[], personInvolvements: CrewInvolvement[], personId: number): WritableDraft<CrewInvolvement>[] {
