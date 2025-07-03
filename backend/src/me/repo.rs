@@ -4,7 +4,7 @@ use utoipa::ToSchema;
 
 use crate::shared::{
     entities::{
-        CollectiveInvolvementWithDetails, Crew, CrewInvolvement, InvolvementStatus, OptOutType,
+        CollectiveInvolvementWithDetails, CrewInvolvement, InvolvementStatus, OptOutType,
         ParticipationIntention,
     },
     repo::{find_current_interval, find_next_interval},

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO crew_involvements (person_id, crew_id, interval_id, convenor, volunteered_convenor)\n            VALUES (?, ?, ?, ?, ?)\n            ON CONFLICT (person_id, crew_id, interval_id) DO UPDATE SET\n                convenor = excluded.convenor,\n                volunteered_convenor = excluded.volunteered_convenor",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 5
+    },
+    "nullable": []
+  },
+  "hash": "ed45303a1b85d2408528df92898d17391d0c5ac44c2441ddb0ea0477612a72bc"
+}
