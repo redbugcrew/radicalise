@@ -4,7 +4,7 @@ use utoipa::ToSchema;
 
 use crate::shared::{
     entities::{
-        CollectiveInvolvementWithDetails, CrewInvolvement, InvolvementStatus, OptOutType,
+        CollectiveInvolvementWithDetails, Crew, CrewInvolvement, InvolvementStatus, OptOutType,
         ParticipationIntention,
     },
     repo::{find_current_interval, find_next_interval},
@@ -126,13 +126,23 @@ pub async fn find_initial_data_for_me(
     })
 }
 
-pub async fn update_crew_participations(
+pub async fn update_crew_involvements(
     person_id: i64,
     interval_id: i64,
-    crew_ids: Vec<i64>,
+    involvements: Vec<CrewInvolvement>,
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
     let existing = find_crew_involvements(person_id, interval_id, pool).await?;
+
+    // Ensure all the involvements have the same person_id and interval_id
+    for involvement in &involvements {
+        if involvement.person_id != person_id || involvement.interval_id != interval_id {
+            eprintln!("Mismatched crew involvement: {:?}", involvement);
+            return Err(sqlx::Error::RowNotFound);
+        }
+    }
+
+    let crew_ids: Vec<i64> = involvements.iter().map(|i| i.crew_id).collect();
 
     // Involvements to remove
     let to_remove: Vec<CrewInvolvement> = existing
@@ -141,29 +151,11 @@ pub async fn update_crew_participations(
         .cloned()
         .collect();
 
-    // Involvements to add
-    let to_add: Vec<CrewInvolvement> = crew_ids
-        .iter()
-        .filter(|&&crew_id| {
-            !existing
-                .iter()
-                .any(|involvement| involvement.crew_id == crew_id)
-        })
-        .map(|&crew_id| CrewInvolvement {
-            id: 0, // This will be set when inserting into the database
-            person_id,
-            crew_id,
-            interval_id,
-            convenor: false,
-            volunteered_convenor: false,
-        })
-        .collect();
-
     println!("Deleting crew participations {:?}", to_remove);
     delete_crew_involvements(to_remove, pool).await?;
 
-    println!("Adding crew participations {:?}", to_add);
-    add_crew_involvements(to_add, pool).await?;
+    println!("Upserting crew participations {:?}", involvements);
+    upsert_crew_involvements(involvements, pool).await?;
 
     Ok(())
 }
@@ -207,7 +199,7 @@ pub async fn delete_crew_involvements(
     Ok(())
 }
 
-pub async fn add_crew_involvements(
+pub async fn upsert_crew_involvements(
     involvements: Vec<CrewInvolvement>,
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
@@ -220,7 +212,10 @@ pub async fn add_crew_involvements(
     for involvement in involvements {
         sqlx::query!(
             "INSERT INTO crew_involvements (person_id, crew_id, interval_id, convenor, volunteered_convenor)
-            VALUES (?, ?, ?, ?, ?)",
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT (person_id, crew_id, interval_id) DO UPDATE SET
+                convenor = excluded.convenor,
+                volunteered_convenor = excluded.volunteered_convenor",
             involvement.person_id,
             involvement.crew_id,
             involvement.interval_id,

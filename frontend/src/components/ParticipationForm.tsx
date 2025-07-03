@@ -8,7 +8,6 @@ import { useAppSelector } from "../store";
 import { forPerson, getMatchingInvolvementInterval } from "../store/involvements";
 import { ComboTextArea, CrewParticipationsInput } from ".";
 import type { ArrayOfStringTuples } from "./forms/ComboTextArea";
-import { dataFromInvolvements, type CrewParticipationsData } from "./CrewParticipationsInput/CrewParticipationsInput";
 
 export interface MyParticipationFormData {
   wellbeing: string;
@@ -17,7 +16,7 @@ export interface MyParticipationFormData {
   participation_intention: ParticipationIntention | null;
   opt_out_type: OptOutType | null;
   opt_out_planned_return_date: string | null;
-  crew_involvements: CrewParticipationsData;
+  crew_involvements: CrewInvolvement[];
 }
 
 type StepProps = {
@@ -138,12 +137,13 @@ function MinimumParticipationStep({ form, readOnly }: MinimumParticipationStepPr
 
 interface AdditionalParticipationStepProps {
   personId: number;
+  intervalId: number;
   crewInvolvements: CrewInvolvement[];
   form: ReturnType<typeof useForm<MyParticipationFormData>>;
   readOnly?: boolean;
 }
 
-function AdditionalParticipationStep({ form, readOnly, personId, crewInvolvements }: AdditionalParticipationStepProps) {
+function AdditionalParticipationStep({ form, readOnly, personId, intervalId, crewInvolvements }: AdditionalParticipationStepProps) {
   const crewsMap = useAppSelector((state) => state.crews);
   const crews = Object.values(crewsMap) as Crew[];
   const people = useAppSelector((state) => state.people);
@@ -151,9 +151,18 @@ function AdditionalParticipationStep({ form, readOnly, personId, crewInvolvement
   return (
     <Stack>
       <Title order={3}>Crews</Title>
-      <p>{JSON.stringify(form)}</p>
+      {/* <p>{JSON.stringify(form)}</p> */}
 
-      <CrewParticipationsInput personId={personId} crews={crews} people={people} disabled={readOnly} crewInvolvements={crewInvolvements} key={form.key("crew_involvements")} {...form.getInputProps("crew_involvements")} />
+      <CrewParticipationsInput
+        personId={personId}
+        intervalId={intervalId}
+        crews={crews}
+        people={people}
+        disabled={readOnly}
+        crewInvolvements={crewInvolvements}
+        key={form.key("crew_involvements")}
+        {...form.getInputProps("crew_involvements")}
+      />
     </Stack>
   );
 }
@@ -185,7 +194,7 @@ export default function ParticipationForm({ personId, interval, readOnly = false
       participation_intention: involvement?.participation_intention || null,
       opt_out_type: involvement?.opt_out_type || null,
       opt_out_planned_return_date: involvement?.opt_out_planned_return_date || null,
-      crew_involvements: dataFromInvolvements(forPerson(crewInvolvements, personId)),
+      crew_involvements: forPerson(crewInvolvements, personId),
     },
 
     validate: (values) => {
@@ -251,7 +260,7 @@ export default function ParticipationForm({ personId, interval, readOnly = false
           <MinimumParticipationStep form={form} readOnly={readOnly} />
         </Stepper.Step>
         <Stepper.Step label="Additional Participation" disabled={!additionalParticipationActive} allowStepSelect={additionalParticipationActive} icon={additionalParticipationActive ? null : <IconLock size={24} />}>
-          <AdditionalParticipationStep form={form} readOnly={readOnly} personId={personId} crewInvolvements={crewInvolvements} />
+          <AdditionalParticipationStep form={form} readOnly={readOnly} personId={personId} intervalId={interval.id} crewInvolvements={crewInvolvements} />
         </Stepper.Step>
 
         <Stepper.Completed>Completed, click back button to get to previous step</Stepper.Completed>

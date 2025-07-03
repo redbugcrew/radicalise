@@ -6,14 +6,6 @@ import { useUncontrolled } from "@mantine/hooks";
 import { IconScale } from "@tabler/icons-react";
 import CrewParticipationControl, { type CrewParticipationControlData } from "./CrewParticipationControl";
 
-export interface CrewParticipationData {
-  crew_id: number;
-  convenor: boolean;
-  volunteered_convenor: boolean;
-}
-
-export type CrewParticipationsData = CrewParticipationData[];
-
 interface GetInputPropsReturnType {
   onChange: any;
   value?: any;
@@ -27,42 +19,31 @@ interface GetInputPropsReturnType {
 
 type CrewParticipationsInputProps = GetInputPropsReturnType & {
   personId: number;
+  intervalId: number;
   crews: Crew[];
   people: PeopleObjectMap;
   disabled?: boolean;
   crewInvolvements: CrewInvolvement[];
 };
 
-function upsertData(arr: CrewParticipationsData, record: CrewParticipationData): CrewParticipationsData {
+function upsertData(arr: CrewInvolvement[], record: CrewInvolvement): CrewInvolvement[] {
   const result = removeData(arr, record);
   result.push(record);
   return result;
 }
 
-function removeData(arr: CrewParticipationsData, record: CrewParticipationData): CrewParticipationsData {
+function removeData(arr: CrewInvolvement[], record: CrewInvolvement): CrewInvolvement[] {
   return arr.filter((item) => item.crew_id !== record.crew_id);
 }
 
-function toggleData(arr: CrewParticipationsData, record: CrewParticipationData, checked: boolean): CrewParticipationsData {
+function toggleData(arr: CrewInvolvement[], record: CrewInvolvement, checked: boolean): CrewInvolvement[] {
   if (checked) {
     return upsertData(arr, record);
   }
   return removeData(arr, record);
 }
 
-function hasCrew(arr: CrewParticipationsData, crewId: number): boolean {
-  return arr.some((item) => item.crew_id === crewId);
-}
-
-export function dataFromInvolvements(crewInvolvements: CrewInvolvement[]): CrewParticipationsData {
-  return crewInvolvements.map((involvement) => ({
-    crew_id: involvement.crew_id,
-    convenor: involvement.convenor,
-    volunteered_convenor: involvement.volunteered_convenor,
-  }));
-}
-
-function toControlData(data: CrewParticipationsData, crewId: number): CrewParticipationControlData {
+function toControlData(data: CrewInvolvement[], crewId: number): CrewParticipationControlData {
   const record = data.find((item) => item.crew_id === crewId);
   return {
     participating: !!record,
@@ -71,8 +52,8 @@ function toControlData(data: CrewParticipationsData, crewId: number): CrewPartic
   };
 }
 
-export default function CrewParticipationsInput({ crews, personId, people, disabled, crewInvolvements, ...rest }: CrewParticipationsInputProps) {
-  const [value, setValue] = useUncontrolled<CrewParticipationsData>({
+export default function CrewParticipationsInput({ crews, personId, intervalId, people, disabled, crewInvolvements, ...rest }: CrewParticipationsInputProps) {
+  const [value, setValue] = useUncontrolled<CrewInvolvement[]>({
     value: rest.value,
     defaultValue: rest.defaultValue,
     finalValue: [],
@@ -81,8 +62,19 @@ export default function CrewParticipationsInput({ crews, personId, people, disab
 
   const handleChange = (crewId: number, itemValue: CrewParticipationControlData) => {
     if (!disabled) {
-      const newRecord = {
+      const defaultRecord: CrewInvolvement = {
+        id: 0, // This will be set by the backend
         crew_id: crewId,
+        person_id: personId,
+        interval_id: intervalId,
+        convenor: false,
+        volunteered_convenor: itemValue.volunteered_convenor,
+      };
+      const existingRecord = value.find((item) => item.crew_id === crewId);
+
+      const newRecord: CrewInvolvement = {
+        ...defaultRecord,
+        ...existingRecord,
         convenor: itemValue.convenor,
         volunteered_convenor: itemValue.volunteered_convenor,
       };

@@ -1,9 +1,8 @@
 import { Card, Group, Stack, Switch, Title } from "@mantine/core";
 import type { PeopleObjectMap } from "../../store/people";
 import type { Crew, CrewInvolvement, Person } from "../../api/Api";
-import { PersonBadge } from "../";
 import styles from "./CrewParticipationsInput.module.css";
-import { asPeopleAlphaSorted, notForPerson } from "../../store/involvements";
+import { asPeopleAlphaSorted } from "../../store/involvements";
 import PersonBadgeGroup from "../PersonBadge/PersonBadgeGroup";
 
 export interface CrewParticipationControlData {

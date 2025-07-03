@@ -147,7 +147,7 @@ export interface MyParticipationInput {
   capacity?: string | null;
   /** @format int64 */
   collective_id: number;
-  crew_ids?: any[] | null;
+  crew_involvements?: any[] | null;
   focus?: string | null;
   opt_out_planned_return_date?: string | null;
   opt_out_type?: null | OptOutType;

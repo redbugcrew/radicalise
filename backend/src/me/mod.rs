@@ -10,7 +10,8 @@ use crate::{
     shared::{
         COLLECTIVE_ID,
         entities::{
-            CollectiveInvolvementWithDetails, InvolvementStatus, OptOutType, ParticipationIntention,
+            CollectiveInvolvementWithDetails, CrewInvolvement, InvolvementStatus, OptOutType,
+            ParticipationIntention,
         },
     },
 };
@@ -87,7 +88,7 @@ pub struct MyParticipationInput {
     pub participation_intention: Option<ParticipationIntention>,
     pub opt_out_type: Option<OptOutType>,
     pub opt_out_planned_return_date: Option<String>,
-    pub crew_ids: Option<Vec<i64>>,
+    pub crew_involvements: Option<Vec<CrewInvolvement>>,
 }
 
 #[utoipa::path(
@@ -144,16 +145,14 @@ async fn update_my_participation(
                 return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
             }
 
-            if let Some(crew_ids) = input.crew_ids {
-                // Update crew participations
+            if let Some(crew_involvements) = input.crew_involvements {
+                // Update crew involvements
                 let crew_result =
-                    repo::update_crew_participations(user.id, interval_id, crew_ids, &pool).await;
+                    repo::update_crew_involvements(user.id, interval_id, crew_involvements, &pool)
+                        .await;
 
                 if crew_result.is_err() {
-                    eprintln!(
-                        "Error updating crew participations: {:?}",
-                        crew_result.err()
-                    );
+                    eprintln!("Error updating crew involvements: {:?}", crew_result.err());
                     return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
                 }
             }
