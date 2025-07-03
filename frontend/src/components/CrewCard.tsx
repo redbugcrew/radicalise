@@ -28,7 +28,7 @@ export default function CrewCard({ crew, involvements, people, highlightPersonId
         </Stack>
         <Group>
           {crewPeople.map((person) => {
-            return <PersonBadge key={person.id} person={person} variant={person.id === highlightPersonId ? "primary" : "default"} />;
+            return <PersonBadge key={person.id} person={person} me={person.id === highlightPersonId} />;
           })}
         </Group>
       </Stack>

@@ -4,14 +4,15 @@ import PersonBadge from "./PersonBadge";
 
 interface PersonBadgeGroupProps {
   people: Person[];
-  highlightMe?: Person | undefined;
+  me?: Person | undefined;
+  highlight?: Person | undefined;
 }
 
-export default function PersonBadgeGroup({ people, highlightMe }: PersonBadgeGroupProps) {
+export default function PersonBadgeGroup({ people, me, highlight }: PersonBadgeGroupProps) {
   return (
     <Group mih={42}>
       {people.map((person) => (
-        <PersonBadge key={person.id} person={person} variant={highlightMe === person ? "primary" : "default"} />
+        <PersonBadge key={person.id} person={person} me={me === person} highlight={highlight === person} />
       ))}
     </Group>
   );

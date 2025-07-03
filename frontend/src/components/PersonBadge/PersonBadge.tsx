@@ -10,18 +10,21 @@ export const avatarUrl = (id: number) => {
 
 interface PersonBadgeProps {
   person: Person | null;
-  variant?: "default" | "primary";
+  me?: boolean;
+  highlight?: boolean;
 }
 
-export default function PersonBadge({ person, variant = "default" }: PersonBadgeProps) {
+export default function PersonBadge({ person, me, highlight }: PersonBadgeProps) {
   if (!person) {
     return null;
   }
 
-  const groupClasses = [classes.PersonBadge, classes[variant]].filter(Boolean).join(" ");
+  const groupClasses = [classes.PersonBadge];
+  if (me) groupClasses.push(classes.me);
+  if (highlight) groupClasses.push(classes.highlighted);
 
   return (
-    <Group gap="xs" className={groupClasses}>
+    <Group gap="xs" className={groupClasses.join(" ")}>
       <Avatar size={30} src={avatarUrl(person.id)} radius={30} />
       <Text fz="sm" fw={500}>
         {person.display_name}
