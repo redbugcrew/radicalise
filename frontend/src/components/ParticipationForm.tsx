@@ -243,9 +243,9 @@ export default function ParticipationForm({ personId, interval, readOnly = false
   const setStepIfValid = (newStep: number) => {
     if (!readOnly && form.validate().hasErrors) return;
 
-    if (newStep <= step || newStep === step + 1) {
-      // if (newStep === 2 && !additionalParticipationActive) return;
+    const editingExisting = involvement && involvement.id;
 
+    if (editingExisting || newStep <= step + 1) {
       setStep(newStep);
     }
   };

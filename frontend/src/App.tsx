@@ -11,6 +11,7 @@ import "@mantine/dates/styles.css";
 import { MantineProvider } from "@mantine/core";
 import { Dashboard, NewPerson, People, Person, MyParticipation, Crews, Intervals, NewInterval } from "./pages";
 import { buildRoutes as buildAuthRoutes } from "./contexts/auth";
+import { theme } from "./theme";
 
 function withStore(func: (store: AppStore) => any, store: AppStore): LoaderFunction<any> {
   const wrappedFunc: LoaderFunction<any> = async () => {
@@ -71,7 +72,7 @@ const router = createBrowserRouter([
 
 function App() {
   return (
-    <MantineProvider defaultColorScheme="dark">
+    <MantineProvider defaultColorScheme="dark" theme={theme}>
       <ReduxProvider store={store}>
         <RouterProvider router={router} />
       </ReduxProvider>
