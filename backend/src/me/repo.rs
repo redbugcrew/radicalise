@@ -126,12 +126,13 @@ pub async fn find_initial_data_for_me(
     })
 }
 
+// Returns the ids of all potentially impacted crews
 pub async fn update_crew_involvements(
     person_id: i64,
     interval_id: i64,
     involvements: Vec<CrewInvolvement>,
     pool: &SqlitePool,
-) -> Result<(), sqlx::Error> {
+) -> Result<Vec<i64>, sqlx::Error> {
     let existing = find_crew_involvements(person_id, interval_id, pool).await?;
 
     // Ensure all the involvements have the same person_id and interval_id
@@ -151,13 +152,17 @@ pub async fn update_crew_involvements(
         .cloned()
         .collect();
 
+    let removed_crew_ids: Vec<i64> = to_remove.iter().map(|i| i.id).collect();
+
     println!("Deleting crew participations {:?}", to_remove);
     delete_crew_involvements(to_remove, pool).await?;
 
     println!("Upserting crew participations {:?}", involvements);
     upsert_crew_involvements(involvements, pool).await?;
 
-    Ok(())
+    let impacted_crew_ids: Vec<i64> = crew_ids.into_iter().chain(removed_crew_ids).collect();
+
+    Ok(impacted_crew_ids)
 }
 
 pub async fn find_crew_involvements(

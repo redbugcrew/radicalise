@@ -1,22 +1,19 @@
 use axum::{Extension, Json, extract::Path, http::StatusCode, response::IntoResponse};
-use serde::{Deserialize, Serialize};
 use sqlx::SqlitePool;
-use utoipa::ToSchema;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     auth::auth_backend::AuthSession,
-    me::{events::MeEvent, repo::MyInitialData},
-    shared::{
-        COLLECTIVE_ID,
-        entities::{
-            CollectiveInvolvementWithDetails, CrewInvolvement, InvolvementStatus, OptOutType,
-            ParticipationIntention,
-        },
+    me::{
+        events::MeEvent,
+        my_involvement::{MyParticipationInput, update_my_involvements},
+        repo::MyInitialData,
     },
+    shared::{COLLECTIVE_ID, entities::CollectiveInvolvementWithDetails},
 };
 
 mod events;
+mod my_involvement;
 mod repo;
 
 pub fn router() -> OpenApiRouter {
@@ -79,18 +76,6 @@ async fn my_participation(
     }
 }
 
-#[derive(Serialize, Deserialize, ToSchema)]
-pub struct MyParticipationInput {
-    pub collective_id: i64,
-    pub wellbeing: Option<String>,
-    pub focus: Option<String>,
-    pub capacity: Option<String>,
-    pub participation_intention: Option<ParticipationIntention>,
-    pub opt_out_type: Option<OptOutType>,
-    pub opt_out_planned_return_date: Option<String>,
-    pub crew_involvements: Option<Vec<CrewInvolvement>>,
-}
-
 #[utoipa::path(
     post,
     path = "/interval/{interval_id}/my_participation",
@@ -114,47 +99,11 @@ async fn update_my_participation(
 ) -> impl IntoResponse {
     match auth_session.user {
         Some(user) => {
-            let status: InvolvementStatus = input.participation_intention.clone().map_or(
-                InvolvementStatus::Participating,
-                |intention| match intention {
-                    ParticipationIntention::OptIn => InvolvementStatus::Participating,
-                    ParticipationIntention::OptOut => InvolvementStatus::OnHiatus,
-                },
-            );
+            let update_result = update_my_involvements(user.id, interval_id, input, &pool).await;
 
-            let result = repo::upsert_detailed_involvement(
-                CollectiveInvolvementWithDetails {
-                    id: -1, // ID will be auto-generated
-                    person_id: user.id,
-                    collective_id: input.collective_id,
-                    interval_id,
-                    status,
-                    wellbeing: input.wellbeing,
-                    focus: input.focus,
-                    capacity: input.capacity,
-                    participation_intention: input.participation_intention,
-                    opt_out_type: input.opt_out_type,
-                    opt_out_planned_return_date: input.opt_out_planned_return_date,
-                },
-                &pool,
-            )
-            .await;
-
-            if result.is_err() {
-                eprintln!("Error updating involvement: {:?}", result.err());
+            if update_result.is_err() {
+                eprintln!("Error updating my involvements: {:?}", update_result.err());
                 return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
-            }
-
-            if let Some(crew_involvements) = input.crew_involvements {
-                // Update crew involvements
-                let crew_result =
-                    repo::update_crew_involvements(user.id, interval_id, crew_involvements, &pool)
-                        .await;
-
-                if crew_result.is_err() {
-                    eprintln!("Error updating crew involvements: {:?}", crew_result.err());
-                    return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
-                }
             }
 
             // Fetch the updated involvement to return

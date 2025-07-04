@@ -4,7 +4,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::shared::entities::Interval;
 
-mod repo;
+pub mod repo;
 
 pub fn router() -> OpenApiRouter {
     OpenApiRouter::new().routes(routes!(create_interval))
