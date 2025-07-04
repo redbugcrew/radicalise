@@ -2,13 +2,15 @@ use serde::{Deserialize, Serialize};
 use sqlx::SqlitePool;
 use utoipa::ToSchema;
 
-use crate::shared::{
-    COLLECTIVE_ID,
-    entities::{
-        Collective, CollectiveInvolvement, Crew, CrewInvolvement, Interval, InvolvementStatus,
-        Person,
+use crate::{
+    intervals::repo::{find_current_interval, find_next_interval},
+    shared::{
+        COLLECTIVE_ID,
+        entities::{
+            Collective, CollectiveInvolvement, Crew, CrewInvolvement, Interval, InvolvementStatus,
+            Person,
+        },
     },
-    repo::{find_current_interval, find_next_interval},
 };
 
 #[derive(Serialize, Deserialize, ToSchema)]

@@ -2,12 +2,12 @@ use serde::{Deserialize, Serialize};
 use sqlx::{QueryBuilder, Sqlite, SqlitePool};
 use utoipa::ToSchema;
 
-use crate::shared::{
-    entities::{
+use crate::{
+    intervals::repo::{find_current_interval, find_next_interval},
+    shared::entities::{
         CollectiveInvolvementWithDetails, CrewInvolvement, InvolvementStatus, OptOutType,
         ParticipationIntention,
     },
-    repo::{find_current_interval, find_next_interval},
 };
 
 #[derive(Serialize, Deserialize, ToSchema)]
@@ -93,7 +93,7 @@ pub async fn find_interval_data_for_me(
     let involvement =
         find_detailed_involvement(collective_id, person_id, interval_id, pool).await?;
 
-    let crew_involvements = find_crew_involvements(person_id, interval_id, pool).await?;
+    let crew_involvements = find_my_crew_involvements(person_id, interval_id, pool).await?;
 
     Ok(MyIntervalData {
         interval_id,
@@ -133,7 +133,7 @@ pub async fn update_crew_involvements(
     involvements: Vec<CrewInvolvement>,
     pool: &SqlitePool,
 ) -> Result<Vec<i64>, sqlx::Error> {
-    let existing = find_crew_involvements(person_id, interval_id, pool).await?;
+    let existing = find_my_crew_involvements(person_id, interval_id, pool).await?;
 
     // Ensure all the involvements have the same person_id and interval_id
     for involvement in &involvements {
@@ -165,7 +165,7 @@ pub async fn update_crew_involvements(
     Ok(impacted_crew_ids)
 }
 
-pub async fn find_crew_involvements(
+pub async fn find_my_crew_involvements(
     person_id: i64,
     interval_id: i64,
     pool: &SqlitePool,

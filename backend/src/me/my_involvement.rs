@@ -3,10 +3,13 @@ use utoipa::ToSchema;
 
 use crate::{
     intervals::repo::{IntervalType, find_interval, get_interval_type},
-    me::repo,
-    shared::entities::{
-        CollectiveInvolvementWithDetails, CrewInvolvement, InvolvementStatus, OptOutType,
-        ParticipationIntention,
+    me::repo::{self},
+    shared::{
+        crew_repo::{find_crew_involvements, set_crew_convenor},
+        entities::{
+            CollectiveInvolvementWithDetails, CrewInvolvement, InvolvementStatus, OptOutType,
+            ParticipationIntention,
+        },
     },
 };
 
@@ -39,13 +42,8 @@ pub async fn update_my_involvements(
     let interval = find_interval(interval_id, &pool).await?;
     let interval_type = get_interval_type(interval);
 
-    // If this is in the past, raise an error
     if interval_type == IntervalType::Past {
-        eprintln!(
-            "Attempted to update participation for a past interval: {}",
-            interval_id
-        );
-        return Err(sqlx::Error::RowNotFound);
+        return Err(past_interval_error());
     }
 
     repo::upsert_detailed_involvement(
@@ -83,13 +81,54 @@ async fn update_convenor_if_needed(
     crew_id: i64,
     interval_id: i64,
     interval_type: IntervalType,
-    _pool: &sqlx::SqlitePool,
+    pool: &sqlx::SqlitePool,
 ) -> Result<(), sqlx::Error> {
-    // Determine who should convene the crew
-    println!(
-        "Checking if crew {} needs a convenor for interval {} of type {:?}",
-        crew_id, interval_id, interval_type
-    );
+    if interval_type == IntervalType::Past {
+        return Err(past_interval_error());
+    }
+
+    let crew_involvements = find_crew_involvements(crew_id, interval_id, pool).await?;
+    let convenor_involvements: Vec<&CrewInvolvement> = crew_involvements
+        .iter()
+        .filter(|involvement| involvement.convenor)
+        .collect();
+
+    let volunteered_convenor_involvements: Vec<&CrewInvolvement> = crew_involvements
+        .iter()
+        .filter(|involvement| involvement.volunteered_convenor)
+        .collect();
+
+    // If this is the current interval, and there's already a convenor, do nothing
+    if interval_type == IntervalType::Current && !convenor_involvements.is_empty() {
+        println!(
+            "Crew {} already has a convenor for interval {} of type {:?}",
+            crew_id, interval_id, interval_type
+        );
+        return Ok(());
+    }
+
+    let best_convenor = get_best_convenor_person_id(&volunteered_convenor_involvements);
+
+    set_crew_convenor(crew_id, interval_id, best_convenor, pool).await?;
 
     Ok(())
+}
+
+fn get_best_convenor_person_id(
+    volunteered_convenor_involvements: &[&CrewInvolvement],
+) -> Option<i64> {
+    // If there are no volunteered convenors, return None
+    if volunteered_convenor_involvements.is_empty() {
+        return None;
+    }
+
+    // Prefer the first volunteered convenor
+    Some(volunteered_convenor_involvements[0].person_id)
+}
+
+fn past_interval_error() -> sqlx::Error {
+    let result =
+        sqlx::Error::InvalidArgument("Cannot update involvements for a past interval".to_string());
+    eprintln!("error: {}", result);
+    result
 }
