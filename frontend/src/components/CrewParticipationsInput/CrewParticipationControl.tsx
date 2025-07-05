@@ -97,7 +97,7 @@ export default function CrewParticipationControl({ value, personId, crew, crewIn
               <Title order={5}>Convenor</Title>
               {value.participating && <Switch disabled={disabled} checked={value.volunteered_convenor} onChange={handleOnChangeVolunteeredConvenor} />}
             </Group>
-            <PersonBadgeGroup people={orderedConvenorVolunteers} me={person} highlight={orderedConvenorVolunteers[0]} />
+            <PersonBadgeGroup people={orderedConvenorVolunteers} me={person} />
           </Stack>
         </Stack>
       </Card.Section>
