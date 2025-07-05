@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use sqlx::SqlitePool;
 
 use crate::shared::entities::CrewInvolvement;
@@ -56,4 +58,47 @@ pub async fn set_crew_convenor(
     transaction.commit().await?;
 
     Ok(())
+}
+
+pub async fn intervals_participated_since_last_convened(
+    crew_id: i64,
+    before_interval_id: i64,
+    pool: &SqlitePool,
+) -> Result<HashMap<i64, i64>, sqlx::Error> {
+    let result = sqlx::query!(
+        "
+        SELECT crew_involvements.person_id, COUNT(interval_id) as \"count: i64\"
+        FROM crew_involvements
+        LEFT JOIN (
+            SELECT person_id, MAX(interval_id) as last_convened
+            FROM crew_involvements
+            WHERE
+                crew_id = ? AND
+                convenor = TRUE AND
+                interval_id <= ?
+            GROUP BY person_id
+        ) i ON crew_involvements.person_id = i.person_id
+        WHERE
+            interval_id > last_convened AND
+            convenor = FALSE AND
+            crew_id = ? AND
+            interval_id <= ?
+        GROUP BY crew_involvements.person_id
+        ",
+        crew_id,
+        before_interval_id,
+        crew_id,
+        before_interval_id
+    )
+    .fetch_all(pool)
+    .await?;
+
+    let mut map: HashMap<i64, i64> = HashMap::new();
+    for row in result {
+        if let Some(count) = row.count {
+            map.insert(row.person_id, count);
+        }
+    }
+
+    Ok(map)
 }

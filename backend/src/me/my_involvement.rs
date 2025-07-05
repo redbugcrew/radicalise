@@ -5,7 +5,9 @@ use crate::{
     intervals::repo::{IntervalType, find_interval, get_interval_type},
     me::repo::{self},
     shared::{
-        crew_repo::{find_crew_involvements, set_crew_convenor},
+        crew_repo::{
+            find_crew_involvements, intervals_participated_since_last_convened, set_crew_convenor,
+        },
         entities::{
             CollectiveInvolvementWithDetails, CrewInvolvement, InvolvementStatus, OptOutType,
             ParticipationIntention,
@@ -107,23 +109,43 @@ async fn update_convenor_if_needed(
         return Ok(());
     }
 
-    let best_convenor = get_best_convenor_person_id(&volunteered_convenor_involvements);
+    let person_ids = volunteered_convenor_involvements
+        .iter()
+        .map(|involvement| involvement.person_id)
+        .collect::<Vec<i64>>();
+    let best_convenor = get_best_convenor_person_id(crew_id, interval_id, person_ids, pool).await?;
 
     set_crew_convenor(crew_id, interval_id, best_convenor, pool).await?;
 
     Ok(())
 }
 
-fn get_best_convenor_person_id(
-    volunteered_convenor_involvements: &[&CrewInvolvement],
-) -> Option<i64> {
+async fn get_best_convenor_person_id(
+    crew_id: i64,
+    interval_id: i64,
+    mut person_ids: Vec<i64>,
+    pool: &sqlx::SqlitePool,
+) -> Result<Option<i64>, sqlx::Error> {
     // If there are no volunteered convenors, return None
-    if volunteered_convenor_involvements.is_empty() {
-        return None;
+    if person_ids.is_empty() {
+        return Ok(None);
     }
 
-    // Prefer the first volunteered convenor
-    Some(volunteered_convenor_involvements[0].person_id)
+    // If there is only one volunteered convenor, return them
+    if person_ids.len() == 1 {
+        return Ok(Some(person_ids[0]));
+    }
+
+    person_ids =
+        filter_by_longest_since_convened_this_crew(person_ids, crew_id, interval_id, pool).await?;
+    if person_ids.len() == 1 {
+        return Ok(Some(person_ids[0]));
+    }
+
+    // If there are still multiple volunteered convenors, sort them by id and return the first one
+    person_ids.sort_unstable();
+
+    Ok(Some(person_ids[0]))
 }
 
 fn past_interval_error() -> sqlx::Error {
@@ -131,4 +153,70 @@ fn past_interval_error() -> sqlx::Error {
         sqlx::Error::InvalidArgument("Cannot update involvements for a past interval".to_string());
     eprintln!("error: {}", result);
     result
+}
+
+async fn filter_by_longest_since_convened_this_crew(
+    person_ids: Vec<i64>,
+    crew_id: i64,
+    current_interval_id: i64,
+    pool: &sqlx::SqlitePool,
+) -> Result<Vec<i64>, sqlx::Error> {
+    let data =
+        intervals_since_last_convened(person_ids.clone(), crew_id, current_interval_id, pool)
+            .await?;
+
+    let most_intervals: i64 = data
+        .iter()
+        .map(|result| result.intervals_since_convened)
+        .max()
+        .unwrap_or_else(|| {
+            eprintln!(
+                "No intervals since convened found for crew {} with person_ids {:?}",
+                crew_id, person_ids
+            );
+            0
+        });
+
+    let filtered_ids: Vec<i64> = data
+        .into_iter()
+        .filter(|record| record.intervals_since_convened == most_intervals)
+        .map(|record| record.person_id)
+        .collect();
+
+    if filtered_ids.is_empty() {
+        panic!(
+            "No crew members found for crew {} with intervals since convened {}",
+            crew_id, most_intervals
+        );
+    } else {
+        Ok(filtered_ids)
+    }
+}
+
+struct IntervalLastConvenedResult {
+    person_id: i64,
+    intervals_since_convened: i64,
+}
+
+async fn intervals_since_last_convened(
+    person_ids: Vec<i64>,
+    crew_id: i64,
+    current_interval_id: i64,
+    pool: &sqlx::SqlitePool,
+) -> Result<Vec<IntervalLastConvenedResult>, sqlx::Error> {
+    let data =
+        intervals_participated_since_last_convened(crew_id, current_interval_id, pool).await?;
+
+    let result: Vec<IntervalLastConvenedResult> = person_ids
+        .into_iter()
+        .map(|person_id| {
+            let intervals_since_convened: i64 = data.get(&person_id).cloned().unwrap_or(0);
+            IntervalLastConvenedResult {
+                person_id,
+                intervals_since_convened,
+            }
+        })
+        .collect();
+
+    Ok(result)
 }
