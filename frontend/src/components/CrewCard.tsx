@@ -1,8 +1,7 @@
 import { Card, Group, Stack, Title, Text } from "@mantine/core";
-import type { Crew, CrewInvolvement } from "../api/Api";
+import type { Crew, CrewInvolvement, Person } from "../api/Api";
 import PersonBadge from "./PersonBadge/PersonBadge";
 import type { PeopleObjectMap } from "../store/people";
-import { compareStrings } from "../utilities/comparison";
 
 interface CrewCardProps {
   crew: Crew;
@@ -11,11 +10,26 @@ interface CrewCardProps {
   highlightPersonId?: number;
 }
 
+interface PersonAndInvolvement {
+  person: Person;
+  involvement: CrewInvolvement;
+}
+
+function sortByConvenorThenName(a: PersonAndInvolvement, b: PersonAndInvolvement): number {
+  if (a.involvement.convenor && !b.involvement.convenor) {
+    return -1;
+  } else if (!a.involvement.convenor && b.involvement.convenor) {
+    return 1;
+  } else {
+    return a.person.display_name.localeCompare(b.person.display_name);
+  }
+}
+
 export default function CrewCard({ crew, involvements, people, highlightPersonId }: CrewCardProps) {
-  const crewPeople = involvements
-    .map((involvement) => people[involvement.person_id])
-    .filter(Boolean)
-    .sort(compareStrings("display_name"));
+  const crewPeople: PersonAndInvolvement[] = involvements
+    .map((involvement) => ({ involvement, person: people[involvement.person_id] }))
+    .filter(({ person }) => person)
+    .sort(sortByConvenorThenName);
 
   return (
     <Card withBorder>
@@ -27,8 +41,10 @@ export default function CrewCard({ crew, involvements, people, highlightPersonId
           <Text>{crew.description}</Text>
         </Stack>
         <Group>
-          {crewPeople.map((person) => {
-            return <PersonBadge key={person.id} person={person} me={person.id === highlightPersonId} />;
+          {crewPeople.map(({ person, involvement }) => {
+            const convenor = involvement?.convenor;
+
+            return <PersonBadge key={person.id} person={person} me={person.id === highlightPersonId} highlight={convenor} />;
           })}
         </Group>
       </Stack>
