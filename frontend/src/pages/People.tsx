@@ -1,7 +1,5 @@
-import { ActionIcon, Group, Stack, Title } from "@mantine/core";
+import { Group, Stack, Title } from "@mantine/core";
 import { IntervalSelector } from "../components";
-import { IconUserPlus } from "@tabler/icons-react";
-import { Anchor } from "../components";
 import { useAppSelector } from "../store";
 import { useEffect, useState } from "react";
 import type { Interval } from "../api/Api";
@@ -21,11 +19,11 @@ export default function People() {
     <Stack>
       <Group justify="space-between">
         <Title order={1}>People</Title>
-        <Anchor href="new">
+        {/* <Anchor href="new">
           <ActionIcon variant="filled" aria-label="Add Person" size="lg">
             <IconUserPlus style={{ width: "70%", height: "70%" }} stroke={2} />
           </ActionIcon>
-        </Anchor>
+        </Anchor> */}
       </Group>
       <IntervalSelector intervals={intervals.allIntervals} selectedInterval={selectedInterval} currentInterval={intervals.currentInterval} onChangeInterval={setSelectedInterval} />
       {selectedInterval && <PeopleForInterval interval={selectedInterval} />}

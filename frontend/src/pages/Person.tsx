@@ -1,12 +1,10 @@
-import { Tabs } from "@mantine/core";
-
 export default function Person() {
   return (
     <div>
       <h1>Person Profile</h1>
       <p>This is where the details of a specific person would be displayed.</p>
 
-      <h2>About me</h2>
+      {/* <h2>About me</h2>
       <ul>
         <li>Display name</li>
         <li>Avatar image</li>
@@ -63,7 +61,7 @@ export default function Person() {
             <li></li>
           </ul>
         </Tabs.Panel>
-      </Tabs>
+      </Tabs> */}
 
       {/* <h2>Retrofitting</h2>
       <h2>Decommodifying</h2>
