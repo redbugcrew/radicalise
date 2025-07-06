@@ -26,6 +26,14 @@ export enum InvolvementStatus {
   Exiting = "Exiting",
 }
 
+export type AppEvent =
+  | {
+      MeEvent: MeEvent;
+    }
+  | {
+      IntervalsEvent: IntervalsEvent;
+    };
+
 export interface Collective {
   description?: string | null;
   /** @format int64 */
@@ -434,7 +442,7 @@ export class Api<
      * @request POST:/api/intervals
      */
     createInterval: (data: Interval, params: RequestParams = {}) =>
-      this.request<IntervalsEvent[], any>({
+      this.request<AppEvent[], any>({
         path: `/api/intervals`,
         method: "POST",
         body: data,
@@ -468,7 +476,7 @@ export class Api<
       data: MyParticipationInput,
       params: RequestParams = {},
     ) =>
-      this.request<MeEvent[], any>({
+      this.request<AppEvent[], any>({
         path: `/api/me/interval/${intervalId}/my_participation`,
         method: "POST",
         body: data,

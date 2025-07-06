@@ -1,6 +1,6 @@
 import { Container, Title, Text, Stack, Card, Group } from "@mantine/core";
 import { IntervalForm } from "../../components";
-import { handleIntervalsEvents, useAppSelector } from "../../store";
+import { handleAppEvents, useAppSelector } from "../../store";
 import DateText from "../../components/DateText";
 import { lastIntervalToInput } from "../../components/intervals/IntervalForm";
 import type { Iso } from "iso-fns";
@@ -17,7 +17,7 @@ export default function NewInterval() {
     const api = getApi();
     api.api.createInterval(interval).then((response) => {
       if (response.status === 201) {
-        handleIntervalsEvents(response.data);
+        handleAppEvents(response.data);
         navigate("/intervals");
       } else {
         console.error("Failed to create interval:", response);

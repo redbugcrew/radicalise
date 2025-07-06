@@ -9,10 +9,10 @@ use crate::{
         my_involvement::{MyParticipationInput, update_my_involvements},
         repo::MyInitialData,
     },
-    shared::{COLLECTIVE_ID, entities::CollectiveInvolvementWithDetails},
+    shared::{COLLECTIVE_ID, entities::CollectiveInvolvementWithDetails, events::AppEvent},
 };
 
-mod events;
+pub mod events;
 mod my_involvement;
 mod repo;
 
@@ -87,7 +87,7 @@ async fn my_participation(
         content_type = "application/json"
     ),
     responses(
-        (status = 200, description = "Updated my participation successfully", body = Vec<MeEvent>),
+        (status = 200, description = "Updated my participation successfully", body = Vec<AppEvent>),
         (status = NOT_FOUND, description = "Not found", body = ())
     ),
 )]
@@ -111,8 +111,8 @@ async fn update_my_participation(
                 repo::find_interval_data_for_me(COLLECTIVE_ID, user.id, interval_id, &pool).await;
             match output_result {
                 Ok(interval_data) => {
-                    let events = vec![MeEvent::MyIntervalDataChanged(interval_data)];
-                    return (StatusCode::OK, Json(events)).into_response();
+                    let event = AppEvent::MeEvent(MeEvent::MyIntervalDataChanged(interval_data));
+                    return (StatusCode::OK, Json(vec![event])).into_response();
                 }
                 Err(_) => return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
             }

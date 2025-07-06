@@ -1,6 +1,6 @@
 import { Container, Stack, Title, Text } from "@mantine/core";
 import ParticipationForm, { type MyParticipationFormData } from "../components/ParticipationForm";
-import { handleMeEvents, useAppSelector } from "../store";
+import { handleAppEvents, useAppSelector } from "../store";
 import { useNavigate, useParams } from "react-router-dom";
 import DateText from "../components/DateText";
 import { useEffect, useState } from "react";
@@ -61,7 +61,7 @@ export default function MyParticipation() {
       .updateMyParticipation(interval.id, inputData)
       .then((response) => {
         console.log("Participation updated successfully", response);
-        handleMeEvents(response.data);
+        handleAppEvents(response.data);
         navigate("/dashboard");
       })
       .catch((error) => {

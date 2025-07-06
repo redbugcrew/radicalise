@@ -8,7 +8,7 @@ import crewsReducer, { crewsLoaded } from "./crews";
 import meReducer, { meLoaded, myIntervalDataChanged } from "./me";
 import { getApi } from "../api";
 import { redirect } from "react-router-dom";
-import type { IntervalsEvent, MeEvent } from "../api/Api";
+import type { AppEvent, IntervalsEvent, MeEvent } from "../api/Api";
 
 const store = configureStore({
   reducer: {
@@ -101,12 +101,18 @@ export async function handleIntervalsEvent(event: IntervalsEvent) {
   }
 }
 
-export async function handleMeEvents(events: MeEvent[]) {
-  events.forEach((event) => handleMeEvent(event));
-}
+export async function handleAppEvents(events: AppEvent[]) {
+  events.forEach((event) => {
+    console.log("Handling AppEvent:", event);
 
-export async function handleIntervalsEvents(events: IntervalsEvent[]) {
-  events.forEach((event) => handleIntervalsEvent(event));
+    if ("MeEvent" in event && event.MeEvent) {
+      handleMeEvent(event.MeEvent);
+    } else if ("IntervalsEvent" in event && event.IntervalsEvent) {
+      handleIntervalsEvent(event.IntervalsEvent);
+    } else {
+      console.warn("Unknown event type:", event);
+    }
+  });
 }
 
 export default store;
