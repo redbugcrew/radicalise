@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT id, person_id, collective_id, interval_id, status as \"status: InvolvementStatus\"\n        FROM collective_involvements\n        WHERE\n          interval_id = ? AND\n          collective_id = ?",
+  "query": "SELECT id, person_id, collective_id, interval_id, status as \"status: InvolvementStatus\", capacity_score\n        FROM collective_involvements\n        WHERE\n          interval_id = ? AND\n          collective_id = ?",
   "describe": {
     "columns": [
       {
@@ -27,6 +27,11 @@
         "name": "status: InvolvementStatus",
         "ordinal": 4,
         "type_info": "Text"
+      },
+      {
+        "name": "capacity_score",
+        "ordinal": 5,
+        "type_info": "Integer"
       }
     ],
     "parameters": {
@@ -37,8 +42,9 @@
       false,
       false,
       false,
-      false
+      false,
+      true
     ]
   },
-  "hash": "d1051a6bb6af35e5aea8da20b0f083a12d79136f811a5e02305abae164b880be"
+  "hash": "e8f0ce92a214eb335d9f9cf46afe5f8ceb04cf3b4ef4cdc4b058b2c1a4c8b1c2"
 }

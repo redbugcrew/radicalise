@@ -43,6 +43,8 @@ export interface Collective {
 
 export interface CollectiveInvolvement {
   /** @format int64 */
+  capacity_score?: number | null;
+  /** @format int64 */
   collective_id: number;
   /** @format int64 */
   id: number;

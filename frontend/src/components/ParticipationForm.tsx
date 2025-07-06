@@ -3,11 +3,12 @@ import { DatePickerInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { useState } from "react";
 import type { CollectiveInvolvementWithDetails, Crew, CrewInvolvement, Interval, OptOutType, ParticipationIntention } from "../api/Api";
-import { IconBattery1, IconBattery2, IconBattery4, IconCheck, IconLock } from "@tabler/icons-react";
+import { IconCheck, IconLock } from "@tabler/icons-react";
 import { useAppSelector } from "../store";
 import { forPerson, getMatchingInvolvementInterval } from "../store/involvements";
 import { ComboTextArea, CrewParticipationsInput } from ".";
 import type { ArrayOfStringTuples } from "./forms/ComboTextArea";
+import CapacityScoreIcon from "./CapacityScoreIcon";
 
 export interface MyParticipationFormData {
   wellbeing: string;
@@ -25,15 +26,9 @@ type StepProps = {
   readOnly?: boolean;
 };
 
-const capacityScoreIcons: Record<string, React.ReactNode> = {
-  "-1": <IconBattery1 />,
-  "0": <IconBattery2 />,
-  "1": <IconBattery4 />,
-};
-
 const renderCapacityScoreOption: SelectProps["renderOption"] = ({ option, checked }) => (
   <Group flex="1" gap="xs">
-    {capacityScoreIcons[option.value]}
+    <CapacityScoreIcon score={option.value} />
     {option.label}
     {checked && <IconCheck style={{ marginInlineStart: "auto" }} />}
   </Group>
@@ -42,7 +37,7 @@ const renderCapacityScoreOption: SelectProps["renderOption"] = ({ option, checke
 function CapacityStep({ form, readOnly }: StepProps) {
   return (
     <Stack>
-      <p>{JSON.stringify(form)}</p>
+      {/* <p>{JSON.stringify(form)}</p> */}
 
       <ComboTextArea
         disabled={readOnly}

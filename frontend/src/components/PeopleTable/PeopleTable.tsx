@@ -4,6 +4,7 @@ import { IconChevronDown, IconChevronUp, IconSearch, IconSelector } from "@table
 import { useState } from "react";
 import classes from "./PeopleTable.module.css";
 import { avatarUrl } from "../PersonBadge/PersonBadge";
+import CapacityScoreIcon from "../CapacityScoreIcon";
 
 interface Crew {
   id: number;
@@ -17,6 +18,7 @@ interface SortableRowData {
 export interface PeopleTableRow {
   id: number;
   name: string;
+  capacity_score: number | null;
   crews: Crew[];
 }
 
@@ -127,6 +129,8 @@ export default function PeopleTable({ people }: PeopleTableProps) {
             <Text fz="sm" fw={500}>
               {item.name}
             </Text>
+
+            <CapacityScoreIcon score={item.capacity_score} />
           </Group>
         </Anchor>
       </Table.Td>

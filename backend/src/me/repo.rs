@@ -55,12 +55,13 @@ pub async fn upsert_detailed_involvement(
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
     let result = sqlx::query!(
-        "INSERT INTO collective_involvements (person_id, collective_id, interval_id, status, wellbeing, focus, capacity, participation_intention, opt_out_type, opt_out_planned_return_date)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        "INSERT INTO collective_involvements (person_id, collective_id, interval_id, status, wellbeing, focus, capacity_score, capacity, participation_intention, opt_out_type, opt_out_planned_return_date)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(person_id, collective_id, interval_id) DO UPDATE SET
             status = excluded.status,
             wellbeing = excluded.wellbeing,
             focus = excluded.focus,
+            capacity_score = excluded.capacity_score,
             capacity = excluded.capacity,
             participation_intention = excluded.participation_intention,
             opt_out_type = excluded.opt_out_type,
@@ -71,6 +72,7 @@ pub async fn upsert_detailed_involvement(
         involvement.status,
         involvement.wellbeing,
         involvement.focus,
+        involvement.capacity_score,
         involvement.capacity,
         involvement.participation_intention,
         involvement.opt_out_type,

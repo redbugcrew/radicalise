@@ -57,7 +57,7 @@ pub async fn find_all_collective_involvements(
 
     sqlx::query_as!(
         CollectiveInvolvement,
-        "SELECT id, person_id, collective_id, interval_id, status as \"status: InvolvementStatus\"
+        "SELECT id, person_id, collective_id, interval_id, status as \"status: InvolvementStatus\", capacity_score
         FROM collective_involvements
         WHERE
           interval_id = ? AND

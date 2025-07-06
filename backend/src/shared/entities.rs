@@ -119,6 +119,7 @@ pub struct CollectiveInvolvement {
     pub collective_id: i64,
     pub interval_id: i64,
     pub status: InvolvementStatus,
+    pub capacity_score: Option<i64>,
 }
 
 #[derive(Serialize, Deserialize, ToSchema)]
