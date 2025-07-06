@@ -6,6 +6,8 @@ use sqlx::{FromRow, SqlitePool};
 use tokio::task;
 use utoipa::ToSchema;
 
+use crate::auth::auth_repo::{AuthRepo, AuthRepoError};
+
 #[derive(Clone, Serialize, Deserialize, FromRow)]
 pub struct User {
     pub id: i64,
@@ -66,6 +68,9 @@ pub enum Error {
 
     #[error(transparent)]
     TaskJoin(#[from] task::JoinError),
+
+    #[error(transparent)]
+    AuthRepo(#[from] AuthRepoError),
 }
 
 #[async_trait]
@@ -78,12 +83,19 @@ impl AuthnBackend for AppAuthBackend {
         &self,
         creds: Self::Credentials,
     ) -> Result<Option<Self::User>, Self::Error> {
-        let user: Option<Self::User> = sqlx::query_as(
-            "SELECT id, email, hashed_password as password FROM people WHERE email = ? ",
-        )
-        .bind(creds.email)
-        .fetch_optional(&self.db)
-        .await?;
+        let repo = AuthRepo::new(&self.db);
+
+        let user: Option<Self::User> = repo
+            .user_for_email(creds.email)
+            .await
+            .map(|user| {
+                user.map(|u| User {
+                    id: u.id,
+                    email: u.email.unwrap_or_default(),
+                    password: u.hashed_password.unwrap_or_default(),
+                })
+            })
+            .map_err(|e| Error::AuthRepo(e))?;
 
         // Verifying the password is blocking and potentially slow, so we'll do so via
         // `spawn_blocking`.
@@ -96,14 +108,18 @@ impl AuthnBackend for AppAuthBackend {
     }
 
     async fn get_user(&self, user_id: &UserId<Self>) -> Result<Option<Self::User>, Self::Error> {
-        let user = sqlx::query_as(
-            "SELECT id, email, hashed_password as password FROM people WHERE id = ?",
-        )
-        .bind(user_id)
-        .fetch_optional(&self.db)
-        .await?;
+        let repo = AuthRepo::new(&self.db);
 
-        Ok(user)
+        repo.user_for_id(*user_id)
+            .await
+            .map(|user| {
+                user.map(|u| User {
+                    id: u.id,
+                    email: u.email.unwrap_or_default(),
+                    password: u.hashed_password.unwrap_or_default(),
+                })
+            })
+            .map_err(|e| Error::AuthRepo(e))
     }
 }
 

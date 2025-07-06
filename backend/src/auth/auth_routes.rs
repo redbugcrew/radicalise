@@ -49,27 +49,31 @@ async fn forgot_password(
         .await
         .map_err(repo_error_handler)?;
 
-    let password_reset_token = Uuid::new_v4().to_string();
+    if let Some(user) = user {
+        let password_reset_token = Uuid::new_v4().to_string();
 
-    repo.set_password_reset_token(&user.id, password_reset_token.clone())
-        .await
-        .map_err(repo_error_handler)?;
+        repo.set_password_reset_token(user.id, password_reset_token.clone())
+            .await
+            .map_err(repo_error_handler)?;
 
-    println!(
-        "We got the user: {} with email: {}, set token: {}",
-        user.display_name,
-        user.email.as_deref().unwrap_or("No email provided"),
-        password_reset_token
-    );
+        println!(
+            "We got the user: {} with email: {}, set token: {}",
+            user.display_name,
+            user.email.as_deref().unwrap_or("No email provided"),
+            password_reset_token
+        );
 
-    reset_password_email(&resend, payload.email.clone(), password_reset_token.clone())
-        .await
-        .map_err(|e| {
-            eprintln!("Failed to send reset password email: {}", e);
-            (StatusCode::INTERNAL_SERVER_ERROR, "Failed to send email").into_response()
-        })?;
+        reset_password_email(&resend, payload.email.clone(), password_reset_token.clone())
+            .await
+            .map_err(|e| {
+                eprintln!("Failed to send reset password email: {}", e);
+                (StatusCode::INTERNAL_SERVER_ERROR, "Failed to send email").into_response()
+            })?;
 
-    Ok((StatusCode::OK, ()).into_response())
+        Ok((StatusCode::OK, ()).into_response())
+    } else {
+        Err((StatusCode::UNAUTHORIZED, "User not found").into_response())
+    }
 }
 
 #[derive(ToSchema, Deserialize)]

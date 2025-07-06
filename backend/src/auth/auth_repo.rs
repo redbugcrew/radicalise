@@ -8,8 +8,11 @@ pub struct AuthUser {
     pub hashed_password: Option<String>,
 }
 
+#[derive(Debug, thiserror::Error)]
 pub enum AuthRepoError {
+    #[error("User not found")]
     UserNotFound,
+    #[error("Database error")]
     DatabaseError,
 }
 
@@ -22,23 +25,35 @@ impl<'a> AuthRepo<'a> {
         AuthRepo { pool }
     }
 
-    pub async fn user_for_email(&self, email: String) -> Result<AuthUser, AuthRepoError> {
+    pub async fn user_for_email(&self, email: String) -> Result<Option<AuthUser>, AuthRepoError> {
         sqlx::query_as!(
             AuthUser,
-            "SELECT id, display_name, email, hashed_password FROM people WHERE email = ?",
+            "SELECT id, display_name, email, hashed_password
+            FROM people
+            WHERE LOWER(email) = LOWER(?)",
             email
         )
-        .fetch_one(self.pool)
+        .fetch_optional(self.pool)
         .await
-        .map_err(|error| match error {
-            sqlx::Error::RowNotFound => AuthRepoError::UserNotFound,
-            _ => log_and_return_db_error(error),
-        })
+        .map_err(log_and_return_db_error)
+    }
+
+    pub async fn user_for_id(&self, user_id: i64) -> Result<Option<AuthUser>, AuthRepoError> {
+        sqlx::query_as!(
+            AuthUser,
+            "SELECT id, display_name, email, hashed_password
+            FROM people
+            WHERE id = ?",
+            user_id
+        )
+        .fetch_optional(self.pool)
+        .await
+        .map_err(log_and_return_db_error)
     }
 
     pub async fn set_password_reset_token(
         &self,
-        user_id: &i64,
+        user_id: i64,
         token: String,
     ) -> Result<(), AuthRepoError> {
         sqlx::query!(
