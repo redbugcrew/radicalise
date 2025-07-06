@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "INSERT INTO intervals (start_date, end_date)\n         VALUES (?, ?)\n         RETURNING id, start_date, end_date",
+  "query": "INSERT INTO intervals (id, start_date, end_date, collective_id)\n         VALUES (?, ?, ?, ?)\n         RETURNING id, start_date, end_date",
   "describe": {
     "columns": [
       {
@@ -20,7 +20,7 @@
       }
     ],
     "parameters": {
-      "Right": 2
+      "Right": 4
     },
     "nullable": [
       false,
@@ -28,5 +28,5 @@
       false
     ]
   },
-  "hash": "f919200b9126e16247104b2e60a8a5d13f1d1ba92ea35255e1a0877654ad8415"
+  "hash": "99c0ea0bc9d97f8fe59d09c59af9e9c965cf49656c7990888dd8156002368a5c"
 }

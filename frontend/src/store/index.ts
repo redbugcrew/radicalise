@@ -2,13 +2,13 @@ import { useDispatch, useSelector, useStore } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import collectiveReducer, { collectiveLoaded } from "./collective";
 import peopleReducer, { peopleLoaded } from "./people";
-import intervalsReducer, { intervalsLoaded } from "./intervals";
+import intervalsReducer, { intervalsLoaded, intervalCreated } from "./intervals";
 import involvementsReducer, { involvementsLoaded } from "./involvements";
 import crewsReducer, { crewsLoaded } from "./crews";
 import meReducer, { meLoaded, myIntervalDataChanged } from "./me";
 import { getApi } from "../api";
 import { redirect } from "react-router-dom";
-import type { MeEvent } from "../api/Api";
+import type { IntervalsEvent, MeEvent } from "../api/Api";
 
 const store = configureStore({
   reducer: {
@@ -94,8 +94,19 @@ export async function handleMeEvent(event: MeEvent) {
   }
 }
 
+export async function handleIntervalsEvent(event: IntervalsEvent) {
+  console.log("Handling IntervalsEvent:", event);
+  if (event.IntervalCreated) {
+    store.dispatch(intervalCreated(event.IntervalCreated));
+  }
+}
+
 export async function handleMeEvents(events: MeEvent[]) {
   events.forEach((event) => handleMeEvent(event));
+}
+
+export async function handleIntervalsEvents(events: IntervalsEvent[]) {
+  events.forEach((event) => handleIntervalsEvent(event));
 }
 
 export default store;

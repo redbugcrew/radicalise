@@ -115,6 +115,10 @@ export interface IntervalInvolvementData {
   interval_id: number;
 }
 
+export type IntervalsEvent = {
+  IntervalCreated: Interval;
+};
+
 export interface InvolvementData {
   current_interval?: null | IntervalInvolvementData;
   next_interval?: null | IntervalInvolvementData;
@@ -342,7 +346,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 0.5.9
+ * @version 0.5.14
  * @license
  */
 export class Api<
@@ -430,7 +434,7 @@ export class Api<
      * @request POST:/api/intervals
      */
     createInterval: (data: Interval, params: RequestParams = {}) =>
-      this.request<any, any>({
+      this.request<IntervalsEvent[], any>({
         path: `/api/intervals`,
         method: "POST",
         body: data,

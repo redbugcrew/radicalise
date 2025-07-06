@@ -24,10 +24,11 @@ export function lastIntervalToInput(interval: Interval | null | undefined): Inte
 interface IntervalFormProps {
   value?: IntervalInput | null;
   minDate?: Iso.Date | null;
+  onSubmit: (data: Interval) => void;
 }
 
-export default function IntervalForm({ value, minDate }: IntervalFormProps) {
-  const form = useForm({
+export default function IntervalForm({ value, minDate, onSubmit }: IntervalFormProps) {
+  const form = useForm<IntervalInput>({
     mode: "controlled",
     initialValues:
       value ||
@@ -50,11 +51,20 @@ export default function IntervalForm({ value, minDate }: IntervalFormProps) {
     },
   });
 
+  const handleSubmit = (values: IntervalInput) => {
+    const interval: Interval = {
+      id: values.id || 0,
+      start_date: values.start_date as Iso.Date,
+      end_date: values.end_date as Iso.Date,
+    };
+    onSubmit(interval);
+  };
+
   return (
-    <form onSubmit={form.onSubmit((values) => console.log(values))}>
+    <form onSubmit={form.onSubmit(handleSubmit, (errors) => console.log("Form submission errors:", errors))}>
       <Stack gap="lg">
         <Stack gap="md">
-          <DateInput label="Start date" {...form.getInputProps("start_date")} />
+          <DateInput label="Start date" {...form.getInputProps("start_date")} minDate={minDate || undefined} />
           <DateInput label="End date" {...form.getInputProps("end_date")} />
         </Stack>
         <Button type="submit">Create interval</Button>

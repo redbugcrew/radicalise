@@ -21,12 +21,17 @@ const intervalsSlice = createSlice({
   } as IntervalsState,
   reducers: {
     intervalsLoaded: (_state: IntervalsState, action: PayloadAction<IntervalsState>) => action.payload,
+    intervalCreated: (state, action: PayloadAction<Interval>) => {
+      const newInterval = action.payload;
+      state.allIntervals.push(newInterval);
+      return state;
+    },
   },
 });
 
 // `createSlice` automatically generated action creators with these names.
 // export them as named exports from this "slice" file
-export const { intervalsLoaded } = intervalsSlice.actions;
+export const { intervalsLoaded, intervalCreated } = intervalsSlice.actions;
 
 // Export the slice reducer as the default export
 export default intervalsSlice.reducer;

@@ -11,18 +11,44 @@ pub enum IntervalType {
 
 pub async fn insert_interval(
     interval: Interval,
+    collective_id: i64,
     pool: &SqlitePool,
 ) -> Result<Interval, sqlx::Error> {
+    let mut transaction = pool.begin().await?;
+
+    let last_id = sqlx::query!(
+        "SELECT MAX(id) AS id
+        FROM intervals
+        WHERE
+            collective_id = ?",
+        collective_id
+    )
+    .fetch_one(&mut *transaction)
+    .await
+    .map(|row| row.id)?;
+
+    let next_id = last_id.map_or(1, |id| id + 1);
+
     sqlx::query_as!(
         Interval,
-        "INSERT INTO intervals (start_date, end_date)
-         VALUES (?, ?)
+        "INSERT INTO intervals (id, start_date, end_date, collective_id)
+         VALUES (?, ?, ?, ?)
          RETURNING id, start_date, end_date",
+        next_id,
         interval.start_date,
-        interval.end_date
+        interval.end_date,
+        collective_id
     )
-    .fetch_one(pool)
-    .await
+    .fetch_one(&mut *transaction)
+    .await?;
+
+    transaction.commit().await?;
+
+    Ok(Interval {
+        id: next_id,
+        start_date: interval.start_date,
+        end_date: interval.end_date,
+    })
 }
 
 pub async fn find_interval(interval_id: i64, pool: &SqlitePool) -> Result<Interval, sqlx::Error> {
