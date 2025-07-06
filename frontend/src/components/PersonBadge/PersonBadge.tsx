@@ -12,14 +12,16 @@ interface PersonBadgeProps {
   person: Person | null;
   me?: boolean;
   highlight?: boolean;
+  variant?: "default" | "transparent";
 }
 
-export default function PersonBadge({ person, me, highlight }: PersonBadgeProps) {
+export default function PersonBadge({ person, me, highlight, variant = "default" }: PersonBadgeProps) {
   if (!person) {
     return null;
   }
 
-  const groupClasses = [classes.PersonBadge];
+  const groupClasses = [];
+  if (variant === "default") groupClasses.push(classes.default);
   if (me) groupClasses.push(classes.me);
   if (highlight) groupClasses.push(classes.highlighted);
 

@@ -1,4 +1,4 @@
-import Layout from "./pages/Layout";
+import { Layout } from "./pages";
 import { Navigate, RouterProvider, createBrowserRouter, type LoaderFunction } from "react-router-dom";
 import { Provider as ReduxProvider } from "react-redux";
 import store, { loadInitialData, type AppStore } from "./store";
