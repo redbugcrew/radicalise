@@ -32,8 +32,10 @@ pub async fn find_detailed_involvement(
 ) -> Result<Option<CollectiveInvolvementWithDetails>, sqlx::Error> {
     sqlx::query_as!(
         CollectiveInvolvementWithDetails,
-        "SELECT id, person_id, collective_id, interval_id, status as \"status: InvolvementStatus\",
-        wellbeing, focus, capacity, participation_intention as \"participation_intention: ParticipationIntention\",
+        "SELECT id, person_id, collective_id, interval_id,
+        status as \"status: InvolvementStatus\",
+        wellbeing, focus, capacity_score, capacity,
+        participation_intention as \"participation_intention: ParticipationIntention\",
         opt_out_type as \"opt_out_type: OptOutType\", opt_out_planned_return_date
         FROM collective_involvements
         WHERE

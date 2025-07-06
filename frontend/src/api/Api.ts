@@ -56,6 +56,8 @@ export interface CollectiveInvolvement {
 export interface CollectiveInvolvementWithDetails {
   capacity?: string | null;
   /** @format int64 */
+  capacity_score?: number | null;
+  /** @format int64 */
   collective_id: number;
   focus?: string | null;
   /** @format int64 */
@@ -157,6 +159,8 @@ export interface MyIntervalData {
 
 export interface MyParticipationInput {
   capacity?: string | null;
+  /** @format int64 */
+  capacity_score?: number | null;
   /** @format int64 */
   collective_id: number;
   crew_involvements?: any[] | null;
@@ -354,7 +358,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 0.5.14
+ * @version 0.5.15
  * @license
  */
 export class Api<

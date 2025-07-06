@@ -1,9 +1,9 @@
-import { Stepper, Group, Button, Stack, Textarea, Select, Title } from "@mantine/core";
+import { Stepper, Group, Button, Stack, Textarea, Select, Title, type SelectProps } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { useState } from "react";
 import type { CollectiveInvolvementWithDetails, Crew, CrewInvolvement, Interval, OptOutType, ParticipationIntention } from "../api/Api";
-import { IconLock } from "@tabler/icons-react";
+import { IconBattery1, IconBattery2, IconBattery4, IconCheck, IconLock } from "@tabler/icons-react";
 import { useAppSelector } from "../store";
 import { forPerson, getMatchingInvolvementInterval } from "../store/involvements";
 import { ComboTextArea, CrewParticipationsInput } from ".";
@@ -12,6 +12,7 @@ import type { ArrayOfStringTuples } from "./forms/ComboTextArea";
 export interface MyParticipationFormData {
   wellbeing: string;
   focus: string;
+  capacity_score: string | null;
   capacity: string;
   participation_intention: ParticipationIntention | null;
   opt_out_type: OptOutType | null;
@@ -24,9 +25,25 @@ type StepProps = {
   readOnly?: boolean;
 };
 
+const capacityScoreIcons: Record<string, React.ReactNode> = {
+  "-1": <IconBattery1 />,
+  "0": <IconBattery2 />,
+  "1": <IconBattery4 />,
+};
+
+const renderCapacityScoreOption: SelectProps["renderOption"] = ({ option, checked }) => (
+  <Group flex="1" gap="xs">
+    {capacityScoreIcons[option.value]}
+    {option.label}
+    {checked && <IconCheck style={{ marginInlineStart: "auto" }} />}
+  </Group>
+);
+
 function CapacityStep({ form, readOnly }: StepProps) {
   return (
     <Stack>
+      <p>{JSON.stringify(form)}</p>
+
       <ComboTextArea
         disabled={readOnly}
         rows={4}
@@ -65,14 +82,21 @@ function CapacityStep({ form, readOnly }: StepProps) {
         key={form.key("focus")}
         {...form.getInputProps("focus")}
       />
-      <Textarea
-        disabled={readOnly}
+      <Select
         label="Capacity"
-        rows={4}
-        description="Given the context of your life (above), how would you describe your capacity to participate in the Brassica Collective this interval"
-        key={form.key("capacity")}
-        {...form.getInputProps("capacity")}
+        description="Given the context of your life (above), how would you describe your capacity to participate in the Brassica Collective this interval?"
+        placeholder="Pick value"
+        disabled={readOnly}
+        data={[
+          { label: "Lower capacity", value: "-1" },
+          { label: "My usual capacity", value: "0" },
+          { label: "Higher capacity", value: "1" },
+        ]}
+        renderOption={renderCapacityScoreOption}
+        key={form.key("capacity_score")}
+        {...form.getInputProps("capacity_score")}
       />
+      <Textarea disabled={readOnly} label="Further context" rows={4} description="Do you want to record any further context about your capacity? " key={form.key("capacity")} {...form.getInputProps("capacity")} />
     </Stack>
   );
 }
@@ -152,7 +176,6 @@ function AdditionalParticipationStep({ form, readOnly, personId, intervalId, cre
   return (
     <Stack>
       <Title order={3}>Crews</Title>
-      {/* <p>{JSON.stringify(form)}</p> */}
 
       <CrewParticipationsInput
         personId={personId}
@@ -195,6 +218,7 @@ export default function ParticipationForm({ personId, interval, previousInterval
     initialValues: {
       wellbeing: involvement?.wellbeing || "",
       focus: involvement?.focus || "",
+      capacity_score: involvement?.capacity_score?.toString() || null,
       capacity: involvement?.capacity || "",
       participation_intention: involvement?.participation_intention || null,
       opt_out_type: involvement?.opt_out_type || null,

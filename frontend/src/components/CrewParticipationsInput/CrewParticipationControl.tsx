@@ -115,7 +115,7 @@ export default function CrewParticipationControl({ value, personId, crew, crewIn
                 <Title order={5}>Convenor</Title>
                 {value.participating && <Switch disabled={disabled} checked={value.volunteered_convenor} onChange={handleOnChangeVolunteeredConvenor} />}
               </Group>
-              {!hasConvenorVolunteers && <Text c="dimmed">Needs volunteers for convenor to go ahead.</Text>}
+              {!hasConvenorVolunteers && <Text c="dimmed">Needs convenor to go ahead.</Text>}
               {hasConvenorVolunteers && <PersonBadgeGroup people={orderedConvenorVolunteers} me={person} />}
             </Stack>
           </Stack>

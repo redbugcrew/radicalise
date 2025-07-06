@@ -130,6 +130,7 @@ pub struct CollectiveInvolvementWithDetails {
     pub status: InvolvementStatus,
     pub wellbeing: Option<String>,
     pub focus: Option<String>,
+    pub capacity_score: Option<i64>,
     pub capacity: Option<String>,
     pub participation_intention: Option<ParticipationIntention>,
     pub opt_out_type: Option<OptOutType>,

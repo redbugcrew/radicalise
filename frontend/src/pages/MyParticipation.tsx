@@ -55,6 +55,7 @@ export default function MyParticipation() {
       collective_id: collective.id,
       ...involvement,
       ...values,
+      capacity_score: values.capacity_score ? parseInt(values.capacity_score) : null,
     };
 
     api.api
