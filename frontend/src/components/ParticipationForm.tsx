@@ -187,9 +187,6 @@ export default function ParticipationForm({ personId, interval, previousInterval
 
   const previousInvolvements = typeof previousIntervalId === "number" ? getMatchingInvolvementInterval(involvements, previousIntervalId)?.crew_involvements : null;
 
-  console.log("Previous interval ID:", previousIntervalId);
-  console.log("Previous involvements:", previousInvolvements);
-
   const minStep = 0;
   const maxStep = additionalParticipationActive ? 2 : 1;
 
