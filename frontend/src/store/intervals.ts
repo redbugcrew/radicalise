@@ -7,6 +7,12 @@ export type IntervalsState = {
   currentInterval: Interval | null;
 };
 
+export function findPreviousInterval(intervals: Interval[], currentIntervalId: number): Interval | null {
+  const currentIndex = intervals.findIndex((i) => i.id === currentIntervalId);
+  if (currentIndex <= 0) return null;
+  return intervals[currentIndex - 1];
+}
+
 const intervalsSlice = createSlice({
   name: "people",
   initialState: {

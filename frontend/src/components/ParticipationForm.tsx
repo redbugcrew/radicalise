@@ -139,11 +139,12 @@ interface AdditionalParticipationStepProps {
   personId: number;
   intervalId: number;
   crewInvolvements: CrewInvolvement[];
+  previousInvolvements?: CrewInvolvement[] | undefined | null;
   form: ReturnType<typeof useForm<MyParticipationFormData>>;
   readOnly?: boolean;
 }
 
-function AdditionalParticipationStep({ form, readOnly, personId, intervalId, crewInvolvements }: AdditionalParticipationStepProps) {
+function AdditionalParticipationStep({ form, readOnly, personId, intervalId, crewInvolvements, previousInvolvements }: AdditionalParticipationStepProps) {
   const crewsMap = useAppSelector((state) => state.crews);
   const crews = Object.values(crewsMap) as Crew[];
   const people = useAppSelector((state) => state.people);
@@ -160,6 +161,7 @@ function AdditionalParticipationStep({ form, readOnly, personId, intervalId, cre
         people={people}
         disabled={readOnly}
         crewInvolvements={crewInvolvements}
+        previousInvolvements={previousInvolvements}
         key={form.key("crew_involvements")}
         {...form.getInputProps("crew_involvements")}
       />
@@ -172,15 +174,21 @@ interface ParticipationFormProps {
   readOnly?: boolean;
   involvement?: CollectiveInvolvementWithDetails | null;
   interval: Interval;
+  previousIntervalId?: number | undefined;
   onSubmit: (data: MyParticipationFormData) => void;
 }
 
-export default function ParticipationForm({ personId, interval, readOnly = false, involvement = null, onSubmit }: ParticipationFormProps) {
+export default function ParticipationForm({ personId, interval, previousIntervalId, readOnly = false, involvement = null, onSubmit }: ParticipationFormProps) {
   const involvements = useAppSelector((state) => state.involvements);
   const involvementInterval = getMatchingInvolvementInterval(involvements, interval.id);
   const crewInvolvements = involvementInterval?.crew_involvements || [];
   const [step, setStep] = useState(0);
   const [additionalParticipationActive, setAdditionalParticipationActive] = useState(involvement?.participation_intention === "OptIn");
+
+  const previousInvolvements = typeof previousIntervalId === "number" ? getMatchingInvolvementInterval(involvements, previousIntervalId)?.crew_involvements : null;
+
+  console.log("Previous interval ID:", previousIntervalId);
+  console.log("Previous involvements:", previousInvolvements);
 
   const minStep = 0;
   const maxStep = additionalParticipationActive ? 2 : 1;
@@ -260,7 +268,7 @@ export default function ParticipationForm({ personId, interval, readOnly = false
           <MinimumParticipationStep form={form} readOnly={readOnly} />
         </Stepper.Step>
         <Stepper.Step label="Additional Participation" disabled={!additionalParticipationActive} allowStepSelect={additionalParticipationActive} icon={additionalParticipationActive ? null : <IconLock size={24} />}>
-          <AdditionalParticipationStep form={form} readOnly={readOnly} personId={personId} intervalId={interval.id} crewInvolvements={crewInvolvements} />
+          <AdditionalParticipationStep form={form} readOnly={readOnly} personId={personId} intervalId={interval.id} crewInvolvements={crewInvolvements} previousInvolvements={previousInvolvements} />
         </Stepper.Step>
 
         <Stepper.Completed>Completed, click back button to get to previous step</Stepper.Completed>

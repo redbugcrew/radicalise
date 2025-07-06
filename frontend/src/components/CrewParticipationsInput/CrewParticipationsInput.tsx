@@ -24,6 +24,7 @@ type CrewParticipationsInputProps = GetInputPropsReturnType & {
   people: PeopleObjectMap;
   disabled?: boolean;
   crewInvolvements: CrewInvolvement[];
+  previousInvolvements?: CrewInvolvement[] | null | undefined;
 };
 
 function upsertData(arr: CrewInvolvement[], record: CrewInvolvement): CrewInvolvement[] {
@@ -52,7 +53,7 @@ function toControlData(data: CrewInvolvement[], crewId: number): CrewParticipati
   };
 }
 
-export default function CrewParticipationsInput({ crews, personId, intervalId, people, disabled, crewInvolvements, ...rest }: CrewParticipationsInputProps) {
+export default function CrewParticipationsInput({ crews, personId, intervalId, people, disabled, crewInvolvements, previousInvolvements, ...rest }: CrewParticipationsInputProps) {
   const [value, setValue] = useUncontrolled<CrewInvolvement[]>({
     value: rest.value,
     defaultValue: rest.defaultValue,
@@ -98,6 +99,7 @@ export default function CrewParticipationsInput({ crews, personId, intervalId, p
               value={toControlData(value, crew.id)}
               crew={crew}
               crewInvolvements={forCrew(crewInvolvements, crew.id)}
+              previousInvolvements={previousInvolvements ? forCrew(previousInvolvements, crew.id) : undefined}
               people={people}
               disabled={disabled}
               onChange={(change) => handleChange(crew.id, change)}

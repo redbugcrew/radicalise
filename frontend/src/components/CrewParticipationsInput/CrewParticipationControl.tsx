@@ -16,6 +16,7 @@ interface CrewParticipationToggleProps {
   personId: number;
   crew: Crew;
   crewInvolvements: CrewInvolvement[];
+  previousInvolvements?: CrewInvolvement[] | null | undefined;
   people: PeopleObjectMap;
   disabled?: boolean;
   onChange?: (change: CrewParticipationControlData) => void;
@@ -54,7 +55,12 @@ function displayPeople(involvements: CrewInvolvement[], people: PeopleObjectMap,
   return sortMeLast(asPeopleAlphaSorted(involvements, people), me);
 }
 
-export default function CrewParticipationControl({ value, personId, crew, crewInvolvements, people, disabled, onChange }: CrewParticipationToggleProps) {
+function hasOverlappingPeople(involvements1: CrewInvolvement[], involvements2: CrewInvolvement[]): boolean {
+  const set1 = new Set(involvements1.map((i) => i.person_id));
+  return involvements2.some((i) => set1.has(i.person_id));
+}
+
+export default function CrewParticipationControl({ value, personId, crew, crewInvolvements, people, disabled, onChange, previousInvolvements }: CrewParticipationToggleProps) {
   const person = people[personId];
   if (!person) return <p>Person not found</p>;
 
@@ -77,9 +83,14 @@ export default function CrewParticipationControl({ value, personId, crew, crewIn
 
   const hasPeople = orderedPeople.length > 0;
   const hasConvenorVolunteers = orderedConvenorVolunteers.length > 0;
+  const noOverlap = Array.isArray(previousInvolvements) && !hasOverlappingPeople(previousInvolvements, formInvolvements);
 
   let cardStyles = [styles.card];
-  if (!hasPeople || !hasConvenorVolunteers) cardStyles.push(styles.empty);
+  if (!hasPeople || !hasConvenorVolunteers) {
+    cardStyles.push(styles.empty);
+  } else if (noOverlap) {
+    cardStyles.push(styles.noOverlap);
+  }
 
   return (
     <Card className={cardStyles.join(" ")}>
@@ -92,6 +103,7 @@ export default function CrewParticipationControl({ value, personId, crew, crewIn
             </Group>
             {!hasPeople && <Text c="dimmed">Needs participants to go ahead.</Text>}
             {hasPeople && <PersonBadgeGroup people={orderedPeople} me={person} />}
+            {hasPeople && noOverlap && <Text c="orange">No overlapping participants with last interval, this crew will go ahead but may lack context.</Text>}
           </Stack>
         </Stack>
       </Card.Section>
