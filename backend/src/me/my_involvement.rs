@@ -18,6 +18,7 @@ use crate::{
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct MyParticipationInput {
     pub collective_id: i64,
+    pub private_capacity_planning: bool,
     pub wellbeing: Option<String>,
     pub focus: Option<String>,
     pub capacity_score: Option<i64>,
@@ -56,6 +57,7 @@ pub async fn update_my_involvements(
             collective_id: input.collective_id,
             interval_id,
             status,
+            private_capacity_planning: input.private_capacity_planning,
             wellbeing: input.wellbeing,
             focus: input.focus,
             capacity_score: input.capacity_score,

@@ -1,4 +1,4 @@
-import { Anchor, AppShell, Avatar, Burger, Container, Group } from "@mantine/core";
+import { Anchor, AppShell, Burger, Container, Group } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconBrandGithub, IconCalendar, IconHome2, IconUsers, IconUsersGroup } from "@tabler/icons-react";
 import { Outlet } from "react-router-dom";

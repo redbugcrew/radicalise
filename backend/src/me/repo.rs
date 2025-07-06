@@ -33,7 +33,7 @@ pub async fn find_detailed_involvement(
     sqlx::query_as!(
         CollectiveInvolvementWithDetails,
         "SELECT id, person_id, collective_id, interval_id,
-        status as \"status: InvolvementStatus\",
+        status as \"status: InvolvementStatus\", private_capacity_planning,
         wellbeing, focus, capacity_score, capacity,
         participation_intention as \"participation_intention: ParticipationIntention\",
         opt_out_type as \"opt_out_type: OptOutType\", opt_out_planned_return_date
@@ -55,10 +55,11 @@ pub async fn upsert_detailed_involvement(
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
     let result = sqlx::query!(
-        "INSERT INTO collective_involvements (person_id, collective_id, interval_id, status, wellbeing, focus, capacity_score, capacity, participation_intention, opt_out_type, opt_out_planned_return_date)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        "INSERT INTO collective_involvements (person_id, collective_id, interval_id, status, private_capacity_planning, wellbeing, focus, capacity_score, capacity, participation_intention, opt_out_type, opt_out_planned_return_date)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(person_id, collective_id, interval_id) DO UPDATE SET
             status = excluded.status,
+            private_capacity_planning = excluded.private_capacity_planning,
             wellbeing = excluded.wellbeing,
             focus = excluded.focus,
             capacity_score = excluded.capacity_score,
@@ -70,6 +71,7 @@ pub async fn upsert_detailed_involvement(
         involvement.collective_id,
         involvement.interval_id,
         involvement.status,
+        involvement.private_capacity_planning,
         involvement.wellbeing,
         involvement.focus,
         involvement.capacity_score,

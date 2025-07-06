@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT id, person_id, collective_id, interval_id,\n        status as \"status: InvolvementStatus\",\n        wellbeing, focus, capacity_score, capacity,\n        participation_intention as \"participation_intention: ParticipationIntention\",\n        opt_out_type as \"opt_out_type: OptOutType\", opt_out_planned_return_date\n        FROM collective_involvements\n        WHERE\n            collective_id = ? AND\n            person_id = ? AND\n            interval_id = ?",
+  "query": "SELECT id, person_id, collective_id, interval_id,\n        status as \"status: InvolvementStatus\", private_capacity_planning,\n        wellbeing, focus, capacity_score, capacity,\n        participation_intention as \"participation_intention: ParticipationIntention\",\n        opt_out_type as \"opt_out_type: OptOutType\", opt_out_planned_return_date\n        FROM collective_involvements\n        WHERE\n            collective_id = ? AND\n            person_id = ? AND\n            interval_id = ?",
   "describe": {
     "columns": [
       {
@@ -29,38 +29,43 @@
         "type_info": "Text"
       },
       {
-        "name": "wellbeing",
+        "name": "private_capacity_planning",
         "ordinal": 5,
-        "type_info": "Text"
+        "type_info": "Bool"
       },
       {
-        "name": "focus",
+        "name": "wellbeing",
         "ordinal": 6,
         "type_info": "Text"
       },
       {
-        "name": "capacity_score",
+        "name": "focus",
         "ordinal": 7,
+        "type_info": "Text"
+      },
+      {
+        "name": "capacity_score",
+        "ordinal": 8,
         "type_info": "Integer"
       },
       {
         "name": "capacity",
-        "ordinal": 8,
-        "type_info": "Text"
-      },
-      {
-        "name": "participation_intention: ParticipationIntention",
         "ordinal": 9,
         "type_info": "Text"
       },
       {
-        "name": "opt_out_type: OptOutType",
+        "name": "participation_intention: ParticipationIntention",
         "ordinal": 10,
         "type_info": "Text"
       },
       {
-        "name": "opt_out_planned_return_date",
+        "name": "opt_out_type: OptOutType",
         "ordinal": 11,
+        "type_info": "Text"
+      },
+      {
+        "name": "opt_out_planned_return_date",
+        "ordinal": 12,
         "type_info": "Text"
       }
     ],
@@ -68,6 +73,7 @@
       "Right": 3
     },
     "nullable": [
+      false,
       false,
       false,
       false,
@@ -82,5 +88,5 @@
       true
     ]
   },
-  "hash": "b52290873d9bc4595e671885194f54dd9f0e19fdeffd1b752ac94b36c7011f33"
+  "hash": "cbc2d0abc901300c6a303982ddf8b8807c482edcc7f2cb471366d205f67de75f"
 }

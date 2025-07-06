@@ -1,4 +1,4 @@
-import { Stepper, Group, Button, Stack, Textarea, Select, Title, type SelectProps } from "@mantine/core";
+import { Stepper, Group, Button, Stack, Textarea, Select, Title, Text, type SelectProps, Switch, Flex } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { useState } from "react";
@@ -11,6 +11,7 @@ import type { ArrayOfStringTuples } from "./forms/ComboTextArea";
 import CapacityScoreIcon from "./CapacityScoreIcon";
 
 export interface MyParticipationFormData {
+  private_capacity_planning: boolean;
   wellbeing: string;
   focus: string;
   capacity_score: string | null;
@@ -36,8 +37,16 @@ const renderCapacityScoreOption: SelectProps["renderOption"] = ({ option, checke
 
 function CapacityStep({ form, readOnly }: StepProps) {
   return (
-    <Stack>
-      {/* <p>{JSON.stringify(form)}</p> */}
+    <Stack mt="lg" gap="md">
+      <Stack gap={0} mb="md">
+        <Flex direction={{ base: "column", sm: "row" }} justify="space-between" align={{ base: "flex-start", sm: "center" }} gap="xs" mb={{ base: "md", sm: 0 }}>
+          <Title order={3} m={0}>
+            Plan your capacity
+          </Title>
+          <Switch label="Keep private" labelPosition="left" {...form.getInputProps("private_capacity_planning", { type: "checkbox" })} />
+        </Flex>
+        <Text c="dimmed">Optional questions to prompt reflection on life before planning your participation, sharing them with the group can help us be more aware of each other's needs.</Text>
+      </Stack>
 
       <ComboTextArea
         disabled={readOnly}
@@ -78,7 +87,7 @@ function CapacityStep({ form, readOnly }: StepProps) {
         {...form.getInputProps("focus")}
       />
       <Select
-        label="Capacity"
+        label={form.values.private_capacity_planning ? "Capacity (Shared with group)" : "Capacity"}
         description="Given the context of your life (above), how would you describe your capacity to participate in the Brassica Collective this interval?"
         placeholder="Pick value"
         disabled={readOnly}
@@ -111,7 +120,7 @@ function MinimumParticipationStep({ form, readOnly }: MinimumParticipationStepPr
   });
 
   return (
-    <Stack>
+    <Stack mt="lg" gap="md">
       <Select
         label="Participation intention"
         description="Would you like to participate in the Brassica Collective this interval?"
@@ -169,8 +178,13 @@ function AdditionalParticipationStep({ form, readOnly, personId, intervalId, cre
   const people = useAppSelector((state) => state.people);
 
   return (
-    <Stack>
-      <Title order={3}>Crews</Title>
+    <Stack mt="lg" gap="md">
+      <Stack gap={0} mb="md">
+        <Group justify="space-between">
+          <Title order={3}>Crews</Title>
+        </Group>
+        <Text c="dimmed">Without forming crews, nothing gets done. Crews don't run for the interval unless they have participants</Text>
+      </Stack>
 
       <CrewParticipationsInput
         personId={personId}
@@ -211,13 +225,14 @@ export default function ParticipationForm({ personId, interval, previousInterval
   const form = useForm<MyParticipationFormData>({
     mode: "controlled",
     initialValues: {
-      wellbeing: involvement?.wellbeing || "",
-      focus: involvement?.focus || "",
-      capacity_score: involvement?.capacity_score?.toString() || null,
-      capacity: involvement?.capacity || "",
-      participation_intention: involvement?.participation_intention || null,
-      opt_out_type: involvement?.opt_out_type || null,
-      opt_out_planned_return_date: involvement?.opt_out_planned_return_date || null,
+      private_capacity_planning: involvement?.private_capacity_planning ?? false,
+      wellbeing: involvement?.wellbeing ?? "",
+      focus: involvement?.focus ?? "",
+      capacity_score: involvement?.capacity_score?.toString() ?? null,
+      capacity: involvement?.capacity ?? "",
+      participation_intention: involvement?.participation_intention ?? null,
+      opt_out_type: involvement?.opt_out_type ?? null,
+      opt_out_planned_return_date: involvement?.opt_out_planned_return_date ?? null,
       crew_involvements: forPerson(crewInvolvements, personId),
     },
 

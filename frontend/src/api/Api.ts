@@ -71,6 +71,7 @@ export interface CollectiveInvolvementWithDetails {
   participation_intention?: null | ParticipationIntention;
   /** @format int64 */
   person_id: number;
+  private_capacity_planning: boolean;
   status: InvolvementStatus;
   wellbeing?: string | null;
 }
@@ -170,6 +171,7 @@ export interface MyParticipationInput {
   opt_out_planned_return_date?: string | null;
   opt_out_type?: null | OptOutType;
   participation_intention?: null | ParticipationIntention;
+  private_capacity_planning: boolean;
   wellbeing?: string | null;
 }
 
@@ -360,7 +362,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 0.5.15
+ * @version 0.5.16
  * @license
  */
 export class Api<

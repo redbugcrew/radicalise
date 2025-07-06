@@ -129,6 +129,7 @@ pub struct CollectiveInvolvementWithDetails {
     pub collective_id: i64,
     pub interval_id: i64,
     pub status: InvolvementStatus,
+    pub private_capacity_planning: bool,
     pub wellbeing: Option<String>,
     pub focus: Option<String>,
     pub capacity_score: Option<i64>,

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO collective_involvements (person_id, collective_id, interval_id, status, private_capacity_planning, wellbeing, focus, capacity_score, capacity, participation_intention, opt_out_type, opt_out_planned_return_date)\n        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)\n        ON CONFLICT(person_id, collective_id, interval_id) DO UPDATE SET\n            status = excluded.status,\n            private_capacity_planning = excluded.private_capacity_planning,\n            wellbeing = excluded.wellbeing,\n            focus = excluded.focus,\n            capacity_score = excluded.capacity_score,\n            capacity = excluded.capacity,\n            participation_intention = excluded.participation_intention,\n            opt_out_type = excluded.opt_out_type,\n            opt_out_planned_return_date = excluded.opt_out_planned_return_date",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 12
+    },
+    "nullable": []
+  },
+  "hash": "8de4aa3a94758ad95a18b396350895296db762da2f68ed9eda2ba12b203cef0d"
+}
