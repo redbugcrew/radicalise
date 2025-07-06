@@ -1,4 +1,4 @@
-import { Card, Group, Stack, Switch, Title } from "@mantine/core";
+import { Card, Group, Stack, Switch, Title, Text } from "@mantine/core";
 import type { PeopleObjectMap } from "../../store/people";
 import type { Crew, CrewInvolvement, Person } from "../../api/Api";
 import styles from "./CrewParticipationsInput.module.css";
@@ -75,10 +75,14 @@ export default function CrewParticipationControl({ value, personId, crew, crewIn
   const orderedPeople = displayPeople(formInvolvements, people, person);
   const orderedConvenorVolunteers = displayPeople(forConvenor(formInvolvements), people, person);
 
-  const peopleOnCrew = formInvolvements.length > 0;
+  const hasPeople = orderedPeople.length > 0;
+  const hasConvenorVolunteers = orderedConvenorVolunteers.length > 0;
+
+  let cardStyles = [styles.card];
+  if (!hasPeople || !hasConvenorVolunteers) cardStyles.push(styles.empty);
 
   return (
-    <Card className={[styles.card, peopleOnCrew ? undefined : styles.empty].join(" ")}>
+    <Card className={cardStyles.join(" ")}>
       <Card.Section withBorder inheritPadding py="xs">
         <Stack key={crew.id} gap="md">
           <Stack gap="xs">
@@ -86,21 +90,25 @@ export default function CrewParticipationControl({ value, personId, crew, crewIn
               <Title order={4}>{crew.name}</Title>
               <Switch disabled={disabled} checked={value.participating} onChange={handleOnChangeParticipating} />
             </Group>
-            <PersonBadgeGroup people={orderedPeople} me={person} />
+            {!hasPeople && <Text c="dimmed">Needs participants to go ahead.</Text>}
+            {hasPeople && <PersonBadgeGroup people={orderedPeople} me={person} />}
           </Stack>
         </Stack>
       </Card.Section>
-      <Card.Section withBorder inheritPadding py="xs">
-        <Stack key={crew.id} gap="md">
-          <Stack gap="xs">
-            <Group justify="space-between">
-              <Title order={5}>Convenor</Title>
-              {value.participating && <Switch disabled={disabled} checked={value.volunteered_convenor} onChange={handleOnChangeVolunteeredConvenor} />}
-            </Group>
-            <PersonBadgeGroup people={orderedConvenorVolunteers} me={person} />
+      {hasPeople && (
+        <Card.Section withBorder inheritPadding py="xs">
+          <Stack key={crew.id} gap="md">
+            <Stack gap="xs">
+              <Group justify="space-between">
+                <Title order={5}>Convenor</Title>
+                {value.participating && <Switch disabled={disabled} checked={value.volunteered_convenor} onChange={handleOnChangeVolunteeredConvenor} />}
+              </Group>
+              {!hasConvenorVolunteers && <Text c="dimmed">Needs volunteers for convenor to go ahead.</Text>}
+              {hasConvenorVolunteers && <PersonBadgeGroup people={orderedConvenorVolunteers} me={person} />}
+            </Stack>
           </Stack>
-        </Stack>
-      </Card.Section>
+        </Card.Section>
+      )}
     </Card>
   );
 }
