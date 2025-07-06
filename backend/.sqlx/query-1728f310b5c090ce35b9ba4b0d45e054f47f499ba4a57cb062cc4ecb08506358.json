@@ -1,0 +1,26 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        SELECT crew_involvements.person_id, COUNT(interval_id) as \"count: i64\"\n        FROM crew_involvements\n        LEFT JOIN (\n            SELECT person_id, MAX(interval_id) as last_convened\n            FROM crew_involvements\n            WHERE\n                crew_id = ? AND\n                convenor = TRUE AND\n                interval_id <= ?\n            GROUP BY person_id\n        ) i ON crew_involvements.person_id = i.person_id\n        WHERE\n            interval_id > last_convened AND\n            convenor = FALSE AND\n            crew_id = ? AND\n            interval_id <= ?\n        GROUP BY crew_involvements.person_id\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "person_id",
+        "ordinal": 0,
+        "type_info": "Integer"
+      },
+      {
+        "name": "count: i64",
+        "ordinal": 1,
+        "type_info": "Null"
+      }
+    ],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": [
+      false,
+      null
+    ]
+  },
+  "hash": "1728f310b5c090ce35b9ba4b0d45e054f47f499ba4a57cb062cc4ecb08506358"
+}

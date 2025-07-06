@@ -1,0 +1,50 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id, person_id, crew_id, interval_id, convenor, volunteered_convenor\n        FROM crew_involvements\n        WHERE crew_id = ? AND interval_id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer"
+      },
+      {
+        "name": "person_id",
+        "ordinal": 1,
+        "type_info": "Integer"
+      },
+      {
+        "name": "crew_id",
+        "ordinal": 2,
+        "type_info": "Integer"
+      },
+      {
+        "name": "interval_id",
+        "ordinal": 3,
+        "type_info": "Integer"
+      },
+      {
+        "name": "convenor",
+        "ordinal": 4,
+        "type_info": "Bool"
+      },
+      {
+        "name": "volunteered_convenor",
+        "ordinal": 5,
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "3db2e2ada1897ef03ebce6e009136e1b74679d1b6fe699d874bbcfc3aa2461d5"
+}

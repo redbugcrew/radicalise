@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE crew_involvements SET convenor = FALSE\n        WHERE crew_id = ? AND interval_id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "fed51a0a3c8eb105c20ebd3032e63ee2a0becebb2df94a9aaf081288d4c4a6ee"
+}
