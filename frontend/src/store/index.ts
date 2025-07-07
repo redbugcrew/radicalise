@@ -4,11 +4,11 @@ import collectiveReducer, { collectiveLoaded } from "./collective";
 import peopleReducer, { peopleLoaded } from "./people";
 import intervalsReducer, { intervalsLoaded, intervalCreated } from "./intervals";
 import involvementsReducer, { involvementsLoaded } from "./involvements";
-import crewsReducer, { crewsLoaded } from "./crews";
+import crewsReducer, { crewsLoaded, crewUpdated } from "./crews";
 import meReducer, { meLoaded, myIntervalDataChanged } from "./me";
 import { getApi } from "../api";
 import { redirect } from "react-router-dom";
-import type { AppEvent, IntervalsEvent, MeEvent } from "../api/Api";
+import type { AppEvent, CrewsEvent, IntervalsEvent, MeEvent } from "../api/Api";
 
 const store = configureStore({
   reducer: {
@@ -101,6 +101,13 @@ export async function handleIntervalsEvent(event: IntervalsEvent) {
   }
 }
 
+export async function handleCrewsEvent(event: CrewsEvent) {
+  console.log("Handling CrewsEvent:", event);
+  if (event.CrewUpdated) {
+    store.dispatch(crewUpdated(event.CrewUpdated));
+  }
+}
+
 export async function handleAppEvents(events: AppEvent[]) {
   events.forEach((event) => {
     console.log("Handling AppEvent:", event);
@@ -109,6 +116,8 @@ export async function handleAppEvents(events: AppEvent[]) {
       handleMeEvent(event.MeEvent);
     } else if ("IntervalsEvent" in event && event.IntervalsEvent) {
       handleIntervalsEvent(event.IntervalsEvent);
+    } else if ("CrewsEvent" in event && event.CrewsEvent) {
+      handleCrewsEvent(event.CrewsEvent);
     } else {
       console.warn("Unknown event type:", event);
     }

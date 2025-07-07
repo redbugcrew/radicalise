@@ -18,12 +18,15 @@ const crewsSlice = createSlice({
       });
       return crews;
     },
+    crewUpdated: (state: CrewsState, action: PayloadAction<Crew>) => {
+      state[action.payload.id] = action.payload;
+    },
   },
 });
 
 // `createSlice` automatically generated action creators with these names.
 // export them as named exports from this "slice" file
-export const { crewsLoaded } = crewsSlice.actions;
+export const { crewsLoaded, crewUpdated } = crewsSlice.actions;
 
 // Export the slice reducer as the default export
 export default crewsSlice.reducer;
