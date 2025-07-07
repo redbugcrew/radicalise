@@ -1,4 +1,4 @@
-use axum::{Extension, http::header, routing::get};
+use axum::{Extension, http::Method, http::header, routing::get};
 use axum_login::{
     AuthManagerLayerBuilder, login_required,
     tower_sessions::{Expiry, SessionManagerLayer},
@@ -43,6 +43,13 @@ async fn main() {
     // CORS
     let cors = CorsLayer::new()
         .allow_origin(base_url.parse::<header::HeaderValue>().unwrap())
+        .allow_methods([
+            Method::GET,
+            Method::POST,
+            Method::PUT,
+            Method::DELETE,
+            Method::OPTIONS,
+        ])
         .allow_headers([header::AUTHORIZATION, header::ACCEPT, header::CONTENT_TYPE])
         .allow_credentials(true);
 

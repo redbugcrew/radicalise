@@ -10,7 +10,7 @@ interface CrewFormProps {
 export default function CrewForm({ crew, onSubmit }: CrewFormProps) {
   const form = useForm<Crew>({
     mode: "controlled",
-    initialValues: crew,
+    initialValues: { ...crew },
     validate: {
       name: (value) => (value ? null : "Name is required"),
       description: (value) => (value ? null : "Description is required"),
@@ -21,8 +21,8 @@ export default function CrewForm({ crew, onSubmit }: CrewFormProps) {
     <form onSubmit={form.onSubmit(onSubmit)}>
       <Stack gap="lg">
         <Stack gap="md">
-          <TextInput label="Name" placeholder="Crew Name" {...form.getInputProps("name")} />
-          <TextInput label="Description" placeholder="Crew Description" {...form.getInputProps("description")} />
+          <TextInput label="Name" placeholder="Crew Name" key="name" {...form.getInputProps("name")} />
+          <TextInput label="Description" placeholder="Crew Description" key="description" {...form.getInputProps("description")} />
         </Stack>
         <Button type="submit">Submit</Button>
       </Stack>

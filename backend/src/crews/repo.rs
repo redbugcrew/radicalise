@@ -12,7 +12,7 @@ pub async fn update_crew(crew: Crew, pool: &SqlitePool) -> Result<Crew, sqlx::Er
         crew.description,
         crew.id
     )
-    .fetch_one(pool)
+    .execute(pool)
     .await?;
 
     Ok(crew)
