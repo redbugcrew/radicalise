@@ -1,7 +1,7 @@
 import { Combobox, Flex, Input, InputBase, useCombobox } from "@mantine/core";
-
 import { IconBrandMatrix, IconCircleLetterL, IconWorldWww } from "@tabler/icons-react";
 import { useState } from "react";
+import classes from "./LinksInput.module.css";
 
 const iconProps = {
   size: 16,
@@ -47,10 +47,11 @@ export default function LinkTypeSelect() {
         setValue(val);
         combobox.closeDropdown();
       }}
+      classNames={{ group: classes.typeSelectInput }}
     >
       <Combobox.Target>
-        <InputBase component="button" type="button" pointer rightSection={<Combobox.Chevron />} onClick={() => combobox.toggleDropdown()} rightSectionPointerEvents="none">
-          {value ? <ItemWithIcon name={value} icon={typeIcons[value]} /> : <Input.Placeholder>Pick value</Input.Placeholder>}
+        <InputBase component="button" type="button" pointer rightSection={<Combobox.Chevron />} onClick={() => combobox.toggleDropdown()} rightSectionPointerEvents="none" classNames={{ input: classes.typeSelectInput }}>
+          {value ? <ItemWithIcon name={value} icon={typeIcons[value]} /> : <Input.Placeholder>Pick type</Input.Placeholder>}
         </InputBase>
       </Combobox.Target>
 

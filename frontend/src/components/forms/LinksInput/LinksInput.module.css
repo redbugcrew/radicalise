@@ -5,7 +5,7 @@
   border-bottom-right-radius: 0;
 }
 
-.typeSelectInput {
+.typeSelectInput button {
   border-radius: 0;
   border-color: red;
 }
