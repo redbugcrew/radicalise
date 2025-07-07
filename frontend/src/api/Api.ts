@@ -32,6 +32,9 @@ export type AppEvent =
     }
   | {
       IntervalsEvent: IntervalsEvent;
+    }
+  | {
+      CrewsEvent: CrewsEvent;
     };
 
 export interface Collective {
@@ -100,6 +103,10 @@ export interface CrewInvolvement {
   person_id: number;
   volunteered_convenor: boolean;
 }
+
+export type CrewsEvent = {
+  CrewUpdated: Crew;
+};
 
 export interface ForgotPasswordRequest {
   email: string;
@@ -362,7 +369,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 0.5.16
+ * @version 0.6.0
  * @license
  */
 export class Api<
@@ -439,6 +446,22 @@ export class Api<
       this.request<IntervalInvolvementData, any>({
         path: `/api/collective/interval/${intervalId}/involvements`,
         method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdateCrew
+     * @request PUT:/api/crews/{crew_id}
+     */
+    updateCrew: (crewId: string, data: Crew, params: RequestParams = {}) =>
+      this.request<AppEvent[], any>({
+        path: `/api/crews/${crewId}`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),

@@ -2,7 +2,21 @@ use std::collections::HashMap;
 
 use sqlx::SqlitePool;
 
-use crate::shared::entities::CrewInvolvement;
+use crate::shared::entities::{Crew, CrewInvolvement};
+
+pub async fn update_crew(crew: Crew, pool: &SqlitePool) -> Result<Crew, sqlx::Error> {
+    sqlx::query_as!(
+        Crew,
+        "UPDATE crews SET name = ?, description = ? WHERE id = ?",
+        crew.name,
+        crew.description,
+        crew.id
+    )
+    .fetch_one(pool)
+    .await?;
+
+    Ok(crew)
+}
 
 pub async fn find_crew_involvements(
     crew_id: i64,

@@ -139,7 +139,7 @@ pub struct CollectiveInvolvementWithDetails {
     pub opt_out_planned_return_date: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, ToSchema)]
+#[derive(Serialize, Deserialize, ToSchema, Debug)]
 pub struct Crew {
     pub id: i64,
     pub name: String,

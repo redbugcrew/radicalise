@@ -5,4 +5,5 @@ use utoipa::ToSchema;
 pub enum AppEvent {
     MeEvent(crate::me::events::MeEvent),
     IntervalsEvent(crate::intervals::events::IntervalsEvent),
+    CrewsEvent(crate::crews::events::CrewsEvent),
 }
