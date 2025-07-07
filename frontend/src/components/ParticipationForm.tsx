@@ -291,7 +291,7 @@ export default function ParticipationForm({ personId, interval, previousInterval
 
   return (
     <form onSubmit={form.onSubmit(onSubmit, (errors) => console.log("Form submission errors:", errors))}>
-      <Stepper active={step} onStepClick={setStepIfValid} iconSize={32}>
+      <Stepper active={step} onStepClick={setStepIfValid} iconSize={32} size="lg" mt="xl">
         <Stepper.Step label="Capacity">
           <CapacityStep form={form} readOnly={readOnly} />
         </Stepper.Step>

@@ -1,5 +1,5 @@
 .user_section {
-  padding: var(--mantine-spacing-md);
+  padding: var(--mantine-spacing-md) 0;
 }
 
 .menu_section {

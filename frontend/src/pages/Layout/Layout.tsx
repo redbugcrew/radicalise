@@ -24,7 +24,7 @@ export default function Layout() {
       </AppShell.Header>
       <AppShell.Navbar p={0}>
         <AppShell.Section className={classes.user_section}>
-          <PersonBadge person={person} variant="transparent" />
+          <NavLink label={<PersonBadge person={person} variant="transparent" />} href={`/people/${person.id}`} onClick={toggle} />
         </AppShell.Section>
         <AppShell.Section className={classes.menu_section}>
           <NavLink label="Dashboard" href="dashboard" leftSection={<IconHome2 size={18} />} onClick={toggle} />

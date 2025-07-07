@@ -123,7 +123,7 @@ export default function PeopleTable({ people }: PeopleTableProps) {
   const rows = sortedData.map((item) => (
     <Table.Tr key={item.id}>
       <Table.Td>
-        <Anchor href="/people/1">
+        <Anchor href={`/people/${item.id}`}>
           <Group gap="sm" wrap="nowrap">
             <Avatar size={30} src={avatarUrl(item.id)} radius={30} />
             <Text fz="sm" fw={500}>
