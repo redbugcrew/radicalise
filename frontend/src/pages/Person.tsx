@@ -3,6 +3,7 @@ import { useAppSelector } from "../store";
 import { Anchor } from "../components";
 import { IconUserEdit } from "@tabler/icons-react";
 import { useParams } from "react-router-dom";
+
 export default function Person() {
   const { personId } = useParams<"personId">();
   const personIdNum = personId ? parseInt(personId, 10) : undefined;

@@ -1,6 +1,6 @@
 import { Stack, Title } from "@mantine/core";
-import { CrewsList } from "../components";
-import { useAppSelector } from "../store";
+import { CrewsList } from "../../components";
+import { useAppSelector } from "../../store";
 
 export default function Crews() {
   const crewsMap = useAppSelector((state) => state.crews);

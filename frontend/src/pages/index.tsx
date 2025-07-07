@@ -4,6 +4,7 @@ export { default as Dashboard } from "./Dashboard/Dashboard";
 export { default as NewPerson } from "./NewPerson";
 export { default as Layout } from "./Layout/Layout";
 export { default as MyParticipation } from "./MyParticipation";
-export { default as Crews } from "./Crews";
+export { default as Crews } from "./crews/Crews";
+export { default as EditCrew } from "./crews/EditCrew";
 export { default as Intervals } from "./intervals/Intervals";
 export { default as NewInterval } from "./intervals/NewInterval";

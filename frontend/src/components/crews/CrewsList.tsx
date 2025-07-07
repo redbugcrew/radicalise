@@ -1,7 +1,7 @@
 import { Stack } from "@mantine/core";
-import type { Crew, CrewInvolvement } from "../api/Api";
-import { hashByNumber } from "../utilities/hashing";
-import type { PeopleObjectMap } from "../store/people";
+import type { Crew, CrewInvolvement } from "../../api/Api";
+import { hashByNumber } from "../../utilities/hashing";
+import type { PeopleObjectMap } from "../../store/people";
 
 import CrewCard from "./CrewCard/CrewCard";
 

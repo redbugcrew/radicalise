@@ -1,8 +1,9 @@
 import { Card, Group, Stack, Title, Text, Badge } from "@mantine/core";
-import type { Crew, CrewInvolvement, Person } from "../../api/Api";
-import PersonBadge from "../PersonBadge/PersonBadge";
-import type { PeopleObjectMap } from "../../store/people";
+import type { Crew, CrewInvolvement, Person } from "../../../api/Api";
+import PersonBadge from "../../PersonBadge/PersonBadge";
+import type { PeopleObjectMap } from "../../../store/people";
 import styles from "./CrewCard.module.css";
+import Anchor from "../../Anchor";
 
 interface CrewCardProps {
   crew: Crew;
@@ -44,9 +45,14 @@ export default function CrewCard({ crew, involvements, people, highlightPersonId
       <Stack gap="md">
         <Group justify="space-between" align="center">
           <Stack gap={0}>
-            <Title order={2} size="h4">
-              {crew.name}
-            </Title>
+            <Group>
+              <Title order={2} size="h4">
+                {crew.name}
+              </Title>
+              <Anchor c="dimmed" href={`/crews/${crew.id}/edit`} size="xs">
+                edit
+              </Anchor>
+            </Group>
             <Text>{crew.description}</Text>
           </Stack>
           {!active && <Badge color="orange">Inactive</Badge>}
