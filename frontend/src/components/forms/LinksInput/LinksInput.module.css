@@ -1,0 +1,26 @@
+.typeSelect {
+  flex: 1;
+  border-color: purple;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.typeSelectInput {
+  border-radius: 0;
+  border-color: red;
+}
+
+.urlTextInput {
+  flex: 3;
+}
+
+.urlTextInput input {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-left-width: 0;
+}
+
+.urlTextInput input:focus {
+  border-left-width: 1px;
+  margin-left: -1px;
+}

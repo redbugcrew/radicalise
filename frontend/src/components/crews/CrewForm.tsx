@@ -1,6 +1,7 @@
 import { useForm } from "@mantine/form";
 import type { Crew } from "../../api/Api";
 import { Button, Stack, TextInput } from "@mantine/core";
+import LinksInput from "../forms/LinksInput/LinksInput";
 
 interface CrewFormProps {
   crew: Crew;
@@ -23,6 +24,7 @@ export default function CrewForm({ crew, onSubmit }: CrewFormProps) {
         <Stack gap="md">
           <TextInput label="Name" placeholder="Crew Name" key="name" {...form.getInputProps("name")} />
           <TextInput label="Description" placeholder="Crew Description" key="description" {...form.getInputProps("description")} />
+          <LinksInput label="Links" placeholder="Add a link" key="links" {...form.getInputProps("links")} />
         </Stack>
         <Button type="submit">Submit</Button>
       </Stack>
