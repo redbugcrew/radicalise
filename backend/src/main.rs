@@ -20,6 +20,7 @@ use crate::{
 mod api;
 mod auth;
 mod collective;
+mod crews;
 mod database;
 mod intervals;
 mod me;
