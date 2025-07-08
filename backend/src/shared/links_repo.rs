@@ -7,10 +7,7 @@ pub fn hash_links_by_owner(links: Vec<LinkWithOwner>) -> HashMap<i64, Vec<Link>>
     for link in links {
         map.entry(link.owner_id)
             .or_insert_with(Vec::new)
-            .push(Link {
-                link_type: link.link_type,
-                url: link.url,
-            });
+            .push(link.strip_owner());
     }
     map
 }
@@ -21,7 +18,7 @@ pub async fn find_all_links_for_owner_type(
 ) -> Result<Vec<LinkWithOwner>, sqlx::Error> {
     sqlx::query_as!(
         LinkWithOwner,
-        "SELECT id, link_type, url, owner_id, owner_type
+        "SELECT id, link_type, url, label, owner_id, owner_type
          FROM links
          WHERE owner_type = ?",
         owner_type
@@ -37,7 +34,7 @@ pub async fn find_all_links_for_owner(
 ) -> Result<Vec<Link>, sqlx::Error> {
     sqlx::query_as!(
         Link,
-        "SELECT link_type, url
+        "SELECT link_type, url, label
          FROM links
          WHERE owner_id = ? AND owner_type = ?",
         owner_id,

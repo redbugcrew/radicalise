@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM links WHERE owner_id = ? AND owner_type = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "c541fad8b4d62c809a7082ba882f42cb1869ec25ae35ca3c9de0858d9511b14c"
+}

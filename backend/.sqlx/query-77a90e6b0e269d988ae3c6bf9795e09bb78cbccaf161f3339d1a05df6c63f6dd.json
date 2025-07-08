@@ -1,0 +1,26 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT link_type, url\n         FROM links\n         WHERE owner_id = ? AND owner_type = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "link_type",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "url",
+        "ordinal": 1,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "77a90e6b0e269d988ae3c6bf9795e09bb78cbccaf161f3339d1a05df6c63f6dd"
+}

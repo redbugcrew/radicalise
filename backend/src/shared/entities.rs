@@ -150,6 +150,7 @@ pub struct Crew {
 pub struct Link {
     pub link_type: String,
     pub url: String,
+    pub label: String,
 }
 
 #[derive(Clone)]
@@ -158,8 +159,19 @@ pub struct LinkWithOwner {
     pub id: i64,
     pub link_type: String,
     pub url: String,
+    pub label: String,
     pub owner_id: i64,
     pub owner_type: String,
+}
+
+impl LinkWithOwner {
+    pub fn strip_owner(self) -> Link {
+        Link {
+            link_type: self.link_type,
+            url: self.url,
+            label: self.label,
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Debug)]

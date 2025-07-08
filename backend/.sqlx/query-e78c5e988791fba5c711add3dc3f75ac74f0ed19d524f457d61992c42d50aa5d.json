@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO links (link_type, url, owner_id, owner_type) VALUES (?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "e78c5e988791fba5c711add3dc3f75ac74f0ed19d524f457d61992c42d50aa5d"
+}
