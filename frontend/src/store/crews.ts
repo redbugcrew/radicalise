@@ -1,8 +1,8 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { Crew } from "../api/Api";
+import type { CrewWithLinks } from "../api/Api";
 
 interface CrewObjectMap {
-  [key: number]: Crew;
+  [key: number]: CrewWithLinks;
 }
 
 export type CrewsState = CrewObjectMap;
@@ -11,14 +11,14 @@ const crewsSlice = createSlice({
   name: "crews",
   initialState: {} as CrewsState,
   reducers: {
-    crewsLoaded: (_state: CrewsState, action: PayloadAction<Crew[]>) => {
+    crewsLoaded: (_state: CrewsState, action: PayloadAction<CrewWithLinks[]>) => {
       const crews: CrewObjectMap = {};
       action.payload.forEach((crew) => {
         crews[crew.id] = crew;
       });
       return crews;
     },
-    crewUpdated: (state: CrewsState, action: PayloadAction<Crew>) => {
+    crewUpdated: (state: CrewsState, action: PayloadAction<CrewWithLinks>) => {
       state[action.payload.id] = action.payload;
     },
   },

@@ -104,6 +104,14 @@ export interface CrewInvolvement {
   volunteered_convenor: boolean;
 }
 
+export interface CrewWithLinks {
+  description?: string | null;
+  /** @format int64 */
+  id: number;
+  links?: any[] | null;
+  name: string;
+}
+
 export type CrewsEvent = {
   CrewUpdated: Crew;
 };
@@ -114,7 +122,7 @@ export interface ForgotPasswordRequest {
 
 export interface InitialData {
   collective: Collective;
-  crews: Crew[];
+  crews: CrewWithLinks[];
   current_interval: Interval;
   intervals: Interval[];
   involvements: InvolvementData;
@@ -142,6 +150,13 @@ export type IntervalsEvent = {
 export interface InvolvementData {
   current_interval?: null | IntervalInvolvementData;
   next_interval?: null | IntervalInvolvementData;
+}
+
+export interface Link {
+  /** @format int64 */
+  id: number;
+  link_type: string;
+  url: string;
 }
 
 export interface LoginResponse {
@@ -369,7 +384,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 0.6.0
+ * @version 0.6.1
  * @license
  */
 export class Api<

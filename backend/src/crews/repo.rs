@@ -2,7 +2,37 @@ use std::collections::HashMap;
 
 use sqlx::SqlitePool;
 
-use crate::shared::entities::{Crew, CrewInvolvement};
+use crate::shared::{
+    entities::{Crew, CrewInvolvement, CrewWithLinks},
+    links_repo::{find_all_links_for_owner_type, hash_links_by_owner},
+};
+
+pub async fn find_all_crews_with_links(
+    pool: &SqlitePool,
+) -> Result<Vec<CrewWithLinks>, sqlx::Error> {
+    let crews = find_all_crews(pool).await?;
+
+    let links = find_all_links_for_owner_type("crews".to_string(), pool).await?;
+    let links_hash = hash_links_by_owner(links);
+
+    let crews: Vec<CrewWithLinks> = crews
+        .into_iter()
+        .map(|crew| CrewWithLinks {
+            id: crew.id,
+            name: crew.name,
+            description: crew.description,
+            links: Some(links_hash.get(&crew.id).cloned().unwrap_or_else(Vec::new)),
+        })
+        .collect();
+
+    Ok(crews)
+}
+
+pub async fn find_all_crews(pool: &SqlitePool) -> Result<Vec<Crew>, sqlx::Error> {
+    sqlx::query_as!(Crew, "SELECT id, name, description FROM crews")
+        .fetch_all(pool)
+        .await
+}
 
 pub async fn update_crew(crew: Crew, pool: &SqlitePool) -> Result<Crew, sqlx::Error> {
     sqlx::query_as!(

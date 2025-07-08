@@ -2,7 +2,7 @@ import { Container, Title } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
 import { handleAppEvents, useAppSelector } from "../../store";
 import { CrewForm } from "../../components";
-import type { Crew } from "../../api/Api";
+import type { CrewWithLinks } from "../../api/Api";
 import { getApi } from "../../api";
 
 export default function EditCrew() {
@@ -15,7 +15,7 @@ export default function EditCrew() {
 
   if (!crew) return <Container>Error: Crew not found</Container>;
 
-  const onSubmit = (values: Crew) => {
+  const onSubmit = (values: CrewWithLinks) => {
     getApi()
       .api.updateCrew(values.id.toString(), values)
       .then((response) => {

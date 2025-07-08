@@ -3,12 +3,13 @@ use sqlx::SqlitePool;
 use utoipa::ToSchema;
 
 use crate::{
+    crews::repo::find_all_crews_with_links,
     intervals::repo::{find_current_interval, find_next_interval},
     shared::{
         COLLECTIVE_ID,
         entities::{
-            Collective, CollectiveInvolvement, Crew, CrewInvolvement, Interval, InvolvementStatus,
-            Person,
+            Collective, CollectiveInvolvement, CrewInvolvement, CrewWithLinks, Interval,
+            InvolvementStatus, Person,
         },
     },
 };
@@ -30,7 +31,7 @@ pub struct InvolvementData {
 pub struct InitialData {
     pub collective: Collective,
     pub people: Vec<Person>,
-    pub crews: Vec<Crew>,
+    pub crews: Vec<CrewWithLinks>,
     pub intervals: Vec<Interval>,
     pub current_interval: Interval,
     pub involvements: InvolvementData,
@@ -107,9 +108,7 @@ pub async fn find_initial_data_for_collective(
         .fetch_all(pool)
         .await?;
 
-    let crews = sqlx::query_as!(Crew, "SELECT id, name, description FROM crews")
-        .fetch_all(pool)
-        .await?;
+    let crews = find_all_crews_with_links(pool).await?;
 
     let intervals = sqlx::query_as!(
         Interval,

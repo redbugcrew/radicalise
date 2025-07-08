@@ -145,3 +145,28 @@ pub struct Crew {
     pub name: String,
     pub description: Option<String>,
 }
+
+#[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
+pub struct Link {
+    pub id: i64,
+    pub link_type: String,
+    pub url: String,
+}
+
+#[derive(Clone)]
+#[allow(dead_code)]
+pub struct LinkWithOwner {
+    pub id: i64,
+    pub link_type: String,
+    pub url: String,
+    pub owner_id: i64,
+    pub owner_type: String,
+}
+
+#[derive(Serialize, Deserialize, ToSchema, Debug)]
+pub struct CrewWithLinks {
+    pub id: i64,
+    pub name: String,
+    pub description: Option<String>,
+    pub links: Option<Vec<Link>>,
+}

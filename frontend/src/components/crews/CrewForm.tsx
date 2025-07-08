@@ -1,27 +1,18 @@
 import { useForm } from "@mantine/form";
-import type { Crew } from "../../api/Api";
 import { Button, Stack, TextInput } from "@mantine/core";
-import LinksInput, { type LinksWithType } from "../forms/LinksInput/LinksInput";
+import LinksInput from "../forms/LinksInput/LinksInput";
+import type { CrewWithLinks } from "../../api/Api";
 
 interface CrewFormProps {
-  crew: Crew;
+  crew: CrewWithLinks;
 
-  onSubmit: (values: Crew) => void;
+  onSubmit: (values: CrewWithLinks) => void;
 }
 
-type CrewFormData = Crew & {
-  links: LinksWithType;
-};
-
-const linkValues: LinksWithType = [
-  { link_type: "Loomio", url: "https://example.com" },
-  { link_type: "Matrix", url: "https://github.com/example" },
-];
-
 export default function CrewForm({ crew, onSubmit }: CrewFormProps) {
-  const form = useForm<CrewFormData>({
+  const form = useForm<CrewWithLinks>({
     mode: "controlled",
-    initialValues: { ...crew, links: [] },
+    initialValues: { ...crew },
     validate: {
       name: (value) => (value ? null : "Name is required"),
       description: (value) => (value ? null : "Description is required"),
@@ -30,7 +21,6 @@ export default function CrewForm({ crew, onSubmit }: CrewFormProps) {
 
   return (
     <form onSubmit={form.onSubmit(onSubmit)}>
-      <p>{JSON.stringify(form)}</p>
       <Stack gap="lg">
         <Stack gap="md">
           <TextInput label="Name" placeholder="Crew Name" key="name" {...form.getInputProps("name")} />
