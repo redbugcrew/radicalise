@@ -4,7 +4,7 @@ import { useUncontrolled } from "@mantine/hooks";
 import classes from "./LinksInput.module.css";
 
 export type LinkWithType = {
-  link_type: LinkType;
+  link_type: LinkType | undefined;
   url: string;
 };
 
@@ -14,6 +14,14 @@ type LinkInputProps = {
   onChange?: (value: LinkWithType) => void;
   placeholder?: string;
 };
+
+export function defaultLink(): LinkWithType {
+  return { link_type: undefined, url: "" };
+}
+
+export function linkIsBlank(link: LinkWithType | undefined): boolean {
+  return !link || !link.url || !link.link_type;
+}
 
 export default function LinkInput({ placeholder, value, defaultValue, ...props }: LinkInputProps) {
   const [controlValue, setControlValue] = useUncontrolled<LinkWithType>({

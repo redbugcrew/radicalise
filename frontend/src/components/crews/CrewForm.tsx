@@ -30,6 +30,7 @@ export default function CrewForm({ crew, onSubmit }: CrewFormProps) {
 
   return (
     <form onSubmit={form.onSubmit(onSubmit)}>
+      <p>{JSON.stringify(form)}</p>
       <Stack gap="lg">
         <Stack gap="md">
           <TextInput label="Name" placeholder="Crew Name" key="name" {...form.getInputProps("name")} />
