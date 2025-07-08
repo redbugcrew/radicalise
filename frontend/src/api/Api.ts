@@ -146,7 +146,7 @@ export interface InvolvementData {
 }
 
 export interface Link {
-  label: string;
+  label?: string | null;
   link_type: string;
   url: string;
 }

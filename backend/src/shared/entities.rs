@@ -150,7 +150,7 @@ pub struct Crew {
 pub struct Link {
     pub link_type: String,
     pub url: String,
-    pub label: String,
+    pub label: Option<String>,
 }
 
 #[derive(Clone)]
@@ -159,7 +159,7 @@ pub struct LinkWithOwner {
     pub id: i64,
     pub link_type: String,
     pub url: String,
-    pub label: String,
+    pub label: Option<String>,
     pub owner_id: i64,
     pub owner_type: String,
 }

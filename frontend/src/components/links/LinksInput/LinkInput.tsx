@@ -1,11 +1,13 @@
 import { Flex, Input } from "@mantine/core";
-import LinkTypeSelect, { linkTypeValidator, type LinkType } from "./LinkTypeSelect";
+import LinkTypeSelect, { linkTypeValidator } from "./LinkTypeSelect";
 import { useUncontrolled } from "@mantine/hooks";
 import classes from "./LinksInput.module.css";
+import type { LinkType } from "../LinksDisplay/LinkDisplay";
 
 export type LinkWithType = {
   link_type: LinkType | undefined;
   url: string;
+  label: string;
 };
 
 type LinkInputProps = {
@@ -17,11 +19,11 @@ type LinkInputProps = {
 };
 
 export function defaultLink(): LinkWithType {
-  return { link_type: undefined, url: "" };
+  return { link_type: undefined, url: "", label: "" };
 }
 
 export function linkIsBlank(link: LinkWithType | undefined): boolean {
-  return !link || (!link.url && !link.link_type);
+  return !link || (!link.url && !link.link_type && !link.label);
 }
 
 export function linkValidator(link: LinkWithType | undefined): string | null {
@@ -69,8 +71,12 @@ export default function LinkInput({ placeholder, value, defaultValue, showValida
     setControlValue({ ...controlValue, url });
   };
 
+  const setLabel = (label: string) => {
+    setControlValue({ ...controlValue, label });
+  };
+
   return (
-    <Flex direction="row" w={"100%"} gap={0}>
+    <Flex direction="row" justify="flex-start" align="flex-start" w={"100%"} gap={0}>
       <LinkTypeSelect
         key="link-type-select"
         value={controlValue?.link_type ?? null}
@@ -78,15 +84,18 @@ export default function LinkInput({ placeholder, value, defaultValue, showValida
         onChange={setLinkType}
         error={showValidation && linkTypeValidator(controlValue?.link_type)}
       />
-      <Input
-        key="url-input"
-        type="url"
-        placeholder={placeholder}
-        className={classes.urlTextInput}
-        value={controlValue?.url}
-        onChange={(event) => setUrl(event.currentTarget.value)}
-        error={showValidation && urlValidator(controlValue?.url)}
-      />
+      <Flex direction="column" w="100%" gap="sm">
+        <Input
+          key="url-input"
+          type="url"
+          placeholder={placeholder}
+          className={classes.urlTextInput}
+          value={controlValue?.url}
+          onChange={(event) => setUrl(event.currentTarget.value)}
+          error={showValidation && urlValidator(controlValue?.url)}
+        />
+        <Input key="label-input" type="text" placeholder="Label (optional)" className={classes.labelTextInput} value={controlValue?.label} onChange={(event) => setLabel(event.currentTarget.value)} />
+      </Flex>
     </Flex>
   );
 }
