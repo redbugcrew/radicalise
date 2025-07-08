@@ -84,13 +84,6 @@ export interface Credentials {
   password: string;
 }
 
-export interface Crew {
-  description?: string | null;
-  /** @format int64 */
-  id: number;
-  name: string;
-}
-
 export interface CrewInvolvement {
   convenor: boolean;
   /** @format int64 */
@@ -113,7 +106,7 @@ export interface CrewWithLinks {
 }
 
 export type CrewsEvent = {
-  CrewUpdated: Crew;
+  CrewUpdated: CrewWithLinks;
 };
 
 export interface ForgotPasswordRequest {
@@ -153,8 +146,6 @@ export interface InvolvementData {
 }
 
 export interface Link {
-  /** @format int64 */
-  id: number;
   link_type: string;
   url: string;
 }
@@ -471,7 +462,11 @@ export class Api<
      * @name UpdateCrew
      * @request PUT:/api/crews/{crew_id}
      */
-    updateCrew: (crewId: string, data: Crew, params: RequestParams = {}) =>
+    updateCrew: (
+      crewId: string,
+      data: CrewWithLinks,
+      params: RequestParams = {},
+    ) =>
       this.request<AppEvent[], any>({
         path: `/api/crews/${crewId}`,
         method: "PUT",

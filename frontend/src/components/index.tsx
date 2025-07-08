@@ -10,4 +10,4 @@ export { default as IntervalSelector } from "./intervals/IntervalSelector";
 export { default as IntervalsTable } from "./intervals/IntervalsTable";
 export { default as IntervalForm } from "./intervals/IntervalForm";
 export { default as ComboTextArea } from "./forms/ComboTextArea";
-export { default as LinksInput } from "./forms/LinksInput/LinksInput";
+export { default as LinksInput } from "./links/LinksInput/LinksInput";

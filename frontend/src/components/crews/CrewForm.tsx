@@ -1,7 +1,7 @@
 import { useForm } from "@mantine/form";
 import { Button, Stack, TextInput } from "@mantine/core";
-import LinksInput from "../forms/LinksInput/LinksInput";
-import type { CrewWithLinks } from "../../api/Api";
+import LinksInput, { linksValidator } from "../links/LinksInput/LinksInput";
+import type { CrewWithLinks } from "../../store/crews";
 
 interface CrewFormProps {
   crew: CrewWithLinks;
@@ -16,6 +16,7 @@ export default function CrewForm({ crew, onSubmit }: CrewFormProps) {
     validate: {
       name: (value) => (value ? null : "Name is required"),
       description: (value) => (value ? null : "Description is required"),
+      links: linksValidator,
     },
   });
 

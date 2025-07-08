@@ -4,7 +4,7 @@ use sqlx::SqlitePool;
 
 use crate::shared::{
     entities::{Crew, CrewInvolvement, CrewWithLinks},
-    links_repo::{find_all_links_for_owner_type, hash_links_by_owner},
+    links_repo::{find_all_links_for_owner_type, hash_links_by_owner, update_links_for_owner},
 };
 
 pub async fn find_all_crews_with_links(
@@ -46,6 +46,30 @@ pub async fn update_crew(crew: Crew, pool: &SqlitePool) -> Result<Crew, sqlx::Er
     .await?;
 
     Ok(crew)
+}
+
+pub async fn update_crew_with_links(
+    crew: CrewWithLinks,
+    pool: &SqlitePool,
+) -> Result<CrewWithLinks, sqlx::Error> {
+    let crew_result = update_crew(
+        Crew {
+            id: crew.id,
+            name: crew.name,
+            description: crew.description,
+        },
+        pool,
+    )
+    .await?;
+
+    let links = update_links_for_owner(crew.id, "crews".to_string(), crew.links, pool).await?;
+
+    Ok(CrewWithLinks {
+        id: crew_result.id,
+        name: crew_result.name,
+        description: crew_result.description,
+        links,
+    })
 }
 
 pub async fn find_crew_involvements(

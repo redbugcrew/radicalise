@@ -1,6 +1,6 @@
 import { ActionIcon, Flex, Group, Input, Stack, type InputWrapperProps } from "@mantine/core";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
-import LinkInput, { defaultLink, linkIsBlank, type LinkWithType } from "./LinkInput";
+import LinkInput, { defaultLink, linkIsBlank, linkValidator, type LinkWithType } from "./LinkInput";
 import { useUncontrolled } from "@mantine/hooks";
 
 export type LinksWithType = LinkWithType[];
@@ -17,6 +17,17 @@ function ensureEmptyLink(links: LinksWithType | undefined): LinksWithType {
     return [...(links || []), defaultLink()];
   }
   return links;
+}
+
+export function linksValidator(links: LinksWithType | undefined): string | null {
+  if (!links || links.length === 0) return null;
+
+  for (const link of links) {
+    const result = linkValidator(link);
+    if (result) return result;
+  }
+
+  return null;
 }
 
 export default function LinksInput({ placeholder, value, defaultValue, onChange, ...wrapperProps }: LinksInputProps) {
@@ -56,7 +67,7 @@ export default function LinksInput({ placeholder, value, defaultValue, onChange,
       <Stack>
         {controlValue.map((link, index) => (
           <Flex key={index} gap="sm" justify="space-between" align="flex-start">
-            <LinkInput key={index} value={link} placeholder={placeholder} defaultValue={link} onChange={(newLink) => onLinkChange(index, newLink)} />
+            <LinkInput key={index} value={link} placeholder={placeholder} defaultValue={link} onChange={(newLink) => onLinkChange(index, newLink)} showValidation={!!wrapperProps.error} />
             <ActionIcon color="var(--mantine-color-orange-6)" variant="outline" aria-label="Remove Link" size="lg" onClick={() => onRemoveLink(index)} disabled={index === 0 && onlyLinkIsBlank()}>
               <IconTrash />
             </ActionIcon>

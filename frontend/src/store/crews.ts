@@ -1,5 +1,9 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { CrewWithLinks } from "../api/Api";
+import type { CrewWithLinks as CrewWithAnyLinks, Link } from "../api/Api";
+
+export type CrewWithLinks = CrewWithAnyLinks & {
+  links: Link[] | undefined;
+};
 
 interface CrewObjectMap {
   [key: number]: CrewWithLinks;

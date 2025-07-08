@@ -1,12 +1,14 @@
 import { Card, Group, Stack, Title, Text, Badge } from "@mantine/core";
-import type { Crew, CrewInvolvement, Person } from "../../../api/Api";
+import type { CrewInvolvement, Person } from "../../../api/Api";
 import PersonBadge from "../../PersonBadge/PersonBadge";
 import type { PeopleObjectMap } from "../../../store/people";
 import styles from "./CrewCard.module.css";
 import Anchor from "../../Anchor";
+import type { CrewWithLinks } from "../../../store/crews";
+import LinksStack from "../../links/LinksDisplay/LinksStack";
 
 interface CrewCardProps {
-  crew: Crew;
+  crew: CrewWithLinks;
   involvements: CrewInvolvement[];
   people: PeopleObjectMap;
   highlightPersonId?: number;
@@ -65,6 +67,7 @@ export default function CrewCard({ crew, involvements, people, highlightPersonId
             return <PersonBadge key={person.id} person={person} me={person.id === highlightPersonId} highlight={convenor} />;
           })}
         </Group>
+        <LinksStack links={crew.links} />
       </Stack>
     </Card>
   );

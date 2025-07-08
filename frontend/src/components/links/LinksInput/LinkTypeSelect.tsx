@@ -1,21 +1,7 @@
 import { Combobox, Flex, Input, useCombobox } from "@mantine/core";
-import { IconBrandMatrix, IconCircleLetterL, IconWorldWww } from "@tabler/icons-react";
 import classes from "./LinksInput.module.css";
 import { useUncontrolled } from "@mantine/hooks";
-
-const iconProps = {
-  size: 16,
-};
-
-export type LinkType = "Loomio" | "Matrix" | "Website";
-
-const typeIcons: Record<LinkType, React.ReactNode> = {
-  Loomio: <IconCircleLetterL {...iconProps} color="var(--mantine-color-yellow-5)" />,
-  Matrix: <IconBrandMatrix {...iconProps} color="white" />,
-  Website: <IconWorldWww {...iconProps} color="var(--mantine-color-blue-5)" />,
-};
-
-const linkTypes: LinkType[] = Object.keys(typeIcons) as LinkType[];
+import { getLinkTypeIcon, linkTypes, type LinkType } from "../LinksDisplay/LinkDisplay";
 
 function ItemWithIcon({ name, icon }: { name: LinkType; icon: React.ReactNode }) {
   return (
@@ -33,9 +19,20 @@ type LinkTypeSelectProps = {
   classNames?: {
     input: string;
   };
+  error?: string | boolean | null;
 };
 
-export default function LinkTypeSelect({ classNames, value, defaultValue, ...props }: LinkTypeSelectProps) {
+export function linkTypeValidator(value: LinkType | undefined | null): string | null {
+  if (!value) {
+    return "Link type is required";
+  }
+  if (!linkTypes.includes(value)) {
+    return "Invalid link type";
+  }
+  return null;
+}
+
+export default function LinkTypeSelect({ classNames, value, defaultValue, error, ...props }: LinkTypeSelectProps) {
   const combobox = useCombobox({
     onDropdownClose: () => combobox.resetSelectedOption(),
   });
@@ -48,7 +45,7 @@ export default function LinkTypeSelect({ classNames, value, defaultValue, ...pro
 
   const options = linkTypes.map((item) => (
     <Combobox.Option value={item} key={item}>
-      <ItemWithIcon name={item} icon={typeIcons[item]} />
+      <ItemWithIcon name={item} icon={getLinkTypeIcon(item)} />
     </Combobox.Option>
   ));
 
@@ -63,8 +60,8 @@ export default function LinkTypeSelect({ classNames, value, defaultValue, ...pro
       classNames={{ group: classes.typeSelectInput }}
     >
       <Combobox.Target>
-        <Input component="button" type="button" pointer rightSection={<Combobox.Chevron />} onClick={() => combobox.toggleDropdown()} rightSectionPointerEvents="none" className={classNames?.input}>
-          {controlValue ? <ItemWithIcon name={controlValue} icon={typeIcons[controlValue]} /> : <Input.Placeholder>Pick type</Input.Placeholder>}
+        <Input component="button" type="button" pointer rightSection={<Combobox.Chevron />} onClick={() => combobox.toggleDropdown()} rightSectionPointerEvents="none" className={classNames?.input} error={error}>
+          {controlValue ? <ItemWithIcon name={controlValue} icon={getLinkTypeIcon(controlValue)} /> : <Input.Placeholder>Pick type</Input.Placeholder>}
         </Input>
       </Combobox.Target>
 

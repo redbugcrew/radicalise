@@ -1,9 +1,9 @@
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-use crate::shared::entities::Crew;
+use crate::shared::entities::CrewWithLinks;
 
 #[derive(Serialize, Deserialize, ToSchema)]
 pub enum CrewsEvent {
-    CrewUpdated(Crew),
+    CrewUpdated(CrewWithLinks),
 }

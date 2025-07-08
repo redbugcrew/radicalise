@@ -148,7 +148,6 @@ pub struct Crew {
 
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
 pub struct Link {
-    pub id: i64,
     pub link_type: String,
     pub url: String,
 }

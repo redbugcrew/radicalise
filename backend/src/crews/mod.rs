@@ -4,7 +4,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     crews::events::CrewsEvent,
-    shared::{entities::Crew, events::AppEvent},
+    shared::{entities::CrewWithLinks, events::AppEvent},
 };
 
 pub mod events;
@@ -15,7 +15,7 @@ pub fn router() -> OpenApiRouter {
 }
 
 #[utoipa::path(put, path = "/{crew_id}",
-    request_body(content = Crew, content_type = "application/json"),
+    request_body(content = CrewWithLinks, content_type = "application/json"),
     responses(
         (status = 200, body = Vec<AppEvent>),
         (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
@@ -25,7 +25,7 @@ pub fn router() -> OpenApiRouter {
 pub async fn update_crew(
     Path(crew_id): Path<i64>,
     Extension(pool): Extension<SqlitePool>,
-    Json(input): Json<Crew>,
+    Json(input): Json<CrewWithLinks>,
 ) -> impl IntoResponse {
     println!("Updating crew with ID {}: {:?}", crew_id, input);
 
@@ -33,7 +33,7 @@ pub async fn update_crew(
         return (StatusCode::BAD_REQUEST, "Crew ID mismatch").into_response();
     }
 
-    match repo::update_crew(input, &pool).await {
+    match repo::update_crew_with_links(input, &pool).await {
         Ok(response) => {
             let event = AppEvent::CrewsEvent(CrewsEvent::CrewUpdated(response));
             (StatusCode::OK, Json(vec![event])).into_response()
