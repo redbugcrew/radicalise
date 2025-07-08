@@ -15,15 +15,15 @@ const crewsSlice = createSlice({
   name: "crews",
   initialState: {} as CrewsState,
   reducers: {
-    crewsLoaded: (_state: CrewsState, action: PayloadAction<CrewWithLinks[]>) => {
+    crewsLoaded: (_state: CrewsState, action: PayloadAction<CrewWithAnyLinks[]>) => {
       const crews: CrewObjectMap = {};
       action.payload.forEach((crew) => {
-        crews[crew.id] = crew;
+        crews[crew.id] = crew as CrewWithLinks;
       });
       return crews;
     },
-    crewUpdated: (state: CrewsState, action: PayloadAction<CrewWithLinks>) => {
-      state[action.payload.id] = action.payload;
+    crewUpdated: (state: CrewsState, action: PayloadAction<CrewWithAnyLinks>) => {
+      state[action.payload.id] = action.payload as CrewWithLinks;
     },
   },
 });

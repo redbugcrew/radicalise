@@ -1,16 +1,18 @@
 import { Flex } from "@mantine/core";
 import type { LinkWithType } from "../LinksInput/LinkInput";
-import { IconCircleLetterL, IconBrandMatrix, IconWorldWww } from "@tabler/icons-react";
+import { IconCircleLetterL, IconBrandMatrix, IconWorldWww, IconLayoutKanban } from "@tabler/icons-react";
+import Anchor from "../../Anchor";
 
 const iconProps = {
   size: 16,
 };
 
-export type LinkType = "Loomio" | "Matrix" | "Website";
+export type LinkType = "Loomio" | "Matrix" | "Taiga" | "Website";
 
 const typeIcons: Record<LinkType, React.ReactNode> = {
   Loomio: <IconCircleLetterL {...iconProps} color="var(--mantine-color-yellow-5)" />,
   Matrix: <IconBrandMatrix {...iconProps} color="white" />,
+  Taiga: <IconLayoutKanban {...iconProps} color="var(--mantine-color-teal-5)" />,
   Website: <IconWorldWww {...iconProps} color="var(--mantine-color-blue-5)" />,
 };
 
@@ -29,7 +31,9 @@ export default function LinkDisplay({ link }: { link: LinkWithType }) {
   return (
     <Flex align="center" justify="flex-start" gap="sm">
       {icon}
-      <span>{name}</span>
+      <Anchor href={link.url} target="_blank">
+        {link.label || name}
+      </Anchor>
     </Flex>
   );
 }

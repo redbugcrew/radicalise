@@ -2,13 +2,14 @@ import { Stepper, Group, Button, Stack, Textarea, Select, Title, Text, type Sele
 import { DatePickerInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { useState } from "react";
-import type { CollectiveInvolvementWithDetails, Crew, CrewInvolvement, Interval, OptOutType, ParticipationIntention } from "../api/Api";
+import type { CollectiveInvolvementWithDetails, CrewInvolvement, Interval, OptOutType, ParticipationIntention } from "../api/Api";
 import { IconCheck, IconLock } from "@tabler/icons-react";
 import { useAppSelector } from "../store";
 import { forPerson, getMatchingInvolvementInterval } from "../store/involvements";
 import { ComboTextArea, CrewParticipationsInput } from ".";
 import type { ArrayOfStringTuples } from "./forms/ComboTextArea";
 import CapacityScoreIcon from "./CapacityScoreIcon";
+import type { CrewWithLinks } from "../store/crews";
 
 export interface MyParticipationFormData {
   private_capacity_planning: boolean;
@@ -174,7 +175,7 @@ interface AdditionalParticipationStepProps {
 
 function AdditionalParticipationStep({ form, readOnly, personId, intervalId, crewInvolvements, previousInvolvements }: AdditionalParticipationStepProps) {
   const crewsMap = useAppSelector((state) => state.crews);
-  const crews = Object.values(crewsMap) as Crew[];
+  const crews = Object.values(crewsMap) as CrewWithLinks[];
   const people = useAppSelector((state) => state.people);
 
   return (

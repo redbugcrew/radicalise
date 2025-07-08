@@ -1,10 +1,11 @@
 import { Alert, Input, Stack, Title } from "@mantine/core";
 import { forCrew } from "../../store/involvements";
 import type { PeopleObjectMap } from "../../store/people";
-import type { Crew, CrewInvolvement } from "../../api/Api";
+import type { CrewInvolvement } from "../../api/Api";
 import { useUncontrolled } from "@mantine/hooks";
 import { IconScale } from "@tabler/icons-react";
 import CrewParticipationControl, { type CrewParticipationControlData } from "./CrewParticipationControl";
+import type { CrewWithLinks } from "../../store/crews";
 
 interface GetInputPropsReturnType {
   onChange: any;
@@ -20,7 +21,7 @@ interface GetInputPropsReturnType {
 type CrewParticipationsInputProps = GetInputPropsReturnType & {
   personId: number;
   intervalId: number;
-  crews: Crew[];
+  crews: CrewWithLinks[];
   people: PeopleObjectMap;
   disabled?: boolean;
   crewInvolvements: CrewInvolvement[];

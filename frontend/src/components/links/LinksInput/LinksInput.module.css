@@ -2,10 +2,26 @@
   flex: 1;
 }
 
+.firstJoinedControl {
+  @media (min-width: $mantine-breakpoint-xs) {
+    min-width: 10rem;
+    width: 10rem;
+  }
+  @media (max-width: $mantine-breakpoint-xs) {
+    min-width: 100%;
+    width: 100%;
+  }
+}
+
 .firstJoinedControl button {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-  min-width: 10rem;
+  @media (min-width: $mantine-breakpoint-xs) {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  @media (max-width: $mantine-breakpoint-xs) {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
 }
 
 .urlTextInput {
@@ -13,12 +29,20 @@
 }
 
 .urlTextInput input {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-  border-left-width: 0;
+  @media (min-width: $mantine-breakpoint-xs) {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-left-width: 0;
+  }
+  @media (max-width: $mantine-breakpoint-xs) {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
 }
 
 .urlTextInput input:focus {
-  border-left-width: 1px;
-  margin-left: -1px;
+  @media (min-width: $mantine-breakpoint-xs) {
+    border-left-width: 1px;
+    margin-left: -1px;
+  }
 }

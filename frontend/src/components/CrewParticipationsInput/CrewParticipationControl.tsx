@@ -1,9 +1,10 @@
 import { Card, Group, Stack, Switch, Title, Text } from "@mantine/core";
 import type { PeopleObjectMap } from "../../store/people";
-import type { Crew, CrewInvolvement, Person } from "../../api/Api";
+import type { CrewInvolvement, Person } from "../../api/Api";
 import styles from "./CrewParticipationsInput.module.css";
 import { asPeopleAlphaSorted } from "../../store/involvements";
 import PersonBadgeGroup from "../PersonBadge/PersonBadgeGroup";
+import type { CrewWithLinks } from "../../store/crews";
 
 export interface CrewParticipationControlData {
   participating: boolean;
@@ -14,7 +15,7 @@ export interface CrewParticipationControlData {
 interface CrewParticipationToggleProps {
   value: CrewParticipationControlData;
   personId: number;
-  crew: Crew;
+  crew: CrewWithLinks;
   crewInvolvements: CrewInvolvement[];
   previousInvolvements?: CrewInvolvement[] | null | undefined;
   people: PeopleObjectMap;

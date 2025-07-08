@@ -76,7 +76,7 @@ export default function LinkInput({ placeholder, value, defaultValue, showValida
   };
 
   return (
-    <Flex direction="row" justify="flex-start" align="flex-start" w={"100%"} gap={0}>
+    <Flex direction={{ base: "column", sm: "row" }} justify="flex-start" align="flex-start" w={"100%"} gap={0}>
       <LinkTypeSelect
         key="link-type-select"
         value={controlValue?.link_type ?? null}

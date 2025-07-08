@@ -4,6 +4,7 @@ import { Anchor as MantineAnchor, type AnchorProps as MantineAnchorProps } from 
 export type AnchorProps = MantineAnchorProps & {
   href: string;
   children: React.ReactNode;
+  target?: string;
 };
 
 export default function Anchor({ href, children, ...otherProps }: AnchorProps) {

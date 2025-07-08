@@ -68,9 +68,11 @@ pub async fn update_links_for_owner(
     // Then, insert the new links
     for link in links {
         sqlx::query!(
-            "INSERT INTO links (link_type, url, owner_id, owner_type) VALUES (?, ?, ?, ?)",
+            "INSERT INTO links (link_type, url, label, owner_id, owner_type)
+             VALUES (?, ?, ?, ?, ?)",
             link.link_type,
             link.url,
+            link.label,
             owner_id,
             owner_type
         )
