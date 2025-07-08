@@ -1,21 +1,23 @@
-import { Combobox, Flex, Input, InputBase, useCombobox } from "@mantine/core";
+import { Combobox, Flex, Input, useCombobox } from "@mantine/core";
 import { IconBrandMatrix, IconCircleLetterL, IconWorldWww } from "@tabler/icons-react";
-import { useState } from "react";
 import classes from "./LinksInput.module.css";
+import { useUncontrolled } from "@mantine/hooks";
 
 const iconProps = {
   size: 16,
 };
 
-const typeIcons: Record<string, React.ReactNode> = {
+export type LinkType = "Loomio" | "Matrix" | "Website";
+
+const typeIcons: Record<LinkType, React.ReactNode> = {
   Loomio: <IconCircleLetterL {...iconProps} color="var(--mantine-color-yellow-5)" />,
   Matrix: <IconBrandMatrix {...iconProps} color="white" />,
   Website: <IconWorldWww {...iconProps} color="var(--mantine-color-blue-5)" />,
 };
 
-const linkTypes: string[] = ["Loomio", "Matrix", "Website"];
+const linkTypes: LinkType[] = Object.keys(typeIcons) as LinkType[];
 
-function ItemWithIcon({ name, icon }: { name: string; icon: React.ReactNode }) {
+function ItemWithIcon({ name, icon }: { name: LinkType; icon: React.ReactNode }) {
   return (
     <Flex align="center" gap="sm">
       {icon}
@@ -24,12 +26,25 @@ function ItemWithIcon({ name, icon }: { name: string; icon: React.ReactNode }) {
   );
 }
 
-export default function LinkTypeSelect() {
+type LinkTypeSelectProps = {
+  value?: LinkType | undefined;
+  defaultValue?: LinkType | undefined;
+  onChange?: (value: LinkType) => void;
+  classNames?: {
+    input: string;
+  };
+};
+
+export default function LinkTypeSelect({ classNames, value, defaultValue, ...props }: LinkTypeSelectProps) {
   const combobox = useCombobox({
     onDropdownClose: () => combobox.resetSelectedOption(),
   });
-
-  const [value, setValue] = useState<string | null>(null);
+  const [controlValue, setControlValue] = useUncontrolled<LinkType>({
+    value: value,
+    defaultValue: defaultValue,
+    finalValue: undefined,
+    onChange: props.onChange as any,
+  });
 
   const options = linkTypes.map((item) => (
     <Combobox.Option value={item} key={item}>
@@ -37,22 +52,20 @@ export default function LinkTypeSelect() {
     </Combobox.Option>
   ));
 
-  const item = linkTypes[0];
-
   return (
     <Combobox
       store={combobox}
       withinPortal={false}
-      onOptionSubmit={(val) => {
-        setValue(val);
+      onOptionSubmit={(val: string) => {
+        setControlValue(val as LinkType);
         combobox.closeDropdown();
       }}
       classNames={{ group: classes.typeSelectInput }}
     >
       <Combobox.Target>
-        <InputBase component="button" type="button" pointer rightSection={<Combobox.Chevron />} onClick={() => combobox.toggleDropdown()} rightSectionPointerEvents="none" classNames={{ input: classes.typeSelectInput }}>
-          {value ? <ItemWithIcon name={value} icon={typeIcons[value]} /> : <Input.Placeholder>Pick type</Input.Placeholder>}
-        </InputBase>
+        <Input component="button" type="button" pointer rightSection={<Combobox.Chevron />} onClick={() => combobox.toggleDropdown()} rightSectionPointerEvents="none" className={classNames?.input}>
+          {controlValue ? <ItemWithIcon name={controlValue} icon={typeIcons[controlValue]} /> : <Input.Placeholder>Pick type</Input.Placeholder>}
+        </Input>
       </Combobox.Target>
 
       <Combobox.Dropdown>

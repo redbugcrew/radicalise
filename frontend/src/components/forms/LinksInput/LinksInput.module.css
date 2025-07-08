@@ -1,13 +1,11 @@
 .typeSelect {
   flex: 1;
-  border-color: purple;
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
 }
 
-.typeSelectInput button {
-  border-radius: 0;
-  border-color: red;
+.firstJoinedControl button {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  min-width: 10rem;
 }
 
 .urlTextInput {

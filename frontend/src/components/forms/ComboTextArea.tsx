@@ -11,7 +11,6 @@ type ComboTextAreaProps = React.ComponentProps<typeof Textarea> & {
 
 export default function ComboTextArea({ hints, ...props }: ComboTextAreaProps) {
   const combobox = useCombobox();
-  // const [value, setValue] = useState<string>((props.value || props.defaultValue || "").toString());
 
   const [value, setValue] = useUncontrolled<string>({
     value: props.value as string,
