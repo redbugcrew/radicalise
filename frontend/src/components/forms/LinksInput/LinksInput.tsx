@@ -12,16 +12,27 @@ type LinksInputProps = InputWrapperProps & {
   placeholder?: string;
 };
 
+function ensureEmptyLink(links: LinksWithType | undefined): LinksWithType {
+  if (!links || links.length === 0) {
+    return [...(links || []), defaultLink()];
+  }
+  return links;
+}
+
 export default function LinksInput({ placeholder, value, defaultValue, onChange, ...wrapperProps }: LinksInputProps) {
   const [controlValue, setControlValue] = useUncontrolled<LinksWithType>({
-    value: value,
-    defaultValue: defaultValue,
+    value: ensureEmptyLink(value),
+    defaultValue: ensureEmptyLink(defaultValue),
     finalValue: undefined,
     onChange: onChange as any,
   });
 
   const lastLinkIsBlank: () => boolean = () => {
     return controlValue.length >= 1 && linkIsBlank(controlValue[controlValue.length - 1]);
+  };
+
+  const onlyLinkIsBlank: () => boolean = () => {
+    return controlValue.length === 1 && linkIsBlank(controlValue[0]);
   };
 
   const onLinkChange = (index: number, newLink: LinkWithType) => {
@@ -45,8 +56,8 @@ export default function LinksInput({ placeholder, value, defaultValue, onChange,
       <Stack>
         {controlValue.map((link, index) => (
           <Flex key={index} gap="sm" justify="space-between" align="flex-start">
-            <LinkInput value={link} placeholder={placeholder} defaultValue={link} onChange={(newLink) => onLinkChange(index, newLink)} />
-            <ActionIcon color="var(--mantine-color-orange-6)" variant="outline" aria-label="Remove Link" size="lg" onClick={() => onRemoveLink(index)}>
+            <LinkInput key={index} value={link} placeholder={placeholder} defaultValue={link} onChange={(newLink) => onLinkChange(index, newLink)} />
+            <ActionIcon color="var(--mantine-color-orange-6)" variant="outline" aria-label="Remove Link" size="lg" onClick={() => onRemoveLink(index)} disabled={index === 0 && onlyLinkIsBlank()}>
               <IconTrash />
             </ActionIcon>
           </Flex>

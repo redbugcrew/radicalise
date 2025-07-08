@@ -21,7 +21,7 @@ const linkValues: LinksWithType = [
 export default function CrewForm({ crew, onSubmit }: CrewFormProps) {
   const form = useForm<CrewFormData>({
     mode: "controlled",
-    initialValues: { ...crew, links: linkValues },
+    initialValues: { ...crew, links: [] },
     validate: {
       name: (value) => (value ? null : "Name is required"),
       description: (value) => (value ? null : "Description is required"),

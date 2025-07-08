@@ -20,7 +20,7 @@ export function defaultLink(): LinkWithType {
 }
 
 export function linkIsBlank(link: LinkWithType | undefined): boolean {
-  return !link || !link.url || !link.link_type;
+  return !link || (!link.url && !link.link_type);
 }
 
 export default function LinkInput({ placeholder, value, defaultValue, ...props }: LinkInputProps) {
@@ -41,8 +41,8 @@ export default function LinkInput({ placeholder, value, defaultValue, ...props }
 
   return (
     <Flex direction="row" w={"100%"} gap={0}>
-      <LinkTypeSelect value={controlValue?.link_type} defaultValue={defaultValue?.link_type} classNames={{ input: classes.firstJoinedControl }} onChange={setLinkType} />
-      <Input placeholder={placeholder} className={classes.urlTextInput} value={controlValue?.url} defaultValue={defaultValue?.url} onChange={(event) => setUrl(event.currentTarget.value)} />
+      <LinkTypeSelect key="link-type-select" value={controlValue?.link_type ?? null} classNames={{ input: classes.firstJoinedControl }} onChange={setLinkType} />
+      <Input key="url-input" placeholder={placeholder} className={classes.urlTextInput} value={controlValue?.url} onChange={(event) => setUrl(event.currentTarget.value)} />
     </Flex>
   );
 }

@@ -27,8 +27,8 @@ function ItemWithIcon({ name, icon }: { name: LinkType; icon: React.ReactNode })
 }
 
 type LinkTypeSelectProps = {
-  value?: LinkType | undefined;
-  defaultValue?: LinkType | undefined;
+  value?: LinkType | undefined | null;
+  defaultValue?: LinkType | undefined | null;
   onChange?: (value: LinkType) => void;
   classNames?: {
     input: string;
@@ -39,7 +39,7 @@ export default function LinkTypeSelect({ classNames, value, defaultValue, ...pro
   const combobox = useCombobox({
     onDropdownClose: () => combobox.resetSelectedOption(),
   });
-  const [controlValue, setControlValue] = useUncontrolled<LinkType>({
+  const [controlValue, setControlValue] = useUncontrolled<LinkType | undefined | null>({
     value: value,
     defaultValue: defaultValue,
     finalValue: undefined,
