@@ -9,7 +9,7 @@ import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
 
 import { MantineProvider } from "@mantine/core";
-import { Dashboard, NewPerson, People, Person, MyParticipation, Crews, EditCrew, Intervals, NewInterval } from "./pages";
+import { Dashboard, NewPerson, People, Person, MyParticipation, Crews, EditCrew, Intervals, NewInterval, EditCollective } from "./pages";
 import { buildRoutes as buildAuthRoutes } from "./contexts/auth";
 import { theme } from "./theme";
 
@@ -33,6 +33,10 @@ const router = createBrowserRouter([
       {
         path: "dashboard",
         element: <Dashboard />,
+      },
+      {
+        path: "collective/edit",
+        element: <EditCollective />,
       },
       {
         path: "people",

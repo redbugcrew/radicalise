@@ -8,3 +8,4 @@ export { default as Crews } from "./crews/Crews";
 export { default as EditCrew } from "./crews/EditCrew";
 export { default as Intervals } from "./intervals/Intervals";
 export { default as NewInterval } from "./intervals/NewInterval";
+export { default as EditCollective } from "./EditCollective";

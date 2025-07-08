@@ -8,12 +8,13 @@ const collectiveSlice = createSlice({
   initialState: null as CollectiveState,
   reducers: {
     collectiveLoaded: (_state: CollectiveState, action: PayloadAction<Collective>) => action.payload,
+    collectiveUpdated: (_state: CollectiveState, action: PayloadAction<Collective>) => action.payload,
   },
 });
 
 // `createSlice` automatically generated action creators with these names.
 // export them as named exports from this "slice" file
-export const { collectiveLoaded } = collectiveSlice.actions;
+export const { collectiveLoaded, collectiveUpdated } = collectiveSlice.actions;
 
 // Export the slice reducer as the default export
 export default collectiveSlice.reducer;

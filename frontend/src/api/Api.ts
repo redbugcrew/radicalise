@@ -35,6 +35,9 @@ export type AppEvent =
     }
   | {
       CrewsEvent: CrewsEvent;
+    }
+  | {
+      CollectiveEvent: CollectiveEvent;
     };
 
 export interface Collective {
@@ -43,6 +46,10 @@ export interface Collective {
   id: number;
   name?: string | null;
 }
+
+export type CollectiveEvent = {
+  CollectiveUpdated: Collective;
+};
 
 export interface CollectiveInvolvement {
   /** @format int64 */
@@ -376,7 +383,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 0.6.1
+ * @version 0.7.0
  * @license
  */
 export class Api<
@@ -439,6 +446,22 @@ export class Api<
       this.request<InitialData, any>({
         path: `/api/collective`,
         method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdateCollective
+     * @request PUT:/api/collective
+     */
+    updateCollective: (data: Collective, params: RequestParams = {}) =>
+      this.request<AppEvent[], any>({
+        path: `/api/collective`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),

@@ -141,3 +141,21 @@ pub async fn find_initial_data_for_collective(
         },
     })
 }
+
+pub async fn update_collective(
+    input: Collective,
+    pool: &SqlitePool,
+) -> Result<Collective, sqlx::Error> {
+    sqlx::query!(
+        "UPDATE collectives
+         SET name = ?, description = ?
+         WHERE id = ?",
+        input.name,
+        input.description,
+        COLLECTIVE_ID
+    )
+    .execute(pool)
+    .await?;
+
+    find_collective(COLLECTIVE_ID, pool).await
+}

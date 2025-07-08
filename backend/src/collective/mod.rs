@@ -3,16 +3,21 @@ use sqlx::SqlitePool;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
-    collective::repo::{InitialData, IntervalInvolvementData},
-    shared::COLLECTIVE_ID,
+    collective::{
+        events::CollectiveEvent,
+        repo::{InitialData, IntervalInvolvementData},
+    },
+    shared::{COLLECTIVE_ID, entities::Collective, events::AppEvent},
 };
 
+pub mod events;
 mod repo;
 
 pub fn router() -> OpenApiRouter {
     OpenApiRouter::new()
         .routes(routes!(get_collective_state))
         .routes(routes!(get_involvements))
+        .routes(routes!(update_collective))
 }
 
 #[utoipa::path(get, path = "/", responses(
@@ -63,4 +68,26 @@ async fn get_involvements(
     };
 
     return (StatusCode::OK, Json(result)).into_response();
+}
+
+#[utoipa::path(put, path = "/",
+    request_body(content = Collective, content_type = "application/json"),
+    responses(
+        (status = 200, body = Vec<AppEvent>),
+        (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
+    ),
+)]
+pub async fn update_collective(
+    Extension(pool): Extension<SqlitePool>,
+    Json(input): Json<Collective>,
+) -> impl IntoResponse {
+    println!("Updating collective: {:?}", input);
+
+    match repo::update_collective(input, &pool).await {
+        Ok(response) => {
+            let event = AppEvent::CollectiveEvent(CollectiveEvent::CollectiveUpdated(response));
+            (StatusCode::OK, Json(vec![event])).into_response()
+        }
+        Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
+    }
 }
