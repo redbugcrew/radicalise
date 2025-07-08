@@ -18,6 +18,17 @@ const typeIcons: Record<LinkType, React.ReactNode> = {
 
 export const linkTypes: LinkType[] = Object.keys(typeIcons) as LinkType[];
 
+export function stringToLinkType(input: string | undefined | null): LinkType | undefined {
+  if (typeof input === "undefined" || input === null) return undefined;
+
+  if (linkTypes.includes(input as LinkType)) {
+    return input as LinkType;
+  } else {
+    console.log(`Unknown link type: ${input}`);
+    return undefined;
+  }
+}
+
 export function getLinkTypeIcon(linkType: LinkType): React.ReactNode {
   return typeIcons[linkType] || null;
 }

@@ -11,6 +11,7 @@ use crate::{
             Collective, CollectiveInvolvement, CrewInvolvement, CrewWithLinks, Interval,
             InvolvementStatus, Person,
         },
+        links_repo::{find_all_links_for_owner, update_links_for_owner},
     },
 };
 
@@ -41,13 +42,34 @@ pub async fn find_collective(
     collective_id: i64,
     pool: &SqlitePool,
 ) -> Result<Collective, sqlx::Error> {
-    sqlx::query_as!(
-        Collective,
-        "SELECT id, name, description FROM collectives WHERE id = ?",
+    sqlx::query!(
+        "SELECT id, name, description
+        FROM collectives WHERE id = ?",
         collective_id
     )
     .fetch_one(pool)
     .await
+    .map(|row| Collective {
+        id: row.id,
+        name: Some(row.name),
+        description: row.description,
+        links: vec![], // Links are not fetched here, assuming they are handled elsewhere
+    })
+}
+
+pub async fn find_collective_with_links(
+    collective_id: i64,
+    pool: &SqlitePool,
+) -> Result<Collective, sqlx::Error> {
+    let collective = find_collective(collective_id, pool).await?;
+    let links = find_all_links_for_owner(collective_id, "collectives".to_string(), pool).await?;
+
+    Ok(Collective {
+        id: collective.id,
+        name: collective.name,
+        description: collective.description,
+        links,
+    })
 }
 
 pub async fn find_all_collective_involvements(
@@ -157,5 +179,26 @@ pub async fn update_collective(
     .execute(pool)
     .await?;
 
-    find_collective(COLLECTIVE_ID, pool).await
+    Ok(input)
+}
+
+pub async fn update_collective_with_links(
+    input: Collective,
+    pool: &SqlitePool,
+) -> Result<Collective, sqlx::Error> {
+    let collective = update_collective(input, pool).await?;
+    let links = update_links_for_owner(
+        collective.id,
+        "collectives".to_string(),
+        Some(collective.links),
+        pool,
+    )
+    .await?;
+
+    Ok(Collective {
+        id: collective.id,
+        name: collective.name,
+        description: collective.description,
+        links: links.unwrap_or_default(),
+    })
 }

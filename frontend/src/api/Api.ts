@@ -44,6 +44,7 @@ export interface Collective {
   description?: string | null;
   /** @format int64 */
   id: number;
+  links: Link[];
   name?: string | null;
 }
 

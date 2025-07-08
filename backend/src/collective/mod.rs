@@ -26,7 +26,7 @@ pub fn router() -> OpenApiRouter {
         (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
     ),)]
 async fn get_collective_state(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse {
-    let collective_result = repo::find_collective(COLLECTIVE_ID, &pool).await;
+    let collective_result = repo::find_collective_with_links(COLLECTIVE_ID, &pool).await;
 
     match collective_result {
         Ok(collective) => {
@@ -83,7 +83,7 @@ pub async fn update_collective(
 ) -> impl IntoResponse {
     println!("Updating collective: {:?}", input);
 
-    match repo::update_collective(input, &pool).await {
+    match repo::update_collective_with_links(input, &pool).await {
         Ok(response) => {
             let event = AppEvent::CollectiveEvent(CollectiveEvent::CollectiveUpdated(response));
             (StatusCode::OK, Json(vec![event])).into_response()

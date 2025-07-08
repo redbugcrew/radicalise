@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT id, name, description FROM collectives WHERE id = ?",
+  "query": "SELECT id, name, description\n        FROM collectives WHERE id = ?",
   "describe": {
     "columns": [
       {
@@ -28,5 +28,5 @@
       true
     ]
   },
-  "hash": "eeeb69520901c614ce9af93dd2dcb16581e303a745be6fa09242cc346c493cce"
+  "hash": "9bf594b4963594af07c6ca30599817010639810fb6d9672c379f4c8d96f3026a"
 }

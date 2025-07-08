@@ -2,6 +2,8 @@ import { ActionIcon, Flex, Group, Input, Stack, type InputWrapperProps } from "@
 import { IconPlus, IconTrash } from "@tabler/icons-react";
 import LinkInput, { defaultLink, linkIsBlank, linkValidator, type LinkWithType } from "./LinkInput";
 import { useUncontrolled } from "@mantine/hooks";
+import type { Link } from "../../../api/Api";
+import { stringToLinkType } from "../LinksDisplay/LinkDisplay";
 
 export type LinksWithType = LinkWithType[];
 
@@ -19,7 +21,7 @@ function ensureEmptyLink(links: LinksWithType | undefined): LinksWithType {
   return links;
 }
 
-export function linksValidator(links: LinksWithType | undefined): string | null {
+export function optionalLinksValidator(links: LinksWithType | undefined): string | null {
   if (!links || links.length === 0) return null;
 
   for (const link of links) {
@@ -28,6 +30,19 @@ export function linksValidator(links: LinksWithType | undefined): string | null 
   }
 
   return null;
+}
+
+export function linksValidator(links: Link[]): string | null {
+  return optionalLinksValidator(
+    links.map(
+      (link) =>
+        ({
+          link_type: stringToLinkType(link.link_type),
+          url: link.url,
+          label: link.label,
+        } as LinkWithType)
+    )
+  );
 }
 
 export default function LinksInput({ placeholder, value, defaultValue, onChange, ...wrapperProps }: LinksInputProps) {
