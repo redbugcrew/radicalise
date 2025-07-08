@@ -2,6 +2,7 @@ import { Flex } from "@mantine/core";
 import type { LinkWithType } from "../LinksInput/LinkInput";
 import { IconCircleLetterL, IconBrandMatrix, IconWorldWww, IconLayoutKanban } from "@tabler/icons-react";
 import Anchor from "../../Anchor";
+import type { Link } from "../../../api/Api";
 
 const iconProps = {
   size: 16,
@@ -18,7 +19,7 @@ const typeIcons: Record<LinkType, React.ReactNode> = {
 
 export const linkTypes: LinkType[] = Object.keys(typeIcons) as LinkType[];
 
-export function stringToLinkType(input: string | undefined | null): LinkType | undefined {
+export function stringToLinkType(input: LinkType | string | undefined | null): LinkType | undefined {
   if (typeof input === "undefined" || input === null) return undefined;
 
   if (linkTypes.includes(input as LinkType)) {
@@ -33,10 +34,11 @@ export function getLinkTypeIcon(linkType: LinkType): React.ReactNode {
   return typeIcons[linkType] || null;
 }
 
-export default function LinkDisplay({ link }: { link: LinkWithType }) {
-  if (!link || !link.link_type || !link.url) return null;
+export default function LinkDisplay({ link }: { link: LinkWithType | Link }) {
+  const link_type = stringToLinkType(link.link_type);
+  if (!link || !link_type || !link.url) return null;
 
-  const icon = getLinkTypeIcon(link.link_type);
+  const icon = getLinkTypeIcon(link_type);
   const name = link.url;
 
   return (

@@ -4,7 +4,7 @@ import { useAppSelector } from "../../store";
 import type { CollectiveInvolvementWithDetails, CrewInvolvement, Interval, MyIntervalData } from "../../api/Api";
 import DateText from "../../components/DateText";
 import classes from "./Dashboard.module.css";
-import { CrewsList } from "../../components";
+import { CrewsList, LinksStack } from "../../components";
 import { compareStrings } from "../../utilities/comparison";
 
 interface MyIntervalPartipationCardProps {
@@ -82,10 +82,10 @@ function MyCrews({ personId, myInvolvements }: { personId: number; myInvolvement
 
 export default function Dashboard() {
   const intervals = useAppSelector((state) => state.intervals);
-
   const myData = useAppSelector((state) => state.me);
+  const collective = useAppSelector((state) => state.collective);
 
-  if (!myData) {
+  if (!myData || !collective) {
     return <Text>Error: Data not found.</Text>;
   }
 
@@ -108,6 +108,10 @@ export default function Dashboard() {
         <Stack gap="md">
           {current_interval && myData.current_interval && <MyIntervalPartipationCard interval={current_interval} data={myData.current_interval} current={true} />}
           {next_interval && myData.next_interval && <MyIntervalPartipationCard interval={next_interval} data={myData.next_interval} current={false} />}
+        </Stack>
+        <Stack gap="md">
+          <Title order={2}>Resources</Title>
+          <LinksStack links={collective.links} />
         </Stack>
         {myData.current_interval && <MyCrews personId={myData.person_id} myInvolvements={myData.current_interval.crew_involvements} />}
       </Stack>

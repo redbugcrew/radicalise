@@ -12,3 +12,4 @@ export { default as IntervalForm } from "./intervals/IntervalForm";
 export { default as ComboTextArea } from "./forms/ComboTextArea";
 export { default as LinksInput } from "./links/LinksInput/LinksInput";
 export { default as CollectiveForm } from "./CollectiveForm";
+export { default as LinksStack } from "./links/LinksDisplay/LinksStack";
