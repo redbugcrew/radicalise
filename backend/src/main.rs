@@ -19,6 +19,7 @@ use crate::{
 
 mod api;
 mod auth;
+mod broadcast;
 mod collective;
 mod crews;
 mod database;
@@ -90,6 +91,7 @@ async fn main() {
 
     let router = router
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", api.clone()))
+        .route("/ws", get(broadcast::handler))
         .fallback_service(get(frontend_handler))
         .layer(cors)
         .layer(Extension(pool))

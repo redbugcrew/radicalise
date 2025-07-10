@@ -7,12 +7,37 @@ import { useAppSelector } from "../../store";
 import packageJson from "../../../package.json";
 
 import classes from "./Layout.module.css";
+import { useEffect, useState } from "react";
+import { getSocket } from "../../api";
 
 export default function Layout() {
   const [opened, { toggle }] = useDisclosure();
   const collective = useAppSelector((state) => state.collective);
   const person_id = useAppSelector((state) => state.me?.person_id);
   const person = useAppSelector((state) => state.people[person_id || -1]);
+
+  const [socket, setSocket] = useState<WebSocket | null>(null);
+
+  useEffect(() => {
+    if (person_id && !socket) {
+      const newSocket = getSocket();
+      newSocket.onopen = () => console.log("WebSocket connection established");
+      newSocket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        console.log("WebSocket message received:", data);
+      };
+      newSocket.onclose = () => {
+        console.log("WebSocket connection closed");
+        setSocket(null);
+      };
+      setSocket(newSocket);
+    }
+    return () => {
+      // if (socket) {
+      //   socket.close();
+      // }
+    };
+  }, [person_id]);
 
   return (
     <AppShell header={{ height: 60 }} navbar={{ width: 300, breakpoint: "sm", collapsed: { mobile: !opened } }} padding="md">

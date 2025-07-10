@@ -12,3 +12,9 @@ export function getApi() {
     withCredentials: true,
   });
 }
+
+export function getSocket() {
+  const apiUrl = getApiUrl();
+  const socketUrl = apiUrl.replace(/^https?/, "ws");
+  return new WebSocket(socketUrl + "ws");
+}
