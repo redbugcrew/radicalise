@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { CollectiveInvolvement, CollectiveInvolvementWithDetails, MyIntervalData, InvolvementData, IntervalInvolvementData, CrewInvolvement, Person } from "../api/Api";
+import type { CollectiveInvolvement, CollectiveInvolvementWithDetails, InvolvementData, IntervalInvolvementData, CrewInvolvement, Person, PersonIntervalInvolvementData } from "../api/Api";
 import { type WritableDraft } from "immer";
 import type { PeopleObjectMap } from "./people";
 import { compareStrings } from "../utilities/comparison";
@@ -67,7 +67,7 @@ const involvementsSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addMatcher(
-      (action): action is PayloadAction<MyIntervalData> => action.type === "me/myIntervalDataChanged",
+      (action): action is PayloadAction<PersonIntervalInvolvementData> => action.type === "me/myIntervalDataChanged",
       (state, { payload }) => {
         if (!state || !payload) return state;
 

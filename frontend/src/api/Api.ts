@@ -142,12 +142,10 @@ export interface Interval {
 }
 
 export interface IntervalInvolvementData {
-  collective_involvement?: null | CollectiveInvolvementWithDetails;
+  collective_involvements: CollectiveInvolvement[];
   crew_involvements: CrewInvolvement[];
   /** @format int64 */
   interval_id: number;
-  /** @format int64 */
-  person_id: number;
 }
 
 export type IntervalsEvent = {
@@ -171,12 +169,12 @@ export interface LoginResponse {
 }
 
 export type MeEvent = {
-  IntervalDataChanged: IntervalInvolvementData;
+  IntervalDataChanged: PersonIntervalInvolvementData;
 };
 
 export interface MyInitialData {
-  current_interval?: null | IntervalInvolvementData;
-  next_interval?: null | IntervalInvolvementData;
+  current_interval?: null | PersonIntervalInvolvementData;
+  next_interval?: null | PersonIntervalInvolvementData;
   /** @format int64 */
   person_id: number;
 }
@@ -200,6 +198,15 @@ export interface Person {
   display_name: string;
   /** @format int64 */
   id: number;
+}
+
+export interface PersonIntervalInvolvementData {
+  collective_involvement?: null | CollectiveInvolvementWithDetails;
+  crew_involvements: CrewInvolvement[];
+  /** @format int64 */
+  interval_id: number;
+  /** @format int64 */
+  person_id: number;
 }
 
 export interface ResetPasswordRequest {

@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { IntervalInvolvementData, MyInitialData } from "../api/Api";
+import type { PersonIntervalInvolvementData, MyInitialData } from "../api/Api";
 
 export type MeState = MyInitialData | null;
 
@@ -8,7 +8,7 @@ const meSlice = createSlice({
   initialState: null as MeState,
   reducers: {
     meLoaded: (_state: MeState, action: PayloadAction<MeState>) => action.payload,
-    myIntervalDataChanged: (state: MeState, action: PayloadAction<IntervalInvolvementData>) => {
+    myIntervalDataChanged: (state: MeState, action: PayloadAction<PersonIntervalInvolvementData>) => {
       const payload = action.payload;
 
       if (state && payload) {
