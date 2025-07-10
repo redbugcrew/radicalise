@@ -21,7 +21,10 @@ export default function Layout() {
   useEffect(() => {
     if (person_id && !socket) {
       const newSocket = getSocket();
-      newSocket.onopen = () => console.log("WebSocket connection established");
+      newSocket.onopen = function () {
+        console.log("WebSocket connection established");
+        this.send(JSON.stringify({ type: "subscribe", person_id }));
+      };
       newSocket.onmessage = (event) => {
         const data = JSON.parse(event.data);
         console.log("WebSocket message received:", data);
@@ -30,6 +33,7 @@ export default function Layout() {
         console.log("WebSocket connection closed");
         setSocket(null);
       };
+
       setSocket(newSocket);
     }
     return () => {
