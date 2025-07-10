@@ -3,7 +3,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { IconBrandGithub, IconCalendar, IconHome2, IconUsers, IconUsersGroup } from "@tabler/icons-react";
 import { Outlet } from "react-router-dom";
 import { NavLink, PersonBadge } from "../../components";
-import { useAppDispatch, useAppSelector } from "../../store";
+import { handleOwnedAppEvent, useAppDispatch, useAppSelector } from "../../store";
 import packageJson from "../../../package.json";
 import useWebSocket from "react-use-websocket";
 
@@ -15,7 +15,6 @@ export default function Layout() {
   const collective = useAppSelector((state) => state.collective);
   const person_id = useAppSelector((state) => state.me?.person_id);
   const person = useAppSelector((state) => state.people[person_id || -1]);
-  const dispatch = useAppDispatch();
 
   const {} = useWebSocket(getSocketUrl(), {
     share: true,
@@ -27,7 +26,7 @@ export default function Layout() {
     },
     onMessage: (event) => {
       console.log("WebSocket message received", event);
-      dispatch({ type: "websocket/message", payload: JSON.parse(event.data) });
+      if (person_id !== undefined) handleOwnedAppEvent(person_id, JSON.parse(event.data));
     },
     heartbeat: false,
   });

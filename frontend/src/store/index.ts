@@ -115,22 +115,37 @@ export async function handleCollectiveEvent(event: CollectiveEvent) {
   }
 }
 
-export async function handleAppEvents(events: AppEvent[]) {
-  events.forEach((event) => {
-    console.log("Handling AppEvent:", event);
+export async function handleAppEvent(event: AppEvent) {
+  console.log("Handling AppEvent:", event);
 
-    if ("MeEvent" in event && event.MeEvent) {
-      handleMeEvent(event.MeEvent);
-    } else if ("IntervalsEvent" in event && event.IntervalsEvent) {
-      handleIntervalsEvent(event.IntervalsEvent);
-    } else if ("CrewsEvent" in event && event.CrewsEvent) {
-      handleCrewsEvent(event.CrewsEvent);
-    } else if ("CollectiveEvent" in event && event.CollectiveEvent) {
-      handleCollectiveEvent(event.CollectiveEvent);
-    } else {
-      console.warn("Unknown event type:", event);
-    }
-  });
+  if ("MeEvent" in event && event.MeEvent) {
+    handleMeEvent(event.MeEvent);
+  } else if ("IntervalsEvent" in event && event.IntervalsEvent) {
+    handleIntervalsEvent(event.IntervalsEvent);
+  } else if ("CrewsEvent" in event && event.CrewsEvent) {
+    handleCrewsEvent(event.CrewsEvent);
+  } else if ("CollectiveEvent" in event && event.CollectiveEvent) {
+    handleCollectiveEvent(event.CollectiveEvent);
+  } else {
+    console.warn("Unknown event type:", event);
+  }
+}
+
+export async function handleAppEvents(events: AppEvent[]) {
+  events.forEach(handleAppEvent);
+}
+
+export interface OwnedAppEvent {
+  author_id: number;
+  event: AppEvent;
+}
+
+export async function handleOwnedAppEvent(current_user_id: number, event: OwnedAppEvent) {
+  if (event.author_id !== current_user_id) {
+    handleAppEvent(event.event);
+  } else {
+    console.log("Ignoring event authored by the current user:", event.author_id);
+  }
 }
 
 export default store;
