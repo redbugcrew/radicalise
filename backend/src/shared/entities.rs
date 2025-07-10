@@ -124,6 +124,13 @@ pub struct CollectiveInvolvement {
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Clone, Debug)]
+pub struct CapacityPlanning {
+    pub wellbeing: Option<String>,
+    pub focus: Option<String>,
+    pub capacity: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, ToSchema, Clone, Debug)]
 pub struct CollectiveInvolvementWithDetails {
     pub id: i64,
     pub person_id: i64,
@@ -131,10 +138,8 @@ pub struct CollectiveInvolvementWithDetails {
     pub interval_id: i64,
     pub status: InvolvementStatus,
     pub private_capacity_planning: bool,
-    pub wellbeing: Option<String>,
-    pub focus: Option<String>,
+    pub capacity_planning: Option<CapacityPlanning>,
     pub capacity_score: Option<i64>,
-    pub capacity: Option<String>,
     pub participation_intention: Option<ParticipationIntention>,
     pub opt_out_type: Option<OptOutType>,
     pub opt_out_planned_return_date: Option<String>,

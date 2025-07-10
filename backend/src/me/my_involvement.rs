@@ -6,11 +6,8 @@ use crate::{
         find_crew_involvements, intervals_participated_since_last_convened, set_crew_convenor,
     },
     intervals::repo::{IntervalType, find_interval, get_interval_type},
-    me::repo::{self},
-    shared::entities::{
-        CollectiveInvolvementWithDetails, CrewInvolvement, InvolvementStatus, OptOutType,
-        ParticipationIntention,
-    },
+    me::repo::{self, CollectiveInvolvementWithDetailsRecord},
+    shared::entities::{CrewInvolvement, InvolvementStatus, OptOutType, ParticipationIntention},
 };
 
 #[derive(Serialize, Deserialize, ToSchema)]
@@ -49,7 +46,7 @@ pub async fn update_my_involvements(
     }
 
     repo::upsert_detailed_involvement(
-        CollectiveInvolvementWithDetails {
+        CollectiveInvolvementWithDetailsRecord {
             id: -1, // ID will be auto-generated
             person_id: person_id,
             collective_id: input.collective_id,

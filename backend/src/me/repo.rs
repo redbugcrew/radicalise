@@ -10,6 +10,74 @@ use crate::{
     },
 };
 
+#[derive(Debug, Clone)]
+pub struct CollectiveInvolvementWithDetailsRecord {
+    pub id: i64,
+    pub person_id: i64,
+    pub collective_id: i64,
+    pub interval_id: i64,
+    pub status: InvolvementStatus,
+    pub private_capacity_planning: bool,
+    pub wellbeing: Option<String>,
+    pub focus: Option<String>,
+    pub capacity: Option<String>,
+    pub capacity_score: Option<i64>,
+    pub participation_intention: Option<ParticipationIntention>,
+    pub opt_out_type: Option<OptOutType>,
+    pub opt_out_planned_return_date: Option<String>,
+}
+
+impl From<CollectiveInvolvementWithDetailsRecord> for CollectiveInvolvementWithDetails {
+    fn from(record: CollectiveInvolvementWithDetailsRecord) -> Self {
+        CollectiveInvolvementWithDetails {
+            id: record.id,
+            person_id: record.person_id,
+            collective_id: record.collective_id,
+            interval_id: record.interval_id,
+            status: record.status,
+            private_capacity_planning: record.private_capacity_planning,
+            capacity_planning: Some(crate::shared::entities::CapacityPlanning {
+                wellbeing: record.wellbeing,
+                focus: record.focus,
+                capacity: record.capacity,
+            }),
+            capacity_score: record.capacity_score,
+            participation_intention: record.participation_intention,
+            opt_out_type: record.opt_out_type,
+            opt_out_planned_return_date: record.opt_out_planned_return_date,
+        }
+    }
+}
+
+impl From<CollectiveInvolvementWithDetails> for CollectiveInvolvementWithDetailsRecord {
+    fn from(involvement: CollectiveInvolvementWithDetails) -> Self {
+        CollectiveInvolvementWithDetailsRecord {
+            id: involvement.id,
+            person_id: involvement.person_id,
+            collective_id: involvement.collective_id,
+            interval_id: involvement.interval_id,
+            status: involvement.status,
+            private_capacity_planning: involvement.private_capacity_planning,
+            wellbeing: involvement
+                .capacity_planning
+                .as_ref()
+                .and_then(|cp| cp.wellbeing.clone()),
+            focus: involvement
+                .capacity_planning
+                .as_ref()
+                .and_then(|cp| cp.focus.clone()),
+            capacity: involvement
+                .capacity_planning
+                .as_ref()
+                .and_then(|cp| cp.capacity.clone()),
+            capacity_score: involvement.capacity_score,
+            participation_intention: involvement.participation_intention,
+            opt_out_type: involvement.opt_out_type,
+            opt_out_planned_return_date: involvement.opt_out_planned_return_date,
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
 pub struct MyIntervalData {
     pub interval_id: i64,
@@ -30,8 +98,8 @@ pub async fn find_detailed_involvement(
     interval_id: i64,
     pool: &SqlitePool,
 ) -> Result<Option<CollectiveInvolvementWithDetails>, sqlx::Error> {
-    sqlx::query_as!(
-        CollectiveInvolvementWithDetails,
+    let record: Option<CollectiveInvolvementWithDetailsRecord> = sqlx::query_as!(
+        CollectiveInvolvementWithDetailsRecord,
         "SELECT id, person_id, collective_id, interval_id,
         status as \"status: InvolvementStatus\", private_capacity_planning,
         wellbeing, focus, capacity_score, capacity,
@@ -47,11 +115,13 @@ pub async fn find_detailed_involvement(
         interval_id,
     )
     .fetch_optional(pool)
-    .await
+    .await?;
+
+    Ok(record.map(Into::into))
 }
 
 pub async fn upsert_detailed_involvement(
-    involvement: CollectiveInvolvementWithDetails,
+    involvement: CollectiveInvolvementWithDetailsRecord,
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
     let result = sqlx::query!(
