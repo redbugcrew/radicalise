@@ -8,3 +8,9 @@ pub enum AppEvent {
     CrewsEvent(crate::crews::events::CrewsEvent),
     CollectiveEvent(crate::collective::events::CollectiveEvent),
 }
+
+#[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
+pub struct AuthoredAppEvent {
+    pub author_id: i64,
+    pub event: AppEvent,
+}

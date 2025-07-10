@@ -3,6 +3,7 @@ use sqlx::SqlitePool;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
+    auth::auth_backend::AuthSession,
     crews::events::CrewsEvent,
     realtime::RealtimeState,
     shared::{entities::CrewWithLinks, events::AppEvent},
@@ -27,6 +28,7 @@ pub async fn update_crew(
     Path(crew_id): Path<i64>,
     Extension(pool): Extension<SqlitePool>,
     Extension(realtime_state): Extension<RealtimeState>,
+    auth_session: AuthSession,
     Json(input): Json<CrewWithLinks>,
 ) -> impl IntoResponse {
     println!("Updating crew with ID {}: {:?}", crew_id, input);
@@ -38,7 +40,9 @@ pub async fn update_crew(
     match repo::update_crew_with_links(input, &pool).await {
         Ok(response) => {
             let event = AppEvent::CrewsEvent(CrewsEvent::CrewUpdated(response));
-            realtime_state.broadcast_app_event(event.clone()).await;
+            realtime_state
+                .broadcast_app_event(auth_session, event.clone())
+                .await;
             (StatusCode::OK, Json(vec![event])).into_response()
         }
         Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),

@@ -3,6 +3,7 @@ use sqlx::SqlitePool;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
+    auth::auth_backend::AuthSession,
     intervals::events::IntervalsEvent,
     realtime::RealtimeState,
     shared::{COLLECTIVE_ID, entities::Interval, events::AppEvent},
@@ -25,6 +26,7 @@ pub fn router() -> OpenApiRouter {
 async fn create_interval(
     Extension(pool): Extension<SqlitePool>,
     Extension(realtime_state): Extension<RealtimeState>,
+    auth_session: AuthSession,
     axum::extract::Json(interval): axum::extract::Json<Interval>,
 ) -> impl IntoResponse {
     println!("Creating interval: {:?}", interval);
@@ -32,7 +34,9 @@ async fn create_interval(
     match repo::insert_interval(interval, COLLECTIVE_ID, &pool).await {
         Ok(response) => {
             let event = AppEvent::IntervalsEvent(IntervalsEvent::IntervalCreated(response));
-            realtime_state.broadcast_app_event(event.clone()).await;
+            realtime_state
+                .broadcast_app_event(auth_session, event.clone())
+                .await;
             return (StatusCode::CREATED, Json(vec![event])).into_response();
         }
         Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),

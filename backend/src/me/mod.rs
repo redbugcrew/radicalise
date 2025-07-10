@@ -114,7 +114,9 @@ async fn update_my_participation(
             match output_result {
                 Ok(interval_data) => {
                     let event = AppEvent::MeEvent(MeEvent::MyIntervalDataChanged(interval_data));
-                    realtime_state.broadcast_app_event(event.clone()).await;
+                    realtime_state
+                        .broadcast_app_event_for_user(user.id.clone(), event.clone())
+                        .await;
                     return (StatusCode::OK, Json(vec![event])).into_response();
                 }
                 Err(_) => return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
