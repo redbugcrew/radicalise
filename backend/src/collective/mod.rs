@@ -7,6 +7,7 @@ use crate::{
         events::CollectiveEvent,
         repo::{InitialData, IntervalInvolvementData},
     },
+    realtime::RealtimeState,
     shared::{COLLECTIVE_ID, entities::Collective, events::AppEvent},
 };
 
@@ -79,6 +80,7 @@ async fn get_involvements(
 )]
 pub async fn update_collective(
     Extension(pool): Extension<SqlitePool>,
+    Extension(realtime_state): Extension<RealtimeState>,
     Json(input): Json<Collective>,
 ) -> impl IntoResponse {
     println!("Updating collective: {:?}", input);
@@ -86,6 +88,7 @@ pub async fn update_collective(
     match repo::update_collective_with_links(input, &pool).await {
         Ok(response) => {
             let event = AppEvent::CollectiveEvent(CollectiveEvent::CollectiveUpdated(response));
+            realtime_state.broadcast_app_event(event.clone()).await;
             (StatusCode::OK, Json(vec![event])).into_response()
         }
         Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
