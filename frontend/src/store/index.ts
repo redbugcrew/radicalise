@@ -89,8 +89,8 @@ export async function loadInitialData(store: AppStore) {
 
 export async function handleMeEvent(event: MeEvent) {
   console.log("Handling MeEvent:", event);
-  if (event.MyIntervalDataChanged) {
-    store.dispatch(myIntervalDataChanged(event.MyIntervalDataChanged));
+  if (event.IntervalDataChanged) {
+    store.dispatch(myIntervalDataChanged(event.IntervalDataChanged));
   }
 }
 

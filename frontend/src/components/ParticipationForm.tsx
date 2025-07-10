@@ -227,10 +227,10 @@ export default function ParticipationForm({ personId, interval, previousInterval
     mode: "controlled",
     initialValues: {
       private_capacity_planning: involvement?.private_capacity_planning ?? false,
-      wellbeing: involvement?.wellbeing ?? "",
-      focus: involvement?.focus ?? "",
+      wellbeing: involvement?.capacity_planning?.wellbeing ?? "",
+      focus: involvement?.capacity_planning?.focus ?? "",
       capacity_score: involvement?.capacity_score?.toString() ?? null,
-      capacity: involvement?.capacity ?? "",
+      capacity: involvement?.capacity_planning?.capacity ?? "",
       participation_intention: involvement?.participation_intention ?? null,
       opt_out_type: involvement?.opt_out_type ?? null,
       opt_out_planned_return_date: involvement?.opt_out_planned_return_date ?? null,
@@ -241,10 +241,6 @@ export default function ParticipationForm({ personId, interval, previousInterval
       let results = {} as Record<keyof MyParticipationFormData, string | null>;
 
       if (step === 0) {
-        results = {
-          ...results,
-          capacity: values.capacity.length > 0 ? null : "Capacity is required",
-        };
       }
       if (step === 1) {
         results = {

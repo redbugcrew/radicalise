@@ -40,6 +40,12 @@ export type AppEvent =
       CollectiveEvent: CollectiveEvent;
     };
 
+export interface CapacityPlanning {
+  capacity?: string | null;
+  focus?: string | null;
+  wellbeing?: string | null;
+}
+
 export interface Collective {
   description?: string | null;
   /** @format int64 */
@@ -67,12 +73,11 @@ export interface CollectiveInvolvement {
 }
 
 export interface CollectiveInvolvementWithDetails {
-  capacity?: string | null;
+  capacity_planning?: null | CapacityPlanning;
   /** @format int64 */
   capacity_score?: number | null;
   /** @format int64 */
   collective_id: number;
-  focus?: string | null;
   /** @format int64 */
   id: number;
   /** @format int64 */
@@ -84,7 +89,6 @@ export interface CollectiveInvolvementWithDetails {
   person_id: number;
   private_capacity_planning: boolean;
   status: InvolvementStatus;
-  wellbeing?: string | null;
 }
 
 export interface Credentials {
@@ -138,10 +142,12 @@ export interface Interval {
 }
 
 export interface IntervalInvolvementData {
-  collective_involvements: CollectiveInvolvement[];
+  collective_involvement?: null | CollectiveInvolvementWithDetails;
   crew_involvements: CrewInvolvement[];
   /** @format int64 */
   interval_id: number;
+  /** @format int64 */
+  person_id: number;
 }
 
 export type IntervalsEvent = {
@@ -165,21 +171,14 @@ export interface LoginResponse {
 }
 
 export type MeEvent = {
-  MyIntervalDataChanged: MyIntervalData;
+  IntervalDataChanged: IntervalInvolvementData;
 };
 
 export interface MyInitialData {
-  current_interval?: null | MyIntervalData;
-  next_interval?: null | MyIntervalData;
+  current_interval?: null | IntervalInvolvementData;
+  next_interval?: null | IntervalInvolvementData;
   /** @format int64 */
   person_id: number;
-}
-
-export interface MyIntervalData {
-  collective_involvement?: null | CollectiveInvolvementWithDetails;
-  crew_involvements: CrewInvolvement[];
-  /** @format int64 */
-  interval_id: number;
 }
 
 export interface MyParticipationInput {
@@ -384,7 +383,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 0.7.0
+ * @version 0.8.0
  * @license
  */
 export class Api<

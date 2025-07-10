@@ -113,7 +113,7 @@ async fn update_my_participation(
                 repo::find_interval_data_for_me(COLLECTIVE_ID, user.id, interval_id, &pool).await;
             match output_result {
                 Ok(interval_data) => {
-                    let event = AppEvent::MeEvent(MeEvent::MyIntervalDataChanged(interval_data));
+                    let event = AppEvent::MeEvent(MeEvent::IntervalDataChanged(interval_data));
                     // realtime_state
                     //     .broadcast_app_event_for_user(user.id.clone(), event.clone())
                     //     .await;

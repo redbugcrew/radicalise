@@ -79,8 +79,9 @@ impl From<CollectiveInvolvementWithDetails> for CollectiveInvolvementWithDetails
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
-pub struct MyIntervalData {
+pub struct IntervalInvolvementData {
     pub interval_id: i64,
+    pub person_id: i64,
     pub collective_involvement: Option<CollectiveInvolvementWithDetails>,
     pub crew_involvements: Vec<CrewInvolvement>,
 }
@@ -88,8 +89,8 @@ pub struct MyIntervalData {
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct MyInitialData {
     pub person_id: i64,
-    pub current_interval: Option<MyIntervalData>,
-    pub next_interval: Option<MyIntervalData>,
+    pub current_interval: Option<IntervalInvolvementData>,
+    pub next_interval: Option<IntervalInvolvementData>,
 }
 
 pub async fn find_detailed_involvement(
@@ -165,14 +166,15 @@ pub async fn find_interval_data_for_me(
     person_id: i64,
     interval_id: i64,
     pool: &SqlitePool,
-) -> Result<MyIntervalData, sqlx::Error> {
+) -> Result<IntervalInvolvementData, sqlx::Error> {
     let involvement =
         find_detailed_involvement(collective_id, person_id, interval_id, pool).await?;
 
     let crew_involvements = find_my_crew_involvements(person_id, interval_id, pool).await?;
 
-    Ok(MyIntervalData {
+    Ok(IntervalInvolvementData {
         interval_id,
+        person_id,
         collective_involvement: involvement,
         crew_involvements,
     })
