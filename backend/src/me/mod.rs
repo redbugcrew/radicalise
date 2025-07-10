@@ -9,7 +9,7 @@ use crate::{
         my_involvement::{MyParticipationInput, update_my_involvements},
         repo::MyInitialData,
     },
-    realtime::RealtimeState,
+    //realtime::RealtimeState,
     shared::{COLLECTIVE_ID, entities::CollectiveInvolvementWithDetails, events::AppEvent},
 };
 
@@ -95,7 +95,7 @@ async fn my_participation(
 async fn update_my_participation(
     Path(interval_id): Path<i64>,
     Extension(pool): Extension<SqlitePool>,
-    Extension(realtime_state): Extension<RealtimeState>,
+    // Extension(realtime_state): Extension<RealtimeState>,
     auth_session: AuthSession,
     axum::extract::Json(input): axum::extract::Json<MyParticipationInput>,
 ) -> impl IntoResponse {
@@ -114,9 +114,9 @@ async fn update_my_participation(
             match output_result {
                 Ok(interval_data) => {
                     let event = AppEvent::MeEvent(MeEvent::MyIntervalDataChanged(interval_data));
-                    realtime_state
-                        .broadcast_app_event_for_user(user.id.clone(), event.clone())
-                        .await;
+                    // realtime_state
+                    //     .broadcast_app_event_for_user(user.id.clone(), event.clone())
+                    //     .await;
                     return (StatusCode::OK, Json(vec![event])).into_response();
                 }
                 Err(_) => return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),

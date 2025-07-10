@@ -3,7 +3,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { IconBrandGithub, IconCalendar, IconHome2, IconUsers, IconUsersGroup } from "@tabler/icons-react";
 import { Outlet } from "react-router-dom";
 import { NavLink, PersonBadge } from "../../components";
-import { handleOwnedAppEvent, useAppDispatch, useAppSelector } from "../../store";
+import { handleOwnedAppEvent, useAppSelector } from "../../store";
 import packageJson from "../../../package.json";
 import useWebSocket from "react-use-websocket";
 
