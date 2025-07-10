@@ -10,6 +10,7 @@ axum = { version = "0.8.4", features = ["ws"] }
 axum-login = "0.17.0"
 chrono = "0.4.41"
 cookie = { version = "0.18.1", features = ["signed"] }
+futures-util = "0.3.31"
 lazy_static = "1.5.0"
 password-auth = "1.0.0"
 reqwest = { version = "0.12.20", features = ["rustls-tls"] }

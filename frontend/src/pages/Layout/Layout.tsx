@@ -5,10 +5,11 @@ import { Outlet } from "react-router-dom";
 import { NavLink, PersonBadge } from "../../components";
 import { useAppSelector } from "../../store";
 import packageJson from "../../../package.json";
+import useWebSocket from "react-use-websocket";
 
 import classes from "./Layout.module.css";
-import { useEffect, useState } from "react";
-import { getSocket } from "../../api";
+import { getSocketUrl } from "../../api";
+import { useEffect } from "react";
 
 export default function Layout() {
   const [opened, { toggle }] = useDisclosure();
@@ -16,32 +17,26 @@ export default function Layout() {
   const person_id = useAppSelector((state) => state.me?.person_id);
   const person = useAppSelector((state) => state.people[person_id || -1]);
 
-  const [socket, setSocket] = useState<WebSocket | null>(null);
+  const { sendMessage, readyState } = useWebSocket(getSocketUrl(), {
+    share: true,
+    onOpen: (event) => {
+      console.log("WebSocket connection opened", event);
+    },
+    onClose: () => {
+      console.log("WebSocket connection closed");
+    },
+    onMessage: (event) => {
+      console.log("WebSocket message received", event);
+    },
+    heartbeat: true,
+  });
 
   useEffect(() => {
-    if (person_id && !socket) {
-      const newSocket = getSocket();
-      newSocket.onopen = function () {
-        console.log("WebSocket connection established");
-        this.send(JSON.stringify({ type: "subscribe", person_id }));
-      };
-      newSocket.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        console.log("WebSocket message received:", data);
-      };
-      newSocket.onclose = () => {
-        console.log("WebSocket connection closed");
-        setSocket(null);
-      };
-
-      setSocket(newSocket);
+    if (readyState === WebSocket.OPEN) {
+      console.log("WebSocket is open, sending message");
+      sendMessage(JSON.stringify({ type: "opened" }));
     }
-    return () => {
-      // if (socket) {
-      //   socket.close();
-      // }
-    };
-  }, [person_id]);
+  }, [readyState]);
 
   return (
     <AppShell header={{ height: 60 }} navbar={{ width: 300, breakpoint: "sm", collapsed: { mobile: !opened } }} padding="md">

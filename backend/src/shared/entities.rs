@@ -1,8 +1,8 @@
 use serde::{Deserialize, Serialize};
-use std::{clone, str::FromStr};
+use std::str::FromStr;
 use utoipa::ToSchema;
 
-#[derive(Serialize, Deserialize, ToSchema, Debug)]
+#[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
 pub struct Collective {
     pub id: i64,
     pub name: Option<String>,
@@ -51,7 +51,7 @@ impl TryFrom<String> for InvolvementStatus {
     }
 }
 
-#[derive(Serialize, Deserialize, ToSchema, sqlx::Type, clone::Clone)]
+#[derive(Serialize, Deserialize, ToSchema, sqlx::Type, Debug, Clone)]
 pub enum ParticipationIntention {
     OptIn,
     OptOut,
@@ -77,7 +77,7 @@ impl TryFrom<String> for ParticipationIntention {
     }
 }
 
-#[derive(Serialize, Deserialize, ToSchema, sqlx::Type)]
+#[derive(Serialize, Deserialize, ToSchema, sqlx::Type, Debug, Clone)]
 pub enum OptOutType {
     Hiatus,
     Exit,
@@ -123,7 +123,7 @@ pub struct CollectiveInvolvement {
     pub capacity_score: Option<i64>,
 }
 
-#[derive(Serialize, Deserialize, ToSchema)]
+#[derive(Serialize, Deserialize, ToSchema, Clone, Debug)]
 pub struct CollectiveInvolvementWithDetails {
     pub id: i64,
     pub person_id: i64,
@@ -175,7 +175,7 @@ impl LinkWithOwner {
     }
 }
 
-#[derive(Serialize, Deserialize, ToSchema, Debug)]
+#[derive(Serialize, Deserialize, ToSchema, Clone, Debug)]
 pub struct CrewWithLinks {
     pub id: i64,
     pub name: String,

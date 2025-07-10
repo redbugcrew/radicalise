@@ -10,7 +10,7 @@ use crate::{
     },
 };
 
-#[derive(Serialize, Deserialize, ToSchema)]
+#[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
 pub struct MyIntervalData {
     pub interval_id: i64,
     pub collective_involvement: Option<CollectiveInvolvementWithDetails>,

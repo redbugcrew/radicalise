@@ -1,4 +1,8 @@
-use axum::{Extension, http::Method, http::header, routing::get};
+use axum::{
+    Extension,
+    http::{Method, header},
+    routing::get,
+};
 use axum_login::{
     AuthManagerLayerBuilder, login_required,
     tower_sessions::{Expiry, SessionManagerLayer},
@@ -14,17 +18,17 @@ use utoipa_swagger_ui::SwaggerUi;
 
 use crate::{
     api::api_router, auth::auth_backend::AppAuthBackend, database::prepare_database,
-    static_server::frontend_handler,
+    realtime::RealtimeState, static_server::frontend_handler,
 };
 
 mod api;
 mod auth;
-mod broadcast;
 mod collective;
 mod crews;
 mod database;
 mod intervals;
 mod me;
+mod realtime;
 mod shared;
 mod static_server;
 
@@ -67,6 +71,9 @@ async fn main() {
     let backend = AppAuthBackend::new(pool.clone());
     let auth_layer = AuthManagerLayerBuilder::new(backend, session_layer).build();
 
+    // REALTIME COMMS
+    let realtime_state = RealtimeState::new();
+
     // EMAIL
     let resend_key =
         env::var("RESEND_API_KEY").unwrap_or_else(|_| "YOUR-RESEND-KEY-HERE".to_string());
@@ -91,12 +98,13 @@ async fn main() {
 
     let router = router
         .merge(SwaggerUi::new("/swagger-ui").url("/api-docs/openapi.json", api.clone()))
-        .route("/ws", get(broadcast::handler))
+        .route("/ws", get(realtime::handler))
         .fallback_service(get(frontend_handler))
         .layer(cors)
         .layer(Extension(pool))
         .layer(Extension(resend))
-        .layer(auth_layer);
+        .layer(auth_layer)
+        .layer(Extension(realtime_state));
 
     // SERVICE
     let app = router.into_make_service();

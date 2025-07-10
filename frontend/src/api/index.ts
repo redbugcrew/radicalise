@@ -13,8 +13,11 @@ export function getApi() {
   });
 }
 
-export function getSocket() {
+export function getSocketUrl(): string {
   const apiUrl = getApiUrl();
-  const socketUrl = apiUrl.replace(/^https?/, "ws");
-  return new WebSocket(socketUrl + "ws");
+  return apiUrl.replace(/^https?/, "ws") + "ws";
+}
+
+export function getSocket() {
+  return new WebSocket(getSocketUrl());
 }
