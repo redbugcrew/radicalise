@@ -3,21 +3,21 @@ import { useDisclosure } from "@mantine/hooks";
 import { IconBrandGithub, IconCalendar, IconHome2, IconUsers, IconUsersGroup } from "@tabler/icons-react";
 import { Outlet } from "react-router-dom";
 import { NavLink, PersonBadge } from "../../components";
-import { useAppSelector } from "../../store";
+import { useAppDispatch, useAppSelector } from "../../store";
 import packageJson from "../../../package.json";
 import useWebSocket from "react-use-websocket";
 
 import classes from "./Layout.module.css";
 import { getSocketUrl } from "../../api";
-import { useEffect } from "react";
 
 export default function Layout() {
   const [opened, { toggle }] = useDisclosure();
   const collective = useAppSelector((state) => state.collective);
   const person_id = useAppSelector((state) => state.me?.person_id);
   const person = useAppSelector((state) => state.people[person_id || -1]);
+  const dispatch = useAppDispatch();
 
-  const { sendMessage, readyState } = useWebSocket(getSocketUrl(), {
+  const {} = useWebSocket(getSocketUrl(), {
     share: true,
     onOpen: (event) => {
       console.log("WebSocket connection opened", event);
@@ -27,16 +27,10 @@ export default function Layout() {
     },
     onMessage: (event) => {
       console.log("WebSocket message received", event);
+      dispatch({ type: "websocket/message", payload: JSON.parse(event.data) });
     },
-    heartbeat: true,
+    heartbeat: false,
   });
-
-  useEffect(() => {
-    if (readyState === WebSocket.OPEN) {
-      console.log("WebSocket is open, sending message");
-      sendMessage(JSON.stringify({ type: "opened" }));
-    }
-  }, [readyState]);
 
   return (
     <AppShell header={{ height: 60 }} navbar={{ width: 300, breakpoint: "sm", collapsed: { mobile: !opened } }} padding="md">

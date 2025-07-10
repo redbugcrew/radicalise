@@ -7,7 +7,7 @@ use axum::{
     response::Response,
 };
 use futures_util::{
-    StreamExt,
+    SinkExt, StreamExt,
     stream::{SplitSink, SplitStream},
 };
 use std::sync::Arc;
@@ -91,12 +91,19 @@ async fn recv_from_client(mut client_rx: SplitStream<WebSocket>) {
 }
 
 async fn recv_broadcast(
-    _client_tx: Arc<Mutex<SplitSink<WebSocket, Message>>>,
-    _broadcast_rx: Receiver<AuthoredAppEvent>,
+    client_tx_mutex: Arc<Mutex<SplitSink<WebSocket, Message>>>,
+    mut broadcast_rx: Receiver<AuthoredAppEvent>,
 ) {
-    // while let Ok(msg) = broadcast_rx.recv().await {
-    //     if client_tx.lock().await.send(msg).await.is_err() {
-    //         return; // disconnected.
-    //     }
-    // }
+    while let Ok(msg) = broadcast_rx.recv().await {
+        let mut client_tx = client_tx_mutex.lock().await;
+
+        if client_tx.send(message_from_event(&msg)).await.is_err() {
+            return; // disconnected.
+        }
+    }
+}
+
+fn message_from_event(event: &AuthoredAppEvent) -> Message {
+    let json = serde_json::to_string(event).expect("Failed to serialize event");
+    Message::Text(json.into())
 }
