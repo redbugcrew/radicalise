@@ -59,6 +59,11 @@ export default function Person() {
             </Anchor>
           )}
         </Group>
+        {person.about && (
+          <Text size="md" style={{ whiteSpace: "pre-line" }}>
+            {person.about}
+          </Text>
+        )}
         {!collective_involvement?.private_capacity_planning && collective_involvement?.capacity_planning && (
           <CapacityPlanningSection capacity_planning={collective_involvement.capacity_planning} capacity_score={collective_involvement.capacity_score} />
         )}
