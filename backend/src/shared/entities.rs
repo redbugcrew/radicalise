@@ -14,6 +14,8 @@ pub struct Collective {
 pub struct Person {
     pub id: i64,
     pub display_name: String,
+    pub about: Option<String>,
+    pub avatar_id: Option<i64>,
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]

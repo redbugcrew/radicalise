@@ -1,7 +1,8 @@
 export { default as Anchor } from "./Anchor";
 export { default as NavLink } from "./NavLink";
-export { default as PeopleTable } from "./PeopleTable/PeopleTable";
-export { default as PersonBadge } from "./PersonBadge/PersonBadge";
+export { default as PeopleTable } from "./people/PeopleTable/PeopleTable";
+export { default as PersonBadge } from "./people/PersonBadge/PersonBadge";
+export { default as PersonForm } from "./people/PersonForm";
 export { default as CrewParticipationsInput } from "./CrewParticipationsInput/CrewParticipationsInput";
 export { default as CrewsList } from "./crews/CrewsList";
 export { default as CrewCard } from "./crews/CrewCard/CrewCard";

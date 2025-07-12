@@ -1,10 +1,10 @@
 import { Avatar, Badge, Center, Group, Table, Text, TextInput, UnstyledButton, Stack } from "@mantine/core";
-import { Anchor } from "../";
+import { Anchor } from "../..";
 import { IconChevronDown, IconChevronUp, IconSearch, IconSelector } from "@tabler/icons-react";
 import { useState } from "react";
 import classes from "./PeopleTable.module.css";
+import CapacityScoreIcon from "../../CapacityScoreIcon";
 import { avatarUrl } from "../PersonBadge/PersonBadge";
-import CapacityScoreIcon from "../CapacityScoreIcon";
 
 interface Crew {
   id: number;

@@ -1,5 +1,5 @@
 import { Group } from "@mantine/core";
-import type { Person } from "../../api/Api";
+import type { Person } from "../../../api/Api";
 import PersonBadge from "./PersonBadge";
 
 interface PersonBadgeGroupProps {

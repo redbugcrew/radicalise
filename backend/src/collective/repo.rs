@@ -126,9 +126,12 @@ pub async fn find_initial_data_for_collective(
     collective: Collective,
     pool: &SqlitePool,
 ) -> Result<InitialData, sqlx::Error> {
-    let people = sqlx::query_as!(Person, "SELECT id, display_name FROM people")
-        .fetch_all(pool)
-        .await?;
+    let people = sqlx::query_as!(
+        Person,
+        "SELECT id, display_name, about, avatar_id FROM people"
+    )
+    .fetch_all(pool)
+    .await?;
 
     let crews = find_all_crews_with_links(pool).await?;
 

@@ -1,6 +1,6 @@
 import { Card, Group, Stack, Title, Text, Badge } from "@mantine/core";
 import type { CrewInvolvement, Person } from "../../../api/Api";
-import PersonBadge from "../../PersonBadge/PersonBadge";
+import PersonBadge from "../../people/PersonBadge/PersonBadge";
 import type { PeopleObjectMap } from "../../../store/people";
 import styles from "./CrewCard.module.css";
 import Anchor from "../../Anchor";

@@ -1,5 +1,5 @@
 import { Avatar, Group, Text } from "@mantine/core";
-import type { Person } from "../../api/Api";
+import type { Person } from "../../../api/Api";
 import classes from "./PersonBadge.module.css";
 
 export const avatarUrl = (id: number) => {
