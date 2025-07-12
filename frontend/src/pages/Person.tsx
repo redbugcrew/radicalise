@@ -1,28 +1,68 @@
-import { ActionIcon, Container, Group, Title } from "@mantine/core";
+import { ActionIcon, Container, Group, Stack, Title, Text, Card } from "@mantine/core";
 import { useAppSelector } from "../store";
 import { Anchor } from "../components";
 import { IconUserEdit } from "@tabler/icons-react";
 import { useParams } from "react-router-dom";
+import type { CapacityPlanning } from "../api/Api";
+import CapacityScoreIcon from "../components/CapacityScoreIcon";
+
+function CapacityQuestion({ question, answer }: { question: string; answer: string | null | undefined }) {
+  if (!answer) return null;
+
+  return (
+    <Stack gap={0}>
+      <Text fw={500}>{question}</Text>
+      <Text size="sm" c="dimmed" style={{ whiteSpace: "pre-line" }}>
+        {answer}
+      </Text>
+    </Stack>
+  );
+}
+
+function CapacityPlanningSection({ capacity_planning, capacity_score }: { capacity_planning: CapacityPlanning; capacity_score: number | null }) {
+  return (
+    <Card>
+      <Group justify="space-between" mb="md">
+        <Title order={2} size="h3">
+          My capacity
+        </Title>
+        <CapacityScoreIcon score={capacity_score} />
+      </Group>
+      <Stack gap="xs">
+        <CapacityQuestion question="Wellbeing" answer={capacity_planning.wellbeing} />
+        <CapacityQuestion question="Focus" answer={capacity_planning.focus} />
+        <CapacityQuestion question="Capacity" answer={capacity_planning.capacity} />
+      </Stack>
+    </Card>
+  );
+}
 
 export default function Person() {
   const { personId } = useParams<"personId">();
   const personIdNum = personId ? parseInt(personId, 10) : undefined;
   const meId = useAppSelector((state) => state.me?.person_id);
   const person = useAppSelector((state) => state.people[personIdNum || -1]);
-  const canEdit = meId === person.id;
+  const collective_involvement = useAppSelector((state) => state.me?.current_interval?.collective_involvement || null);
+
+  const canEdit = meId === person.id && false;
 
   return (
     <Container>
-      <Group justify="space-between">
-        <Title order={1}>{person.display_name}</Title>
-        {canEdit && (
-          <Anchor href="new">
-            <ActionIcon variant="filled" aria-label="Add Person" size="lg">
-              <IconUserEdit style={{ width: "70%", height: "70%" }} stroke={2} />
-            </ActionIcon>
-          </Anchor>
+      <Stack>
+        <Group justify="space-between">
+          <Title order={1}>{person.display_name}</Title>
+          {canEdit && (
+            <Anchor href="new">
+              <ActionIcon variant="filled" aria-label="Add Person" size="lg">
+                <IconUserEdit style={{ width: "70%", height: "70%" }} stroke={2} />
+              </ActionIcon>
+            </Anchor>
+          )}
+        </Group>
+        {!collective_involvement?.private_capacity_planning && collective_involvement?.capacity_planning && (
+          <CapacityPlanningSection capacity_planning={collective_involvement.capacity_planning} capacity_score={collective_involvement.capacity_score} />
         )}
-      </Group>
+      </Stack>
     </Container>
   );
 }
