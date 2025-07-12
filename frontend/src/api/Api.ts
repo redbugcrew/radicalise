@@ -38,6 +38,9 @@ export type AppEvent =
     }
   | {
       CollectiveEvent: CollectiveEvent;
+    }
+  | {
+      PeopleEvent: PeopleEvent;
     };
 
 export interface CapacityPlanning {
@@ -193,6 +196,10 @@ export interface MyParticipationInput {
   private_capacity_planning: boolean;
   wellbeing?: string | null;
 }
+
+export type PeopleEvent = {
+  PersonUpdated: Person;
+};
 
 export interface Person {
   about?: string | null;
@@ -570,6 +577,26 @@ export class Api<
       this.request<null | CollectiveInvolvementWithDetails, any>({
         path: `/api/me/participation/interval/${intervalId}`,
         method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdatePerson
+     * @request PUT:/api/people/{person_id}
+     */
+    updatePerson: (
+      personId: string,
+      data: Person,
+      params: RequestParams = {},
+    ) =>
+      this.request<AppEvent[], any>({
+        path: `/api/people/${personId}`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),

@@ -1,14 +1,14 @@
 import { useDispatch, useSelector, useStore } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import collectiveReducer, { collectiveLoaded, collectiveUpdated } from "./collective";
-import peopleReducer, { peopleLoaded } from "./people";
+import peopleReducer, { peopleLoaded, personUpdated } from "./people";
 import intervalsReducer, { intervalsLoaded, intervalCreated } from "./intervals";
 import involvementsReducer, { involvementsLoaded, intervalDataChanged } from "./involvements";
 import crewsReducer, { crewsLoaded, crewUpdated } from "./crews";
 import meReducer, { meLoaded } from "./me";
 import { getApi } from "../api";
 import { redirect } from "react-router-dom";
-import type { AppEvent, CollectiveEvent, CrewsEvent, IntervalsEvent, MeEvent } from "../api/Api";
+import type { AppEvent, CollectiveEvent, CrewsEvent, IntervalsEvent, MeEvent, PeopleEvent } from "../api/Api";
 
 const store = configureStore({
   reducer: {
@@ -111,6 +111,12 @@ export async function handleCollectiveEvent(event: CollectiveEvent) {
   }
 }
 
+export async function handlePeopleEvent(event: PeopleEvent) {
+  if (event.PersonUpdated) {
+    store.dispatch(personUpdated(event.PersonUpdated));
+  }
+}
+
 export async function handleAppEvent(event: AppEvent) {
   console.log("Handling AppEvent:", event);
 
@@ -122,6 +128,8 @@ export async function handleAppEvent(event: AppEvent) {
     handleCrewsEvent(event.CrewsEvent);
   } else if ("CollectiveEvent" in event && event.CollectiveEvent) {
     handleCollectiveEvent(event.CollectiveEvent);
+  } else if ("PeopleEvent" in event && event.PeopleEvent) {
+    handlePeopleEvent(event.PeopleEvent);
   } else {
     console.warn("Unknown event type:", event);
   }

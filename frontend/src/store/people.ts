@@ -1,6 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { Person } from "../api/Api";
-
 export interface PeopleObjectMap {
   [key: number]: Person;
 }
@@ -18,12 +17,17 @@ const peopleSlice = createSlice({
       });
       return people;
     },
+    personUpdated: (state: PeopleState, action: PayloadAction<Person>) => {
+      const person = action.payload;
+      state[person.id] = person;
+      return state;
+    },
   },
 });
 
 // `createSlice` automatically generated action creators with these names.
 // export them as named exports from this "slice" file
-export const { peopleLoaded } = peopleSlice.actions;
+export const { peopleLoaded, personUpdated } = peopleSlice.actions;
 
 // Export the slice reducer as the default export
 export default peopleSlice.reducer;

@@ -15,6 +15,7 @@ export default function PersonForm({ person, onSubmit }: PersonFormProps) {
     initialValues: {
       ...person,
       avatar_id: person.avatar_id ?? person.id,
+      about: person.about || "",
     },
     validate: {
       display_name: (value) => (value ? null : "Display name is required"),

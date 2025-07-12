@@ -28,6 +28,7 @@ mod crews;
 mod database;
 mod intervals;
 mod me;
+mod people;
 mod realtime;
 mod shared;
 mod static_server;

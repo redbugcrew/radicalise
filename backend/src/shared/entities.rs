@@ -10,7 +10,7 @@ pub struct Collective {
     pub links: Vec<Link>,
 }
 
-#[derive(Serialize, Deserialize, ToSchema)]
+#[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
 pub struct Person {
     pub id: i64,
     pub display_name: String,

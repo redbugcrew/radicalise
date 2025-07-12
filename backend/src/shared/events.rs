@@ -7,6 +7,7 @@ pub enum AppEvent {
     IntervalsEvent(crate::intervals::events::IntervalsEvent),
     CrewsEvent(crate::crews::events::CrewsEvent),
     CollectiveEvent(crate::collective::events::CollectiveEvent),
+    PeopleEvent(crate::people::events::PeopleEvent),
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]

@@ -6,4 +6,5 @@ pub fn api_router() -> OpenApiRouter {
         .nest("/me", crate::me::router())
         .nest("/intervals", crate::intervals::router())
         .nest("/crews", crate::crews::router())
+        .nest("/people", crate::people::router())
 }
