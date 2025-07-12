@@ -1,5 +1,4 @@
 import { Combobox, Input, InputBase, useCombobox, type InputWrapperProps } from "@mantine/core";
-import { useState } from "react";
 import Avatar, { maxAvatarId, minAvatarId } from "./Avatar";
 import { useUncontrolled } from "@mantine/hooks";
 
