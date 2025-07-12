@@ -22,7 +22,7 @@ export default function PersonBadge({ person, me, highlight, variant = "default"
 
   return (
     <Group gap="xs" className={groupClasses.join(" ")}>
-      <Avatar avatarId={person.id} />
+      <Avatar avatarId={person.avatar_id ?? person.id} />
       <Text fz="sm" fw={500}>
         {person.display_name}
       </Text>

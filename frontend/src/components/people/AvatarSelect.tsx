@@ -1,6 +1,7 @@
 import { Combobox, Input, InputBase, useCombobox, type InputWrapperProps } from "@mantine/core";
 import { useState } from "react";
 import Avatar, { maxAvatarId, minAvatarId } from "./Avatar";
+import { useUncontrolled } from "@mantine/hooks";
 
 const avatarIds = () => Array.from({ length: maxAvatarId - minAvatarId + 1 }, (_, i) => i + minAvatarId);
 
@@ -16,7 +17,12 @@ export function AvatarSelect({ value, defaultValue, onChange, placeholder, ...wr
     onDropdownClose: () => combobox.resetSelectedOption(),
   });
 
-  const [controlValue, setControlValue] = useState<number | null>(value || defaultValue || null);
+  const [controlValue, setControlValue] = useUncontrolled<number | null>({
+    value: value as number | null,
+    defaultValue: defaultValue as number | null,
+    finalValue: null,
+    onChange: onChange as any,
+  });
 
   // map between minAvatarId and maxAvatarId and create options for the combobox
   const options = avatarIds().map((id) => (
