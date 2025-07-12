@@ -1,10 +1,10 @@
-import { Avatar, Badge, Center, Group, Table, Text, TextInput, UnstyledButton, Stack } from "@mantine/core";
+import { Badge, Center, Group, Table, Text, TextInput, UnstyledButton, Stack } from "@mantine/core";
 import { Anchor } from "../..";
 import { IconChevronDown, IconChevronUp, IconSearch, IconSelector } from "@tabler/icons-react";
 import { useState } from "react";
 import classes from "./PeopleTable.module.css";
 import CapacityScoreIcon from "../../CapacityScoreIcon";
-import { avatarUrl } from "../PersonBadge/PersonBadge";
+import Avatar from "../Avatar";
 
 interface Crew {
   id: number;
@@ -18,6 +18,7 @@ interface SortableRowData {
 export interface PeopleTableRow {
   id: number;
   name: string;
+  avatar_id: number;
   capacity_score: number | null;
   crews: Crew[];
 }
@@ -125,7 +126,7 @@ export default function PeopleTable({ people }: PeopleTableProps) {
       <Table.Td>
         <Anchor href={`/people/${item.id}`}>
           <Group gap="sm" wrap="nowrap">
-            <Avatar size={30} src={avatarUrl(item.id)} radius={30} />
+            <Avatar avatarId={item.avatar_id} />
             <Text fz="sm" fw={500}>
               {item.name}
             </Text>

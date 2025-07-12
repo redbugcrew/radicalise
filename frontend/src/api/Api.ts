@@ -195,6 +195,9 @@ export interface MyParticipationInput {
 }
 
 export interface Person {
+  about?: string | null;
+  /** @format int64 */
+  avatar_id?: number | null;
   display_name: string;
   /** @format int64 */
   id: number;
@@ -390,7 +393,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 0.8.0
+ * @version 0.8.1
  * @license
  */
 export class Api<

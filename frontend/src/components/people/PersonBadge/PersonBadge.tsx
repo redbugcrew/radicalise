@@ -1,12 +1,7 @@
-import { Avatar, Group, Text } from "@mantine/core";
+import { Group, Text } from "@mantine/core";
 import type { Person } from "../../../api/Api";
 import classes from "./PersonBadge.module.css";
-
-export const avatarUrl = (id: number) => {
-  let number = (id % 10) + 1;
-  if (number === 5) number = 2;
-  return `https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-${number}.png`;
-};
+import Avatar from "../Avatar";
 
 interface PersonBadgeProps {
   person: Person | null;
@@ -27,7 +22,7 @@ export default function PersonBadge({ person, me, highlight, variant = "default"
 
   return (
     <Group gap="xs" className={groupClasses.join(" ")}>
-      <Avatar size={30} src={avatarUrl(person.id)} radius={30} />
+      <Avatar avatarId={person.id} />
       <Text fz="sm" fw={500}>
         {person.display_name}
       </Text>
