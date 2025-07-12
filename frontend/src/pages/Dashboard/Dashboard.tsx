@@ -1,7 +1,7 @@
 import { Button, Card, Container, Title, Stack, Text, Badge, Group } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import { useAppSelector } from "../../store";
-import type { CollectiveInvolvementWithDetails, CrewInvolvement, Interval, MyIntervalData } from "../../api/Api";
+import type { CollectiveInvolvementWithDetails, CrewInvolvement, Interval, PersonIntervalInvolvementData } from "../../api/Api";
 import DateText from "../../components/DateText";
 import classes from "./Dashboard.module.css";
 import { CrewsList, LinksStack } from "../../components";
@@ -9,7 +9,7 @@ import { compareStrings } from "../../utilities/comparison";
 
 interface MyIntervalPartipationCardProps {
   interval: Interval;
-  data: MyIntervalData;
+  data: PersonIntervalInvolvementData;
   current: boolean;
 }
 
