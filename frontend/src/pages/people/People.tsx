@@ -1,8 +1,8 @@
 import { Group, Stack, Title } from "@mantine/core";
-import { IntervalSelector } from "../components";
-import { useAppSelector } from "../store";
+import { IntervalSelector } from "../../components";
+import { useAppSelector } from "../../store";
 import { useEffect, useState } from "react";
-import type { Interval } from "../api/Api";
+import type { Interval } from "../../api/Api";
 import PeopleForInterval from "./PeopleForInterval";
 
 export default function People() {

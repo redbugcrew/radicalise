@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { type Interval, type IntervalInvolvementData } from "../api/Api";
-import { useAppSelector } from "../store";
+import { type Interval, type IntervalInvolvementData } from "../../api/Api";
+import { useAppSelector } from "../../store";
 import PeopleByInvolvementStatus from "./PeopleByInvolvementStatus";
-import type { InvolvementsState } from "../store/involvements";
-import { getApi } from "../api";
+import type { InvolvementsState } from "../../store/involvements";
+import { getApi } from "../../api";
 
 interface PeopleForIntervalProps {
   interval: Interval;

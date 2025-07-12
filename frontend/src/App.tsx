@@ -1,4 +1,4 @@
-import { Layout } from "./pages";
+import { EditPerson, Layout } from "./pages";
 import { Navigate, RouterProvider, createBrowserRouter, type LoaderFunction } from "react-router-dom";
 import { Provider as ReduxProvider } from "react-redux";
 import store, { loadInitialData, type AppStore } from "./store";
@@ -45,6 +45,10 @@ const router = createBrowserRouter([
       {
         path: "people/new",
         element: <NewPerson />,
+      },
+      {
+        path: "people/:personId/edit",
+        element: <EditPerson />,
       },
       {
         path: "people/:personId",

@@ -1,10 +1,10 @@
 import { ActionIcon, Container, Group, Stack, Title, Text, Card } from "@mantine/core";
-import { useAppSelector } from "../store";
-import { Anchor } from "../components";
+import { useAppSelector } from "../../store";
+import { Anchor } from "../../components";
 import { IconUserEdit } from "@tabler/icons-react";
 import { useParams } from "react-router-dom";
-import type { CapacityPlanning } from "../api/Api";
-import CapacityScoreIcon from "../components/CapacityScoreIcon";
+import type { CapacityPlanning } from "../../api/Api";
+import CapacityScoreIcon from "../../components/CapacityScoreIcon";
 
 function CapacityQuestion({ question, answer }: { question: string; answer: string | null | undefined }) {
   if (!answer) return null;
@@ -19,7 +19,7 @@ function CapacityQuestion({ question, answer }: { question: string; answer: stri
   );
 }
 
-function CapacityPlanningSection({ capacity_planning, capacity_score }: { capacity_planning: CapacityPlanning; capacity_score: number | null }) {
+function CapacityPlanningSection({ capacity_planning, capacity_score }: { capacity_planning: CapacityPlanning; capacity_score: number | null | undefined }) {
   return (
     <Card>
       <Group justify="space-between" mb="md">
@@ -44,7 +44,7 @@ export default function Person() {
   const person = useAppSelector((state) => state.people[personIdNum || -1]);
   const collective_involvement = useAppSelector((state) => state.me?.current_interval?.collective_involvement || null);
 
-  const canEdit = meId === person.id && false;
+  const canEdit = meId === person.id;
 
   return (
     <Container>
@@ -52,8 +52,8 @@ export default function Person() {
         <Group justify="space-between">
           <Title order={1}>{person.display_name}</Title>
           {canEdit && (
-            <Anchor href="new">
-              <ActionIcon variant="filled" aria-label="Add Person" size="lg">
+            <Anchor href="edit">
+              <ActionIcon variant="filled" aria-label="Edit Person" size="lg">
                 <IconUserEdit style={{ width: "70%", height: "70%" }} stroke={2} />
               </ActionIcon>
             </Anchor>

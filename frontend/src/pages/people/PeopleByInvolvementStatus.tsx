@@ -1,13 +1,13 @@
 import { Tabs } from "@mantine/core";
-import { PeopleTable } from "../components";
-import { InvolvementStatus, type CollectiveInvolvement, type CrewInvolvement } from "../api/Api";
-import { useAppSelector } from "../store";
+import { PeopleTable } from "../../components";
+import { InvolvementStatus, type CollectiveInvolvement, type CrewInvolvement } from "../../api/Api";
+import { useAppSelector } from "../../store";
 import { capitalCase } from "change-case";
 import { useEffect, useState } from "react";
-import type { PeopleState } from "../store/people";
-import type { PeopleTableRow } from "../components/PeopleTable/PeopleTable";
-import type { CrewsState } from "../store/crews";
-import { hashByPerson, hashByStatus, type HashById } from "../utilities/hashing";
+import type { PeopleState } from "../../store/people";
+import type { PeopleTableRow } from "../../components/PeopleTable/PeopleTable";
+import type { CrewsState } from "../../store/crews";
+import { hashByPerson, hashByStatus, type HashById } from "../../utilities/hashing";
 
 function peopleForInvolvements(involvements: CollectiveInvolvement[], allCrewInvolvements: HashById<CrewInvolvement>, allPeople: PeopleState, allCrews: CrewsState): PeopleTableRow[] {
   return involvements.map((involvement) => {
