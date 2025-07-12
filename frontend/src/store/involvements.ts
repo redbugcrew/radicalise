@@ -64,36 +64,33 @@ const involvementsSlice = createSlice({
   } as InvolvementsState,
   reducers: {
     involvementsLoaded: (_state: InvolvementsState, action: PayloadAction<InvolvementsState>) => action.payload,
-  },
-  extraReducers: (builder) => {
-    builder.addMatcher(
-      (action): action is PayloadAction<PersonIntervalInvolvementData> => action.type === "me/myIntervalDataChanged",
-      (state, { payload }) => {
-        if (!state || !payload) return state;
+    intervalDataChanged: (state: InvolvementsState, action: PayloadAction<PersonIntervalInvolvementData>) => {
+      let payload = action.payload;
 
-        const detailedInvolvement = payload.collective_involvement;
-        if (!detailedInvolvement) return state;
-        const involvement = removeInvolvementDetails(detailedInvolvement);
-        const person_id = involvement.person_id;
+      if (!state || !payload) return state;
 
-        const interval_keys: (keyof InvolvementsState)[] = ["current_interval", "next_interval"];
+      const detailedInvolvement = payload.collective_involvement;
+      if (!detailedInvolvement) return state;
+      const involvement = removeInvolvementDetails(detailedInvolvement);
+      const person_id = involvement.person_id;
 
-        interval_keys.forEach((key) => {
-          if (state && state[key] && state[key].interval_id === payload.interval_id) {
-            state[key].collective_involvements = upsertCollectiveInvolvement(state[key].collective_involvements, involvement);
-            state[key].crew_involvements = updateCrewInvolvementForPerson(state[key].crew_involvements, forPerson(payload.crew_involvements, person_id), person_id);
-          }
-        });
+      const interval_keys: (keyof InvolvementsState)[] = ["current_interval", "next_interval"];
 
-        return state;
-      }
-    );
+      interval_keys.forEach((key) => {
+        if (state && state[key] && state[key].interval_id === payload.interval_id) {
+          state[key].collective_involvements = upsertCollectiveInvolvement(state[key].collective_involvements, involvement);
+          state[key].crew_involvements = updateCrewInvolvementForPerson(state[key].crew_involvements, forPerson(payload.crew_involvements, person_id), person_id);
+        }
+      });
+
+      return state;
+    },
   },
 });
 
 // `createSlice` automatically generated action creators with these names.
 // export them as named exports from this "slice" file
-export const { involvementsLoaded } = involvementsSlice.actions;
+export const { involvementsLoaded, intervalDataChanged } = involvementsSlice.actions;
 
 // Export the slice reducer as the default export
 export default involvementsSlice.reducer;

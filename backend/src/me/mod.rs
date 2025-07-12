@@ -5,11 +5,11 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 use crate::{
     auth::auth_backend::AuthSession,
     me::{
-        events::MeEvent,
+        events::{MeEvent, strip_private_data},
         my_involvement::{MyParticipationInput, update_my_involvements},
         repo::MyInitialData,
     },
-    //realtime::RealtimeState,
+    realtime::RealtimeState,
     shared::{COLLECTIVE_ID, entities::CollectiveInvolvementWithDetails, events::AppEvent},
 };
 
@@ -95,7 +95,7 @@ async fn my_participation(
 async fn update_my_participation(
     Path(interval_id): Path<i64>,
     Extension(pool): Extension<SqlitePool>,
-    // Extension(realtime_state): Extension<RealtimeState>,
+    Extension(realtime_state): Extension<RealtimeState>,
     auth_session: AuthSession,
     axum::extract::Json(input): axum::extract::Json<MyParticipationInput>,
 ) -> impl IntoResponse {
@@ -113,11 +113,15 @@ async fn update_my_participation(
                 repo::find_interval_data_for_me(COLLECTIVE_ID, user.id, interval_id, &pool).await;
             match output_result {
                 Ok(interval_data) => {
-                    let event = AppEvent::MeEvent(MeEvent::IntervalDataChanged(interval_data));
-                    // realtime_state
-                    //     .broadcast_app_event_for_user(user.id.clone(), event.clone())
-                    //     .await;
-                    return (StatusCode::OK, Json(vec![event])).into_response();
+                    let public_interval_data = strip_private_data(&interval_data);
+                    let public_event =
+                        AppEvent::MeEvent(MeEvent::IntervalDataChanged(public_interval_data));
+                    realtime_state
+                        .broadcast_app_event_for_user(user.id.clone(), public_event.clone())
+                        .await;
+
+                    let my_event = AppEvent::MeEvent(MeEvent::IntervalDataChanged(interval_data));
+                    return (StatusCode::OK, Json(vec![my_event])).into_response();
                 }
                 Err(_) => return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
             }

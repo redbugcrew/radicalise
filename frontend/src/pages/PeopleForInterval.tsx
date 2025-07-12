@@ -12,8 +12,13 @@ interface PeopleForIntervalProps {
 export default function PeopleForInterval({ interval }: PeopleForIntervalProps) {
   const currentInterval = useAppSelector((state) => state.intervals.currentInterval);
   const involvementState: InvolvementsState = useAppSelector((state) => state.involvements);
+  const [cacheKey, setCacheKey] = useState<number>(0);
 
   const [involvements, setInvolvements] = useState<IntervalInvolvementData | null>(null);
+
+  const incrementCacheKey = () => {
+    setCacheKey((prevKey) => prevKey + 1);
+  };
 
   useEffect(() => {
     if (involvementState.current_interval?.interval_id === interval.id) {
@@ -33,7 +38,8 @@ export default function PeopleForInterval({ interval }: PeopleForIntervalProps) 
           setInvolvements(null);
         });
     }
+    incrementCacheKey();
   }, [interval.id, currentInterval, involvementState]);
 
-  return involvements && <PeopleByInvolvementStatus key={interval.id} involvements={involvements.collective_involvements} crewEnrolments={involvements.crew_involvements} tableKey={interval.id} />;
+  return involvements && <PeopleByInvolvementStatus involvements={involvements.collective_involvements} crewEnrolments={involvements.crew_involvements} tableKey={`${interval.id}-${cacheKey}`} />;
 }

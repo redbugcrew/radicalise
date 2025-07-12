@@ -3,7 +3,7 @@ import { PeopleTable } from "../components";
 import { InvolvementStatus, type CollectiveInvolvement, type CrewInvolvement } from "../api/Api";
 import { useAppSelector } from "../store";
 import { capitalCase } from "change-case";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { PeopleState } from "../store/people";
 import type { PeopleTableRow } from "../components/PeopleTable/PeopleTable";
 import type { CrewsState } from "../store/crews";
@@ -39,6 +39,10 @@ export default function PeopleByInvolvementStatus({ involvements, crewEnrolments
     setActiveState(InvolvementStatus[value as keyof typeof InvolvementStatus]);
   };
 
+  useEffect(() => {
+    console.log("involvements have changed to: ", involvements);
+  }, [involvements]);
+
   const hashedInvolvements = hashByStatus(involvements);
   const hashedCrewEnrolments = hashByPerson(crewEnrolments);
 
@@ -56,7 +60,7 @@ export default function PeopleByInvolvementStatus({ involvements, crewEnrolments
       </Tabs.List>
 
       {states.map((state) => (
-        <Tabs.Panel value={state} key={state} pt="md">
+        <Tabs.Panel value={state} key={`${state}-${tableKey}`} pt="md">
           <PeopleTable key={tableKey} people={peopleForInvolvements(hashedInvolvements.get(state) || [], hashedCrewEnrolments, allPeople, allCrews)} />
         </Tabs.Panel>
       ))}

@@ -3,9 +3,9 @@ import { configureStore } from "@reduxjs/toolkit";
 import collectiveReducer, { collectiveLoaded, collectiveUpdated } from "./collective";
 import peopleReducer, { peopleLoaded } from "./people";
 import intervalsReducer, { intervalsLoaded, intervalCreated } from "./intervals";
-import involvementsReducer, { involvementsLoaded } from "./involvements";
+import involvementsReducer, { involvementsLoaded, intervalDataChanged } from "./involvements";
 import crewsReducer, { crewsLoaded, crewUpdated } from "./crews";
-import meReducer, { meLoaded, myIntervalDataChanged } from "./me";
+import meReducer, { meLoaded } from "./me";
 import { getApi } from "../api";
 import { redirect } from "react-router-dom";
 import type { AppEvent, CollectiveEvent, CrewsEvent, IntervalsEvent, MeEvent } from "../api/Api";
@@ -88,28 +88,24 @@ export async function loadInitialData(store: AppStore) {
 }
 
 export async function handleMeEvent(event: MeEvent) {
-  console.log("Handling MeEvent:", event);
   if (event.IntervalDataChanged) {
-    store.dispatch(myIntervalDataChanged(event.IntervalDataChanged));
+    store.dispatch(intervalDataChanged(event.IntervalDataChanged));
   }
 }
 
 export async function handleIntervalsEvent(event: IntervalsEvent) {
-  console.log("Handling IntervalsEvent:", event);
   if (event.IntervalCreated) {
     store.dispatch(intervalCreated(event.IntervalCreated));
   }
 }
 
 export async function handleCrewsEvent(event: CrewsEvent) {
-  console.log("Handling CrewsEvent:", event);
   if (event.CrewUpdated) {
     store.dispatch(crewUpdated(event.CrewUpdated));
   }
 }
 
 export async function handleCollectiveEvent(event: CollectiveEvent) {
-  console.log("Handling CollectiveEvent:", event);
   if (event.CollectiveUpdated) {
     store.dispatch(collectiveUpdated(event.CollectiveUpdated));
   }
