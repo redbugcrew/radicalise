@@ -4,11 +4,11 @@
   padding-right: var(--mantine-spacing-md);
 }
 
-.PersonBadge.highlighted {
+.highlighted {
   border: 2px solid var(--mantine-color-blue-7);
 }
 
-.PersonBadge.me {
+.me {
   background-color: var(--mantine-color-dark-3);
   color: var(--mantine-color-dark-9);
 }
