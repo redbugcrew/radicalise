@@ -69,6 +69,7 @@ export interface CollectiveInvolvement {
   collective_id: number;
   /** @format int64 */
   id: number;
+  intention_context?: string | null;
   /** @format int64 */
   interval_id: number;
   opt_out_planned_return_date?: string | null;
@@ -176,6 +177,7 @@ export interface MyParticipationInput {
   collective_id: number;
   crew_involvements?: any[] | null;
   focus?: string | null;
+  intention_context?: string | null;
   opt_out_planned_return_date?: string | null;
   opt_out_type?: null | OptOutType;
   participation_intention?: null | ParticipationIntention;
@@ -386,7 +388,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 0.8.2
+ * @version 0.8.3
  * @license
  */
 export class Api<

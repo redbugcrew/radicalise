@@ -19,6 +19,7 @@ pub struct CollectiveInvolvementRecord {
     pub participation_intention: Option<ParticipationIntention>,
     pub opt_out_type: Option<OptOutType>,
     pub opt_out_planned_return_date: Option<String>,
+    pub intention_context: Option<String>,
 }
 
 impl From<CollectiveInvolvementRecord> for CollectiveInvolvement {
@@ -39,6 +40,7 @@ impl From<CollectiveInvolvementRecord> for CollectiveInvolvement {
             participation_intention: record.participation_intention,
             opt_out_type: record.opt_out_type,
             opt_out_planned_return_date: record.opt_out_planned_return_date,
+            intention_context: record.intention_context,
         }
     }
 }
@@ -68,6 +70,7 @@ impl From<CollectiveInvolvement> for CollectiveInvolvementRecord {
             participation_intention: involvement.participation_intention,
             opt_out_type: involvement.opt_out_type,
             opt_out_planned_return_date: involvement.opt_out_planned_return_date,
+            intention_context: involvement.intention_context,
         }
     }
 }
@@ -84,7 +87,8 @@ pub async fn find_collective_involvement(
         status as \"status: InvolvementStatus\", private_capacity_planning,
         wellbeing, focus, capacity_score, capacity,
         participation_intention as \"participation_intention: ParticipationIntention\",
-        opt_out_type as \"opt_out_type: OptOutType\", opt_out_planned_return_date
+        opt_out_type as \"opt_out_type: OptOutType\", opt_out_planned_return_date,
+        intention_context
         FROM collective_involvements
         WHERE
             collective_id = ? AND
@@ -111,7 +115,8 @@ pub async fn find_all_collective_involvements(
         status as \"status: InvolvementStatus\", private_capacity_planning,
         wellbeing, focus, capacity_score, capacity,
         participation_intention as \"participation_intention: ParticipationIntention\",
-        opt_out_type as \"opt_out_type: OptOutType\", opt_out_planned_return_date
+        opt_out_type as \"opt_out_type: OptOutType\", opt_out_planned_return_date,
+        intention_context
         FROM collective_involvements
         WHERE
             collective_id = ? AND
@@ -130,8 +135,9 @@ pub async fn upsert_collective_involvement(
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
     let result = sqlx::query!(
-        "INSERT INTO collective_involvements (person_id, collective_id, interval_id, status, private_capacity_planning, wellbeing, focus, capacity_score, capacity, participation_intention, opt_out_type, opt_out_planned_return_date)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        "INSERT INTO collective_involvements (person_id, collective_id, interval_id, status, private_capacity_planning, wellbeing, focus, capacity_score, capacity, participation_intention, opt_out_type, opt_out_planned_return_date,
+        intention_context)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(person_id, collective_id, interval_id) DO UPDATE SET
             status = excluded.status,
             private_capacity_planning = excluded.private_capacity_planning,
@@ -141,7 +147,8 @@ pub async fn upsert_collective_involvement(
             capacity = excluded.capacity,
             participation_intention = excluded.participation_intention,
             opt_out_type = excluded.opt_out_type,
-            opt_out_planned_return_date = excluded.opt_out_planned_return_date",
+            opt_out_planned_return_date = excluded.opt_out_planned_return_date,
+            intention_context = excluded.intention_context",
         involvement.person_id,
         involvement.collective_id,
         involvement.interval_id,
@@ -153,7 +160,8 @@ pub async fn upsert_collective_involvement(
         involvement.capacity,
         involvement.participation_intention,
         involvement.opt_out_type,
-        involvement.opt_out_planned_return_date
+        involvement.opt_out_planned_return_date,
+        involvement.intention_context
     )
     .execute(pool)
     .await?;

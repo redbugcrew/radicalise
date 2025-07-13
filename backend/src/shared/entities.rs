@@ -135,6 +135,7 @@ pub struct CollectiveInvolvement {
     pub participation_intention: Option<ParticipationIntention>,
     pub opt_out_type: Option<OptOutType>,
     pub opt_out_planned_return_date: Option<String>,
+    pub intention_context: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Debug)]

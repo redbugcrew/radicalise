@@ -23,6 +23,7 @@ pub struct MyParticipationInput {
     pub opt_out_type: Option<OptOutType>,
     pub opt_out_planned_return_date: Option<String>,
     pub crew_involvements: Option<Vec<CrewInvolvement>>,
+    pub intention_context: Option<String>,
 }
 
 pub async fn update_my_involvements(
@@ -61,6 +62,7 @@ pub async fn update_my_involvements(
             participation_intention: input.participation_intention,
             opt_out_type: input.opt_out_type,
             opt_out_planned_return_date: input.opt_out_planned_return_date,
+            intention_context: input.intention_context,
         },
         pool,
     )

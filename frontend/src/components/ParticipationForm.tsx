@@ -21,6 +21,7 @@ export interface MyParticipationFormData {
   opt_out_type: OptOutType | null;
   opt_out_planned_return_date: string | null;
   crew_involvements: CrewInvolvement[];
+  intention_context: string | null;
 }
 
 type StepProps = {
@@ -109,16 +110,19 @@ function CapacityStep({ form, readOnly }: StepProps) {
 type MinimumParticipationStepProps = StepProps & {};
 
 function MinimumParticipationStep({ form, readOnly }: MinimumParticipationStepProps) {
-  const [showOptOut, setShowOptOut] = useState(form.values.participation_intention === "OptOut");
-  const [showHiatus, setShowHiatus] = useState(form.values.opt_out_type === "Hiatus");
+  const [intention, setIntention] = useState<ParticipationIntention | null>(form.values.participation_intention);
+  const [optOutType, setOptOutType] = useState<OptOutType | null>(form.values.opt_out_type);
 
   form.watch("participation_intention", ({ value }) => {
-    setShowOptOut(value === "OptOut");
+    setIntention(value);
   });
 
   form.watch("opt_out_type", ({ value }) => {
-    setShowHiatus(value === "Hiatus");
+    setOptOutType(value);
   });
+
+  const showOptOut = intention === "OptOut";
+  const showHiatus = showOptOut && optOutType === "Hiatus";
 
   return (
     <Stack mt="lg" gap="md">
@@ -149,13 +153,25 @@ function MinimumParticipationStep({ form, readOnly }: MinimumParticipationStepPr
             {...form.getInputProps("opt_out_type")}
           />
           {showHiatus && (
-            <DatePickerInput
+            <>
+              <DatePickerInput
+                disabled={readOnly}
+                label="Planned return date"
+                description="We'll give you a reminder one week before hand (if we've coded that bit)"
+                placeholder="Pick date"
+                key={form.key("opt_out_planned_return_date")}
+                {...form.getInputProps("opt_out_planned_return_date")}
+              />
+            </>
+          )}
+          {optOutType !== null && (
+            <Textarea
               disabled={readOnly}
-              label="Planned return date"
-              description="We'll give you a reminder one week before hand (if we've coded that bit)"
-              placeholder="Pick date"
-              key={form.key("opt_out_planned_return_date")}
-              {...form.getInputProps("opt_out_planned_return_date")}
+              label={optOutType === "Hiatus" ? "Hiatus context" : "Exit context"}
+              rows={4}
+              description={optOutType === "Hiatus" ? "Any context you would like to share about why you are taking a hiatus." : "Any context you would like to share about why you are exiting the collective."}
+              key={form.key("intention_context")}
+              {...form.getInputProps("intention_context")}
             />
           )}
         </>
@@ -235,6 +251,7 @@ export default function ParticipationForm({ personId, interval, previousInterval
       opt_out_type: involvement?.opt_out_type ?? null,
       opt_out_planned_return_date: involvement?.opt_out_planned_return_date ?? null,
       crew_involvements: forPerson(crewInvolvements, personId),
+      intention_context: involvement?.intention_context ?? null,
     },
 
     validate: (values) => {
