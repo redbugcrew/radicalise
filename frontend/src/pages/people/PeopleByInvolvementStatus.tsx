@@ -19,6 +19,7 @@ function peopleForInvolvements(involvements: CollectiveInvolvement[], allCrewInv
       name: person.display_name,
       avatar_id: person.avatar_id ?? person.id,
       capacity_score: involvement.capacity_score ?? null,
+      dimmed: false,
       crews: crewInvolvements.map((crewInvolvement) => allCrews[crewInvolvement.crew_id] || null).filter((crew) => crew),
     };
   });

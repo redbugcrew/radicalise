@@ -20,6 +20,7 @@ export interface PeopleTableRow {
   name: string;
   avatar_id: number;
   capacity_score: number | null;
+  dimmed?: boolean;
   crews: Crew[];
 }
 
@@ -127,7 +128,7 @@ export default function PeopleTable({ people }: PeopleTableProps) {
         <Anchor href={`/people/${item.id}`}>
           <Group gap="sm" wrap="nowrap">
             <Avatar avatarId={item.avatar_id} />
-            <Text fz="sm" fw={500}>
+            <Text fz="sm" fw={500} c={item.dimmed ? "dimmed" : "default"}>
               {item.name}
             </Text>
 
