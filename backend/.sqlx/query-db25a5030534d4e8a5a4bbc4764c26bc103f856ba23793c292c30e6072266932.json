@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT id, person_id, collective_id, interval_id,\n        status as \"status: InvolvementStatus\", private_capacity_planning,\n        wellbeing, focus, capacity_score, capacity,\n        participation_intention as \"participation_intention: ParticipationIntention\",\n        opt_out_type as \"opt_out_type: OptOutType\", opt_out_planned_return_date\n        FROM collective_involvements\n        WHERE\n            collective_id = ? AND\n            interval_id = ?",
+  "query": "SELECT id, person_id, collective_id, interval_id,\n        status as \"status: InvolvementStatus\", private_capacity_planning,\n        wellbeing, focus, capacity_score, capacity,\n        participation_intention as \"participation_intention: ParticipationIntention\",\n        opt_out_type as \"opt_out_type: OptOutType\", opt_out_planned_return_date,\n        intention_context\n        FROM collective_involvements\n        WHERE\n            collective_id = ? AND\n            interval_id = ?",
   "describe": {
     "columns": [
       {
@@ -67,6 +67,11 @@
         "name": "opt_out_planned_return_date",
         "ordinal": 12,
         "type_info": "Text"
+      },
+      {
+        "name": "intention_context",
+        "ordinal": 13,
+        "type_info": "Text"
       }
     ],
     "parameters": {
@@ -85,8 +90,9 @@
       true,
       true,
       true,
+      true,
       true
     ]
   },
-  "hash": "34298f9e05e45764472203d48333c463b1ca2c39da8233ebe5d927ae1a3e7158"
+  "hash": "db25a5030534d4e8a5a4bbc4764c26bc103f856ba23793c292c30e6072266932"
 }
