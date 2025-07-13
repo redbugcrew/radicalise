@@ -32,7 +32,13 @@ interface PeopleByInvolvementStatusProps {
 }
 
 export default function PeopleByInvolvementStatus({ involvements, crewEnrolments, tableKey }: PeopleByInvolvementStatusProps) {
-  const states = [InvolvementStatus.Participating, InvolvementStatus.OnHiatus];
+  const states = [InvolvementStatus.Participating];
+  involvements.forEach((involvement) => {
+    if (states.indexOf(involvement.status) === -1) {
+      states.push(involvement.status);
+    }
+  });
+
   const [activeState, setActiveState] = useState<InvolvementStatus>(states[0]);
 
   const setActiveTab = (value: string | null) => {

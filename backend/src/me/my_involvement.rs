@@ -26,18 +26,30 @@ pub struct MyParticipationInput {
     pub intention_context: Option<String>,
 }
 
+pub fn calculate_status(
+    participation_intention: Option<ParticipationIntention>,
+    opt_out_type: Option<OptOutType>,
+) -> InvolvementStatus {
+    match participation_intention {
+        Some(ParticipationIntention::OptIn) => InvolvementStatus::Participating,
+        Some(ParticipationIntention::OptOut) => match opt_out_type {
+            Some(OptOutType::Hiatus) => InvolvementStatus::OnHiatus,
+            Some(OptOutType::Exit) => InvolvementStatus::Exiting,
+            None => InvolvementStatus::OnHiatus, // Default to OnHiatus if no opt-out type is set
+        },
+        None => InvolvementStatus::Participating, // We might revisit this later
+    }
+}
+
 pub async fn update_my_involvements(
     person_id: i64,
     interval_id: i64,
     input: MyParticipationInput,
     pool: &sqlx::SqlitePool,
 ) -> Result<(), sqlx::Error> {
-    let status: InvolvementStatus = input.participation_intention.clone().map_or(
-        InvolvementStatus::Participating,
-        |intention| match intention {
-            ParticipationIntention::OptIn => InvolvementStatus::Participating,
-            ParticipationIntention::OptOut => InvolvementStatus::OnHiatus,
-        },
+    let status: InvolvementStatus = calculate_status(
+        input.participation_intention.clone(),
+        input.opt_out_type.clone(),
     );
 
     let interval = find_interval(interval_id, &pool).await?;
