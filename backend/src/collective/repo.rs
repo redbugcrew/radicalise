@@ -3,13 +3,14 @@ use sqlx::SqlitePool;
 use utoipa::ToSchema;
 
 use crate::{
+    collective::involvements_repo::find_all_collective_involvements,
     crews::repo::find_all_crews_with_links,
     intervals::repo::{find_current_interval, find_next_interval},
     shared::{
         COLLECTIVE_ID,
         entities::{
-            Collective, CollectiveInvolvement, CrewInvolvement, CrewWithLinks, Interval,
-            InvolvementStatus, Person,
+            Collective, CollectiveInvolvementWithDetails, CrewInvolvement, CrewWithLinks, Interval,
+            Person,
         },
         links_repo::{find_all_links_for_owner, update_links_for_owner},
     },
@@ -18,7 +19,7 @@ use crate::{
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct IntervalInvolvementData {
     pub interval_id: i64,
-    pub collective_involvements: Vec<CollectiveInvolvement>,
+    pub collective_involvements: Vec<CollectiveInvolvementWithDetails>,
     pub crew_involvements: Vec<CrewInvolvement>,
 }
 
@@ -72,26 +73,6 @@ pub async fn find_collective_with_links(
     })
 }
 
-pub async fn find_all_collective_involvements(
-    interval_id: i64,
-    pool: &SqlitePool,
-) -> Result<Vec<CollectiveInvolvement>, sqlx::Error> {
-    let collective_id = COLLECTIVE_ID;
-
-    sqlx::query_as!(
-        CollectiveInvolvement,
-        "SELECT id, person_id, collective_id, interval_id, status as \"status: InvolvementStatus\", capacity_score
-        FROM collective_involvements
-        WHERE
-          interval_id = ? AND
-          collective_id = ?",
-        interval_id,
-        collective_id
-    )
-    .fetch_all(pool)
-    .await
-}
-
 pub async fn find_all_crew_involvements(
     interval_id: i64,
     pool: &SqlitePool,
@@ -112,7 +93,8 @@ async fn find_interval_involvement_data(
     interval_id: i64,
     pool: &SqlitePool,
 ) -> Result<IntervalInvolvementData, sqlx::Error> {
-    let collective_involvements = find_all_collective_involvements(interval_id, pool).await?;
+    let collective_involvements =
+        find_all_collective_involvements(COLLECTIVE_ID, interval_id, pool).await?;
     let crew_involvements = find_all_crew_involvements(interval_id, pool).await?;
 
     Ok(IntervalInvolvementData {

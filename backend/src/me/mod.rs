@@ -4,6 +4,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     auth::auth_backend::AuthSession,
+    collective::involvements_repo::find_detailed_involvement,
     me::{
         events::{MeEvent, strip_private_data},
         my_involvement::{MyParticipationInput, update_my_involvements},
@@ -65,7 +66,7 @@ async fn my_participation(
     match auth_session.user {
         Some(user) => {
             let result =
-                repo::find_detailed_involvement(COLLECTIVE_ID, user.id, interval_id, &pool).await;
+                find_detailed_involvement(COLLECTIVE_ID, user.id, interval_id, &pool).await;
 
             match result {
                 Ok(Some(data)) => (StatusCode::OK, Json(data)).into_response(),

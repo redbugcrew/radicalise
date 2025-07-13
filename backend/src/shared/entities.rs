@@ -115,17 +115,7 @@ pub struct CrewInvolvement {
     pub volunteered_convenor: bool,
 }
 
-#[derive(Serialize, Deserialize, ToSchema)]
-pub struct CollectiveInvolvement {
-    pub id: i64,
-    pub person_id: i64,
-    pub collective_id: i64,
-    pub interval_id: i64,
-    pub status: InvolvementStatus,
-    pub capacity_score: Option<i64>,
-}
-
-#[derive(Serialize, Deserialize, ToSchema, Clone, Debug)]
+#[derive(Serialize, Deserialize, ToSchema, Clone, Debug, sqlx::Type, sqlx::Decode)]
 pub struct CapacityPlanning {
     pub wellbeing: Option<String>,
     pub focus: Option<String>,

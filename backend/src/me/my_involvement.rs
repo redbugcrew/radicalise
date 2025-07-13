@@ -2,11 +2,14 @@ use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 use crate::{
+    collective::involvements_repo::{
+        CollectiveInvolvementWithDetailsRecord, upsert_detailed_involvement,
+    },
     crews::repo::{
         find_crew_involvements, intervals_participated_since_last_convened, set_crew_convenor,
     },
     intervals::repo::{IntervalType, find_interval, get_interval_type},
-    me::repo::{self, CollectiveInvolvementWithDetailsRecord},
+    me::repo::{self},
     shared::entities::{CrewInvolvement, InvolvementStatus, OptOutType, ParticipationIntention},
 };
 
@@ -45,7 +48,7 @@ pub async fn update_my_involvements(
         return Err(past_interval_error());
     }
 
-    repo::upsert_detailed_involvement(
+    upsert_detailed_involvement(
         CollectiveInvolvementWithDetailsRecord {
             id: -1, // ID will be auto-generated
             person_id: person_id,

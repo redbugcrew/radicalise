@@ -6,6 +6,7 @@ use crate::{
     auth::auth_backend::AuthSession,
     collective::{
         events::CollectiveEvent,
+        involvements_repo::find_all_collective_involvements,
         repo::{InitialData, IntervalInvolvementData},
     },
     realtime::RealtimeState,
@@ -13,6 +14,7 @@ use crate::{
 };
 
 pub mod events;
+pub mod involvements_repo;
 mod repo;
 
 pub fn router() -> OpenApiRouter {
@@ -54,7 +56,7 @@ async fn get_involvements(
     Extension(pool): Extension<SqlitePool>,
 ) -> impl IntoResponse {
     let collective_involvements_result =
-        repo::find_all_collective_involvements(interval_id, &pool).await;
+        find_all_collective_involvements(COLLECTIVE_ID, interval_id, &pool).await;
     let crew_involvements_result = repo::find_all_crew_involvements(interval_id, &pool).await;
 
     if collective_involvements_result.is_err() || crew_involvements_result.is_err() {
