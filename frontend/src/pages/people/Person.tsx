@@ -3,8 +3,9 @@ import { useAppSelector } from "../../store";
 import { Anchor } from "../../components";
 import { IconUserEdit } from "@tabler/icons-react";
 import { useParams } from "react-router-dom";
-import type { CapacityPlanning } from "../../api/Api";
+import type { CapacityPlanning, CollectiveInvolvement, Person } from "../../api/Api";
 import CapacityScoreIcon from "../../components/CapacityScoreIcon";
+import DateText from "../../components/DateText";
 
 function CapacityQuestion({ question, answer }: { question: string; answer: string | null | undefined }) {
   if (!answer) return null;
@@ -21,7 +22,7 @@ function CapacityQuestion({ question, answer }: { question: string; answer: stri
 
 function CapacityPlanningSection({ capacity_planning, capacity_score }: { capacity_planning: CapacityPlanning; capacity_score: number | null | undefined }) {
   return (
-    <Card>
+    <Card withBorder>
       <Group justify="space-between" mb="md">
         <Title order={2} size="h3">
           My capacity
@@ -33,6 +34,35 @@ function CapacityPlanningSection({ capacity_planning, capacity_score }: { capaci
         <CapacityQuestion question="Focus" answer={capacity_planning.focus} />
         <CapacityQuestion question="Capacity" answer={capacity_planning.capacity} />
       </Stack>
+    </Card>
+  );
+}
+
+function ExitingInfo({ person, collective_involvement }: { person: Person; collective_involvement: CollectiveInvolvement }) {
+  return (
+    <Card withBorder style={{ borderColor: "var(--mantine-color-red-6)" }}>
+      <Title order={2} size="h3" mb="md">
+        {person.display_name} is exiting the collective.
+      </Title>
+      <Text size="md" c="dimmed" style={{ whiteSpace: "pre-line" }}>
+        {collective_involvement.intention_context || "No exit reason provided."}
+      </Text>
+    </Card>
+  );
+}
+
+function HiatusInfo({ person, collective_involvement }: { person: Person; collective_involvement: CollectiveInvolvement }) {
+  return (
+    <Card withBorder style={{ borderColor: "var(--mantine-color-blue-5)" }}>
+      <Title order={2} size="h3">
+        {person.display_name} is on hiatus from the collective.
+      </Title>
+      <Text>
+        Until <DateText date={collective_involvement.opt_out_planned_return_date} />
+      </Text>
+      <Text size="md" c="dimmed" style={{ whiteSpace: "pre-line" }} mt={"md"}>
+        {collective_involvement.intention_context || "No exit reason provided."}
+      </Text>
     </Card>
   );
 }
@@ -59,11 +89,14 @@ export default function Person() {
             </Anchor>
           )}
         </Group>
+        {collective_involvement?.status == "Exiting" && <ExitingInfo person={person} collective_involvement={collective_involvement} />}
+        {collective_involvement?.status == "OnHiatus" && <HiatusInfo person={person} collective_involvement={collective_involvement} />}
         {person.about && (
           <Text size="md" style={{ whiteSpace: "pre-line" }}>
             {person.about}
           </Text>
         )}
+
         {!collective_involvement?.private_capacity_planning && collective_involvement?.capacity_planning && (
           <CapacityPlanningSection capacity_planning={collective_involvement.capacity_planning} capacity_score={collective_involvement.capacity_score} />
         )}

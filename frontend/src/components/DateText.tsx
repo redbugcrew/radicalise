@@ -3,7 +3,7 @@ import { dateStringToDateTime } from "../utilities/date";
 import { format, isThisYear } from "date-fns";
 
 interface DateTextProps {
-  date: Date | null | string;
+  date: Date | null | string | undefined;
   formatString?: string;
 }
 
