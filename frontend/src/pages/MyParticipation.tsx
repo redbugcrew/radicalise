@@ -5,7 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import DateText from "../components/DateText";
 import { useEffect, useState } from "react";
 import { getApi } from "../api";
-import type { CollectiveInvolvementWithDetails, MyParticipationInput } from "../api/Api";
+import type { CollectiveInvolvement, MyParticipationInput } from "../api/Api";
 import { findPreviousInterval } from "../store/intervals";
 
 export default function MyParticipation() {
@@ -34,7 +34,7 @@ export default function MyParticipation() {
 
   const readOnly = intervalIdNumber < currentInterval.id;
 
-  const [involvement, setInvolvement] = useState<CollectiveInvolvementWithDetails | null>(null);
+  const [involvement, setInvolvement] = useState<CollectiveInvolvement | null>(null);
   useEffect(() => {
     api.api
       .myParticipation(interval.id)

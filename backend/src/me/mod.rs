@@ -4,14 +4,14 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     auth::auth_backend::AuthSession,
-    collective::involvements_repo::find_detailed_involvement,
+    collective::involvements_repo::find_collective_involvement,
     me::{
         events::{MeEvent, strip_private_data},
         my_involvement::{MyParticipationInput, update_my_involvements},
         repo::MyInitialData,
     },
     realtime::RealtimeState,
-    shared::{COLLECTIVE_ID, entities::CollectiveInvolvementWithDetails, events::AppEvent},
+    shared::{COLLECTIVE_ID, entities::CollectiveInvolvement, events::AppEvent},
 };
 
 pub mod events;
@@ -54,7 +54,7 @@ async fn get_my_state(
         ("interval_id" = i64, Path, description = "Interval ID")
     ),
     responses(
-        (status = 200, description = "Fetched my participation successfully", body = Option<CollectiveInvolvementWithDetails>),
+        (status = 200, description = "Fetched my participation successfully", body = Option<CollectiveInvolvement>),
         (status = NOT_FOUND, description = "Not found", body = ())
     ),
 )]
@@ -66,7 +66,7 @@ async fn my_participation(
     match auth_session.user {
         Some(user) => {
             let result =
-                find_detailed_involvement(COLLECTIVE_ID, user.id, interval_id, &pool).await;
+                find_collective_involvement(COLLECTIVE_ID, user.id, interval_id, &pool).await;
 
             match result {
                 Ok(Some(data)) => (StatusCode::OK, Json(data)).into_response(),

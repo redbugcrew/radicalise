@@ -1,15 +1,10 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { CollectiveInvolvement, CollectiveInvolvementWithDetails, InvolvementData, IntervalInvolvementData, CrewInvolvement, Person, PersonIntervalInvolvementData } from "../api/Api";
+import type { CollectiveInvolvement, InvolvementData, IntervalInvolvementData, CrewInvolvement, Person, PersonIntervalInvolvementData } from "../api/Api";
 import { type WritableDraft } from "immer";
 import type { PeopleObjectMap } from "./people";
 import { compareStrings } from "../utilities/comparison";
 
 export type InvolvementsState = InvolvementData;
-
-function removeInvolvementDetails(input: CollectiveInvolvementWithDetails): CollectiveInvolvement {
-  const { id, collective_id, interval_id, person_id, status } = input;
-  return { id, collective_id, interval_id, person_id, status };
-}
 
 function upsertCollectiveInvolvement(involvements: CollectiveInvolvement[], newInvolvement: CollectiveInvolvement): CollectiveInvolvement[] {
   const existingIndex = involvements.findIndex((inv) => inv.id === newInvolvement.id);
@@ -69,9 +64,8 @@ const involvementsSlice = createSlice({
 
       if (!state || !payload) return state;
 
-      const detailedInvolvement = payload.collective_involvement;
-      if (!detailedInvolvement) return state;
-      const involvement = removeInvolvementDetails(detailedInvolvement);
+      const involvement = payload.collective_involvement;
+      if (!involvement) return state;
       const person_id = involvement.person_id;
 
       const interval_keys: (keyof InvolvementsState)[] = ["current_interval", "next_interval"];

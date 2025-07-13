@@ -2,9 +2,7 @@ use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 use crate::{
-    collective::involvements_repo::{
-        CollectiveInvolvementWithDetailsRecord, upsert_detailed_involvement,
-    },
+    collective::involvements_repo::{CollectiveInvolvementRecord, upsert_collective_involvement},
     crews::repo::{
         find_crew_involvements, intervals_participated_since_last_convened, set_crew_convenor,
     },
@@ -48,8 +46,8 @@ pub async fn update_my_involvements(
         return Err(past_interval_error());
     }
 
-    upsert_detailed_involvement(
-        CollectiveInvolvementWithDetailsRecord {
+    upsert_collective_involvement(
+        CollectiveInvolvementRecord {
             id: -1, // ID will be auto-generated
             person_id: person_id,
             collective_id: input.collective_id,

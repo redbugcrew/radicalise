@@ -2,7 +2,7 @@ import { Stepper, Group, Button, Stack, Textarea, Select, Title, Text, type Sele
 import { DatePickerInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { useState } from "react";
-import type { CollectiveInvolvementWithDetails, CrewInvolvement, Interval, OptOutType, ParticipationIntention } from "../api/Api";
+import type { CollectiveInvolvement, CrewInvolvement, Interval, OptOutType, ParticipationIntention } from "../api/Api";
 import { IconCheck, IconLock } from "@tabler/icons-react";
 import { useAppSelector } from "../store";
 import { forPerson, getMatchingInvolvementInterval } from "../store/involvements";
@@ -205,7 +205,7 @@ function AdditionalParticipationStep({ form, readOnly, personId, intervalId, cre
 interface ParticipationFormProps {
   personId: number;
   readOnly?: boolean;
-  involvement?: CollectiveInvolvementWithDetails | null;
+  involvement?: CollectiveInvolvement | null;
   interval: Interval;
   previousIntervalId?: number | undefined;
   onSubmit: (data: MyParticipationFormData) => void;

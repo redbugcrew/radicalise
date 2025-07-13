@@ -9,8 +9,7 @@ use crate::{
     shared::{
         COLLECTIVE_ID,
         entities::{
-            Collective, CollectiveInvolvementWithDetails, CrewInvolvement, CrewWithLinks, Interval,
-            Person,
+            Collective, CollectiveInvolvement, CrewInvolvement, CrewWithLinks, Interval, Person,
         },
         links_repo::{find_all_links_for_owner, update_links_for_owner},
     },
@@ -19,7 +18,7 @@ use crate::{
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct IntervalInvolvementData {
     pub interval_id: i64,
-    pub collective_involvements: Vec<CollectiveInvolvementWithDetails>,
+    pub collective_involvements: Vec<CollectiveInvolvement>,
     pub crew_involvements: Vec<CrewInvolvement>,
 }
 

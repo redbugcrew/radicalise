@@ -3,16 +3,16 @@ use sqlx::{QueryBuilder, Sqlite, SqlitePool};
 use utoipa::ToSchema;
 
 use crate::{
-    collective::involvements_repo::find_detailed_involvement,
+    collective::involvements_repo::find_collective_involvement,
     intervals::repo::{find_current_interval, find_next_interval},
-    shared::entities::{CollectiveInvolvementWithDetails, CrewInvolvement},
+    shared::entities::{CollectiveInvolvement, CrewInvolvement},
 };
 
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
 pub struct PersonIntervalInvolvementData {
     pub interval_id: i64,
     pub person_id: i64,
-    pub collective_involvement: Option<CollectiveInvolvementWithDetails>,
+    pub collective_involvement: Option<CollectiveInvolvement>,
     pub crew_involvements: Vec<CrewInvolvement>,
 }
 
@@ -30,7 +30,7 @@ pub async fn find_interval_data_for_me(
     pool: &SqlitePool,
 ) -> Result<PersonIntervalInvolvementData, sqlx::Error> {
     let involvement =
-        find_detailed_involvement(collective_id, person_id, interval_id, pool).await?;
+        find_collective_involvement(collective_id, person_id, interval_id, pool).await?;
 
     let crew_involvements = find_my_crew_involvements(person_id, interval_id, pool).await?;
 

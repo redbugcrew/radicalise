@@ -1,11 +1,11 @@
 use sqlx::SqlitePool;
 
 use crate::shared::entities::{
-    CollectiveInvolvementWithDetails, InvolvementStatus, OptOutType, ParticipationIntention,
+    CollectiveInvolvement, InvolvementStatus, OptOutType, ParticipationIntention,
 };
 
 #[derive(Debug, Clone)]
-pub struct CollectiveInvolvementWithDetailsRecord {
+pub struct CollectiveInvolvementRecord {
     pub id: i64,
     pub person_id: i64,
     pub collective_id: i64,
@@ -21,9 +21,9 @@ pub struct CollectiveInvolvementWithDetailsRecord {
     pub opt_out_planned_return_date: Option<String>,
 }
 
-impl From<CollectiveInvolvementWithDetailsRecord> for CollectiveInvolvementWithDetails {
-    fn from(record: CollectiveInvolvementWithDetailsRecord) -> Self {
-        CollectiveInvolvementWithDetails {
+impl From<CollectiveInvolvementRecord> for CollectiveInvolvement {
+    fn from(record: CollectiveInvolvementRecord) -> Self {
+        CollectiveInvolvement {
             id: record.id,
             person_id: record.person_id,
             collective_id: record.collective_id,
@@ -43,9 +43,9 @@ impl From<CollectiveInvolvementWithDetailsRecord> for CollectiveInvolvementWithD
     }
 }
 
-impl From<CollectiveInvolvementWithDetails> for CollectiveInvolvementWithDetailsRecord {
-    fn from(involvement: CollectiveInvolvementWithDetails) -> Self {
-        CollectiveInvolvementWithDetailsRecord {
+impl From<CollectiveInvolvement> for CollectiveInvolvementRecord {
+    fn from(involvement: CollectiveInvolvement) -> Self {
+        CollectiveInvolvementRecord {
             id: involvement.id,
             person_id: involvement.person_id,
             collective_id: involvement.collective_id,
@@ -72,14 +72,14 @@ impl From<CollectiveInvolvementWithDetails> for CollectiveInvolvementWithDetails
     }
 }
 
-pub async fn find_detailed_involvement(
+pub async fn find_collective_involvement(
     collective_id: i64,
     person_id: i64,
     interval_id: i64,
     pool: &SqlitePool,
-) -> Result<Option<CollectiveInvolvementWithDetails>, sqlx::Error> {
-    let record: Option<CollectiveInvolvementWithDetailsRecord> = sqlx::query_as!(
-        CollectiveInvolvementWithDetailsRecord,
+) -> Result<Option<CollectiveInvolvement>, sqlx::Error> {
+    let record: Option<CollectiveInvolvementRecord> = sqlx::query_as!(
+        CollectiveInvolvementRecord,
         "SELECT id, person_id, collective_id, interval_id,
         status as \"status: InvolvementStatus\", private_capacity_planning,
         wellbeing, focus, capacity_score, capacity,
@@ -104,9 +104,9 @@ pub async fn find_all_collective_involvements(
     collective_id: i64,
     interval_id: i64,
     pool: &SqlitePool,
-) -> Result<Vec<CollectiveInvolvementWithDetails>, sqlx::Error> {
+) -> Result<Vec<CollectiveInvolvement>, sqlx::Error> {
     let records = sqlx::query_as!(
-        CollectiveInvolvementWithDetailsRecord,
+        CollectiveInvolvementRecord,
         "SELECT id, person_id, collective_id, interval_id,
         status as \"status: InvolvementStatus\", private_capacity_planning,
         wellbeing, focus, capacity_score, capacity,
@@ -125,8 +125,8 @@ pub async fn find_all_collective_involvements(
     Ok(records.into_iter().map(Into::into).collect())
 }
 
-pub async fn upsert_detailed_involvement(
-    involvement: CollectiveInvolvementWithDetailsRecord,
+pub async fn upsert_collective_involvement(
+    involvement: CollectiveInvolvementRecord,
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
     let result = sqlx::query!(

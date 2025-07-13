@@ -62,20 +62,6 @@ export type CollectiveEvent = {
 };
 
 export interface CollectiveInvolvement {
-  /** @format int64 */
-  capacity_score?: number | null;
-  /** @format int64 */
-  collective_id: number;
-  /** @format int64 */
-  id: number;
-  /** @format int64 */
-  interval_id: number;
-  /** @format int64 */
-  person_id: number;
-  status: InvolvementStatus;
-}
-
-export interface CollectiveInvolvementWithDetails {
   capacity_planning?: null | CapacityPlanning;
   /** @format int64 */
   capacity_score?: number | null;
@@ -211,7 +197,7 @@ export interface Person {
 }
 
 export interface PersonIntervalInvolvementData {
-  collective_involvement?: null | CollectiveInvolvementWithDetails;
+  collective_involvement?: null | CollectiveInvolvement;
   crew_involvements: CrewInvolvement[];
   /** @format int64 */
   interval_id: number;
@@ -400,7 +386,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 0.8.1
+ * @version 0.8.2
  * @license
  */
 export class Api<
@@ -574,7 +560,7 @@ export class Api<
      * @request GET:/api/me/participation/interval/{interval_id}
      */
     myParticipation: (intervalId: number, params: RequestParams = {}) =>
-      this.request<null | CollectiveInvolvementWithDetails, any>({
+      this.request<null | CollectiveInvolvement, any>({
         path: `/api/me/participation/interval/${intervalId}`,
         method: "GET",
         format: "json",
