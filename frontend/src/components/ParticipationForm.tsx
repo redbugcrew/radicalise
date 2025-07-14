@@ -1,9 +1,9 @@
-import { Stepper, Group, Button, Stack, Textarea, Select, Title, Text, type SelectProps, Switch, Flex } from "@mantine/core";
+import { Stepper, Group, Button, Stack, Textarea, Select, Title, Text, type SelectProps, Switch, Flex, Alert } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { useState } from "react";
 import type { CollectiveInvolvement, CrewInvolvement, Interval, OptOutType, ParticipationIntention } from "../api/Api";
-import { IconCheck, IconLock } from "@tabler/icons-react";
+import { IconCheck, IconLock, IconDoorExit } from "@tabler/icons-react";
 import { useAppSelector } from "../store";
 import { forPerson, getMatchingInvolvementInterval } from "../store/involvements";
 import { ComboTextArea, CrewParticipationsInput } from ".";
@@ -173,6 +173,16 @@ function MinimumParticipationStep({ form, readOnly }: MinimumParticipationStepPr
               key={form.key("intention_context")}
               {...form.getInputProps("intention_context")}
             />
+          )}
+          {optOutType === "Exit" && (
+            <Alert variant="light" color="blue" title="Exiting" icon={<IconDoorExit />}>
+              <Text>
+                This will move you into the exiting state, to be offboarded during this interval. No one is alerted at this stage, so don't hesitate to reach our to your buddy or to PAS crew if you have questions or need
+                faster action on offboarding.
+              </Text>
+
+              <Text mt="md">Once you exit, it's still possible to re-join. Just use the regular expression-of-interest pathway.</Text>
+            </Alert>
           )}
         </>
       )}
