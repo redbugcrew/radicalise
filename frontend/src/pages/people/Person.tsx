@@ -6,6 +6,7 @@ import { useParams } from "react-router-dom";
 import type { CapacityPlanning, CollectiveInvolvement, Person } from "../../api/Api";
 import CapacityScoreIcon from "../../components/CapacityScoreIcon";
 import DateText from "../../components/DateText";
+import { oneForPerson } from "../../store/involvements";
 
 function CapacityQuestion({ question, answer }: { question: string; answer: string | null | undefined }) {
   if (!answer) return null;
@@ -21,6 +22,9 @@ function CapacityQuestion({ question, answer }: { question: string; answer: stri
 }
 
 function CapacityPlanningSection({ capacity_planning, capacity_score }: { capacity_planning: CapacityPlanning; capacity_score: number | null | undefined }) {
+  if (!capacity_planning) return null;
+  if (!capacity_planning.wellbeing && !capacity_planning.focus && !capacity_planning.capacity) return null;
+
   return (
     <Card withBorder>
       <Group justify="space-between" mb="md">
@@ -72,7 +76,8 @@ export default function Person() {
   const personIdNum = personId ? parseInt(personId, 10) : undefined;
   const meId = useAppSelector((state) => state.me?.person_id);
   const person = useAppSelector((state) => state.people[personIdNum || -1]);
-  const collective_involvement = useAppSelector((state) => state.me?.current_interval?.collective_involvement || null);
+  const collective_involvements = useAppSelector((state) => state.involvements.current_interval?.collective_involvements);
+  const collective_involvement = collective_involvements && oneForPerson(collective_involvements, personIdNum);
 
   const canEdit = meId === person.id;
 
