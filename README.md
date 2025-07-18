@@ -14,6 +14,8 @@ Once this is done, in the root directory of this project run `asdf install`.
 
 Direnv is used to load environment variables. It's likely already installed on your system. To approve this direnv config, run `direnv allow` from the root of this project.
 
+If it's not installed, it can be installed on ubuntu/debian systems with `sudo apt install direnv`, followed by enabling it in your shell. If you're using oh-my-zsh, you can do this by adding `direnv` to the list of plugins in your `~/.zshrc` file.
+
 ### Frontend
 
 The frontend is a React app using Vite and react-router. From the frontend dir, packages are installed using `npm install`, and the the code is run in development mode using `npm run dev`.
