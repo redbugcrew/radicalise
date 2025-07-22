@@ -20,6 +20,8 @@ export default function PeopleForInterval({ interval }: PeopleForIntervalProps) 
     setCacheKey((prevKey) => prevKey + 1);
   };
 
+  const tableKey = `${interval.id}-${cacheKey}`;
+
   useEffect(() => {
     if (involvementState.current_interval?.interval_id === interval.id) {
       setInvolvements(involvementState.current_interval || null);
@@ -41,5 +43,5 @@ export default function PeopleForInterval({ interval }: PeopleForIntervalProps) 
     incrementCacheKey();
   }, [interval.id, currentInterval, involvementState]);
 
-  return involvements && <PeopleByInvolvementStatus involvements={involvements.collective_involvements} crewEnrolments={involvements.crew_involvements} tableKey={`${interval.id}-${cacheKey}`} />;
+  return involvements && <PeopleByInvolvementStatus involvements={involvements.collective_involvements} crewEnrolments={involvements.crew_involvements} key={tableKey} tableKey={tableKey} />;
 }

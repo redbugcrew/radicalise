@@ -26,7 +26,7 @@ export default function People() {
         </Anchor> */}
       </Group>
       <IntervalSelector intervals={intervals.allIntervals} selectedInterval={selectedInterval} currentInterval={intervals.currentInterval} onChangeInterval={setSelectedInterval} />
-      {selectedInterval && <PeopleForInterval interval={selectedInterval} />}
+      {selectedInterval && <PeopleForInterval interval={selectedInterval} key={selectedInterval.id} />}
     </Stack>
   );
 }
