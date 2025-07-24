@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT id, display_name, about, avatar_id FROM people",
+  "query": "SELECT id, collective_id, display_name, about, avatar_id\n        FROM people\n        WHERE user_id = ? AND collective_id = ?",
   "describe": {
     "columns": [
       {
@@ -9,30 +9,36 @@
         "type_info": "Integer"
       },
       {
-        "name": "display_name",
+        "name": "collective_id",
         "ordinal": 1,
-        "type_info": "Text"
+        "type_info": "Integer"
       },
       {
-        "name": "about",
+        "name": "display_name",
         "ordinal": 2,
         "type_info": "Text"
       },
       {
-        "name": "avatar_id",
+        "name": "about",
         "ordinal": 3,
+        "type_info": "Text"
+      },
+      {
+        "name": "avatar_id",
+        "ordinal": 4,
         "type_info": "Integer"
       }
     ],
     "parameters": {
-      "Right": 0
+      "Right": 2
     },
     "nullable": [
+      false,
       false,
       false,
       true,
       true
     ]
   },
-  "hash": "de1077907a8229bbd3e0506a1b9e1bafdacaffdeff91f2eb85810cbefc1db95f"
+  "hash": "dbaadb309d6edbb12b27203bf10467195e38978f4a1cd548d5b1855155691785"
 }

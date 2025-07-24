@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT id, display_name, email, hashed_password\n            FROM people\n            WHERE LOWER(email) = LOWER(?)",
+  "query": "SELECT id, email, hashed_password\n            FROM users\n            WHERE id = ?",
   "describe": {
     "columns": [
       {
@@ -9,18 +9,13 @@
         "type_info": "Integer"
       },
       {
-        "name": "display_name",
+        "name": "email",
         "ordinal": 1,
         "type_info": "Text"
       },
       {
-        "name": "email",
-        "ordinal": 2,
-        "type_info": "Text"
-      },
-      {
         "name": "hashed_password",
-        "ordinal": 3,
+        "ordinal": 2,
         "type_info": "Text"
       }
     ],
@@ -29,10 +24,9 @@
     },
     "nullable": [
       false,
-      false,
       true,
       true
     ]
   },
-  "hash": "845775060a1451f02601bb4c2816d173a67f8e11e04bf09d0237a2c91fb95c2d"
+  "hash": "ee9e0a602a42fbfca305bfce907c2694457299135d0fdefe22e8d737635723fe"
 }

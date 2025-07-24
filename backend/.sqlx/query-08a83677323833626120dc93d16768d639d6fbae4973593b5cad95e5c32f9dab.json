@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT id, name, description FROM crews",
+  "query": "SELECT id, email, hashed_password\n            FROM users\n            WHERE LOWER(email) = LOWER(?)",
   "describe": {
     "columns": [
       {
@@ -9,24 +9,24 @@
         "type_info": "Integer"
       },
       {
-        "name": "name",
+        "name": "email",
         "ordinal": 1,
         "type_info": "Text"
       },
       {
-        "name": "description",
+        "name": "hashed_password",
         "ordinal": 2,
         "type_info": "Text"
       }
     ],
     "parameters": {
-      "Right": 0
+      "Right": 1
     },
     "nullable": [
       false,
-      false,
+      true,
       true
     ]
   },
-  "hash": "7ed3d9f041fa851bbde54a28a15c7e0733d7cf365cde6f041747c6585a76623f"
+  "hash": "08a83677323833626120dc93d16768d639d6fbae4973593b5cad95e5c32f9dab"
 }

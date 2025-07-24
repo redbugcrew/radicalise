@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE users\n            SET password_reset_token = ?, password_reset_token_issued_at = datetime('now')\n            WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "24dda078a2e3b5a81594870f9b8cdeecd278debf031eea05771776f7cac5cdff"
+}

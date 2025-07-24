@@ -100,6 +100,8 @@ export interface CrewInvolvement {
 }
 
 export interface CrewWithLinks {
+  /** @format int64 */
+  collective_id: number;
   description?: string | null;
   /** @format int64 */
   id: number;
@@ -193,6 +195,8 @@ export interface Person {
   about?: string | null;
   /** @format int64 */
   avatar_id?: number | null;
+  /** @format int64 */
+  collective_id: number;
   display_name: string;
   /** @format int64 */
   id: number;
@@ -388,7 +392,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 0.8.3
+ * @version 1.0.2
  * @license
  */
 export class Api<

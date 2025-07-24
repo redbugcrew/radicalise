@@ -211,6 +211,7 @@ pub struct Crew {
     pub id: i64,
     pub name: String,
     pub description: Option<String>,
+    pub collective_id: i64,
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
@@ -246,5 +247,6 @@ pub struct CrewWithLinks {
     pub id: i64,
     pub name: String,
     pub description: Option<String>,
+    pub collective_id: i64,
     pub links: Option<Vec<Link>>,
 }

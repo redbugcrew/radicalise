@@ -6,7 +6,7 @@ use crate::{
     auth::auth_backend::AuthSession,
     crews::events::CrewsEvent,
     realtime::RealtimeState,
-    shared::{entities::CrewWithLinks, events::AppEvent},
+    shared::{default_collective_id, entities::CrewWithLinks, events::AppEvent},
 };
 
 pub mod events;
@@ -37,7 +37,7 @@ pub async fn update_crew(
         return (StatusCode::BAD_REQUEST, "Crew ID mismatch").into_response();
     }
 
-    match repo::update_crew_with_links(input, &pool).await {
+    match repo::update_crew_with_links(default_collective_id(), input, &pool).await {
         Ok(response) => {
             let event = AppEvent::CrewsEvent(CrewsEvent::CrewUpdated(response));
             realtime_state

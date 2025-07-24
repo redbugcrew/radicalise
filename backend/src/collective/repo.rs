@@ -112,7 +112,7 @@ pub async fn find_initial_data_for_collective(
 ) -> Result<InitialData, sqlx::Error> {
     let people = find_all_people(collective.typed_id(), pool).await?;
 
-    let crews = find_all_crews_with_links(pool).await?;
+    let crews = find_all_crews_with_links(collective.typed_id(), pool).await?;
 
     let intervals = sqlx::query_as!(
         Interval,
