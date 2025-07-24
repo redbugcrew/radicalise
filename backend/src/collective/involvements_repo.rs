@@ -1,7 +1,7 @@
 use sqlx::SqlitePool;
 
 use crate::shared::entities::{
-    CollectiveInvolvement, InvolvementStatus, OptOutType, ParticipationIntention,
+    CollectiveInvolvement, InvolvementStatus, OptOutType, ParticipationIntention, PersonId,
 };
 
 #[derive(Debug, Clone)]
@@ -77,7 +77,7 @@ impl From<CollectiveInvolvement> for CollectiveInvolvementRecord {
 
 pub async fn find_collective_involvement(
     collective_id: i64,
-    person_id: i64,
+    person_id: PersonId,
     interval_id: i64,
     pool: &SqlitePool,
 ) -> Result<Option<CollectiveInvolvement>, sqlx::Error> {
@@ -95,7 +95,7 @@ pub async fn find_collective_involvement(
             person_id = ? AND
             interval_id = ?",
         collective_id,
-        person_id,
+        person_id.id,
         interval_id,
     )
     .fetch_optional(pool)

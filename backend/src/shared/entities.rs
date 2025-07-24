@@ -10,12 +10,40 @@ pub struct Collective {
     pub links: Vec<Link>,
 }
 
+#[derive(Clone, Debug, PartialEq)]
+pub struct UserId {
+    pub id: i64,
+}
+
+impl UserId {
+    pub fn new(id: i64) -> Self {
+        UserId { id }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct PersonId {
+    pub id: i64,
+}
+
+impl PersonId {
+    pub fn new(id: i64) -> Self {
+        PersonId { id }
+    }
+}
+
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
 pub struct Person {
     pub id: i64,
     pub display_name: String,
     pub about: Option<String>,
     pub avatar_id: Option<i64>,
+}
+
+impl Person {
+    pub fn typed_id(&self) -> PersonId {
+        PersonId::new(self.id)
+    }
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]

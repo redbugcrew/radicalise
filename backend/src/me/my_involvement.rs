@@ -8,7 +8,9 @@ use crate::{
     },
     intervals::repo::{IntervalType, find_interval, get_interval_type},
     me::repo::{self},
-    shared::entities::{CrewInvolvement, InvolvementStatus, OptOutType, ParticipationIntention},
+    shared::entities::{
+        CrewInvolvement, InvolvementStatus, OptOutType, ParticipationIntention, PersonId,
+    },
 };
 
 #[derive(Serialize, Deserialize, ToSchema)]
@@ -42,7 +44,7 @@ pub fn calculate_status(
 }
 
 pub async fn update_my_involvements(
-    person_id: i64,
+    person_id: PersonId,
     interval_id: i64,
     input: MyParticipationInput,
     pool: &sqlx::SqlitePool,
@@ -62,7 +64,7 @@ pub async fn update_my_involvements(
     upsert_collective_involvement(
         CollectiveInvolvementRecord {
             id: -1, // ID will be auto-generated
-            person_id: person_id,
+            person_id: person_id.id,
             collective_id: input.collective_id,
             interval_id,
             status,
