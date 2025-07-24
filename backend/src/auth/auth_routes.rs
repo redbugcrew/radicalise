@@ -57,8 +57,7 @@ async fn forgot_password(
             .map_err(repo_error_handler)?;
 
         println!(
-            "We got the user: {} with email: {}, set token: {}",
-            user.display_name,
+            "We got the user: with email: {}, set token: {}",
             user.email.as_deref().unwrap_or("No email provided"),
             password_reset_token
         );

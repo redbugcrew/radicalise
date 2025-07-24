@@ -3,7 +3,6 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize)]
 pub struct AuthUser {
     pub id: i64,
-    pub display_name: String,
     pub email: Option<String>,
     pub hashed_password: Option<String>,
 }
@@ -28,8 +27,8 @@ impl<'a> AuthRepo<'a> {
     pub async fn user_for_email(&self, email: String) -> Result<Option<AuthUser>, AuthRepoError> {
         sqlx::query_as!(
             AuthUser,
-            "SELECT id, display_name, email, hashed_password
-            FROM people
+            "SELECT id, email, hashed_password
+            FROM users
             WHERE LOWER(email) = LOWER(?)",
             email
         )
@@ -41,8 +40,8 @@ impl<'a> AuthRepo<'a> {
     pub async fn user_for_id(&self, user_id: i64) -> Result<Option<AuthUser>, AuthRepoError> {
         sqlx::query_as!(
             AuthUser,
-            "SELECT id, display_name, email, hashed_password
-            FROM people
+            "SELECT id, email, hashed_password
+            FROM users
             WHERE id = ?",
             user_id
         )
@@ -57,7 +56,7 @@ impl<'a> AuthRepo<'a> {
         token: String,
     ) -> Result<(), AuthRepoError> {
         sqlx::query!(
-            "UPDATE people
+            "UPDATE users
             SET password_reset_token = ?, password_reset_token_issued_at = datetime('now')
             WHERE id = ?",
             token,
@@ -83,7 +82,7 @@ impl<'a> AuthRepo<'a> {
         let interval = format!("+{} hours", hours_token_valid);
 
         let result = sqlx::query!(
-            "UPDATE people
+            "UPDATE users
             SET hashed_password = ?, password_reset_token = NULL, password_reset_token_issued_at = NULL
             WHERE
               password_reset_token = ? AND datetime('now') < datetime(password_reset_token_issued_at, ?)",
