@@ -13,7 +13,7 @@ use crate::{
     realtime::RealtimeState,
     shared::{
         default_collective_id,
-        entities::{CollectiveInvolvement, UserId},
+        entities::{CollectiveInvolvement, IntervalId, UserId},
         events::AppEvent,
     },
 };
@@ -80,6 +80,7 @@ async fn my_participation(
                 return (StatusCode::NOT_FOUND, ()).into_response();
             }
             let person_id = person_id.unwrap();
+            let interval_id = IntervalId::new(interval_id);
 
             let result =
                 find_collective_involvement(default_collective_id(), person_id, interval_id, &pool)
@@ -125,9 +126,10 @@ async fn update_my_participation(
                 return (StatusCode::NOT_FOUND, ()).into_response();
             }
             let person_id = person_id.unwrap();
+            let interval_id = IntervalId::new(interval_id);
 
             let update_result =
-                update_my_involvements(person_id.clone(), interval_id, input, &pool).await;
+                update_my_involvements(person_id.clone(), interval_id.clone(), input, &pool).await;
 
             if update_result.is_err() {
                 eprintln!("Error updating my involvements: {:?}", update_result.err());

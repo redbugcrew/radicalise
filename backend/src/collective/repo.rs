@@ -10,7 +10,7 @@ use crate::{
         COLLECTIVE_ID, default_collective_id,
         entities::{
             Collective, CollectiveId, CollectiveInvolvement, CrewInvolvement, CrewWithLinks,
-            Interval, Person,
+            Interval, IntervalId, Person,
         },
         links_repo::{find_all_links_for_owner, update_links_for_owner},
     },
@@ -74,7 +74,7 @@ pub async fn find_collective_with_links(
 }
 
 pub async fn find_all_crew_involvements(
-    interval_id: i64,
+    interval_id: IntervalId,
     pool: &SqlitePool,
 ) -> Result<Vec<CrewInvolvement>, sqlx::Error> {
     sqlx::query_as!(
@@ -83,22 +83,23 @@ pub async fn find_all_crew_involvements(
         FROM crew_involvements
         WHERE
           interval_id = ?",
-        interval_id
+        interval_id.id
     )
     .fetch_all(pool)
     .await
 }
 
 async fn find_interval_involvement_data(
-    interval_id: i64,
+    interval_id: IntervalId,
     pool: &SqlitePool,
 ) -> Result<IntervalInvolvementData, sqlx::Error> {
     let collective_involvements =
-        find_all_collective_involvements(default_collective_id(), interval_id, pool).await?;
-    let crew_involvements = find_all_crew_involvements(interval_id, pool).await?;
+        find_all_collective_involvements(default_collective_id(), interval_id.clone(), pool)
+            .await?;
+    let crew_involvements = find_all_crew_involvements(interval_id.clone(), pool).await?;
 
     Ok(IntervalInvolvementData {
-        interval_id,
+        interval_id: interval_id.id,
         collective_involvements,
         crew_involvements,
     })
@@ -126,13 +127,14 @@ pub async fn find_initial_data_for_collective(
     .await?;
 
     let current_interval = find_current_interval(collective.typed_id(), pool).await?;
-    let current_interval_id = current_interval.id.clone();
+    let current_interval_id = current_interval.typed_id().clone();
     let next_interval =
-        find_next_interval(collective.typed_id(), current_interval_id, pool).await?;
+        find_next_interval(collective.typed_id(), current_interval_id.clone(), pool).await?;
 
-    let current_interval_data = find_interval_involvement_data(current_interval_id, pool).await?;
+    let current_interval_data =
+        find_interval_involvement_data(current_interval_id.clone(), pool).await?;
     let next_interval_data = if let Some(interval) = next_interval {
-        Some(find_interval_involvement_data(interval.id, pool).await?)
+        Some(find_interval_involvement_data(interval.typed_id(), pool).await?)
     } else {
         None
     };

@@ -57,11 +57,28 @@ impl Person {
     }
 }
 
+#[derive(Clone, Debug, PartialEq)]
+pub struct IntervalId {
+    pub id: i64,
+}
+
+impl IntervalId {
+    pub fn new(id: i64) -> Self {
+        IntervalId { id }
+    }
+}
+
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
 pub struct Interval {
     pub id: i64,
     pub start_date: String,
     pub end_date: String,
+}
+
+impl Interval {
+    pub fn typed_id(&self) -> IntervalId {
+        IntervalId::new(self.id)
+    }
 }
 
 #[derive(Serialize, Deserialize, ToSchema, sqlx::Type, Clone, Debug)]

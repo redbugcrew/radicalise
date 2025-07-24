@@ -1,8 +1,8 @@
 use sqlx::SqlitePool;
 
 use crate::shared::entities::{
-    CollectiveId, CollectiveInvolvement, InvolvementStatus, OptOutType, ParticipationIntention,
-    PersonId,
+    CollectiveId, CollectiveInvolvement, IntervalId, InvolvementStatus, OptOutType,
+    ParticipationIntention, PersonId,
 };
 
 #[derive(Debug, Clone)]
@@ -79,7 +79,7 @@ impl From<CollectiveInvolvement> for CollectiveInvolvementRecord {
 pub async fn find_collective_involvement(
     collective_id: CollectiveId,
     person_id: PersonId,
-    interval_id: i64,
+    interval_id: IntervalId,
     pool: &SqlitePool,
 ) -> Result<Option<CollectiveInvolvement>, sqlx::Error> {
     let record: Option<CollectiveInvolvementRecord> = sqlx::query_as!(
@@ -97,7 +97,7 @@ pub async fn find_collective_involvement(
             interval_id = ?",
         collective_id.id,
         person_id.id,
-        interval_id,
+        interval_id.id,
     )
     .fetch_optional(pool)
     .await?;
@@ -107,7 +107,7 @@ pub async fn find_collective_involvement(
 
 pub async fn find_all_collective_involvements(
     collective_id: CollectiveId,
-    interval_id: i64,
+    interval_id: IntervalId,
     pool: &SqlitePool,
 ) -> Result<Vec<CollectiveInvolvement>, sqlx::Error> {
     let records = sqlx::query_as!(
@@ -123,7 +123,7 @@ pub async fn find_all_collective_involvements(
             collective_id = ? AND
             interval_id = ?",
         collective_id.id,
-        interval_id,
+        interval_id.id,
     )
     .fetch_all(pool)
     .await?;
