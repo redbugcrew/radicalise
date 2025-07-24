@@ -9,7 +9,7 @@ use crate::{
     intervals::repo::{IntervalType, find_interval, get_interval_type},
     me::repo::{self},
     shared::entities::{
-        CrewInvolvement, IntervalId, InvolvementStatus, OptOutType, ParticipationIntention,
+        CrewId, CrewInvolvement, IntervalId, InvolvementStatus, OptOutType, ParticipationIntention,
         PersonId,
     },
 };
@@ -101,7 +101,7 @@ pub async fn update_my_involvements(
 }
 
 async fn update_convenor_if_needed(
-    crew_id: i64,
+    crew_id: CrewId,
     interval_id: IntervalId,
     interval_type: IntervalType,
     pool: &sqlx::SqlitePool,
@@ -110,7 +110,8 @@ async fn update_convenor_if_needed(
         return Err(past_interval_error());
     }
 
-    let crew_involvements = find_crew_involvements(crew_id, interval_id.clone(), pool).await?;
+    let crew_involvements =
+        find_crew_involvements(crew_id.clone(), interval_id.clone(), pool).await?;
     let convenor_involvements: Vec<&CrewInvolvement> = crew_involvements
         .iter()
         .filter(|involvement| involvement.convenor)
@@ -125,7 +126,7 @@ async fn update_convenor_if_needed(
     if interval_type == IntervalType::Current && !convenor_involvements.is_empty() {
         println!(
             "Crew {} already has a convenor for interval {} of type {:?}",
-            crew_id, interval_id.id, interval_type
+            crew_id.id, interval_id.id, interval_type
         );
         return Ok(());
     }
@@ -135,7 +136,7 @@ async fn update_convenor_if_needed(
         .map(|involvement| involvement.person_id)
         .collect::<Vec<i64>>();
     let best_convenor =
-        get_best_convenor_person_id(crew_id, interval_id.clone(), person_ids, pool).await?;
+        get_best_convenor_person_id(crew_id.clone(), interval_id.clone(), person_ids, pool).await?;
 
     set_crew_convenor(crew_id, interval_id, best_convenor, pool).await?;
 
@@ -143,7 +144,7 @@ async fn update_convenor_if_needed(
 }
 
 async fn get_best_convenor_person_id(
-    crew_id: i64,
+    crew_id: CrewId,
     interval_id: IntervalId,
     mut person_ids: Vec<i64>,
     pool: &sqlx::SqlitePool,
@@ -179,13 +180,17 @@ fn past_interval_error() -> sqlx::Error {
 
 async fn filter_by_longest_since_convened_this_crew(
     person_ids: Vec<i64>,
-    crew_id: i64,
+    crew_id: CrewId,
     current_interval_id: IntervalId,
     pool: &sqlx::SqlitePool,
 ) -> Result<Vec<i64>, sqlx::Error> {
-    let data =
-        intervals_since_last_convened(person_ids.clone(), crew_id, current_interval_id, pool)
-            .await?;
+    let data = intervals_since_last_convened(
+        person_ids.clone(),
+        crew_id.clone(),
+        current_interval_id,
+        pool,
+    )
+    .await?;
 
     let most_intervals: i64 = data
         .iter()
@@ -194,7 +199,7 @@ async fn filter_by_longest_since_convened_this_crew(
         .unwrap_or_else(|| {
             eprintln!(
                 "No intervals since convened found for crew {} with person_ids {:?}",
-                crew_id, person_ids
+                crew_id.id, person_ids
             );
             0
         });
@@ -208,7 +213,7 @@ async fn filter_by_longest_since_convened_this_crew(
     if filtered_ids.is_empty() {
         panic!(
             "No crew members found for crew {} with intervals since convened {}",
-            crew_id, most_intervals
+            crew_id.id, most_intervals
         );
     } else {
         Ok(filtered_ids)
@@ -222,7 +227,7 @@ struct IntervalLastConvenedResult {
 
 async fn intervals_since_last_convened(
     person_ids: Vec<i64>,
-    crew_id: i64,
+    crew_id: CrewId,
     current_interval_id: IntervalId,
     pool: &sqlx::SqlitePool,
 ) -> Result<Vec<IntervalLastConvenedResult>, sqlx::Error> {

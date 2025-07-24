@@ -6,7 +6,8 @@ use crate::{
     collective::involvements_repo::find_collective_involvement,
     intervals::repo::{find_current_interval, find_next_interval},
     shared::entities::{
-        CollectiveId, CollectiveInvolvement, CrewInvolvement, IntervalId, Person, PersonId, UserId,
+        CollectiveId, CollectiveInvolvement, CrewId, CrewInvolvement, IntervalId, Person, PersonId,
+        UserId,
     },
 };
 
@@ -92,7 +93,7 @@ pub async fn update_crew_involvements(
     interval_id: IntervalId,
     involvements: Vec<CrewInvolvement>,
     pool: &SqlitePool,
-) -> Result<Vec<i64>, sqlx::Error> {
+) -> Result<Vec<CrewId>, sqlx::Error> {
     let existing = find_my_crew_involvements(person_id.clone(), interval_id.clone(), pool).await?;
 
     // Ensure all the involvements have the same person_id and interval_id
@@ -103,16 +104,19 @@ pub async fn update_crew_involvements(
         }
     }
 
-    let crew_ids: Vec<i64> = involvements.iter().map(|i| i.crew_id).collect();
+    let crew_ids: Vec<CrewId> = involvements
+        .iter()
+        .map(|i| CrewId::new(i.crew_id))
+        .collect();
 
     // Involvements to remove
     let to_remove: Vec<CrewInvolvement> = existing
         .iter()
-        .filter(|involvement| !crew_ids.contains(&involvement.crew_id))
+        .filter(|involvement| !crew_ids.contains(&CrewId::new(involvement.crew_id)))
         .cloned()
         .collect();
 
-    let removed_crew_ids: Vec<i64> = to_remove.iter().map(|i| i.id).collect();
+    let removed_crew_ids: Vec<CrewId> = to_remove.iter().map(|i| CrewId::new(i.id)).collect();
 
     println!("Deleting crew participations {:?}", to_remove);
     delete_crew_involvements(to_remove, pool).await?;
@@ -120,7 +124,7 @@ pub async fn update_crew_involvements(
     println!("Upserting crew participations {:?}", involvements);
     upsert_crew_involvements(involvements, pool).await?;
 
-    let impacted_crew_ids: Vec<i64> = crew_ids.into_iter().chain(removed_crew_ids).collect();
+    let impacted_crew_ids: Vec<CrewId> = crew_ids.into_iter().chain(removed_crew_ids).collect();
 
     Ok(impacted_crew_ids)
 }

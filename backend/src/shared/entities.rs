@@ -162,6 +162,17 @@ impl TryFrom<String> for OptOutType {
     }
 }
 
+#[derive(Clone, Debug, PartialEq)]
+pub struct CrewId {
+    pub id: i64,
+}
+
+impl CrewId {
+    pub fn new(id: i64) -> Self {
+        CrewId { id }
+    }
+}
+
 #[derive(Serialize, Deserialize, ToSchema, Clone, Debug)]
 pub struct CrewInvolvement {
     pub id: i64,
