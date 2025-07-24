@@ -14,12 +14,14 @@ CREATE TABLE new_people (
   about TEXT,
   avatar_id INTEGER,
   user_id INTEGER,
-  FOREIGN KEY (user_id) REFERENCES users (id)
+  collective_id INTEGER NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users (id),
+  FOREIGN KEY (collective_id) REFERENCES collectives (id)
 );
 
 INSERT INTO new_people (
-  id, formal_name, display_name, about, avatar_id, user_id)
-SELECT id, formal_name, display_name, about, avatar_id, user_id
+  id, formal_name, display_name, about, avatar_id, user_id, collective_id)
+SELECT id, formal_name, display_name, about, avatar_id, user_id, 1 as collective_id
 FROM people;
 
 DROP TABLE people;

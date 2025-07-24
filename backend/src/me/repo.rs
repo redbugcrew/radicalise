@@ -197,32 +197,37 @@ pub async fn upsert_crew_involvements(
 }
 
 pub async fn find_person_for_user(
-    _collective_id: CollectiveId,
+    collective_id: CollectiveId,
     user_id: UserId,
     pool: &SqlitePool,
 ) -> Result<Person, sqlx::Error> {
     sqlx::query_as!(
         Person,
-        "SELECT id, display_name, about, avatar_id
+        "SELECT id, collective_id, display_name, about, avatar_id
         FROM people
-        WHERE user_id = ?",
-        user_id.id
+        WHERE user_id = ? AND collective_id = ?",
+        user_id.id,
+        collective_id.id
     )
     .fetch_one(pool)
     .await
 }
 
 pub async fn find_person_id_for_user(
-    _collective_id: CollectiveId,
+    collective_id: CollectiveId,
     user_id: UserId,
     pool: &SqlitePool,
 ) -> Result<PersonId, sqlx::Error> {
     sqlx::query_as!(
         PersonId,
-        "SELECT id
+        "
+        SELECT id
         FROM people
-        WHERE user_id = ?",
-        user_id.id
+        WHERE
+          user_id = ? AND
+          collective_id = ?",
+        user_id.id,
+        collective_id.id
     )
     .fetch_one(pool)
     .await

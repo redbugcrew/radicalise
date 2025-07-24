@@ -6,11 +6,11 @@ use crate::{
     auth::auth_backend::AuthSession,
     people::events::PeopleEvent,
     realtime::RealtimeState,
-    shared::{entities::Person, events::AppEvent},
+    shared::{default_collective_id, entities::Person, events::AppEvent},
 };
 
 pub mod events;
-mod repo;
+pub mod repo;
 
 pub fn router() -> OpenApiRouter {
     OpenApiRouter::new().routes(routes!(update_person))
@@ -37,7 +37,7 @@ pub async fn update_person(
         return (StatusCode::BAD_REQUEST, "Person ID mismatch").into_response();
     }
 
-    match repo::update_person(input, &pool).await {
+    match repo::update_person(input, default_collective_id(), &pool).await {
         Ok(response) => {
             let event = AppEvent::PeopleEvent(PeopleEvent::PersonUpdated(response));
             realtime_state

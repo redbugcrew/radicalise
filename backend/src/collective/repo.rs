@@ -6,6 +6,7 @@ use crate::{
     collective::involvements_repo::find_all_collective_involvements,
     crews::repo::find_all_crews_with_links,
     intervals::repo::{find_current_interval, find_next_interval},
+    people::repo::find_all_people,
     shared::{
         COLLECTIVE_ID, default_collective_id,
         entities::{
@@ -109,12 +110,7 @@ pub async fn find_initial_data_for_collective(
     collective: Collective,
     pool: &SqlitePool,
 ) -> Result<InitialData, sqlx::Error> {
-    let people = sqlx::query_as!(
-        Person,
-        "SELECT id, display_name, about, avatar_id FROM people"
-    )
-    .fetch_all(pool)
-    .await?;
+    let people = find_all_people(collective.typed_id(), pool).await?;
 
     let crews = find_all_crews_with_links(pool).await?;
 
