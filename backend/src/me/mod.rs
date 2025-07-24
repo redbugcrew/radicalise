@@ -12,7 +12,7 @@ use crate::{
     },
     realtime::RealtimeState,
     shared::{
-        COLLECTIVE_ID,
+        default_collective_id,
         entities::{CollectiveInvolvement, UserId},
         events::AppEvent,
     },
@@ -40,8 +40,12 @@ async fn get_my_state(
 ) -> impl IntoResponse {
     match auth_session.user {
         Some(user) => {
-            let result =
-                repo::find_initial_data_for_user(COLLECTIVE_ID, UserId::new(user.id), &pool).await;
+            let result = repo::find_initial_data_for_user(
+                default_collective_id(),
+                UserId::new(user.id),
+                &pool,
+            )
+            .await;
 
             match result {
                 Ok(initial_data) => (StatusCode::OK, Json(initial_data)).into_response(),
@@ -71,14 +75,15 @@ async fn my_participation(
     match auth_session.user {
         Some(user) => {
             let person_id =
-                find_person_id_for_user(COLLECTIVE_ID, UserId::new(user.id), &pool).await;
+                find_person_id_for_user(default_collective_id(), UserId::new(user.id), &pool).await;
             if person_id.is_err() {
                 return (StatusCode::NOT_FOUND, ()).into_response();
             }
             let person_id = person_id.unwrap();
 
             let result =
-                find_collective_involvement(COLLECTIVE_ID, person_id, interval_id, &pool).await;
+                find_collective_involvement(default_collective_id(), person_id, interval_id, &pool)
+                    .await;
 
             match result {
                 Ok(Some(data)) => (StatusCode::OK, Json(data)).into_response(),
@@ -115,7 +120,7 @@ async fn update_my_participation(
     match auth_session.user {
         Some(user) => {
             let person_id =
-                find_person_id_for_user(COLLECTIVE_ID, UserId::new(user.id), &pool).await;
+                find_person_id_for_user(default_collective_id(), UserId::new(user.id), &pool).await;
             if person_id.is_err() {
                 return (StatusCode::NOT_FOUND, ()).into_response();
             }
@@ -130,9 +135,13 @@ async fn update_my_participation(
             }
 
             // Fetch the updated involvement to return
-            let output_result =
-                repo::find_interval_data_for_person(COLLECTIVE_ID, person_id, interval_id, &pool)
-                    .await;
+            let output_result = repo::find_interval_data_for_person(
+                default_collective_id(),
+                person_id,
+                interval_id,
+                &pool,
+            )
+            .await;
             match output_result {
                 Ok(interval_data) => {
                     let public_interval_data = strip_private_data(&interval_data);

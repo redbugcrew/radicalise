@@ -1,7 +1,8 @@
 use sqlx::SqlitePool;
 
 use crate::shared::entities::{
-    CollectiveInvolvement, InvolvementStatus, OptOutType, ParticipationIntention, PersonId,
+    CollectiveId, CollectiveInvolvement, InvolvementStatus, OptOutType, ParticipationIntention,
+    PersonId,
 };
 
 #[derive(Debug, Clone)]
@@ -76,7 +77,7 @@ impl From<CollectiveInvolvement> for CollectiveInvolvementRecord {
 }
 
 pub async fn find_collective_involvement(
-    collective_id: i64,
+    collective_id: CollectiveId,
     person_id: PersonId,
     interval_id: i64,
     pool: &SqlitePool,
@@ -94,7 +95,7 @@ pub async fn find_collective_involvement(
             collective_id = ? AND
             person_id = ? AND
             interval_id = ?",
-        collective_id,
+        collective_id.id,
         person_id.id,
         interval_id,
     )
@@ -105,7 +106,7 @@ pub async fn find_collective_involvement(
 }
 
 pub async fn find_all_collective_involvements(
-    collective_id: i64,
+    collective_id: CollectiveId,
     interval_id: i64,
     pool: &SqlitePool,
 ) -> Result<Vec<CollectiveInvolvement>, sqlx::Error> {
@@ -121,7 +122,7 @@ pub async fn find_all_collective_involvements(
         WHERE
             collective_id = ? AND
             interval_id = ?",
-        collective_id,
+        collective_id.id,
         interval_id,
     )
     .fetch_all(pool)

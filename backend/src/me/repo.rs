@@ -5,7 +5,9 @@ use utoipa::ToSchema;
 use crate::{
     collective::involvements_repo::find_collective_involvement,
     intervals::repo::{find_current_interval, find_next_interval},
-    shared::entities::{CollectiveInvolvement, CrewInvolvement, Person, PersonId, UserId},
+    shared::entities::{
+        CollectiveId, CollectiveInvolvement, CrewInvolvement, Person, PersonId, UserId,
+    },
 };
 
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
@@ -24,7 +26,7 @@ pub struct MyInitialData {
 }
 
 pub async fn find_interval_data_for_person(
-    collective_id: i64,
+    collective_id: CollectiveId,
     person_id: PersonId,
     interval_id: i64,
     pool: &SqlitePool,
@@ -43,23 +45,33 @@ pub async fn find_interval_data_for_person(
 }
 
 pub async fn find_initial_data_for_user(
-    collective_id: i64,
+    collective_id: CollectiveId,
     user_id: UserId,
     pool: &SqlitePool,
 ) -> Result<MyInitialData, sqlx::Error> {
-    let current_interval = find_current_interval(collective_id, pool).await?;
-    let next_interval = find_next_interval(collective_id, current_interval.id, pool).await?;
-    let person = find_person_for_user(collective_id, user_id, pool).await?;
+    let current_interval = find_current_interval(collective_id.clone(), pool).await?;
+    let next_interval =
+        find_next_interval(collective_id.clone(), current_interval.id, pool).await?;
+    let person = find_person_for_user(collective_id.clone(), user_id, pool).await?;
     let person_id = person.typed_id();
 
-    let current_interval_data =
-        find_interval_data_for_person(collective_id, person_id.clone(), current_interval.id, pool)
-            .await?;
+    let current_interval_data = find_interval_data_for_person(
+        collective_id.clone(),
+        person_id.clone(),
+        current_interval.id,
+        pool,
+    )
+    .await?;
 
     let next_interval_data = if let Some(interval) = next_interval {
         Some(
-            find_interval_data_for_person(collective_id, person_id.clone(), interval.id, pool)
-                .await?,
+            find_interval_data_for_person(
+                collective_id.clone(),
+                person_id.clone(),
+                interval.id,
+                pool,
+            )
+            .await?,
         )
     } else {
         None
@@ -183,7 +195,7 @@ pub async fn upsert_crew_involvements(
 }
 
 pub async fn find_person_for_user(
-    _collective_id: i64,
+    _collective_id: CollectiveId,
     user_id: UserId,
     pool: &SqlitePool,
 ) -> Result<Person, sqlx::Error> {
@@ -199,7 +211,7 @@ pub async fn find_person_for_user(
 }
 
 pub async fn find_person_id_for_user(
-    _collective_id: i64,
+    _collective_id: CollectiveId,
     user_id: UserId,
     pool: &SqlitePool,
 ) -> Result<PersonId, sqlx::Error> {

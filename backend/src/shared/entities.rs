@@ -2,12 +2,23 @@ use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 use utoipa::ToSchema;
 
+#[derive(Clone, Debug, PartialEq)]
+pub struct CollectiveId {
+    pub id: i64,
+}
+
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
 pub struct Collective {
     pub id: i64,
     pub name: Option<String>,
     pub description: Option<String>,
     pub links: Vec<Link>,
+}
+
+impl Collective {
+    pub fn typed_id(&self) -> CollectiveId {
+        CollectiveId { id: self.id }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq)]

@@ -10,7 +10,7 @@ use crate::{
         repo::{InitialData, IntervalInvolvementData},
     },
     realtime::RealtimeState,
-    shared::{COLLECTIVE_ID, entities::Collective, events::AppEvent},
+    shared::{default_collective_id, entities::Collective, events::AppEvent},
 };
 
 pub mod events;
@@ -30,7 +30,7 @@ pub fn router() -> OpenApiRouter {
         (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
     ),)]
 async fn get_collective_state(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse {
-    let collective_result = repo::find_collective_with_links(COLLECTIVE_ID, &pool).await;
+    let collective_result = repo::find_collective_with_links(default_collective_id(), &pool).await;
 
     match collective_result {
         Ok(collective) => {
@@ -56,7 +56,7 @@ async fn get_involvements(
     Extension(pool): Extension<SqlitePool>,
 ) -> impl IntoResponse {
     let collective_involvements_result =
-        find_all_collective_involvements(COLLECTIVE_ID, interval_id, &pool).await;
+        find_all_collective_involvements(default_collective_id(), interval_id, &pool).await;
     let crew_involvements_result = repo::find_all_crew_involvements(interval_id, &pool).await;
 
     if collective_involvements_result.is_err() || crew_involvements_result.is_err() {
