@@ -1,6 +1,6 @@
 use sqlx::SqlitePool;
 
-use crate::shared::entities::Interval;
+use crate::shared::entities::{CollectiveId, Interval, IntervalId};
 
 #[derive(PartialEq, Debug, Clone, Copy)]
 pub enum IntervalType {
@@ -11,7 +11,7 @@ pub enum IntervalType {
 
 pub async fn insert_interval(
     interval: Interval,
-    collective_id: i64,
+    collective_id: CollectiveId,
     pool: &SqlitePool,
 ) -> Result<Interval, sqlx::Error> {
     let mut transaction = pool.begin().await?;
@@ -21,7 +21,7 @@ pub async fn insert_interval(
         FROM intervals
         WHERE
             collective_id = ?",
-        collective_id
+        collective_id.id
     )
     .fetch_one(&mut *transaction)
     .await
@@ -37,7 +37,7 @@ pub async fn insert_interval(
         next_id,
         interval.start_date,
         interval.end_date,
-        collective_id
+        collective_id.id
     )
     .fetch_one(&mut *transaction)
     .await?;
@@ -51,18 +51,21 @@ pub async fn insert_interval(
     })
 }
 
-pub async fn find_interval(interval_id: i64, pool: &SqlitePool) -> Result<Interval, sqlx::Error> {
+pub async fn find_interval(
+    interval_id: IntervalId,
+    pool: &SqlitePool,
+) -> Result<Interval, sqlx::Error> {
     sqlx::query_as!(
         Interval,
         "SELECT id, start_date, end_date FROM intervals WHERE id = ?",
-        interval_id
+        interval_id.id
     )
     .fetch_one(pool)
     .await
 }
 
 pub async fn find_current_interval(
-    collective_id: i64,
+    collective_id: CollectiveId,
     pool: &SqlitePool,
 ) -> Result<Interval, sqlx::Error> {
     sqlx::query_as!(
@@ -74,15 +77,15 @@ pub async fn find_current_interval(
             start_date <= date('now') AND (end_date IS NULL OR end_date >= date('now'))
         ORDER BY id ASC
         LIMIT 1",
-        collective_id
+        collective_id.id
     )
     .fetch_one(pool)
     .await
 }
 
 pub async fn find_next_interval(
-    collective_id: i64,
-    current_interval_id: i64,
+    collective_id: CollectiveId,
+    current_interval_id: IntervalId,
     pool: &SqlitePool,
 ) -> Result<Option<Interval>, sqlx::Error> {
     sqlx::query_as!(
@@ -94,8 +97,8 @@ pub async fn find_next_interval(
             id > ?
         ORDER BY id ASC
         LIMIT 1",
-        collective_id,
-        current_interval_id
+        collective_id.id,
+        current_interval_id.id
     )
     .fetch_optional(pool)
     .await

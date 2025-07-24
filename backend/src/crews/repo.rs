@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use sqlx::SqlitePool;
 
 use crate::shared::{
-    entities::{Crew, CrewInvolvement, CrewWithLinks},
+    entities::{Crew, CrewInvolvement, CrewWithLinks, IntervalId},
     links_repo::{find_all_links_for_owner_type, hash_links_by_owner, update_links_for_owner},
 };
 
@@ -74,7 +74,7 @@ pub async fn update_crew_with_links(
 
 pub async fn find_crew_involvements(
     crew_id: i64,
-    interval_id: i64,
+    interval_id: IntervalId,
     pool: &SqlitePool,
 ) -> Result<Vec<CrewInvolvement>, sqlx::Error> {
     sqlx::query_as!(
@@ -83,7 +83,7 @@ pub async fn find_crew_involvements(
         FROM crew_involvements
         WHERE crew_id = ? AND interval_id = ?",
         crew_id,
-        interval_id
+        interval_id.id
     )
     .fetch_all(pool)
     .await
@@ -91,13 +91,13 @@ pub async fn find_crew_involvements(
 
 pub async fn set_crew_convenor(
     crew_id: i64,
-    interval_id: i64,
+    interval_id: IntervalId,
     person_id: Option<i64>,
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
     println!(
         "Setting crew {} convenor for interval {} to person {:?}",
-        crew_id, interval_id, person_id
+        crew_id, interval_id.id, person_id
     );
 
     let mut transaction = pool.begin().await?;
@@ -106,7 +106,7 @@ pub async fn set_crew_convenor(
         "UPDATE crew_involvements SET convenor = FALSE
         WHERE crew_id = ? AND interval_id = ?",
         crew_id,
-        interval_id
+        interval_id.id
     )
     .execute(&mut *transaction)
     .await?;
@@ -116,7 +116,7 @@ pub async fn set_crew_convenor(
             "UPDATE crew_involvements SET convenor = TRUE
         WHERE crew_id = ? AND interval_id = ? AND person_id = ?",
             crew_id,
-            interval_id,
+            interval_id.id,
             person_id
         )
         .execute(&mut *transaction)
@@ -130,7 +130,7 @@ pub async fn set_crew_convenor(
 
 pub async fn intervals_participated_since_last_convened(
     crew_id: i64,
-    before_interval_id: i64,
+    before_interval_id: IntervalId,
     pool: &SqlitePool,
 ) -> Result<HashMap<i64, i64>, sqlx::Error> {
     let result = sqlx::query!(
@@ -154,9 +154,9 @@ pub async fn intervals_participated_since_last_convened(
         GROUP BY crew_involvements.person_id
         ",
         crew_id,
-        before_interval_id,
+        before_interval_id.id,
         crew_id,
-        before_interval_id
+        before_interval_id.id
     )
     .fetch_all(pool)
     .await?;

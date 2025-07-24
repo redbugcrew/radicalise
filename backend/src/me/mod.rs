@@ -8,10 +8,14 @@ use crate::{
     me::{
         events::{MeEvent, strip_private_data},
         my_involvement::{MyParticipationInput, update_my_involvements},
-        repo::MyInitialData,
+        repo::{MyInitialData, find_person_id_for_user},
     },
     realtime::RealtimeState,
-    shared::{COLLECTIVE_ID, entities::CollectiveInvolvement, events::AppEvent},
+    shared::{
+        default_collective_id,
+        entities::{CollectiveInvolvement, IntervalId, UserId},
+        events::AppEvent,
+    },
 };
 
 pub mod events;
@@ -36,7 +40,12 @@ async fn get_my_state(
 ) -> impl IntoResponse {
     match auth_session.user {
         Some(user) => {
-            let result = repo::find_initial_data_for_me(COLLECTIVE_ID, user.id, &pool).await;
+            let result = repo::find_initial_data_for_user(
+                default_collective_id(),
+                UserId::new(user.id),
+                &pool,
+            )
+            .await;
 
             match result {
                 Ok(initial_data) => (StatusCode::OK, Json(initial_data)).into_response(),
@@ -65,8 +74,17 @@ async fn my_participation(
 ) -> impl IntoResponse {
     match auth_session.user {
         Some(user) => {
+            let person_id =
+                find_person_id_for_user(default_collective_id(), UserId::new(user.id), &pool).await;
+            if person_id.is_err() {
+                return (StatusCode::NOT_FOUND, ()).into_response();
+            }
+            let person_id = person_id.unwrap();
+            let interval_id = IntervalId::new(interval_id);
+
             let result =
-                find_collective_involvement(COLLECTIVE_ID, user.id, interval_id, &pool).await;
+                find_collective_involvement(default_collective_id(), person_id, interval_id, &pool)
+                    .await;
 
             match result {
                 Ok(Some(data)) => (StatusCode::OK, Json(data)).into_response(),
@@ -102,7 +120,16 @@ async fn update_my_participation(
 ) -> impl IntoResponse {
     match auth_session.user {
         Some(user) => {
-            let update_result = update_my_involvements(user.id, interval_id, input, &pool).await;
+            let person_id =
+                find_person_id_for_user(default_collective_id(), UserId::new(user.id), &pool).await;
+            if person_id.is_err() {
+                return (StatusCode::NOT_FOUND, ()).into_response();
+            }
+            let person_id = person_id.unwrap();
+            let interval_id = IntervalId::new(interval_id);
+
+            let update_result =
+                update_my_involvements(person_id.clone(), interval_id.clone(), input, &pool).await;
 
             if update_result.is_err() {
                 eprintln!("Error updating my involvements: {:?}", update_result.err());
@@ -110,15 +137,20 @@ async fn update_my_participation(
             }
 
             // Fetch the updated involvement to return
-            let output_result =
-                repo::find_interval_data_for_me(COLLECTIVE_ID, user.id, interval_id, &pool).await;
+            let output_result = repo::find_interval_data_for_person(
+                default_collective_id(),
+                person_id,
+                interval_id,
+                &pool,
+            )
+            .await;
             match output_result {
                 Ok(interval_data) => {
                     let public_interval_data = strip_private_data(&interval_data);
                     let public_event =
                         AppEvent::MeEvent(MeEvent::IntervalDataChanged(public_interval_data));
                     realtime_state
-                        .broadcast_app_event_for_user(user.id.clone(), public_event.clone())
+                        .broadcast_app_event_for_user(user.id, public_event.clone())
                         .await;
 
                     let my_event = AppEvent::MeEvent(MeEvent::IntervalDataChanged(interval_data));

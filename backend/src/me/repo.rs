@@ -5,7 +5,9 @@ use utoipa::ToSchema;
 use crate::{
     collective::involvements_repo::find_collective_involvement,
     intervals::repo::{find_current_interval, find_next_interval},
-    shared::entities::{CollectiveInvolvement, CrewInvolvement},
+    shared::entities::{
+        CollectiveId, CollectiveInvolvement, CrewInvolvement, IntervalId, Person, PersonId, UserId,
+    },
 };
 
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
@@ -23,44 +25,62 @@ pub struct MyInitialData {
     pub next_interval: Option<PersonIntervalInvolvementData>,
 }
 
-pub async fn find_interval_data_for_me(
-    collective_id: i64,
-    person_id: i64,
-    interval_id: i64,
+pub async fn find_interval_data_for_person(
+    collective_id: CollectiveId,
+    person_id: PersonId,
+    interval_id: IntervalId,
     pool: &SqlitePool,
 ) -> Result<PersonIntervalInvolvementData, sqlx::Error> {
     let involvement =
-        find_collective_involvement(collective_id, person_id, interval_id, pool).await?;
+        find_collective_involvement(collective_id, person_id.clone(), interval_id.clone(), pool)
+            .await?;
 
-    let crew_involvements = find_my_crew_involvements(person_id, interval_id, pool).await?;
+    let crew_involvements =
+        find_my_crew_involvements(person_id.clone(), interval_id.clone(), pool).await?;
 
     Ok(PersonIntervalInvolvementData {
-        interval_id,
-        person_id,
+        interval_id: interval_id.id,
+        person_id: person_id.id,
         collective_involvement: involvement,
         crew_involvements,
     })
 }
 
-pub async fn find_initial_data_for_me(
-    collective_id: i64,
-    person_id: i64,
+pub async fn find_initial_data_for_user(
+    collective_id: CollectiveId,
+    user_id: UserId,
     pool: &SqlitePool,
 ) -> Result<MyInitialData, sqlx::Error> {
-    let current_interval = find_current_interval(collective_id, pool).await?;
-    let next_interval = find_next_interval(collective_id, current_interval.id, pool).await?;
+    let current_interval = find_current_interval(collective_id.clone(), pool).await?;
+    let next_interval =
+        find_next_interval(collective_id.clone(), current_interval.typed_id(), pool).await?;
+    let person = find_person_for_user(collective_id.clone(), user_id, pool).await?;
+    let person_id = person.typed_id();
 
-    let current_interval_data =
-        find_interval_data_for_me(collective_id, person_id, current_interval.id, pool).await?;
+    let current_interval_data = find_interval_data_for_person(
+        collective_id.clone(),
+        person_id.clone(),
+        current_interval.typed_id(),
+        pool,
+    )
+    .await?;
 
     let next_interval_data = if let Some(interval) = next_interval {
-        Some(find_interval_data_for_me(collective_id, person_id, interval.id, pool).await?)
+        Some(
+            find_interval_data_for_person(
+                collective_id.clone(),
+                person_id.clone(),
+                interval.typed_id(),
+                pool,
+            )
+            .await?,
+        )
     } else {
         None
     };
 
     Ok(MyInitialData {
-        person_id,
+        person_id: person_id.id,
         current_interval: Some(current_interval_data),
         next_interval: next_interval_data,
     })
@@ -68,16 +88,16 @@ pub async fn find_initial_data_for_me(
 
 // Returns the ids of all potentially impacted crews
 pub async fn update_crew_involvements(
-    person_id: i64,
-    interval_id: i64,
+    person_id: PersonId,
+    interval_id: IntervalId,
     involvements: Vec<CrewInvolvement>,
     pool: &SqlitePool,
 ) -> Result<Vec<i64>, sqlx::Error> {
-    let existing = find_my_crew_involvements(person_id, interval_id, pool).await?;
+    let existing = find_my_crew_involvements(person_id.clone(), interval_id.clone(), pool).await?;
 
     // Ensure all the involvements have the same person_id and interval_id
     for involvement in &involvements {
-        if involvement.person_id != person_id || involvement.interval_id != interval_id {
+        if involvement.person_id != person_id.id || involvement.interval_id != interval_id.id {
             eprintln!("Mismatched crew involvement: {:?}", involvement);
             return Err(sqlx::Error::RowNotFound);
         }
@@ -106,8 +126,8 @@ pub async fn update_crew_involvements(
 }
 
 pub async fn find_my_crew_involvements(
-    person_id: i64,
-    interval_id: i64,
+    person_id: PersonId,
+    interval_id: IntervalId,
     pool: &SqlitePool,
 ) -> Result<Vec<CrewInvolvement>, sqlx::Error> {
     sqlx::query_as!(
@@ -115,8 +135,8 @@ pub async fn find_my_crew_involvements(
         "SELECT id, person_id, crew_id, interval_id, convenor, volunteered_convenor
         FROM crew_involvements
         WHERE person_id = ? AND interval_id = ?",
-        person_id,
-        interval_id
+        person_id.id,
+        interval_id.id
     )
     .fetch_all(pool)
     .await
@@ -174,4 +194,37 @@ pub async fn upsert_crew_involvements(
     transaction.commit().await?;
 
     Ok(())
+}
+
+pub async fn find_person_for_user(
+    _collective_id: CollectiveId,
+    user_id: UserId,
+    pool: &SqlitePool,
+) -> Result<Person, sqlx::Error> {
+    sqlx::query_as!(
+        Person,
+        "SELECT id, display_name, about, avatar_id
+        FROM people
+        WHERE user_id = ?",
+        user_id.id
+    )
+    .fetch_one(pool)
+    .await
+}
+
+pub async fn find_person_id_for_user(
+    _collective_id: CollectiveId,
+    user_id: UserId,
+    pool: &SqlitePool,
+) -> Result<PersonId, sqlx::Error> {
+    sqlx::query_as!(
+        PersonId,
+        "SELECT id
+        FROM people
+        WHERE user_id = ?",
+        user_id.id
+    )
+    .fetch_one(pool)
+    .await
+    .map(|person| PersonId::new(person.id))
 }

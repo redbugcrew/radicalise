@@ -2,12 +2,45 @@ use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 use utoipa::ToSchema;
 
+#[derive(Clone, Debug, PartialEq)]
+pub struct CollectiveId {
+    pub id: i64,
+}
+
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
 pub struct Collective {
     pub id: i64,
     pub name: Option<String>,
     pub description: Option<String>,
     pub links: Vec<Link>,
+}
+
+impl Collective {
+    pub fn typed_id(&self) -> CollectiveId {
+        CollectiveId { id: self.id }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct UserId {
+    pub id: i64,
+}
+
+impl UserId {
+    pub fn new(id: i64) -> Self {
+        UserId { id }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct PersonId {
+    pub id: i64,
+}
+
+impl PersonId {
+    pub fn new(id: i64) -> Self {
+        PersonId { id }
+    }
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
@@ -18,11 +51,34 @@ pub struct Person {
     pub avatar_id: Option<i64>,
 }
 
+impl Person {
+    pub fn typed_id(&self) -> PersonId {
+        PersonId::new(self.id)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct IntervalId {
+    pub id: i64,
+}
+
+impl IntervalId {
+    pub fn new(id: i64) -> Self {
+        IntervalId { id }
+    }
+}
+
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
 pub struct Interval {
     pub id: i64,
     pub start_date: String,
     pub end_date: String,
+}
+
+impl Interval {
+    pub fn typed_id(&self) -> IntervalId {
+        IntervalId::new(self.id)
+    }
 }
 
 #[derive(Serialize, Deserialize, ToSchema, sqlx::Type, Clone, Debug)]

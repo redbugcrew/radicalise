@@ -10,7 +10,11 @@ use crate::{
         repo::{InitialData, IntervalInvolvementData},
     },
     realtime::RealtimeState,
-    shared::{COLLECTIVE_ID, entities::Collective, events::AppEvent},
+    shared::{
+        default_collective_id,
+        entities::{Collective, IntervalId},
+        events::AppEvent,
+    },
 };
 
 pub mod events;
@@ -30,7 +34,7 @@ pub fn router() -> OpenApiRouter {
         (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
     ),)]
 async fn get_collective_state(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse {
-    let collective_result = repo::find_collective_with_links(COLLECTIVE_ID, &pool).await;
+    let collective_result = repo::find_collective_with_links(default_collective_id(), &pool).await;
 
     match collective_result {
         Ok(collective) => {
@@ -55,9 +59,12 @@ async fn get_involvements(
     Path(interval_id): Path<i64>,
     Extension(pool): Extension<SqlitePool>,
 ) -> impl IntoResponse {
+    let interval_id = IntervalId::new(interval_id);
+
     let collective_involvements_result =
-        find_all_collective_involvements(COLLECTIVE_ID, interval_id, &pool).await;
-    let crew_involvements_result = repo::find_all_crew_involvements(interval_id, &pool).await;
+        find_all_collective_involvements(default_collective_id(), interval_id.clone(), &pool).await;
+    let crew_involvements_result =
+        repo::find_all_crew_involvements(interval_id.clone(), &pool).await;
 
     if collective_involvements_result.is_err() || crew_involvements_result.is_err() {
         return (StatusCode::NOT_FOUND, ()).into_response();
@@ -66,7 +73,7 @@ async fn get_involvements(
     let crew_involvements = crew_involvements_result.unwrap();
 
     let result = IntervalInvolvementData {
-        interval_id,
+        interval_id: interval_id.id,
         collective_involvements,
         crew_involvements,
     };
