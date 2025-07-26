@@ -55,6 +55,7 @@ export interface Collective {
   id: number;
   links: Link[];
   name?: string | null;
+  noun_name?: string | null;
 }
 
 export type CollectiveEvent = {
@@ -100,8 +101,6 @@ export interface CrewInvolvement {
 }
 
 export interface CrewWithLinks {
-  /** @format int64 */
-  collective_id: number;
   description?: string | null;
   /** @format int64 */
   id: number;
@@ -195,8 +194,6 @@ export interface Person {
   about?: string | null;
   /** @format int64 */
   avatar_id?: number | null;
-  /** @format int64 */
-  collective_id: number;
   display_name: string;
   /** @format int64 */
   id: number;
@@ -392,7 +389,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 1.0.2
+ * @version 1.0.1
  * @license
  */
 export class Api<
