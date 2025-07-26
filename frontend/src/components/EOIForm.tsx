@@ -52,7 +52,7 @@ export default function EOIForm({ onSubmit }: EOIFormProps) {
           <Textarea
             rows={3}
             label="Practicing transformative justice"
-            description="Recognising that we all have the capacity to cause or experience harm - is there anything you would like to share about your experiences of learning and healing from conflict?"
+            description="Recognising that we all have the capacity to cause and experience harm - is there anything you would like to share about your experiences of learning and healing from conflict?"
             placeholder="Feel free to share here, or let us know if you would prefer to discuss this in person."
             {...form.getInputProps("transformativeJustice")}
           />
