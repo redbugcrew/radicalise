@@ -14,3 +14,4 @@ export { default as ComboTextArea } from "./forms/ComboTextArea";
 export { default as LinksInput } from "./links/LinksInput/LinksInput";
 export { default as CollectiveForm } from "./CollectiveForm";
 export { default as LinksStack } from "./links/LinksDisplay/LinksStack";
+export { default as EOIForm } from "./EOIForm";
