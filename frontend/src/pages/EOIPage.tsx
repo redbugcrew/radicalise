@@ -1,9 +1,10 @@
-import { Container, Stack, Title, Text } from "@mantine/core";
-import { Anchor, EOIForm } from "../components";
+import { Container, Stack, Title } from "@mantine/core";
+import { EOIForm, Markdown } from "../components";
 import type { ExpressionOfInterest } from "../components/EOIForm";
 import { useParams } from "react-router-dom";
 import { getApi } from "../api";
 import { useEffect, useState } from "react";
+
 import type { Collective } from "../api/Api";
 
 export default function EOIPage() {
@@ -42,6 +43,10 @@ export default function EOIPage() {
     return <Container>Loading...</Container>;
   }
 
+  if (collective.feature_eoi !== true) {
+    return <Container>Expression of Interest is not enabled for this collective.</Container>;
+  }
+
   return (
     <Container pt="lg" pb="xl">
       <Stack gap="xl">
@@ -52,21 +57,9 @@ export default function EOIPage() {
           </Title>
         </Stack>
 
-        <Stack gap="md">
-          <Text>
-            Hi there, you can use this form to express your interest in participating in the Rhubarb Collective. The Rhubarb Collective is not a membership organisation, it's a multi-site housing project driven by an
-            emerging group of participants.
-          </Text>
-          <Text>
-            Before expressing your interest, please read about what participating in the Rhubarb Collective involves in <Anchor href="https://radhousing.org/brassica/handbook/participation">our handbook</Anchor>.
-          </Text>
-          <Text>
-            We have a decentralised process for inviting participants who express interest based on our capacity for onboarding new people. The details you provide here will help us reach out to you, if/when any current
-            participants have the capacity to support you to get involved in the project.
-          </Text>
-        </Stack>
+        <Markdown children={collective.eoi_description} />
 
-        <EOIForm onSubmit={handleSubmit} />
+        <EOIForm onSubmit={handleSubmit} collective={collective} />
       </Stack>
     </Container>
   );
