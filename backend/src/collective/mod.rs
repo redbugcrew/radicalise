@@ -96,7 +96,7 @@ pub async fn update_collective(
 ) -> impl IntoResponse {
     println!("Updating collective: {:?}", input);
 
-    match repo::update_collective_with_links(input, &pool).await {
+    match repo::update_collective_with_links(input, default_collective_id(), &pool).await {
         Ok(response) => {
             let event = AppEvent::CollectiveEvent(CollectiveEvent::CollectiveUpdated(response));
             realtime_state

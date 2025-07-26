@@ -8,7 +8,7 @@ use crate::{
     intervals::repo::{find_current_interval, find_next_interval},
     people::repo::find_all_people,
     shared::{
-        COLLECTIVE_ID, default_collective_id,
+        default_collective_id,
         entities::{
             Collective, CollectiveId, CollectiveInvolvement, CrewInvolvement, CrewWithLinks,
             Interval, IntervalId, Person,
@@ -152,6 +152,7 @@ pub async fn find_initial_data_for_collective(
 
 pub async fn update_collective(
     input: Collective,
+    collective_id: CollectiveId,
     pool: &SqlitePool,
 ) -> Result<Collective, sqlx::Error> {
     sqlx::query!(
@@ -161,7 +162,7 @@ pub async fn update_collective(
         input.name,
         input.noun_name,
         input.description,
-        COLLECTIVE_ID
+        collective_id.id
     )
     .execute(pool)
     .await?;
@@ -171,9 +172,10 @@ pub async fn update_collective(
 
 pub async fn update_collective_with_links(
     input: Collective,
+    collective_id: CollectiveId,
     pool: &SqlitePool,
 ) -> Result<Collective, sqlx::Error> {
-    let collective = update_collective(input, pool).await?;
+    let collective = update_collective(input, collective_id, pool).await?;
     let links = update_links_for_owner(
         collective.id,
         "collectives".to_string(),
