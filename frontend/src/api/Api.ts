@@ -452,50 +452,6 @@ export class Api<
     /**
      * No description
      *
-     * @name GetCollectiveState
-     * @request GET:/api/collective
-     */
-    getCollectiveState: (params: RequestParams = {}) =>
-      this.request<InitialData, any>({
-        path: `/api/collective`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name UpdateCollective
-     * @request PUT:/api/collective
-     */
-    updateCollective: (data: Collective, params: RequestParams = {}) =>
-      this.request<AppEvent[], any>({
-        path: `/api/collective`,
-        method: "PUT",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name GetInvolvements
-     * @request GET:/api/collective/interval/{interval_id}/involvements
-     */
-    getInvolvements: (intervalId: number, params: RequestParams = {}) =>
-      this.request<IntervalInvolvementData, any>({
-        path: `/api/collective/interval/${intervalId}/involvements`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name UpdateCrew
      * @request PUT:/api/crews/{crew_id}
      */
@@ -580,6 +536,50 @@ export class Api<
     /**
      * No description
      *
+     * @name UpdateCollective
+     * @request PUT:/api/my_collective
+     */
+    updateCollective: (data: Collective, params: RequestParams = {}) =>
+      this.request<AppEvent[], any>({
+        path: `/api/my_collective`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GetInvolvements
+     * @request GET:/api/my_collective/interval/{interval_id}/involvements
+     */
+    getInvolvements: (intervalId: number, params: RequestParams = {}) =>
+      this.request<IntervalInvolvementData, any>({
+        path: `/api/my_collective/interval/${intervalId}/involvements`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GetCollectiveState
+     * @request GET:/api/my_collective/state
+     */
+    getCollectiveState: (params: RequestParams = {}) =>
+      this.request<InitialData, any>({
+        path: `/api/my_collective/state`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name UpdatePerson
      * @request PUT:/api/people/{person_id}
      */
@@ -593,6 +593,20 @@ export class Api<
         method: "PUT",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GetCollectiveBySlug
+     * @request GET:/api/public/collective/by_slug/{collective_slug}
+     */
+    getCollectiveBySlug: (collectiveSlug: string, params: RequestParams = {}) =>
+      this.request<Collective, any>({
+        path: `/api/public/collective/by_slug/${collectiveSlug}`,
+        method: "GET",
         format: "json",
         ...params,
       }),

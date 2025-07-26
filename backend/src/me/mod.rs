@@ -4,12 +4,12 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     auth::auth_backend::AuthSession,
-    collective::involvements_repo::find_collective_involvement,
     me::{
         events::{MeEvent, strip_private_data},
         my_involvement::{MyParticipationInput, update_my_involvements},
         repo::{MyInitialData, find_person_id_for_user},
     },
+    my_collective::involvements_repo::find_collective_involvement,
     realtime::RealtimeState,
     shared::{
         default_collective_id,

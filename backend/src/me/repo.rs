@@ -3,8 +3,8 @@ use sqlx::{QueryBuilder, Sqlite, SqlitePool};
 use utoipa::ToSchema;
 
 use crate::{
-    collective::involvements_repo::find_collective_involvement,
     intervals::repo::{find_current_interval, find_next_interval},
+    my_collective::involvements_repo::find_collective_involvement,
     shared::entities::{
         CollectiveId, CollectiveInvolvement, CrewId, CrewInvolvement, IntervalId, Person, PersonId,
         UserId,

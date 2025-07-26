@@ -3,9 +3,9 @@ use sqlx::SqlitePool;
 use utoipa::ToSchema;
 
 use crate::{
-    collective::involvements_repo::find_all_collective_involvements,
     crews::repo::find_all_crews_with_links,
     intervals::repo::{find_current_interval, find_next_interval},
+    my_collective::involvements_repo::find_all_collective_involvements,
     people::repo::find_all_people,
     shared::{
         default_collective_id,
@@ -48,6 +48,29 @@ pub async fn find_collective(
         "SELECT id, name, noun_name, description, slug, feature_eoi, eoi_description
         FROM collectives WHERE id = ?",
         collective_id.id
+    )
+    .fetch_one(pool)
+    .await
+    .map(|row| Collective {
+        id: row.id,
+        name: Some(row.name),
+        noun_name: row.noun_name,
+        description: row.description,
+        links: vec![], // Links are not fetched here, assuming they are handled elsewhere
+        slug: row.slug,
+        feature_eoi: row.feature_eoi,
+        eoi_description: row.eoi_description,
+    })
+}
+
+pub async fn find_collective_by_slug(
+    collective_slug: String,
+    pool: &SqlitePool,
+) -> Result<Collective, sqlx::Error> {
+    sqlx::query!(
+        "SELECT id, name, noun_name, description, slug, feature_eoi, eoi_description
+        FROM collectives WHERE slug = ?",
+        collective_slug
     )
     .fetch_one(pool)
     .await
@@ -163,11 +186,14 @@ pub async fn update_collective(
 ) -> Result<Collective, sqlx::Error> {
     sqlx::query!(
         "UPDATE collectives
-         SET name = ?, noun_name = ?, description = ?
+         SET name = ?, noun_name = ?, description = ?, slug = ?, feature_eoi = ?, eoi_description = ?
          WHERE id = ?",
         input.name,
         input.noun_name,
         input.description,
+        input.slug,
+        input.feature_eoi,
+        input.eoi_description,
         collective_id.id
     )
     .execute(pool)
