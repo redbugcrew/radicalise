@@ -1,0 +1,22 @@
+{
+  "editor.formatOnSave": true,
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    "**/CVS": true,
+    "**/.ruby-lsp": true,
+    "**/.classpath": true,
+    "**/.project": true,
+    "**/.settings": true,
+    "**/.factorypath": true,
+    "frontend/dist": true,
+    "frontend/node_modules": true,
+    "node_modules": true,
+    "backend/target": true,
+    "backend/.sqlx": true
+  },
+  "explorerExclude.backup": {}
+}
