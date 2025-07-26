@@ -45,7 +45,7 @@ pub async fn find_collective(
     pool: &SqlitePool,
 ) -> Result<Collective, sqlx::Error> {
     sqlx::query!(
-        "SELECT id, name, description
+        "SELECT id, name, noun_name, description
         FROM collectives WHERE id = ?",
         collective_id.id
     )
@@ -54,6 +54,7 @@ pub async fn find_collective(
     .map(|row| Collective {
         id: row.id,
         name: Some(row.name),
+        noun_name: row.noun_name,
         description: row.description,
         links: vec![], // Links are not fetched here, assuming they are handled elsewhere
     })
@@ -69,6 +70,7 @@ pub async fn find_collective_with_links(
     Ok(Collective {
         id: collective.id,
         name: collective.name,
+        noun_name: collective.noun_name,
         description: collective.description,
         links,
     })
@@ -182,6 +184,7 @@ pub async fn update_collective_with_links(
     Ok(Collective {
         id: collective.id,
         name: collective.name,
+        noun_name: collective.noun_name,
         description: collective.description,
         links: links.unwrap_or_default(),
     })
