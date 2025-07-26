@@ -8,8 +8,12 @@ export const theme = createTheme({
           return {
             root: {
               "--input-label-size": "18px",
-              "--input-description-size": "14px",
+              "--input-description-size": "16px",
               "--input-fz": "16px",
+            },
+            description: {
+              lineHeight: "1.3",
+              paddingBottom: "0.2em",
             },
           };
         }

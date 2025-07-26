@@ -10,3 +10,4 @@ export { default as EditCrew } from "./crews/EditCrew";
 export { default as Intervals } from "./intervals/Intervals";
 export { default as NewInterval } from "./intervals/NewInterval";
 export { default as EditCollective } from "./EditCollective";
+export { default as EOIPage } from "./EOIPage";
