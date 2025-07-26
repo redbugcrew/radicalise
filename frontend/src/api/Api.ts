@@ -51,11 +51,14 @@ export interface CapacityPlanning {
 
 export interface Collective {
   description?: string | null;
+  eoi_description?: string | null;
+  feature_eoi: boolean;
   /** @format int64 */
   id: number;
   links: Link[];
   name?: string | null;
   noun_name?: string | null;
+  slug?: string | null;
 }
 
 export type CollectiveEvent = {
@@ -101,6 +104,8 @@ export interface CrewInvolvement {
 }
 
 export interface CrewWithLinks {
+  /** @format int64 */
+  collective_id: number;
   description?: string | null;
   /** @format int64 */
   id: number;
@@ -194,6 +199,8 @@ export interface Person {
   about?: string | null;
   /** @format int64 */
   avatar_id?: number | null;
+  /** @format int64 */
+  collective_id: number;
   display_name: string;
   /** @format int64 */
   id: number;
@@ -389,7 +396,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 1.0.1
+ * @version 1.1.2
  * @license
  */
 export class Api<

@@ -14,6 +14,9 @@ pub struct Collective {
     pub noun_name: Option<String>,
     pub description: Option<String>,
     pub links: Vec<Link>,
+    pub slug: Option<String>,
+    pub feature_eoi: bool,
+    pub eoi_description: Option<String>,
 }
 
 impl Collective {
