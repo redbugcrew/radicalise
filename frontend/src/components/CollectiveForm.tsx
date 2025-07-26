@@ -15,6 +15,7 @@ export default function CollectiveForm({ collective, onSubmit }: CollectiveFormP
     initialValues: { ...collective },
     validate: {
       name: (value) => (value ? null : "Name is required"),
+      noun_name: (value) => (value ? null : "Noun name is required"),
       links: linksValidator,
     },
   });
@@ -23,7 +24,8 @@ export default function CollectiveForm({ collective, onSubmit }: CollectiveFormP
     <form onSubmit={form.onSubmit(onSubmit)}>
       <Stack gap="lg">
         <Stack gap="md">
-          <TextInput label="Name" placeholder="Crew Name" key="name" {...form.getInputProps("name")} />
+          <TextInput label="Name" key="name" {...form.getInputProps("name")} />
+          <TextInput label="Noun name" key="noun_name" {...form.getInputProps("noun_name")} />
           <Textarea label="Description" rows={5} placeholder="Crew Description" key="description" {...form.getInputProps("description")} />
           <LinksInput label="Links" placeholder="Add a link" key="links" {...form.getInputProps("links")} />
         </Stack>

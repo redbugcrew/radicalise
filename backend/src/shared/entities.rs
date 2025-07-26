@@ -11,6 +11,7 @@ pub struct CollectiveId {
 pub struct Collective {
     pub id: i64,
     pub name: Option<String>,
+    pub noun_name: Option<String>,
     pub description: Option<String>,
     pub links: Vec<Link>,
 }
