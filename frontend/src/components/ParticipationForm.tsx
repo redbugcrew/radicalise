@@ -38,6 +38,8 @@ const renderCapacityScoreOption: SelectProps["renderOption"] = ({ option, checke
 );
 
 function CapacityStep({ form, readOnly }: StepProps) {
+  const collective_noun_name = useAppSelector((state) => state.collective?.noun_name || "the collective");
+
   return (
     <Stack mt="lg" gap="md">
       <Stack gap={0} mb="md">
@@ -90,7 +92,7 @@ function CapacityStep({ form, readOnly }: StepProps) {
       />
       <Select
         label={form.values.private_capacity_planning ? "Capacity (Shared with group)" : "Capacity"}
-        description="Given the context of your life (above), how would you describe your capacity to participate in the Brassica Collective this interval?"
+        description={`Given the context of your life (above), how would you describe your capacity to participate in ${collective_noun_name} this interval?`}
         placeholder="Pick value"
         disabled={readOnly}
         data={[
@@ -112,6 +114,7 @@ type MinimumParticipationStepProps = StepProps & {};
 function MinimumParticipationStep({ form, readOnly }: MinimumParticipationStepProps) {
   const [intention, setIntention] = useState<ParticipationIntention | null>(form.values.participation_intention);
   const [optOutType, setOptOutType] = useState<OptOutType | null>(form.values.opt_out_type);
+  const collective_noun_name = useAppSelector((state) => state.collective?.noun_name || "the collective");
 
   form.watch("participation_intention", ({ value }) => {
     setIntention(value);
@@ -128,7 +131,7 @@ function MinimumParticipationStep({ form, readOnly }: MinimumParticipationStepPr
     <Stack mt="lg" gap="md">
       <Select
         label="Participation intention"
-        description="Would you like to participate in the Brassica Collective this interval?"
+        description={`Would you like to participate in ${collective_noun_name} this interval?`}
         placeholder="Pick value"
         disabled={readOnly}
         data={[
