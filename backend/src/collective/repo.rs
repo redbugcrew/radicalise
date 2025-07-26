@@ -156,9 +156,10 @@ pub async fn update_collective(
 ) -> Result<Collective, sqlx::Error> {
     sqlx::query!(
         "UPDATE collectives
-         SET name = ?, description = ?
+         SET name = ?, noun_name = ?, description = ?
          WHERE id = ?",
         input.name,
+        input.noun_name,
         input.description,
         COLLECTIVE_ID
     )
