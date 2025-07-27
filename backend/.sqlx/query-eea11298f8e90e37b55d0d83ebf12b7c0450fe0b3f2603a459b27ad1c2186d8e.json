@@ -1,0 +1,56 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id, name, noun_name, description, slug, feature_eoi, eoi_description\n        FROM collectives WHERE slug = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer"
+      },
+      {
+        "name": "name",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "noun_name",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "description",
+        "ordinal": 3,
+        "type_info": "Text"
+      },
+      {
+        "name": "slug",
+        "ordinal": 4,
+        "type_info": "Text"
+      },
+      {
+        "name": "feature_eoi",
+        "ordinal": 5,
+        "type_info": "Bool"
+      },
+      {
+        "name": "eoi_description",
+        "ordinal": 6,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      true,
+      false,
+      true
+    ]
+  },
+  "hash": "eea11298f8e90e37b55d0d83ebf12b7c0450fe0b3f2603a459b27ad1c2186d8e"
+}
