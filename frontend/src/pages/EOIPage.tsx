@@ -4,7 +4,12 @@ import { useParams } from "react-router-dom";
 import { getApi } from "../api";
 import { useEffect, useState } from "react";
 
-import type { Collective, Eoi } from "../api/Api";
+import { EoiError, type Collective, type Eoi } from "../api/Api";
+
+interface EoiPageResult {
+  eoi: Eoi | null;
+  error: EoiError | null;
+}
 
 export default function EOIPage() {
   const { collectiveSlug } = useParams<"collectiveSlug">();
@@ -12,7 +17,7 @@ export default function EOIPage() {
   if (!collectiveSlug) return <Container>Error: Collective not found</Container>;
 
   const [collective, setCollective] = useState<undefined | null | Collective>(undefined);
-  const [eoi, setEoi] = useState<Eoi | null>(null);
+  const [result, setResult] = useState<EoiPageResult>({ eoi: null, error: null });
 
   useEffect(() => {
     getApi()
@@ -44,15 +49,14 @@ export default function EOIPage() {
   const handleSubmit = (values: Eoi): Promise<void> => {
     return getApi()
       .api.createEoi(values)
-      .then((response) => {
-        if (response.status === 201) {
-          setEoi(values);
-        } else {
-          console.error("Error submitting EOI:", response);
-        }
+      .then((_) => {
+        setResult({ eoi: values, error: null });
       })
       .catch((error) => {
-        console.error("Error submitting EOI:", error);
+        if (error.response?.status === 400) {
+          const errorEnum = error.response.data as EoiError;
+          setResult({ eoi: null, error: errorEnum });
+        }
       });
   };
 
@@ -66,14 +70,14 @@ export default function EOIPage() {
           </Title>
         </Stack>
 
-        {eoi && (
+        {result.eoi && (
           <Card withBorder>
             <Stack gap="md">
               <Title order={3}>Thank you for your interest!</Title>
               <Text>
                 You will receive a confirmation email to{" "}
                 <Text span ff="monospace" fw="bold">
-                  {eoi.email}
+                  {result.eoi.email}
                 </Text>{" "}
                 which contains links to edit or withdraw your interest.
               </Text>
@@ -81,7 +85,28 @@ export default function EOIPage() {
           </Card>
         )}
 
-        {!eoi && (
+        {result.error && result.error === EoiError.EmailAlreadyExists && (
+          <Card withBorder style={{ borderColor: "var(--mantine-color-red-5)" }}>
+            <Stack gap="md">
+              <Title order={3}>I think we already have a submission from you</Title>
+              <Text>
+                We already have an expression of interest for {collective.noun_name ?? "this collective"} from that email. If you would like to update your interest, you shoul have received an email with a link to edit
+                or delete your original submission.
+              </Text>
+            </Stack>
+          </Card>
+        )}
+
+        {result.error && result.error !== EoiError.EmailAlreadyExists && (
+          <Card withBorder style={{ borderColor: "var(--mantine-color-red-5)" }}>
+            <Stack gap="md">
+              <Title order={3}>Sorry, there was an error with your submission</Title>
+              <Text>Something is broken on our end. Please try again later, or contact the collective via other means.</Text>
+            </Stack>
+          </Card>
+        )}
+
+        {!result.error && !result.eoi && (
           <>
             <Markdown children={collective.eoi_description} />
             <EOIForm onSubmit={handleSubmit} collective={collective} />

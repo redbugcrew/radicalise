@@ -26,6 +26,12 @@ export enum InvolvementStatus {
   Exiting = "Exiting",
 }
 
+export enum EoiError {
+  CollectiveNotFound = "CollectiveNotFound",
+  EoiFeatureDisabled = "EoiFeatureDisabled",
+  EmailAlreadyExists = "EmailAlreadyExists",
+}
+
 export type AppEvent =
   | {
       MeEvent: MeEvent;
@@ -632,7 +638,7 @@ export class Api<
      * @request POST:/api/public/eoi
      */
     createEoi: (data: Eoi, params: RequestParams = {}) =>
-      this.request<any, string>({
+      this.request<any, EoiError>({
         path: `/api/public/eoi`,
         method: "POST",
         body: data,
