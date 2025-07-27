@@ -18,7 +18,7 @@ export default function EoiTable({ eois }: EoiTableProps) {
         {eois.map((eoi) => (
           <Table.Tr key={eoi.id}>
             <Table.Td>
-              <Anchor href={`/eois/${eoi.id}`}>{eoi.name}</Anchor>
+              <Anchor href={`/invitations/${eoi.id}`}>{eoi.name}</Anchor>
             </Table.Td>
           </Table.Tr>
         ))}
