@@ -5,7 +5,7 @@ use utoipa::ToSchema;
 
 use crate::{
     my_collective::repo::find_collective,
-    shared::entities::{CollectiveId, Eoi},
+    shared::entities::{CollectiveId, EntryPathway},
 };
 
 pub mod repo;
@@ -25,11 +25,11 @@ enum EoiError {
         (status = BAD_REQUEST, body = EoiError),
         (status = INTERNAL_SERVER_ERROR, body = ()),
     ),
-    request_body(content = Eoi, content_type = "application/json")
+    request_body(content = EntryPathway, content_type = "application/json")
 )]
 pub async fn create_eoi(
     Extension(pool): Extension<SqlitePool>,
-    axum::extract::Json(submission): axum::extract::Json<Eoi>,
+    axum::extract::Json(submission): axum::extract::Json<EntryPathway>,
 ) -> impl IntoResponse {
     println!("Creating EOI for details: {:?}", submission);
 
@@ -49,7 +49,7 @@ pub async fn create_eoi(
         return (StatusCode::BAD_REQUEST, Json(EoiError::EoiFeatureDisabled)).into_response();
     }
 
-    let create_result = repo::create_eoi(submission, &pool).await;
+    let create_result = repo::create_entry_pathway(submission, &pool).await;
 
     match create_result {
         Ok(_) => (StatusCode::CREATED, ()),

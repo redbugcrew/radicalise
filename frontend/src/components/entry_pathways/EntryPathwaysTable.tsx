@@ -1,12 +1,12 @@
 import { Badge, Table } from "@mantine/core";
-import type { Eoi } from "../../api/Api";
+import type { EntryPathway } from "../../api/Api";
 import Anchor from "../Anchor";
 
-interface EoiTableProps {
-  eois: Eoi[];
+interface EntryPathwayTableProps {
+  entryPathways: EntryPathway[];
 }
 
-export default function EoiTable({ eois }: EoiTableProps) {
+export default function EntryPathwayTable({ entryPathways }: EntryPathwayTableProps) {
   return (
     <Table>
       <Table.Thead>
@@ -16,10 +16,10 @@ export default function EoiTable({ eois }: EoiTableProps) {
         </Table.Tr>
       </Table.Thead>
       <Table.Tbody>
-        {eois.map((eoi) => (
-          <Table.Tr key={eoi.id}>
+        {entryPathways.map((entryPathway) => (
+          <Table.Tr key={entryPathway.id}>
             <Table.Td>
-              <Anchor href={`/invitations/${eoi.id}`}>{eoi.name}</Anchor>
+              <Anchor href={`/entry_pathways/${entryPathway.id}`}>{entryPathway.name}</Anchor>
             </Table.Td>
             <Table.Td>
               <Badge color="blue">EOI</Badge>

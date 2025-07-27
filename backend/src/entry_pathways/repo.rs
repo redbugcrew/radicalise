@@ -1,8 +1,11 @@
 use sqlx::SqlitePool;
 
-use crate::shared::entities::{CollectiveId, Eoi};
+use crate::shared::entities::{CollectiveId, EntryPathway};
 
-pub async fn create_eoi(record: Eoi, pool: &SqlitePool) -> Result<(), sqlx::Error> {
+pub async fn create_entry_pathway(
+    record: EntryPathway,
+    pool: &SqlitePool,
+) -> Result<(), sqlx::Error> {
     sqlx::query!(
         "INSERT INTO entry_pathways (collective_id, name, email, interest, context, referral, conflict_experience, participant_connections) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
         record.collective_id,
@@ -19,12 +22,12 @@ pub async fn create_eoi(record: Eoi, pool: &SqlitePool) -> Result<(), sqlx::Erro
     Ok(())
 }
 
-pub async fn find_all_eois_for_collective(
+pub async fn find_all_entry_pathways_for_collective(
     collective_id: CollectiveId,
     pool: &SqlitePool,
-) -> Result<Vec<Eoi>, sqlx::Error> {
+) -> Result<Vec<EntryPathway>, sqlx::Error> {
     let eois = sqlx::query_as!(
-        Eoi,
+        EntryPathway,
         "SELECT id, collective_id, name, email, interest, context, referral, conflict_experience, participant_connections FROM entry_pathways WHERE collective_id = ?",
         collective_id.id
     )

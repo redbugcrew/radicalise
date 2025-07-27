@@ -5,7 +5,7 @@ import peopleReducer, { peopleLoaded, personUpdated } from "./people";
 import intervalsReducer, { intervalsLoaded, intervalCreated } from "./intervals";
 import involvementsReducer, { involvementsLoaded, intervalDataChanged } from "./involvements";
 import crewsReducer, { crewsLoaded, crewUpdated } from "./crews";
-import eoisReducer, { eoisLoaded } from "./eois";
+import entryPathwaysReducer, { entryPathwaysLoaded } from "./entry_pathways";
 import meReducer, { meLoaded } from "./me";
 import { getApi } from "../api";
 import { redirect } from "react-router-dom";
@@ -19,7 +19,7 @@ const store = configureStore({
     involvements: involvementsReducer,
     crews: crewsReducer,
     me: meReducer,
-    eois: eoisReducer,
+    entryPathways: entryPathwaysReducer,
   },
 });
 
@@ -44,7 +44,7 @@ async function loadCollectiveData(store: AppStore, api: ReturnType<typeof getApi
       store.dispatch(crewsLoaded(response.data.crews));
       store.dispatch(intervalsLoaded({ allIntervals: response.data.intervals, currentInterval: response.data.current_interval }));
       store.dispatch(involvementsLoaded(response.data.involvements));
-      store.dispatch(eoisLoaded(response.data.eois));
+      store.dispatch(entryPathwaysLoaded(response.data.entry_pathways));
       store.dispatch(collectiveLoaded(response.data.collective));
 
       return null;

@@ -4,10 +4,10 @@ import { useParams } from "react-router-dom";
 import { getApi } from "../api";
 import { useEffect, useState } from "react";
 
-import { EoiError, type Collective, type Eoi } from "../api/Api";
+import { EoiError, type Collective, type EntryPathway } from "../api/Api";
 
 interface EoiPageResult {
-  eoi: Eoi | null;
+  eoi: EntryPathway | null;
   error: EoiError | null;
 }
 
@@ -46,7 +46,7 @@ export default function EOIPage() {
     return <Container>Expression of Interest is not enabled for this collective.</Container>;
   }
 
-  const handleSubmit = (values: Eoi): Promise<void> => {
+  const handleSubmit = (values: EntryPathway): Promise<void> => {
     return getApi()
       .api.createEoi(values)
       .then((_) => {

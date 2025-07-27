@@ -16,4 +16,4 @@ export { default as CollectiveForm } from "./CollectiveForm";
 export { default as LinksStack } from "./links/LinksDisplay/LinksStack";
 export { default as EOIForm } from "./EOIForm";
 export { default as Markdown } from "./Markdown";
-export { default as InvitationTable } from "./invitations/InvitationTable";
+export { default as EntryPathwaysTable } from "./entry_pathways/EntryPathwaysTable";

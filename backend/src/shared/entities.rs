@@ -263,7 +263,7 @@ pub struct CrewWithLinks {
 
 #[derive(ToSchema, Deserialize, Serialize, Debug)]
 #[allow(dead_code)]
-pub struct Eoi {
+pub struct EntryPathway {
     pub id: i64,
     pub collective_id: i64,
     pub name: String,

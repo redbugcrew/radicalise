@@ -7,7 +7,7 @@ use crate::{my_collective::repo::find_collective_by_slug, shared::entities::Coll
 pub fn router() -> OpenApiRouter {
     OpenApiRouter::new()
         .routes(routes!(get_collective_by_slug))
-        .routes(routes!(crate::eoi::create_eoi))
+        .routes(routes!(crate::entry_pathways::create_eoi))
 }
 
 #[utoipa::path(get, path = "/collective/by_slug/{collective_slug}", responses(

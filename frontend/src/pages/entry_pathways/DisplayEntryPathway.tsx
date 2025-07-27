@@ -1,7 +1,7 @@
 import { Container, Stack, Title, Box, Text, Card, Group } from "@mantine/core";
 import { useParams } from "react-router-dom";
 import { useAppSelector } from "../../store";
-import type { Eoi } from "../../api/Api";
+import type { EntryPathway } from "../../api/Api";
 import { Anchor } from "../../components";
 import { IconArrowLeft } from "@tabler/icons-react";
 
@@ -21,15 +21,15 @@ function ResponseField({ label, description, value }: { label: string; descripti
   );
 }
 
-export default function Invitation() {
-  const { invitationId } = useParams<"invitationId">();
-  const invitationIdNum = parseInt(invitationId || "", 10);
-  const invitation: Eoi | undefined = useAppSelector((state) => state.eois.find((eoi) => eoi.id === invitationIdNum));
+export default function DisplayEntryPathway() {
+  const { entryPathwayId } = useParams<"entryPathwayId">();
+  const entryPathwayIdNum = parseInt(entryPathwayId || "", 10);
+  const entryPathway: EntryPathway | undefined = useAppSelector((state) => state.entryPathways.find((entryPathway) => entryPathway.id === entryPathwayIdNum));
 
-  if (!invitation) {
+  if (!entryPathway) {
     return (
       <Container>
-        <Title order={2}>Invitation not found</Title>
+        <Title order={2}>Entry Pathway not found</Title>
       </Container>
     );
   }
@@ -38,28 +38,28 @@ export default function Invitation() {
     <Container>
       <Stack gap="lg">
         <Box>
-          <Title order={1}>Invitation Details</Title>
+          <Title order={1}>Entry Pathway</Title>
           <Title order={2}>Expression of Interest</Title>
         </Box>
         <Stack gap="lg">
-          <ResponseField label="Name" value={invitation.name} />
-          <ResponseField label="Interest" description="What interests you about participating in the Brassica Collective?" value={invitation.interest} />
+          <ResponseField label="Name" value={entryPathway.name} />
+          <ResponseField label="Interest" description="What interests you about participating in the Brassica Collective?" value={entryPathway.interest} />
           <ResponseField
             label="Context"
             description="What areas that the the Brassica Collective is involved in are you already familiar with, and which ones are ones you're interested in learning more about?"
-            value={invitation.context}
+            value={entryPathway.context}
           />
-          <ResponseField label="How did you hear about us?" description="Where did you hear about the the Brassica Collective?" value={invitation.referral} />
+          <ResponseField label="How did you hear about us?" description="Where did you hear about the the Brassica Collective?" value={entryPathway.referral} />
           <ResponseField
             label="Practicing transformative justice"
             description="Recognising that we all have the capacity to cause and experience harm - is there anything you would like to share about your experiences of learning and healing from conflict?"
-            value={invitation.conflict_experience}
+            value={entryPathway.conflict_experience}
           />
-          <ResponseField label="Participant connections" description="Are there any connections to other Brassica Collective participants that you'd like to tell us about?" value={invitation.participant_connections} />
+          <ResponseField label="Participant connections" description="Are there any connections to other Brassica Collective participants that you'd like to tell us about?" value={entryPathway.participant_connections} />
         </Stack>
-        <Anchor href="/invitations">
+        <Anchor href="/entry_pathways">
           <Group gap="sm">
-            <IconArrowLeft /> Back to Invitations
+            <IconArrowLeft /> Back to Entry Pathways
           </Group>
         </Anchor>
       </Stack>

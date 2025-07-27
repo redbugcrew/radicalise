@@ -4,15 +4,15 @@ use utoipa::ToSchema;
 
 use crate::{
     crews::repo::find_all_crews_with_links,
-    eoi::repo::find_all_eois_for_collective,
+    entry_pathways::repo::find_all_entry_pathways_for_collective,
     intervals::repo::{find_current_interval, find_next_interval},
     my_collective::involvements_repo::find_all_collective_involvements,
     people::repo::find_all_people,
     shared::{
         default_collective_id,
         entities::{
-            Collective, CollectiveId, CollectiveInvolvement, CrewInvolvement, CrewWithLinks, Eoi,
-            Interval, IntervalId, Person,
+            Collective, CollectiveId, CollectiveInvolvement, CrewInvolvement, CrewWithLinks,
+            EntryPathway, Interval, IntervalId, Person,
         },
         links_repo::{find_all_links_for_owner, update_links_for_owner},
     },
@@ -39,7 +39,7 @@ pub struct InitialData {
     pub intervals: Vec<Interval>,
     pub current_interval: Interval,
     pub involvements: InvolvementData,
-    pub eois: Vec<Eoi>,
+    pub entry_pathways: Vec<EntryPathway>,
 }
 
 pub async fn find_collective(
@@ -168,7 +168,8 @@ pub async fn find_initial_data_for_collective(
         None
     };
 
-    let eois = find_all_eois_for_collective(collective.typed_id(), pool).await?;
+    let entry_pathways =
+        find_all_entry_pathways_for_collective(collective.typed_id(), pool).await?;
 
     Ok(InitialData {
         collective,
@@ -180,7 +181,7 @@ pub async fn find_initial_data_for_collective(
             current_interval: Some(current_interval_data),
             next_interval: next_interval_data,
         },
-        eois,
+        entry_pathways,
     })
 }
 

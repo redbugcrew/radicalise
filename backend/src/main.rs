@@ -28,7 +28,7 @@ mod api;
 mod auth;
 mod crews;
 mod database;
-mod eoi;
+mod entry_pathways;
 mod intervals;
 mod me;
 mod my_collective;

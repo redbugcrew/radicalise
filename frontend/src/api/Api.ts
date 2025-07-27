@@ -123,7 +123,7 @@ export type CrewsEvent = {
   CrewUpdated: CrewWithLinks;
 };
 
-export interface Eoi {
+export interface EntryPathway {
   /** @format int64 */
   collective_id: number;
   conflict_experience?: string | null;
@@ -145,7 +145,7 @@ export interface InitialData {
   collective: Collective;
   crews: CrewWithLinks[];
   current_interval: Interval;
-  eois: Eoi[];
+  entry_pathways: EntryPathway[];
   intervals: Interval[];
   involvements: InvolvementData;
   people: Person[];
@@ -638,7 +638,7 @@ export class Api<
      * @name CreateEoi
      * @request POST:/api/public/eoi
      */
-    createEoi: (data: Eoi, params: RequestParams = {}) =>
+    createEoi: (data: EntryPathway, params: RequestParams = {}) =>
       this.request<any, EoiError>({
         path: `/api/public/eoi`,
         method: "POST",
