@@ -2,12 +2,14 @@ use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 use crate::{
-    collective::involvements_repo::{CollectiveInvolvementRecord, upsert_collective_involvement},
     crews::repo::{
         find_crew_involvements, intervals_participated_since_last_convened, set_crew_convenor,
     },
     intervals::repo::{IntervalType, find_interval, get_interval_type},
     me::repo::{self},
+    my_collective::involvements_repo::{
+        CollectiveInvolvementRecord, upsert_collective_involvement,
+    },
     shared::entities::{
         CrewId, CrewInvolvement, IntervalId, InvolvementStatus, OptOutType, ParticipationIntention,
         PersonId,

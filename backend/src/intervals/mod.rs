@@ -35,7 +35,7 @@ async fn create_interval(
         Ok(response) => {
             let event = AppEvent::IntervalsEvent(IntervalsEvent::IntervalCreated(response));
             realtime_state
-                .broadcast_app_event(auth_session, event.clone())
+                .broadcast_app_event(Some(auth_session), event.clone())
                 .await;
             return (StatusCode::CREATED, Json(vec![event])).into_response();
         }

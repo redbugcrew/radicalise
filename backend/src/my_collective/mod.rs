@@ -4,7 +4,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     auth::auth_backend::AuthSession,
-    collective::{
+    my_collective::{
         events::CollectiveEvent,
         involvements_repo::find_all_collective_involvements,
         repo::{InitialData, IntervalInvolvementData},
@@ -19,7 +19,7 @@ use crate::{
 
 pub mod events;
 pub mod involvements_repo;
-mod repo;
+pub mod repo;
 
 pub fn router() -> OpenApiRouter {
     OpenApiRouter::new()
@@ -28,7 +28,7 @@ pub fn router() -> OpenApiRouter {
         .routes(routes!(update_collective))
 }
 
-#[utoipa::path(get, path = "/", responses(
+#[utoipa::path(get, path = "/state", responses(
         (status = 200, description = "Collective found successfully", body = InitialData),
         (status = NOT_FOUND, description = "Collective was not found", body = ()),
         (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
@@ -100,7 +100,7 @@ pub async fn update_collective(
         Ok(response) => {
             let event = AppEvent::CollectiveEvent(CollectiveEvent::CollectiveUpdated(response));
             realtime_state
-                .broadcast_app_event(auth_session, event.clone())
+                .broadcast_app_event(Some(auth_session), event.clone())
                 .await;
             (StatusCode::OK, Json(vec![event])).into_response()
         }

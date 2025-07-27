@@ -3,15 +3,16 @@ use sqlx::SqlitePool;
 use utoipa::ToSchema;
 
 use crate::{
-    collective::involvements_repo::find_all_collective_involvements,
     crews::repo::find_all_crews_with_links,
+    entry_pathways::repo::find_all_entry_pathways_for_collective,
     intervals::repo::{find_current_interval, find_next_interval},
+    my_collective::involvements_repo::find_all_collective_involvements,
     people::repo::find_all_people,
     shared::{
         default_collective_id,
         entities::{
             Collective, CollectiveId, CollectiveInvolvement, CrewInvolvement, CrewWithLinks,
-            Interval, IntervalId, Person,
+            EntryPathway, Interval, IntervalId, Person,
         },
         links_repo::{find_all_links_for_owner, update_links_for_owner},
     },
@@ -38,6 +39,7 @@ pub struct InitialData {
     pub intervals: Vec<Interval>,
     pub current_interval: Interval,
     pub involvements: InvolvementData,
+    pub entry_pathways: Vec<EntryPathway>,
 }
 
 pub async fn find_collective(
@@ -45,7 +47,7 @@ pub async fn find_collective(
     pool: &SqlitePool,
 ) -> Result<Collective, sqlx::Error> {
     sqlx::query!(
-        "SELECT id, name, noun_name, description
+        "SELECT id, name, noun_name, description, slug, feature_eoi, eoi_description
         FROM collectives WHERE id = ?",
         collective_id.id
     )
@@ -57,6 +59,32 @@ pub async fn find_collective(
         noun_name: row.noun_name,
         description: row.description,
         links: vec![], // Links are not fetched here, assuming they are handled elsewhere
+        slug: row.slug,
+        feature_eoi: row.feature_eoi,
+        eoi_description: row.eoi_description,
+    })
+}
+
+pub async fn find_collective_by_slug(
+    collective_slug: String,
+    pool: &SqlitePool,
+) -> Result<Collective, sqlx::Error> {
+    sqlx::query!(
+        "SELECT id, name, noun_name, description, slug, feature_eoi, eoi_description
+        FROM collectives WHERE slug = ?",
+        collective_slug
+    )
+    .fetch_one(pool)
+    .await
+    .map(|row| Collective {
+        id: row.id,
+        name: Some(row.name),
+        noun_name: row.noun_name,
+        description: row.description,
+        links: vec![], // Links are not fetched here, assuming they are handled elsewhere
+        slug: row.slug,
+        feature_eoi: row.feature_eoi,
+        eoi_description: row.eoi_description,
     })
 }
 
@@ -73,6 +101,9 @@ pub async fn find_collective_with_links(
         noun_name: collective.noun_name,
         description: collective.description,
         links,
+        slug: collective.slug,
+        feature_eoi: collective.feature_eoi,
+        eoi_description: collective.eoi_description,
     })
 }
 
@@ -137,6 +168,9 @@ pub async fn find_initial_data_for_collective(
         None
     };
 
+    let entry_pathways =
+        find_all_entry_pathways_for_collective(collective.typed_id(), pool).await?;
+
     Ok(InitialData {
         collective,
         people,
@@ -147,6 +181,7 @@ pub async fn find_initial_data_for_collective(
             current_interval: Some(current_interval_data),
             next_interval: next_interval_data,
         },
+        entry_pathways,
     })
 }
 
@@ -157,11 +192,14 @@ pub async fn update_collective(
 ) -> Result<Collective, sqlx::Error> {
     sqlx::query!(
         "UPDATE collectives
-         SET name = ?, noun_name = ?, description = ?
+         SET name = ?, noun_name = ?, description = ?, slug = ?, feature_eoi = ?, eoi_description = ?
          WHERE id = ?",
         input.name,
         input.noun_name,
         input.description,
+        input.slug,
+        input.feature_eoi,
+        input.eoi_description,
         collective_id.id
     )
     .execute(pool)
@@ -190,5 +228,8 @@ pub async fn update_collective_with_links(
         noun_name: collective.noun_name,
         description: collective.description,
         links: links.unwrap_or_default(),
+        slug: collective.slug,
+        feature_eoi: collective.feature_eoi,
+        eoi_description: collective.eoi_description,
     })
 }

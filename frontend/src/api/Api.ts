@@ -26,6 +26,12 @@ export enum InvolvementStatus {
   Exiting = "Exiting",
 }
 
+export enum EoiError {
+  CollectiveNotFound = "CollectiveNotFound",
+  EoiFeatureDisabled = "EoiFeatureDisabled",
+  EmailAlreadyExists = "EmailAlreadyExists",
+}
+
 export type AppEvent =
   | {
       MeEvent: MeEvent;
@@ -41,6 +47,9 @@ export type AppEvent =
     }
   | {
       PeopleEvent: PeopleEvent;
+    }
+  | {
+      EntryPathwayEvent: EntryPathwayEvent;
     };
 
 export interface CapacityPlanning {
@@ -51,11 +60,14 @@ export interface CapacityPlanning {
 
 export interface Collective {
   description?: string | null;
+  eoi_description?: string | null;
+  feature_eoi: boolean;
   /** @format int64 */
   id: number;
   links: Link[];
   name?: string | null;
   noun_name?: string | null;
+  slug?: string | null;
 }
 
 export type CollectiveEvent = {
@@ -101,6 +113,8 @@ export interface CrewInvolvement {
 }
 
 export interface CrewWithLinks {
+  /** @format int64 */
+  collective_id: number;
   description?: string | null;
   /** @format int64 */
   id: number;
@@ -112,6 +126,24 @@ export type CrewsEvent = {
   CrewUpdated: CrewWithLinks;
 };
 
+export interface EntryPathway {
+  /** @format int64 */
+  collective_id: number;
+  conflict_experience?: string | null;
+  context?: string | null;
+  email: string;
+  /** @format int64 */
+  id: number;
+  interest?: string | null;
+  name: string;
+  participant_connections?: string | null;
+  referral?: string | null;
+}
+
+export type EntryPathwayEvent = {
+  EntryPathwayUpdated: EntryPathway;
+};
+
 export interface ForgotPasswordRequest {
   email: string;
 }
@@ -120,6 +152,7 @@ export interface InitialData {
   collective: Collective;
   crews: CrewWithLinks[];
   current_interval: Interval;
+  entry_pathways: EntryPathway[];
   intervals: Interval[];
   involvements: InvolvementData;
   people: Person[];
@@ -194,6 +227,8 @@ export interface Person {
   about?: string | null;
   /** @format int64 */
   avatar_id?: number | null;
+  /** @format int64 */
+  collective_id: number;
   display_name: string;
   /** @format int64 */
   id: number;
@@ -389,7 +424,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 1.0.1
+ * @version 1.1.2
  * @license
  */
 export class Api<
@@ -439,50 +474,6 @@ export class Api<
         method: "POST",
         body: data,
         type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name GetCollectiveState
-     * @request GET:/api/collective
-     */
-    getCollectiveState: (params: RequestParams = {}) =>
-      this.request<InitialData, any>({
-        path: `/api/collective`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name UpdateCollective
-     * @request PUT:/api/collective
-     */
-    updateCollective: (data: Collective, params: RequestParams = {}) =>
-      this.request<AppEvent[], any>({
-        path: `/api/collective`,
-        method: "PUT",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name GetInvolvements
-     * @request GET:/api/collective/interval/{interval_id}/involvements
-     */
-    getInvolvements: (intervalId: number, params: RequestParams = {}) =>
-      this.request<IntervalInvolvementData, any>({
-        path: `/api/collective/interval/${intervalId}/involvements`,
-        method: "GET",
-        format: "json",
         ...params,
       }),
 
@@ -573,6 +564,50 @@ export class Api<
     /**
      * No description
      *
+     * @name UpdateCollective
+     * @request PUT:/api/my_collective
+     */
+    updateCollective: (data: Collective, params: RequestParams = {}) =>
+      this.request<AppEvent[], any>({
+        path: `/api/my_collective`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GetInvolvements
+     * @request GET:/api/my_collective/interval/{interval_id}/involvements
+     */
+    getInvolvements: (intervalId: number, params: RequestParams = {}) =>
+      this.request<IntervalInvolvementData, any>({
+        path: `/api/my_collective/interval/${intervalId}/involvements`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GetCollectiveState
+     * @request GET:/api/my_collective/state
+     */
+    getCollectiveState: (params: RequestParams = {}) =>
+      this.request<InitialData, any>({
+        path: `/api/my_collective/state`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name UpdatePerson
      * @request PUT:/api/people/{person_id}
      */
@@ -584,6 +619,36 @@ export class Api<
       this.request<AppEvent[], any>({
         path: `/api/people/${personId}`,
         method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GetCollectiveBySlug
+     * @request GET:/api/public/collective/by_slug/{collective_slug}
+     */
+    getCollectiveBySlug: (collectiveSlug: string, params: RequestParams = {}) =>
+      this.request<Collective, any>({
+        path: `/api/public/collective/by_slug/${collectiveSlug}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CreateEoi
+     * @request POST:/api/public/eoi
+     */
+    createEoi: (data: EntryPathway, params: RequestParams = {}) =>
+      this.request<any, EoiError>({
+        path: `/api/public/eoi`,
+        method: "POST",
         body: data,
         type: ContentType.Json,
         format: "json",

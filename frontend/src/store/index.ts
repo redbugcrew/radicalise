@@ -5,10 +5,11 @@ import peopleReducer, { peopleLoaded, personUpdated } from "./people";
 import intervalsReducer, { intervalsLoaded, intervalCreated } from "./intervals";
 import involvementsReducer, { involvementsLoaded, intervalDataChanged } from "./involvements";
 import crewsReducer, { crewsLoaded, crewUpdated } from "./crews";
+import entryPathwaysReducer, { entryPathwaysLoaded, entryPathwayUpdated } from "./entry_pathways";
 import meReducer, { meLoaded } from "./me";
 import { getApi } from "../api";
 import { redirect } from "react-router-dom";
-import type { AppEvent, CollectiveEvent, CrewsEvent, IntervalsEvent, MeEvent, PeopleEvent } from "../api/Api";
+import type { AppEvent, CollectiveEvent, CrewsEvent, EntryPathwayEvent, IntervalsEvent, MeEvent, PeopleEvent } from "../api/Api";
 
 const store = configureStore({
   reducer: {
@@ -18,6 +19,7 @@ const store = configureStore({
     involvements: involvementsReducer,
     crews: crewsReducer,
     me: meReducer,
+    entryPathways: entryPathwaysReducer,
   },
 });
 
@@ -42,6 +44,7 @@ async function loadCollectiveData(store: AppStore, api: ReturnType<typeof getApi
       store.dispatch(crewsLoaded(response.data.crews));
       store.dispatch(intervalsLoaded({ allIntervals: response.data.intervals, currentInterval: response.data.current_interval }));
       store.dispatch(involvementsLoaded(response.data.involvements));
+      store.dispatch(entryPathwaysLoaded(response.data.entry_pathways));
       store.dispatch(collectiveLoaded(response.data.collective));
 
       return null;
@@ -117,6 +120,12 @@ export async function handlePeopleEvent(event: PeopleEvent) {
   }
 }
 
+export async function handleEntryPathwayEvent(event: EntryPathwayEvent) {
+  if (event.EntryPathwayUpdated) {
+    store.dispatch(entryPathwayUpdated(event.EntryPathwayUpdated));
+  }
+}
+
 export async function handleAppEvent(event: AppEvent) {
   console.log("Handling AppEvent:", event);
 
@@ -130,6 +139,8 @@ export async function handleAppEvent(event: AppEvent) {
     handleCollectiveEvent(event.CollectiveEvent);
   } else if ("PeopleEvent" in event && event.PeopleEvent) {
     handlePeopleEvent(event.PeopleEvent);
+  } else if ("EntryPathwayEvent" in event && event.EntryPathwayEvent) {
+    handleEntryPathwayEvent(event.EntryPathwayEvent);
   } else {
     console.warn("Unknown event type:", event);
   }

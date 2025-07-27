@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "collective_slug_unique" ON "collectives" ("slug")

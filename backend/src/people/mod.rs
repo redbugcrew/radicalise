@@ -41,7 +41,7 @@ pub async fn update_person(
         Ok(response) => {
             let event = AppEvent::PeopleEvent(PeopleEvent::PersonUpdated(response));
             realtime_state
-                .broadcast_app_event(auth_session, event.clone())
+                .broadcast_app_event(Some(auth_session), event.clone())
                 .await;
             (StatusCode::OK, Json(vec![event])).into_response()
         }

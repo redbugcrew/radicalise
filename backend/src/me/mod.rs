@@ -4,12 +4,12 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     auth::auth_backend::AuthSession,
-    collective::involvements_repo::find_collective_involvement,
     me::{
         events::{MeEvent, strip_private_data},
         my_involvement::{MyParticipationInput, update_my_involvements},
         repo::{MyInitialData, find_person_id_for_user},
     },
+    my_collective::involvements_repo::find_collective_involvement,
     realtime::RealtimeState,
     shared::{
         default_collective_id,
@@ -150,7 +150,7 @@ async fn update_my_participation(
                     let public_event =
                         AppEvent::MeEvent(MeEvent::IntervalDataChanged(public_interval_data));
                     realtime_state
-                        .broadcast_app_event_for_user(user.id, public_event.clone())
+                        .broadcast_app_event_for_user(Some(user.id), public_event.clone())
                         .await;
 
                     let my_event = AppEvent::MeEvent(MeEvent::IntervalDataChanged(interval_data));
