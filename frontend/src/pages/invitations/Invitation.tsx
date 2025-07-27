@@ -37,7 +37,10 @@ export default function Invitation() {
   return (
     <Container>
       <Stack gap="lg">
-        <Title order={1}>Invitation Details</Title>
+        <Box>
+          <Title order={1}>Invitation Details</Title>
+          <Title order={2}>Expression of Interest</Title>
+        </Box>
         <Stack gap="lg">
           <ResponseField label="Name" value={invitation.name} />
           <ResponseField label="Interest" description="What interests you about participating in the Brassica Collective?" value={invitation.interest} />

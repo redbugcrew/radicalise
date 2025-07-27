@@ -1,4 +1,4 @@
-import { Table } from "@mantine/core";
+import { Badge, Table } from "@mantine/core";
 import type { Eoi } from "../../api/Api";
 import Anchor from "../Anchor";
 
@@ -12,6 +12,7 @@ export default function EoiTable({ eois }: EoiTableProps) {
       <Table.Thead>
         <Table.Tr>
           <Table.Th>Name</Table.Th>
+          <Table.Th>Status</Table.Th>
         </Table.Tr>
       </Table.Thead>
       <Table.Tbody>
@@ -19,6 +20,9 @@ export default function EoiTable({ eois }: EoiTableProps) {
           <Table.Tr key={eoi.id}>
             <Table.Td>
               <Anchor href={`/invitations/${eoi.id}`}>{eoi.name}</Anchor>
+            </Table.Td>
+            <Table.Td>
+              <Badge color="blue">EOI</Badge>
             </Table.Td>
           </Table.Tr>
         ))}
