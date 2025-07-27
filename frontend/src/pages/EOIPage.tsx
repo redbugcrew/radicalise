@@ -1,4 +1,4 @@
-import { Container, Stack, Title } from "@mantine/core";
+import { Card, Container, Stack, Title, Text } from "@mantine/core";
 import { EOIForm, Markdown } from "../components";
 import { useParams } from "react-router-dom";
 import { getApi } from "../api";
@@ -12,13 +12,13 @@ export default function EOIPage() {
   if (!collectiveSlug) return <Container>Error: Collective not found</Container>;
 
   const [collective, setCollective] = useState<undefined | null | Collective>(undefined);
+  const [eoi, setEoi] = useState<Eoi | null>(null);
 
   useEffect(() => {
     getApi()
       .api.getCollectiveBySlug(collectiveSlug)
       .then((response) => {
         if (response.status === 200) {
-          console.log("Collective data:", response.data);
           setCollective(response.data);
         } else if (response.status === 404) {
           setCollective(null);
@@ -46,16 +46,13 @@ export default function EOIPage() {
       .api.createEoi(values)
       .then((response) => {
         if (response.status === 201) {
-          console.log("EOI submitted successfully:", response.data);
-          // Optionally, redirect or show a success message
+          setEoi(values);
         } else {
           console.error("Error submitting EOI:", response);
-          // Handle error response
         }
       })
       .catch((error) => {
         console.error("Error submitting EOI:", error);
-        // Handle network or other errors
       });
   };
 
@@ -69,9 +66,27 @@ export default function EOIPage() {
           </Title>
         </Stack>
 
-        <Markdown children={collective.eoi_description} />
+        {eoi && (
+          <Card withBorder>
+            <Stack gap="md">
+              <Title order={3}>Thank you for your interest!</Title>
+              <Text>
+                You will receive a confirmation email to{" "}
+                <Text span ff="monospace" fw="bold">
+                  {eoi.email}
+                </Text>{" "}
+                which contains links to edit or withdraw your interest.
+              </Text>
+            </Stack>
+          </Card>
+        )}
 
-        <EOIForm onSubmit={handleSubmit} collective={collective} />
+        {!eoi && (
+          <>
+            <Markdown children={collective.eoi_description} />
+            <EOIForm onSubmit={handleSubmit} collective={collective} />
+          </>
+        )}
       </Stack>
     </Container>
   );
