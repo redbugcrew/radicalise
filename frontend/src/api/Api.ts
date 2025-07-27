@@ -47,6 +47,9 @@ export type AppEvent =
     }
   | {
       PeopleEvent: PeopleEvent;
+    }
+  | {
+      EntryPathwayEvent: EntryPathwayEvent;
     };
 
 export interface CapacityPlanning {
@@ -136,6 +139,10 @@ export interface EntryPathway {
   participant_connections?: string | null;
   referral?: string | null;
 }
+
+export type EntryPathwayEvent = {
+  EntryPathwayUpdated: EntryPathway;
+};
 
 export interface ForgotPasswordRequest {
   email: string;

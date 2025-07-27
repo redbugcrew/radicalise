@@ -150,7 +150,7 @@ async fn update_my_participation(
                     let public_event =
                         AppEvent::MeEvent(MeEvent::IntervalDataChanged(public_interval_data));
                     realtime_state
-                        .broadcast_app_event_for_user(user.id, public_event.clone())
+                        .broadcast_app_event_for_user(Some(user.id), public_event.clone())
                         .await;
 
                     let my_event = AppEvent::MeEvent(MeEvent::IntervalDataChanged(interval_data));

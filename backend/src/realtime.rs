@@ -33,25 +33,25 @@ impl RealtimeState {
         }
     }
 
-    pub async fn broadcast_app_event(&self, auth_session: AuthSession, event: AppEvent) {
-        match auth_session.user {
-            Some(user) => self.broadcast_app_event_for_user(user.id, event).await,
-            None => {
-                eprintln!("No user when broadcasting event")
-            }
-        }
+    pub async fn broadcast_app_event(&self, auth_session: Option<AuthSession>, event: AppEvent) {
+        let user_id = self.get_user_id_from_session(auth_session);
+        self.broadcast_app_event_for_user(user_id, event).await;
     }
 
-    pub async fn broadcast_app_event_for_user(&self, user_id: i64, event: AppEvent) {
+    pub async fn broadcast_app_event_for_user(&self, user_id: Option<i64>, event: AppEvent) {
         match self.broadcast_tx.lock().await.send(AuthoredAppEvent {
             author_id: user_id,
             event,
         }) {
             Ok(_) => {}
             Err(_) => {
-                eprintln!("Failed to send message to user {}", user_id);
+                eprintln!("Failed to send message");
             }
         }
+    }
+
+    fn get_user_id_from_session(&self, session: Option<AuthSession>) -> Option<i64> {
+        session.map(|s| s.user.map(|u| u.id)).flatten()
     }
 }
 

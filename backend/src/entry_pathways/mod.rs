@@ -5,9 +5,14 @@ use utoipa::ToSchema;
 
 use crate::{
     my_collective::repo::find_collective,
-    shared::entities::{CollectiveId, EntryPathway},
+    realtime::RealtimeState,
+    shared::{
+        entities::{CollectiveId, EntryPathway},
+        events::AppEvent,
+    },
 };
 
+pub mod events;
 pub mod repo;
 
 #[derive(ToSchema, Debug, Serialize)]
@@ -29,6 +34,7 @@ enum EoiError {
 )]
 pub async fn create_eoi(
     Extension(pool): Extension<SqlitePool>,
+    Extension(realtime_state): Extension<RealtimeState>,
     axum::extract::Json(submission): axum::extract::Json<EntryPathway>,
 ) -> impl IntoResponse {
     println!("Creating EOI for details: {:?}", submission);
@@ -52,9 +58,17 @@ pub async fn create_eoi(
     let create_result = repo::create_entry_pathway(submission, &pool).await;
 
     match create_result {
-        Ok(_) => (StatusCode::CREATED, ()),
+        Ok(entry_pathway) => {
+            // raise the realtime event
+            let event = events::EntryPathwayEvent::EntryPathwayUpdated(entry_pathway);
+            realtime_state
+                .broadcast_app_event(None, AppEvent::EntryPathwayEvent(event))
+                .await;
+
+            return (StatusCode::CREATED, ()).into_response();
+        }
         Err(e) => {
-            // If is a uniqu e constraint violation, return a 400 Bad Request
+            // If is a unique constraint violation, return a 400 Bad Request
             if let sqlx::Error::Database(db_error) = &e {
                 eprintln!("Database error: {}", db_error);
                 println!("Database error code: {:?}", db_error.code());

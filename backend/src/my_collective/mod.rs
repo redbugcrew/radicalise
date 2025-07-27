@@ -100,7 +100,7 @@ pub async fn update_collective(
         Ok(response) => {
             let event = AppEvent::CollectiveEvent(CollectiveEvent::CollectiveUpdated(response));
             realtime_state
-                .broadcast_app_event(auth_session, event.clone())
+                .broadcast_app_event(Some(auth_session), event.clone())
                 .await;
             (StatusCode::OK, Json(vec![event])).into_response()
         }
