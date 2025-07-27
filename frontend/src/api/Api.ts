@@ -145,6 +145,7 @@ export interface InitialData {
   collective: Collective;
   crews: CrewWithLinks[];
   current_interval: Interval;
+  eois: Eoi[];
   intervals: Interval[];
   involvements: InvolvementData;
   people: Person[];
