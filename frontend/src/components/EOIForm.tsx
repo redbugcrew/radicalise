@@ -1,10 +1,10 @@
-import { Button, Card, Stack, TextInput, Textarea, Title, Text, List } from "@mantine/core";
+import { Button, Card, Stack, TextInput, Textarea, Title, Text, List, LoadingOverlay } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import type { Collective, Eoi } from "../api/Api";
 
 interface EOIFormProps {
   collective: Collective;
-  onSubmit: (values: Eoi) => void;
+  onSubmit: (values: Eoi) => Promise<void>;
 }
 
 export default function EOIForm({ onSubmit, collective }: EOIFormProps) {
@@ -32,6 +32,7 @@ export default function EOIForm({ onSubmit, collective }: EOIFormProps) {
 
   return (
     <form onSubmit={form.onSubmit(onSubmit)}>
+      {form.submitting && <LoadingOverlay />}
       <Stack gap="lg">
         <Stack gap="md">
           <TextInput label="Name" placeholder="How would you like us to refer to you?" {...form.getInputProps("name")} />
@@ -99,7 +100,9 @@ export default function EOIForm({ onSubmit, collective }: EOIFormProps) {
             </List>
           </Stack>
         </Card>
-        <Button type="submit">Submit</Button>
+        <Button type="submit" loading={form.submitting}>
+          Submit
+        </Button>
       </Stack>
     </form>
   );

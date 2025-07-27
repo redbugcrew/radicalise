@@ -41,8 +41,8 @@ export default function EOIPage() {
     return <Container>Expression of Interest is not enabled for this collective.</Container>;
   }
 
-  const handleSubmit = (values: Eoi) => {
-    getApi()
+  const handleSubmit = (values: Eoi): Promise<void> => {
+    return getApi()
       .api.createEoi(values)
       .then((response) => {
         if (response.status === 201) {
