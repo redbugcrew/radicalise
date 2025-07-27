@@ -1,4 +1,4 @@
-import { Button, Stack, TextInput, Textarea } from "@mantine/core";
+import { Button, Card, Stack, TextInput, Textarea, Title, Text, Box, List } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import type { Collective } from "../api/Api";
 
@@ -9,7 +9,7 @@ export interface ExpressionOfInterest {
   howDidYouHear: string;
   transformativeJustice: string;
   existingConnections: string;
-  contactInfo: string;
+  email: string;
 }
 
 interface EOIFormProps {
@@ -27,11 +27,11 @@ export default function EOIForm({ onSubmit, collective }: EOIFormProps) {
       howDidYouHear: "",
       transformativeJustice: "",
       existingConnections: "",
-      contactInfo: "",
+      email: "",
     },
     validate: {
       name: (value) => (value ? null : "Name is required"),
-      contactInfo: (value) => (value ? null : "Contact info is required"),
+      email: (value) => (value ? null : "Email is required"),
     },
   });
 
@@ -64,8 +64,49 @@ export default function EOIForm({ onSubmit, collective }: EOIFormProps) {
 
           <Textarea rows={2} label="Existing connections" description={`Are there any connections to other ${name} participants that you'd like to tell us about?`} {...form.getInputProps("existingConnections")} />
 
-          <Textarea rows={2} label="Contact info" description="Your email, phone, or any other way you would prefer us to reach you" {...form.getInputProps("contactInfo")} />
+          <TextInput
+            label="Email"
+            description="Your email address. This is used to contact you about your expression of interest or allow you to update or delete what you've written here"
+            {...form.getInputProps("email")}
+          />
         </Stack>
+        <Card bg="var(--mantine-color-dark-6)" withBorder>
+          <Stack gap="md">
+            <Title order={3}>What we do with this data</Title>
+
+            <Text>Your expression of interest will be used in the following ways:</Text>
+            <List>
+              <List.Item>
+                <Text>
+                  <strong>Email address:</strong> Used to send you an automated email with links allowing you to edit or delete your expression of interest.
+                </Text>
+              </List.Item>
+              <List.Item>
+                <Text>
+                  <strong>Other fields:</strong> Displayed to all current and future participants in the collective so that they can opt-in to following up on your interest.
+                </Text>
+              </List.Item>
+            </List>
+            <Text>Your data will be permanently deleted when any one of the following occurs:</Text>
+            <List>
+              <List.Item>
+                <Text>
+                  <strong>You request deletion:</strong> If you decide to withdraw your expression of interest using the provided link, all of your data will be permanently deleted.
+                </Text>
+              </List.Item>
+              <List.Item>
+                <Text>
+                  <strong>You're invited:</strong> If you are invited to participate in the collective, your expression of interest will be deleted.
+                </Text>
+              </List.Item>
+              <List.Item>
+                <Text>
+                  <strong>One year has passed:</strong> Your expression of interest will be automatically deleted one year after submission.
+                </Text>
+              </List.Item>
+            </List>
+          </Stack>
+        </Card>
         <Button type="submit">Submit</Button>
       </Stack>
     </form>
