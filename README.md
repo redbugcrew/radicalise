@@ -32,8 +32,9 @@ The app uses an SQLlite database, that will be auto-generated in the backend dir
 
 Each time the app is run, any migration files in the `backend/migrations` directory will be run.
 
-To perform more detailed operations on the database, you'll need the sqlx command line tools. Install this with `cargo install sqlx-cli`.
+Database migrations are performed by a tool called sqlx, available through cargo. For documentation, see https://lib.rs/crates/sqlx-cli
 
-To create a migration, run `sqlx migrate add some_migration_name` where `some_migration_name` is replace with a short name describing the migration. This should create a fresh file in the migrations directory.
+To create a migration, run `cargo sqlx migrate add some_migration_name` where `some_migration_name` is replaced with a short name describing the migration. This should create a fresh file in the migrations directory.
 
-These should be automatically run when you re-start the app, but if not, run `sqlx migrate run`.
+The SQLlite changes to the database can then be added to the migration file.
+These changes should be automatically run when you re-start the app, but if not, run `cargo sqlx migrate run`.
