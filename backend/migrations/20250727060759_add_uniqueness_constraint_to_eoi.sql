@@ -1,2 +1,2 @@
 -- Add migration script here
-CREATE UNIQUE INDEX "eoi_id_unique" ON eoi (id, email);
+CREATE UNIQUE INDEX "eoi_email_unique_per_collective" ON eoi (collective_id, email);
