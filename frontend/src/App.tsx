@@ -2,7 +2,7 @@ import { Navigate, RouterProvider, createBrowserRouter, type LoaderFunction } fr
 import { Provider as ReduxProvider } from "react-redux";
 import store, { loadInitialData, type AppStore } from "./store";
 import { MantineProvider } from "@mantine/core";
-import { EditPerson, EOIPage, Layout, Dashboard, NewPerson, People, Person, MyParticipation, Crews, EditCrew, Intervals, NewInterval, EditCollective } from "./pages";
+import { EditPerson, EOIPage, Layout, Dashboard, NewPerson, People, Person, MyParticipation, Crews, EditCrew, Intervals, NewInterval, EditCollective, Invitations } from "./pages";
 import { buildRoutes as buildAuthRoutes } from "./contexts/auth";
 import { theme } from "./theme";
 
@@ -71,6 +71,10 @@ const router = createBrowserRouter([
       {
         path: "my_participation/:intervalId",
         element: <MyParticipation />,
+      },
+      {
+        path: "invitations",
+        element: <Invitations />,
       },
     ],
   },

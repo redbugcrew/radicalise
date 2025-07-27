@@ -47,6 +47,7 @@ export default function Layout() {
           <NavLink label="Dashboard" href="dashboard" leftSection={<IconHome2 size={18} />} onClick={toggle} />
           <NavLink label="People" href="people" leftSection={<IconUsers size={18} />} onClick={toggle} />
           <NavLink label="Crews" href="crews" leftSection={<IconUsersGroup size={18} />} onClick={toggle} />
+          {collective?.feature_eoi && <NavLink label="Invitations" href="invitations" leftSection={<IconUsers size={18} />} onClick={toggle} />}
           <NavLink label="Intervals" href="intervals" leftSection={<IconCalendar size={18} />} onClick={toggle} />
         </AppShell.Section>
 

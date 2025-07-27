@@ -8,7 +8,7 @@ use crate::{
     shared::entities::{CollectiveId, Eoi},
 };
 
-mod repo;
+pub mod repo;
 
 #[derive(ToSchema, Debug, Serialize)]
 enum EoiError {

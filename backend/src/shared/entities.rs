@@ -261,7 +261,7 @@ pub struct CrewWithLinks {
     pub links: Option<Vec<Link>>,
 }
 
-#[derive(ToSchema, Deserialize, Debug)]
+#[derive(ToSchema, Deserialize, Serialize, Debug)]
 #[allow(dead_code)]
 pub struct Eoi {
     pub id: i64,
