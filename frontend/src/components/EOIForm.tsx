@@ -23,7 +23,7 @@ export default function EOIForm({ onSubmit, collective }: EOIFormProps) {
     },
     validate: {
       name: (value) => (value ? null : "Name is required"),
-      email: (value) => (value ? null : "Email is required"),
+      email: (value) => (/\S+@\S+\.\S+/.test(value) ? null : "Invalid email"),
     },
   });
 
