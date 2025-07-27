@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import { getApi } from "../api";
 import { useEffect, useState } from "react";
 
-import type { Collective, EOI } from "../api/Api";
+import type { Collective, Eoi } from "../api/Api";
 
 export default function EOIPage() {
   const { collectiveSlug } = useParams<"collectiveSlug">();
@@ -41,9 +41,9 @@ export default function EOIPage() {
     return <Container>Expression of Interest is not enabled for this collective.</Container>;
   }
 
-  const handleSubmit = (values: EOI) => {
+  const handleSubmit = (values: Eoi) => {
     getApi()
-      .api.createEoi(collective.id, values)
+      .api.createEoi(values)
       .then((response) => {
         if (response.status === 201) {
           console.log("EOI submitted successfully:", response.data);

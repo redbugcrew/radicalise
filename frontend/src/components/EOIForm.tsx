@@ -1,14 +1,14 @@
 import { Button, Card, Stack, TextInput, Textarea, Title, Text, List } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import type { Collective, EOI } from "../api/Api";
+import type { Collective, Eoi } from "../api/Api";
 
 interface EOIFormProps {
   collective: Collective;
-  onSubmit: (values: EOI) => void;
+  onSubmit: (values: Eoi) => void;
 }
 
 export default function EOIForm({ onSubmit, collective }: EOIFormProps) {
-  const form = useForm<EOI>({
+  const form = useForm<Eoi>({
     mode: "controlled",
     initialValues: {
       id: -1, // Placeholder ID, will be set by the backend

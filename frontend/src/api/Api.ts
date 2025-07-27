@@ -117,7 +117,7 @@ export type CrewsEvent = {
   CrewUpdated: CrewWithLinks;
 };
 
-export interface EOI {
+export interface Eoi {
   /** @format int64 */
   collective_id: number;
   conflict_experience?: string | null;
@@ -629,11 +629,11 @@ export class Api<
      * No description
      *
      * @name CreateEoi
-     * @request POST:/api/public/collective/{collective_id}/eoi
+     * @request POST:/api/public/eoi
      */
-    createEoi: (collectiveId: number, data: EOI, params: RequestParams = {}) =>
-      this.request<any, any>({
-        path: `/api/public/collective/${collectiveId}/eoi`,
+    createEoi: (data: Eoi, params: RequestParams = {}) =>
+      this.request<any, string>({
+        path: `/api/public/eoi`,
         method: "POST",
         body: data,
         type: ContentType.Json,
