@@ -5,7 +5,9 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 use crate::{my_collective::repo::find_collective_by_slug, shared::entities::Collective};
 
 pub fn router() -> OpenApiRouter {
-    OpenApiRouter::new().routes(routes!(get_collective_by_slug))
+    OpenApiRouter::new()
+        .routes(routes!(get_collective_by_slug))
+        .routes(routes!(crate::eoi::create_eoi))
 }
 
 #[utoipa::path(get, path = "/collective/by_slug/{collective_slug}", responses(

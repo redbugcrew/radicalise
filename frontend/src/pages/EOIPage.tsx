@@ -1,11 +1,10 @@
 import { Container, Stack, Title } from "@mantine/core";
 import { EOIForm, Markdown } from "../components";
-import type { ExpressionOfInterest } from "../components/EOIForm";
 import { useParams } from "react-router-dom";
 import { getApi } from "../api";
 import { useEffect, useState } from "react";
 
-import type { Collective } from "../api/Api";
+import type { Collective, EOI } from "../api/Api";
 
 export default function EOIPage() {
   const { collectiveSlug } = useParams<"collectiveSlug">();
@@ -31,11 +30,6 @@ export default function EOIPage() {
       });
   }, [collectiveSlug]);
 
-  const handleSubmit = (values: ExpressionOfInterest) => {
-    console.log(values);
-    // Handle form submission logic here, e.g., send to API
-  };
-
   if (collective === null) {
     return <Container>Collective not found</Container>;
   }
@@ -46,6 +40,24 @@ export default function EOIPage() {
   if (collective.feature_eoi !== true) {
     return <Container>Expression of Interest is not enabled for this collective.</Container>;
   }
+
+  const handleSubmit = (values: EOI) => {
+    getApi()
+      .api.createEoi(collective.id, values)
+      .then((response) => {
+        if (response.status === 201) {
+          console.log("EOI submitted successfully:", response.data);
+          // Optionally, redirect or show a success message
+        } else {
+          console.error("Error submitting EOI:", response);
+          // Handle error response
+        }
+      })
+      .catch((error) => {
+        console.error("Error submitting EOI:", error);
+        // Handle network or other errors
+      });
+  };
 
   return (
     <Container pt="lg" pb="xl">

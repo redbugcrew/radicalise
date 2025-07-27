@@ -1,32 +1,24 @@
-import { Button, Card, Stack, TextInput, Textarea, Title, Text, Box, List } from "@mantine/core";
+import { Button, Card, Stack, TextInput, Textarea, Title, Text, List } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import type { Collective } from "../api/Api";
-
-export interface ExpressionOfInterest {
-  name: string;
-  interest: string;
-  context: string;
-  howDidYouHear: string;
-  transformativeJustice: string;
-  existingConnections: string;
-  email: string;
-}
+import type { Collective, EOI } from "../api/Api";
 
 interface EOIFormProps {
   collective: Collective;
-  onSubmit: (values: ExpressionOfInterest) => void;
+  onSubmit: (values: EOI) => void;
 }
 
 export default function EOIForm({ onSubmit, collective }: EOIFormProps) {
-  const form = useForm<ExpressionOfInterest>({
+  const form = useForm<EOI>({
     mode: "controlled",
     initialValues: {
+      id: -1, // Placeholder ID, will be set by the backend
+      collective_id: collective.id,
       name: "",
       interest: "",
       context: "",
-      howDidYouHear: "",
-      transformativeJustice: "",
-      existingConnections: "",
+      referral: "",
+      conflict_experience: "",
+      participant_connections: "",
       email: "",
     },
     validate: {
@@ -52,17 +44,17 @@ export default function EOIForm({ onSubmit, collective }: EOIFormProps) {
             rows={6}
             {...form.getInputProps("context")}
           />
-          <Textarea rows={2} label="How did you hear about us?" description={`Where did you hear about the ${noun_name}?`} {...form.getInputProps("howDidYouHear")} />
+          <Textarea rows={2} label="How did you hear about us?" description={`Where did you hear about the ${noun_name}?`} {...form.getInputProps("referral")} />
 
           <Textarea
             rows={3}
             label="Practicing transformative justice"
             description="Recognising that we all have the capacity to cause and experience harm - is there anything you would like to share about your experiences of learning and healing from conflict?"
             placeholder="Feel free to share here, or let us know if you would prefer to discuss this in person."
-            {...form.getInputProps("transformativeJustice")}
+            {...form.getInputProps("conflict_experience")}
           />
 
-          <Textarea rows={2} label="Existing connections" description={`Are there any connections to other ${name} participants that you'd like to tell us about?`} {...form.getInputProps("existingConnections")} />
+          <Textarea rows={2} label="Participant connections" description={`Are there any connections to other ${name} participants that you'd like to tell us about?`} {...form.getInputProps("participant_connections")} />
 
           <TextInput
             label="Email"

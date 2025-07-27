@@ -24,7 +24,7 @@ export const theme = createTheme({
       },
     }),
     Input: Input.extend({
-      vars: (_theme: any, props: any) => {
+      vars: (_theme: any, _props: any) => {
         return {
           wrapper: {},
           input: {

@@ -7,6 +7,12 @@ pub struct CollectiveId {
     pub id: i64,
 }
 
+impl CollectiveId {
+    pub fn new(id: i64) -> Self {
+        CollectiveId { id }
+    }
+}
+
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
 pub struct Collective {
     pub id: i64,
@@ -253,4 +259,18 @@ pub struct CrewWithLinks {
     pub description: Option<String>,
     pub collective_id: i64,
     pub links: Option<Vec<Link>>,
+}
+
+#[derive(ToSchema, Deserialize, Debug)]
+#[allow(dead_code)]
+pub struct EOI {
+    pub id: i64,
+    pub collective_id: i64,
+    pub name: String,
+    pub email: String,
+    pub interest: Option<String>,
+    pub context: Option<String>,
+    pub referral: Option<String>,
+    pub conflict_experience: Option<String>,
+    pub participant_connections: Option<String>,
 }

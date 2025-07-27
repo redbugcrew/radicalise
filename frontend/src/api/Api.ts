@@ -117,6 +117,20 @@ export type CrewsEvent = {
   CrewUpdated: CrewWithLinks;
 };
 
+export interface EOI {
+  /** @format int64 */
+  collective_id: number;
+  conflict_experience?: string | null;
+  context?: string | null;
+  email: string;
+  /** @format int64 */
+  id: number;
+  interest?: string | null;
+  name: string;
+  participant_connections?: string | null;
+  referral?: string | null;
+}
+
 export interface ForgotPasswordRequest {
   email: string;
 }
@@ -607,6 +621,22 @@ export class Api<
       this.request<Collective, any>({
         path: `/api/public/collective/by_slug/${collectiveSlug}`,
         method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CreateEoi
+     * @request POST:/api/public/collective/{collective_id}/eoi
+     */
+    createEoi: (collectiveId: number, data: EOI, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/public/collective/${collectiveId}/eoi`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),
