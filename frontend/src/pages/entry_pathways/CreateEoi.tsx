@@ -1,30 +1,22 @@
 import { Card, Container, Stack, Title, Text } from "@mantine/core";
-import { EOIForm, Markdown } from "../components";
+import { EOIForm, Markdown } from "../../components";
 import { useParams } from "react-router-dom";
-import { getApi } from "../api";
+import { getApi } from "../../api";
 import { useEffect, useState } from "react";
 
-import {
-  EoiError,
-  type Collective,
-  type EntryPathway,
-  type ExpressionOfInterest,
-} from "../api/Api";
+import { EoiError, type Collective, type EntryPathway, type ExpressionOfInterest } from "../../api/Api";
 
 interface EoiPageResult {
   eoi: EntryPathway | null;
   error: EoiError | null;
 }
 
-export default function EOIPage() {
+export default function CreateEoi() {
   const { collectiveSlug } = useParams<"collectiveSlug">();
 
-  if (!collectiveSlug)
-    return <Container>Error: Collective not found</Container>;
+  if (!collectiveSlug) return <Container>Error: Collective not found</Container>;
 
-  const [collective, setCollective] = useState<undefined | null | Collective>(
-    undefined
-  );
+  const [collective, setCollective] = useState<undefined | null | Collective>(undefined);
   const [result, setResult] = useState<EoiPageResult>({
     eoi: null,
     error: null,
@@ -54,11 +46,7 @@ export default function EOIPage() {
   }
 
   if (collective.feature_eoi !== true) {
-    return (
-      <Container>
-        Expression of Interest is not enabled for this collective.
-      </Container>
-    );
+    return <Container>Expression of Interest is not enabled for this collective.</Container>;
   }
 
   const handleSubmit = (values: ExpressionOfInterest): Promise<void> => {
@@ -89,46 +77,28 @@ export default function EOIPage() {
           <Card withBorder>
             <Stack gap="md">
               <Title order={3}>Thank you for your interest!</Title>
-              <Text>
-                You will receive a confirmation email which contains links to
-                edit or withdraw your interest.
-              </Text>
+              <Text>You will receive a confirmation email which contains links to edit or withdraw your interest.</Text>
             </Stack>
           </Card>
         )}
 
         {result.error && result.error === EoiError.EmailAlreadyExists && (
-          <Card
-            withBorder
-            style={{ borderColor: "var(--mantine-color-red-5)" }}
-          >
+          <Card withBorder style={{ borderColor: "var(--mantine-color-red-5)" }}>
             <Stack gap="md">
-              <Title order={3}>
-                I think we already have a submission from you
-              </Title>
+              <Title order={3}>I think we already have a submission from you</Title>
               <Text>
-                We already have an expression of interest for{" "}
-                {collective.noun_name ?? "this collective"} from that email. If
-                you would like to update your interest, you shoul have received
-                an email with a link to edit or delete your original submission.
+                We already have an expression of interest for {collective.noun_name ?? "this collective"} from that email. If you would like to update your interest, you shoul have received an email with a link to edit
+                or delete your original submission.
               </Text>
             </Stack>
           </Card>
         )}
 
         {result.error && result.error !== EoiError.EmailAlreadyExists && (
-          <Card
-            withBorder
-            style={{ borderColor: "var(--mantine-color-red-5)" }}
-          >
+          <Card withBorder style={{ borderColor: "var(--mantine-color-red-5)" }}>
             <Stack gap="md">
-              <Title order={3}>
-                Sorry, there was an error with your submission
-              </Title>
-              <Text>
-                Something is broken on our end. Please try again later, or
-                contact the collective via other means.
-              </Text>
+              <Title order={3}>Sorry, there was an error with your submission</Title>
+              <Text>Something is broken on our end. Please try again later, or contact the collective via other means.</Text>
             </Stack>
           </Card>
         )}

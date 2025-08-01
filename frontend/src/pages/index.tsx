@@ -10,6 +10,7 @@ export { default as EditCrew } from "./crews/EditCrew";
 export { default as Intervals } from "./intervals/Intervals";
 export { default as NewInterval } from "./intervals/NewInterval";
 export { default as EditCollective } from "./EditCollective";
-export { default as EOIPage } from "./EOIPage";
+export { default as CreateEoi } from "./entry_pathways/CreateEoi";
+export { default as ManageMyEoi } from "./entry_pathways/ManageMyEoi";
 export { default as EntryPathways } from "./entry_pathways/EntryPathways";
 export { default as DisplayEntryPathway } from "./entry_pathways/DisplayEntryPathway";
