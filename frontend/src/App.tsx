@@ -2,7 +2,25 @@ import { Navigate, RouterProvider, createBrowserRouter, type LoaderFunction } fr
 import { Provider as ReduxProvider } from "react-redux";
 import store, { loadInitialData, type AppStore } from "./store";
 import { MantineProvider } from "@mantine/core";
-import { EditPerson, CreateEoi, Layout, Dashboard, NewPerson, People, Person, MyParticipation, Crews, EditCrew, Intervals, NewInterval, EditCollective, EntryPathways, DisplayEntryPathway, ManageMyEoi } from "./pages";
+import {
+  EditPerson,
+  CreateEoi,
+  Layout,
+  Dashboard,
+  NewPerson,
+  People,
+  Person,
+  MyParticipation,
+  Crews,
+  EditCrew,
+  Intervals,
+  NewInterval,
+  EditCollective,
+  EntryPathways,
+  DisplayEntryPathway,
+  ManageMyEoi,
+  PublicWithCollective,
+} from "./pages";
 import { buildRoutes as buildAuthRoutes } from "./contexts/auth";
 import { theme } from "./theme";
 
@@ -88,6 +106,7 @@ const router = createBrowserRouter([
   },
   {
     path: "collective/:collectiveSlug",
+    element: <PublicWithCollective />,
     children: [
       {
         path: "interest",

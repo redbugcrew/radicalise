@@ -1,16 +1,16 @@
 import { Container, Title, Text, Stack } from "@mantine/core";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getApi } from "../../api";
-import type { Collective, EntryPathway } from "../../api/Api";
+import type { EntryPathway } from "../../api/Api";
 import EntryPathwayFields from "../../components/entry_pathways/EntryPathwayFields";
+import { CollectiveContext } from "../PublicWithCollective";
 
 export default function ManageMyEoi() {
   const { authToken } = useParams<"authToken">();
-  const { collectiveSlug } = useParams<"collectiveSlug">();
+  const collective = useContext(CollectiveContext);
 
   const [entryPathway, setEntryPathway] = useState<EntryPathway | null | undefined>(undefined);
-  const [collective, setCollective] = useState<Collective | null | undefined>(undefined);
 
   useEffect(() => {
     if (!authToken) {
@@ -19,7 +19,7 @@ export default function ManageMyEoi() {
     }
 
     getApi()
-      .api.getEntryPathwayByAuthToken(authToken)
+      .api.getEntryPathwayByAuthToken(authToken, collective.id)
       .then((response) => {
         if (response.status === 200) {
           console.log("Entry pathway data:", response.data);
@@ -32,30 +32,11 @@ export default function ManageMyEoi() {
       });
   }, [authToken]);
 
-  useEffect(() => {
-    if (!collectiveSlug) {
-      console.error("No collective slug provided in the URL parameters.");
-      return;
-    }
-
-    getApi()
-      .api.getCollectiveBySlug(collectiveSlug)
-      .then((response) => {
-        if (response.status === 200) {
-          setCollective(response.data);
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching collective data:", error);
-        setCollective(null);
-      });
-  }, [collectiveSlug]);
-
-  if (entryPathway === undefined || collective === undefined) {
+  if (entryPathway === undefined) {
     return <Container></Container>;
   }
 
-  if (entryPathway === null || collective === null) {
+  if (entryPathway === null) {
     return (
       <Container pt="lg" pb="xl">
         <Stack mt="lg">

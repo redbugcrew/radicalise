@@ -1,10 +1,9 @@
 import { Card, Container, Stack, Title, Text } from "@mantine/core";
 import { EOIForm, Markdown } from "../../components";
-import { useParams } from "react-router-dom";
 import { getApi } from "../../api";
-import { useEffect, useState } from "react";
-
-import { EoiError, type Collective, type EntryPathway, type ExpressionOfInterest } from "../../api/Api";
+import { useContext, useState } from "react";
+import { EoiError, type EntryPathway, type ExpressionOfInterest } from "../../api/Api";
+import { CollectiveContext } from "../PublicWithCollective";
 
 interface EoiPageResult {
   eoi: EntryPathway | null;
@@ -12,38 +11,11 @@ interface EoiPageResult {
 }
 
 export default function CreateEoi() {
-  const { collectiveSlug } = useParams<"collectiveSlug">();
-
-  if (!collectiveSlug) return <Container>Error: Collective not found</Container>;
-
-  const [collective, setCollective] = useState<undefined | null | Collective>(undefined);
+  const collective = useContext(CollectiveContext);
   const [result, setResult] = useState<EoiPageResult>({
     eoi: null,
     error: null,
   });
-
-  useEffect(() => {
-    getApi()
-      .api.getCollectiveBySlug(collectiveSlug)
-      .then((response) => {
-        if (response.status === 200) {
-          setCollective(response.data);
-        } else if (response.status === 404) {
-          setCollective(null);
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching collective:", error);
-        setCollective(null);
-      });
-  }, [collectiveSlug]);
-
-  if (collective === null) {
-    return <Container>Collective not found</Container>;
-  }
-  if (collective === undefined) {
-    return <Container>Loading...</Container>;
-  }
 
   if (collective.feature_eoi !== true) {
     return <Container>Expression of Interest is not enabled for this collective.</Container>;
