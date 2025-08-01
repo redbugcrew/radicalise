@@ -1,4 +1,5 @@
 use sqlx::SqlitePool;
+use uuid::Uuid;
 
 use crate::shared::entities::{CollectiveId, EntryPathway, ExpressionOfInterest};
 
@@ -6,8 +7,10 @@ pub async fn create_eoi(
     record: ExpressionOfInterest,
     pool: &SqlitePool,
 ) -> Result<EntryPathway, sqlx::Error> {
+    let auth_token = Uuid::new_v4().to_string();
     let result = sqlx::query!(
-        "INSERT INTO entry_pathways (collective_id, name, email, interest, context, referral, conflict_experience, participant_connections) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO entry_pathways (collective_id, name, email, interest, context, referral, conflict_experience, participant_connections, auth_token) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
         record.collective_id,
         record.name,
         record.email,
@@ -15,7 +18,8 @@ pub async fn create_eoi(
         record.context,
         record.referral,
         record.conflict_experience,
-        record.participant_connections
+        record.participant_connections,
+        auth_token
     )
     .execute(pool)
     .await?;
