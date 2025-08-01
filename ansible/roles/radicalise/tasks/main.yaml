@@ -5,7 +5,7 @@
     compose:
       - services:
           radicalise:
-            image: ghcr.io/brassica-collective/radicalise:latest
+            image: ghcr.io/redbugcrew/radicalise:latest
             ports:
               - target: 2022
                 published: 2022
