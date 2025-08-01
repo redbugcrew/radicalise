@@ -2,15 +2,15 @@ import { Container, Title, Text, Stack } from "@mantine/core";
 import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getApi } from "../../api";
-import type { EntryPathway } from "../../api/Api";
+import type { ExpressionOfInterest } from "../../api/Api";
 import EntryPathwayFields from "../../components/entry_pathways/EntryPathwayFields";
 import { CollectiveContext } from "../PublicWithCollective";
+import { EOIForm } from "../../components";
 
 export default function ManageMyEoi() {
   const { authToken } = useParams<"authToken">();
   const collective = useContext(CollectiveContext);
-
-  const [entryPathway, setEntryPathway] = useState<EntryPathway | null | undefined>(undefined);
+  const [eoi, setEoi] = useState<ExpressionOfInterest | null | undefined>(undefined);
 
   useEffect(() => {
     if (!authToken) {
@@ -23,20 +23,20 @@ export default function ManageMyEoi() {
       .then((response) => {
         if (response.status === 200) {
           console.log("Entry pathway data:", response.data);
-          setEntryPathway(response.data);
+          setEoi(response.data);
         }
       })
       .catch((error) => {
         console.error("Error fetching entry pathway data:", error);
-        setEntryPathway(null);
+        setEoi(null);
       });
   }, [authToken]);
 
-  if (entryPathway === undefined) {
+  if (eoi === undefined) {
     return <Container></Container>;
   }
 
-  if (entryPathway === null) {
+  if (eoi === null) {
     return (
       <Container pt="lg" pb="xl">
         <Stack mt="lg">
@@ -46,6 +46,10 @@ export default function ManageMyEoi() {
       </Container>
     );
   }
+
+  const handleSubmit = async (values: ExpressionOfInterest): Promise<void> => {
+    console.log("Submitted form", values);
+  };
 
   return (
     <Container pt="lg" pb="xl">
@@ -57,7 +61,8 @@ export default function ManageMyEoi() {
           </Title>
         </Stack>
 
-        <EntryPathwayFields entryPathway={entryPathway} />
+        <EntryPathwayFields entryPathway={eoi} />
+        <EOIForm onSubmit={handleSubmit} collective={collective} eoi={eoi} />
       </Stack>
     </Container>
   );
