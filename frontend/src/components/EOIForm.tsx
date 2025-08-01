@@ -5,10 +5,11 @@ import type { Collective, ExpressionOfInterest } from "../api/Api";
 interface EOIFormProps {
   collective: Collective;
   eoi?: ExpressionOfInterest;
+  actionName?: String;
   onSubmit: (values: ExpressionOfInterest) => Promise<void>;
 }
 
-export default function EOIForm({ onSubmit, collective, eoi }: EOIFormProps) {
+export default function EOIForm({ onSubmit, collective, eoi, actionName }: EOIFormProps) {
   const form = useForm<ExpressionOfInterest>({
     mode: "controlled",
     initialValues: eoi || {
@@ -102,7 +103,7 @@ export default function EOIForm({ onSubmit, collective, eoi }: EOIFormProps) {
           </Stack>
         </Card>
         <Button type="submit" loading={form.submitting}>
-          Submit
+          {actionName || "Submit"}
         </Button>
       </Stack>
     </form>

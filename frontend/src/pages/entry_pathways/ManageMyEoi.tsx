@@ -3,7 +3,6 @@ import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getApi } from "../../api";
 import type { ExpressionOfInterest } from "../../api/Api";
-import EntryPathwayFields from "../../components/entry_pathways/EntryPathwayFields";
 import { CollectiveContext } from "../PublicWithCollective";
 import { EOIForm } from "../../components";
 
@@ -19,15 +18,15 @@ export default function ManageMyEoi() {
     }
 
     getApi()
-      .api.getEntryPathwayByAuthToken(authToken, collective.id)
+      .api.getEoiByAuthToken(authToken, collective.id)
       .then((response) => {
         if (response.status === 200) {
-          console.log("Entry pathway data:", response.data);
+          console.log("EOI data:", response.data);
           setEoi(response.data);
         }
       })
       .catch((error) => {
-        console.error("Error fetching entry pathway data:", error);
+        console.error("Error fetching EOI data:", error);
         setEoi(null);
       });
   }, [authToken]);
@@ -61,8 +60,7 @@ export default function ManageMyEoi() {
           </Title>
         </Stack>
 
-        <EntryPathwayFields entryPathway={eoi} />
-        <EOIForm onSubmit={handleSubmit} collective={collective} eoi={eoi} />
+        <EOIForm onSubmit={handleSubmit} collective={collective} eoi={eoi} actionName="Update" />
       </Stack>
     </Container>
   );
