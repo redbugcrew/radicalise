@@ -4,7 +4,7 @@ use sqlx::SqlitePool;
 use utoipa::ToSchema;
 
 use crate::{
-    entry_pathways::repo::{find_entry_pathway, find_entry_pathway_by_auth_token}, my_collective::repo::find_collective, realtime::RealtimeState, shared::{
+    entry_pathways::repo::{find_entry_pathway_by_auth_token}, my_collective::repo::find_collective, realtime::RealtimeState, shared::{
         entities::{CollectiveId, EntryPathway, ExpressionOfInterest},
         events::AppEvent,
     }
@@ -92,6 +92,8 @@ pub async fn create_eoi(
     ),
     responses(
         (status = OK, body = EntryPathway),
+        (status = NOT_FOUND, description = "Entry pathway not found", body = ()),
+        (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ())
     ),
 )]
 pub async fn get_entry_pathway_by_auth_token(
@@ -100,8 +102,12 @@ pub async fn get_entry_pathway_by_auth_token(
 ) -> impl IntoResponse {
     let result = find_entry_pathway_by_auth_token(&auth_token, &pool).await; 
     match result {
-        Ok(entry_pathway) => {
+        Ok(Some(entry_pathway)) => {
             return (StatusCode::OK, Json(entry_pathway)).into_response();
+        }
+        Ok(None) => {
+            println!("No entry pathway found for auth token: {}", auth_token);
+            return (StatusCode::NOT_FOUND, ()).into_response();
         }
         Err(e) => {
             eprintln!("Failed to find entry pathway by auth token: {}", e);

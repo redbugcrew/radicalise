@@ -655,6 +655,23 @@ export class Api<
     /**
      * No description
      *
+     * @name GetEntryPathwayByAuthToken
+     * @request GET:/api/public/entry_pathway/by_auth_token/{auth_token}
+     */
+    getEntryPathwayByAuthToken: (
+      authToken: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<EntryPathway, any>({
+        path: `/api/public/entry_pathway/by_auth_token/${authToken}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name CreateEoi
      * @request POST:/api/public/eoi
      */

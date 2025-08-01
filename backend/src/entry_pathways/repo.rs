@@ -44,7 +44,7 @@ pub async fn find_entry_pathway(id: i64, pool: &SqlitePool) -> Result<EntryPathw
 pub async fn find_entry_pathway_by_auth_token(
     auth_token: &str,
     pool: &SqlitePool,
-) -> Result<EntryPathway, sqlx::Error> {
+) -> Result<Option<EntryPathway>, sqlx::Error> {
     sqlx::query_as!(
         EntryPathway,
         "SELECT id, collective_id, name, interest, context, referral, conflict_experience, participant_connections
@@ -52,7 +52,7 @@ pub async fn find_entry_pathway_by_auth_token(
         WHERE auth_token = ?",
         auth_token
     )
-    .fetch_one(pool)
+    .fetch_optional(pool)
     .await
 }
 
