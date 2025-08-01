@@ -31,7 +31,7 @@ pub async fn update_eoi(
     record: ExpressionOfInterest,
     pool: &SqlitePool,
 ) -> Result<EntryPathway, sqlx::Error> {
-    let result = sqlx::query!(
+    sqlx::query!(
         "UPDATE entry_pathways
         SET name = ?, email = ?, interest = ?, context = ?, referral = ?, conflict_experience = ?, participant_connections = ?
         WHERE id = ?",
@@ -47,7 +47,7 @@ pub async fn update_eoi(
     .execute(pool)
     .await?;
 
-    return find_entry_pathway(result.last_insert_rowid(), pool).await;
+    return find_entry_pathway(record.id, pool).await;
 }
 
 pub async fn find_entry_pathway(id: i64, pool: &SqlitePool) -> Result<EntryPathway, sqlx::Error> {

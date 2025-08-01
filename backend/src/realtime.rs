@@ -44,8 +44,11 @@ impl RealtimeState {
             event,
         }) {
             Ok(_) => {}
-            Err(_) => {
-                eprintln!("Failed to send message");
+            Err(error) => {
+                eprintln!(
+                    "No realtime message sent, could be no connections: {}",
+                    error
+                );
             }
         }
     }
