@@ -1,15 +1,13 @@
-use axum::{Extension, Json, http::StatusCode, response::IntoResponse};
+use axum::{extract::Path, http::StatusCode, response::IntoResponse, Extension, Json};
 use serde::Serialize;
 use sqlx::SqlitePool;
 use utoipa::ToSchema;
 
 use crate::{
-    my_collective::repo::find_collective,
-    realtime::RealtimeState,
-    shared::{
-        entities::{CollectiveId, ExpressionOfInterest},
+    my_collective::repo::find_collective, realtime::RealtimeState, shared::{
+        entities::{CollectiveId, EntryPathway, ExpressionOfInterest},
         events::AppEvent,
-    },
+    }
 };
 
 pub mod events;
@@ -84,4 +82,30 @@ pub async fn create_eoi(
         }
     }
     .into_response()
+}
+
+#[utoipa::path(
+    get,
+    path = "/entry_pathway/by_auth_token/{auth_token}",
+    params(
+        ("auth_token" = String, Path, description = "Authentication token for the entry pathway")
+    ),
+    responses(
+        (status = OK, body = EntryPathway),
+    ),
+)]
+pub async fn get_entry_pathway_by_auth_token(
+    Path(auth_token): Path<String>
+) -> impl IntoResponse {
+    let result = EntryPathway {
+        id: 1,
+        collective_id: 1,
+        name: auth_token,
+        interest: Some("Interest".to_string()),
+        context: Some("Context".to_string()),
+        referral: Some("Referral".to_string()),
+        conflict_experience: Some("Conflict Experience".to_string()),
+        participant_connections: Some("Participant Connections".to_string()),   
+    }; 
+    (StatusCode::OK, Json(result)).into_response()
 }

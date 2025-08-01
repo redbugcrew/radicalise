@@ -8,6 +8,7 @@ pub fn router() -> OpenApiRouter {
     OpenApiRouter::new()
         .routes(routes!(get_collective_by_slug))
         .routes(routes!(crate::entry_pathways::create_eoi))
+        .routes(routes!(crate::entry_pathways::get_entry_pathway_by_auth_token))
 }
 
 #[utoipa::path(get, path = "/collective/by_slug/{collective_slug}", responses(
