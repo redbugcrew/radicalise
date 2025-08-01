@@ -86,9 +86,10 @@ pub async fn create_eoi(
 
 #[utoipa::path(
     get,
-    path = "/entry_pathway/by_auth_token/{auth_token}",
+    path = "/collective/{collective_id}/entry_pathway/by_auth_token/{auth_token}",
     params(
-        ("auth_token" = String, Path, description = "Authentication token for the entry pathway")
+        ("auth_token" = String, Path, description = "Authentication token for the entry pathway"),
+        ("collective_id" = i64, Path, description = "Collective ID for the entry pathway")
     ),
     responses(
         (status = OK, body = EntryPathway),
@@ -97,10 +98,10 @@ pub async fn create_eoi(
     ),
 )]
 pub async fn get_entry_pathway_by_auth_token(
-    Path(auth_token): Path<String>,
+    Path((collective_id, auth_token)): Path<(i64, String)>,
     Extension(pool): Extension<SqlitePool>,
 ) -> impl IntoResponse {
-    let result = find_entry_pathway_by_auth_token(&auth_token, &pool).await; 
+    let result = find_entry_pathway_by_auth_token(CollectiveId::new(collective_id), &auth_token, &pool).await; 
     match result {
         Ok(Some(entry_pathway)) => {
             return (StatusCode::OK, Json(entry_pathway)).into_response();

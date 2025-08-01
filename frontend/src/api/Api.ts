@@ -656,14 +656,15 @@ export class Api<
      * No description
      *
      * @name GetEntryPathwayByAuthToken
-     * @request GET:/api/public/entry_pathway/by_auth_token/{auth_token}
+     * @request GET:/api/public/collective/{collective_id}/entry_pathway/by_auth_token/{auth_token}
      */
     getEntryPathwayByAuthToken: (
       authToken: string,
+      collectiveId: number,
       params: RequestParams = {},
     ) =>
       this.request<EntryPathway, any>({
-        path: `/api/public/entry_pathway/by_auth_token/${authToken}`,
+        path: `/api/public/collective/${collectiveId}/entry_pathway/by_auth_token/${authToken}`,
         method: "GET",
         format: "json",
         ...params,
