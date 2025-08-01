@@ -20,6 +20,7 @@ pub mod repo;
 #[derive(ToSchema, Debug, Serialize)]
 enum EoiError {
     CollectiveNotFound,
+    EoiNotFound,
     EoiFeatureDisabled,
     EmailAlreadyExists,
 }
@@ -58,6 +59,66 @@ pub async fn create_eoi(
         Ok(entry_pathway) => {
             broadcast_entry_pathway_updated(&entry_pathway, &realtime_state).await;
             return (StatusCode::CREATED, ()).into_response();
+        }
+        Err(e) => {
+            if is_constraint_violation(&e) {
+                return (StatusCode::BAD_REQUEST, Json(EoiError::EmailAlreadyExists))
+                    .into_response();
+            }
+
+            eprintln!("Failed to create EOI: {}", e);
+            (StatusCode::INTERNAL_SERVER_ERROR, ())
+        }
+    }
+    .into_response()
+}
+
+#[utoipa::path(
+    put,
+    path = "/collective/{collective_id}/eoi/{auth_token}",
+    params(
+        ("auth_token" = String, Path, description = "Authentication token for the entry pathway"),
+        ("collective_id" = i64, Path, description = "Collective ID for the entry pathway")
+    ),
+    responses(
+        (status = 200, body = ()),
+        (status = BAD_REQUEST, body = EoiError),
+        (status = INTERNAL_SERVER_ERROR, body = ()),
+    ),
+    request_body(content = ExpressionOfInterest, content_type = "application/json")
+)]
+pub async fn update_eoi(
+    Extension(pool): Extension<SqlitePool>,
+    Extension(realtime_state): Extension<RealtimeState>,
+    Path((collective_id, auth_token)): Path<(i64, String)>,
+    axum::extract::Json(submission): axum::extract::Json<ExpressionOfInterest>,
+) -> impl IntoResponse {
+    println!("Updating EOI for details: {:?}", submission);
+
+    let eoi = match find_eoi_by_auth_token(CollectiveId::new(collective_id), &auth_token, &pool)
+        .await
+    {
+        Ok(Some(result)) => result,
+        Ok(None) => return (StatusCode::BAD_REQUEST, Json(EoiError::EoiNotFound)).into_response(),
+        Err(_) => return (StatusCode::BAD_REQUEST, Json(EoiError::EoiNotFound)).into_response(),
+    };
+
+    let record_to_write = ExpressionOfInterest {
+        id: eoi.id,
+        collective_id: eoi.collective_id,
+        name: submission.name,
+        email: submission.email,
+        interest: submission.interest,
+        context: submission.context,
+        referral: submission.referral,
+        conflict_experience: submission.conflict_experience,
+        participant_connections: submission.participant_connections,
+    };
+
+    match repo::update_eoi(record_to_write, &pool).await {
+        Ok(entry_pathway) => {
+            broadcast_entry_pathway_updated(&entry_pathway, &realtime_state).await;
+            return (StatusCode::OK, ()).into_response();
         }
         Err(e) => {
             if is_constraint_violation(&e) {

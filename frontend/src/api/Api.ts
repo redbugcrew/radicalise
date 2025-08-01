@@ -28,6 +28,7 @@ export enum InvolvementStatus {
 
 export enum EoiError {
   CollectiveNotFound = "CollectiveNotFound",
+  EoiNotFound = "EoiNotFound",
   EoiFeatureDisabled = "EoiFeatureDisabled",
   EmailAlreadyExists = "EmailAlreadyExists",
 }
@@ -648,6 +649,27 @@ export class Api<
       this.request<Collective, any>({
         path: `/api/public/collective/by_slug/${collectiveSlug}`,
         method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdateEoi
+     * @request PUT:/api/public/collective/{collective_id}/eoi/{auth_token}
+     */
+    updateEoi: (
+      authToken: string,
+      collectiveId: number,
+      data: ExpressionOfInterest,
+      params: RequestParams = {},
+    ) =>
+      this.request<any, EoiError>({
+        path: `/api/public/collective/${collectiveId}/eoi/${authToken}`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),

@@ -9,7 +9,7 @@ pub async fn create_eoi(
 ) -> Result<EntryPathway, sqlx::Error> {
     let auth_token = Uuid::new_v4().to_string();
     let result = sqlx::query!(
-        "INSERT INTO entry_pathways (collective_id, name, email, interest, context, referral, conflict_experience, participant_connections, auth_token) 
+        "INSERT INTO entry_pathways (collective_id, name, email, interest, context, referral, conflict_experience, participant_connections, auth_token)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
         record.collective_id,
         record.name,
@@ -20,6 +20,29 @@ pub async fn create_eoi(
         record.conflict_experience,
         record.participant_connections,
         auth_token
+    )
+    .execute(pool)
+    .await?;
+
+    return find_entry_pathway(result.last_insert_rowid(), pool).await;
+}
+
+pub async fn update_eoi(
+    record: ExpressionOfInterest,
+    pool: &SqlitePool,
+) -> Result<EntryPathway, sqlx::Error> {
+    let result = sqlx::query!(
+        "UPDATE entry_pathways
+        SET name = ?, email = ?, interest = ?, context = ?, referral = ?, conflict_experience = ?, participant_connections = ?
+        WHERE id = ?",
+        record.name,
+        record.email,
+        record.interest,
+        record.context,
+        record.referral,
+        record.conflict_experience,
+        record.participant_connections,
+        record.id
     )
     .execute(pool)
     .await?;

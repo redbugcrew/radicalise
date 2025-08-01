@@ -1,8 +1,8 @@
-import { Container, Title, Text, Stack } from "@mantine/core";
+import { Container, Title, Text, Stack, Card } from "@mantine/core";
 import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getApi } from "../../api";
-import type { ExpressionOfInterest } from "../../api/Api";
+import type { EoiError, ExpressionOfInterest } from "../../api/Api";
 import { CollectiveContext } from "../PublicWithCollective";
 import { EOIForm } from "../../components";
 
@@ -10,6 +10,7 @@ export default function ManageMyEoi() {
   const { authToken } = useParams<"authToken">();
   const collective = useContext(CollectiveContext);
   const [eoi, setEoi] = useState<ExpressionOfInterest | null | undefined>(undefined);
+  const [error, setError] = useState<EoiError | null>(null);
 
   useEffect(() => {
     if (!authToken) {
@@ -23,6 +24,7 @@ export default function ManageMyEoi() {
         if (response.status === 200) {
           console.log("EOI data:", response.data);
           setEoi(response.data);
+          setError(null);
         }
       })
       .catch((error) => {
@@ -47,7 +49,23 @@ export default function ManageMyEoi() {
   }
 
   const handleSubmit = async (values: ExpressionOfInterest): Promise<void> => {
-    console.log("Submitted form", values);
+    if (!authToken) {
+      console.error("No auth token provided for updating EOI.");
+      return;
+    }
+
+    return getApi()
+      .api.updateEoi(authToken, collective.id, values)
+      .then((_) => {
+        setError(null);
+        setEoi(values);
+      })
+      .catch((error) => {
+        if (error.response?.status === 400) {
+          const errorEnum = error.response.data as EoiError;
+          setError(errorEnum);
+        }
+      });
   };
 
   return (
@@ -59,6 +77,15 @@ export default function ManageMyEoi() {
             {collective.name}
           </Title>
         </Stack>
+
+        {error && (
+          <Card withBorder style={{ borderColor: "var(--mantine-color-red-5)" }}>
+            <Stack gap="md">
+              <Title order={3}>Sorry, there was an error with your submission</Title>
+              <Text>Something is broken on our end. Please try again later, or contact the collective via other means.</Text>
+            </Stack>
+          </Card>
+        )}
 
         <EOIForm onSubmit={handleSubmit} collective={collective} eoi={eoi} actionName="Update" />
       </Stack>
