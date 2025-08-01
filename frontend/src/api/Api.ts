@@ -655,16 +655,16 @@ export class Api<
     /**
      * No description
      *
-     * @name GetEntryPathwayByAuthToken
-     * @request GET:/api/public/collective/{collective_id}/entry_pathway/by_auth_token/{auth_token}
+     * @name GetEoiByAuthToken
+     * @request GET:/api/public/collective/{collective_id}/interest/by_auth_token/{auth_token}
      */
-    getEntryPathwayByAuthToken: (
+    getEoiByAuthToken: (
       authToken: string,
       collectiveId: number,
       params: RequestParams = {},
     ) =>
-      this.request<EntryPathway, any>({
-        path: `/api/public/collective/${collectiveId}/entry_pathway/by_auth_token/${authToken}`,
+      this.request<ExpressionOfInterest, any>({
+        path: `/api/public/collective/${collectiveId}/interest/by_auth_token/${authToken}`,
         method: "GET",
         format: "json",
         ...params,
