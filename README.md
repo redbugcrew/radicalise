@@ -37,7 +37,7 @@ Database migrations are performed by a tool called sqlx, available through cargo
 To create a migration, run `cargo sqlx migrate add some_migration_name` where `some_migration_name` is replaced with a short name describing the migration. This should create a fresh file in the migrations directory.
 
 The SQLlite changes to the database can then be added to the migration file.
-These changes should be automatically run when you re-start the app, but if not, run `cargo sqlx migrate run`.
+These changes should be automatically run when you re-start the app, but if not, run `cargo sqlx migrate run` in the backend terminal.
 
 ### Frontend Backend Connection
 

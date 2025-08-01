@@ -131,7 +131,6 @@ export interface EntryPathway {
   collective_id: number;
   conflict_experience?: string | null;
   context?: string | null;
-  email: string;
   /** @format int64 */
   id: number;
   interest?: string | null;
@@ -143,6 +142,20 @@ export interface EntryPathway {
 export type EntryPathwayEvent = {
   EntryPathwayUpdated: EntryPathway;
 };
+
+export interface ExpressionOfInterest {
+  /** @format int64 */
+  collective_id: number;
+  conflict_experience?: string | null;
+  context?: string | null;
+  email: string;
+  /** @format int64 */
+  id: number;
+  interest?: string | null;
+  name: string;
+  participant_connections?: string | null;
+  referral?: string | null;
+}
 
 export interface ForgotPasswordRequest {
   email: string;
@@ -424,7 +437,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 1.1.2
+ * @version 1.2.0
  * @license
  */
 export class Api<
@@ -645,7 +658,7 @@ export class Api<
      * @name CreateEoi
      * @request POST:/api/public/eoi
      */
-    createEoi: (data: EntryPathway, params: RequestParams = {}) =>
+    createEoi: (data: ExpressionOfInterest, params: RequestParams = {}) =>
       this.request<any, EoiError>({
         path: `/api/public/eoi`,
         method: "POST",

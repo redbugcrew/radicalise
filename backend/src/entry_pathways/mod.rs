@@ -7,7 +7,7 @@ use crate::{
     my_collective::repo::find_collective,
     realtime::RealtimeState,
     shared::{
-        entities::{CollectiveId, EntryPathway},
+        entities::{CollectiveId, ExpressionOfInterest},
         events::AppEvent,
     },
 };
@@ -30,12 +30,12 @@ enum EoiError {
         (status = BAD_REQUEST, body = EoiError),
         (status = INTERNAL_SERVER_ERROR, body = ()),
     ),
-    request_body(content = EntryPathway, content_type = "application/json")
+    request_body(content = ExpressionOfInterest, content_type = "application/json")
 )]
 pub async fn create_eoi(
     Extension(pool): Extension<SqlitePool>,
     Extension(realtime_state): Extension<RealtimeState>,
-    axum::extract::Json(submission): axum::extract::Json<EntryPathway>,
+    axum::extract::Json(submission): axum::extract::Json<ExpressionOfInterest>,
 ) -> impl IntoResponse {
     println!("Creating EOI for details: {:?}", submission);
 
@@ -55,7 +55,7 @@ pub async fn create_eoi(
         return (StatusCode::BAD_REQUEST, Json(EoiError::EoiFeatureDisabled)).into_response();
     }
 
-    let create_result = repo::create_entry_pathway(submission, &pool).await;
+    let create_result = repo::create_eoi(submission, &pool).await;
 
     match create_result {
         Ok(entry_pathway) => {

@@ -267,6 +267,19 @@ pub struct EntryPathway {
     pub id: i64,
     pub collective_id: i64,
     pub name: String,
+    pub interest: Option<String>,
+    pub context: Option<String>,
+    pub referral: Option<String>,
+    pub conflict_experience: Option<String>,
+    pub participant_connections: Option<String>,
+}
+
+#[derive(ToSchema, Deserialize, Serialize, Debug, Clone)]
+#[allow(dead_code)]
+pub struct ExpressionOfInterest {
+    pub id: i64,
+    pub collective_id: i64,
+    pub name: String,
     pub email: String,
     pub interest: Option<String>,
     pub context: Option<String>,
