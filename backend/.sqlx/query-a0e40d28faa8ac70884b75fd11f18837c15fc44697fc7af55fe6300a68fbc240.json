@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE entry_pathways\n        SET name = ?, email = ?, interest = ?, context = ?, referral = ?, conflict_experience = ?, participant_connections = ?\n        WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 8
+    },
+    "nullable": []
+  },
+  "hash": "a0e40d28faa8ac70884b75fd11f18837c15fc44697fc7af55fe6300a68fbc240"
+}
