@@ -1,13 +1,17 @@
-use axum::{extract::Path, http::StatusCode, response::IntoResponse, Extension, Json};
+use axum::{Extension, Json, extract::Path, http::StatusCode, response::IntoResponse};
 use serde::Serialize;
 use sqlx::SqlitePool;
 use utoipa::ToSchema;
 
 use crate::{
-    entry_pathways::repo::{find_eoi_by_auth_token}, my_collective::repo::find_collective, realtime::RealtimeState, shared::{
-        entities::{CollectiveId,ExpressionOfInterest},
+    entry_pathways::repo::find_eoi_by_auth_token,
+    my_collective::repo::find_collective,
+    realtime::RealtimeState,
+    shared::{
+        db_helpers::is_constraint_violation,
+        entities::{CollectiveId, EntryPathway, ExpressionOfInterest},
         events::AppEvent,
-    }
+    },
 };
 
 pub mod events;
@@ -37,44 +41,28 @@ pub async fn create_eoi(
 ) -> impl IntoResponse {
     println!("Creating EOI for details: {:?}", submission);
 
-    let collective_result =
-        find_collective(CollectiveId::new(submission.collective_id), &pool).await;
-    if collective_result.is_err() {
-        eprintln!("Collective not found for ID: {}", submission.collective_id);
-        return (StatusCode::BAD_REQUEST, Json(EoiError::CollectiveNotFound)).into_response();
-    }
-    let collective = collective_result.unwrap();
+    let collective = match find_collective(CollectiveId::new(submission.collective_id), &pool).await
+    {
+        Ok(result) => result,
+        Err(_) => {
+            eprintln!("Collective not found for ID: {}", submission.collective_id);
+            return (StatusCode::BAD_REQUEST, Json(EoiError::CollectiveNotFound)).into_response();
+        }
+    };
 
     if !collective.feature_eoi {
-        eprintln!(
-            "EOI feature is not enabled for collective ID: {}",
-            submission.collective_id
-        );
         return (StatusCode::BAD_REQUEST, Json(EoiError::EoiFeatureDisabled)).into_response();
     }
 
-    let create_result = repo::create_eoi(submission, &pool).await;
-
-    match create_result {
+    match repo::create_eoi(submission, &pool).await {
         Ok(entry_pathway) => {
-            // raise the realtime event
-            let event = events::EntryPathwayEvent::EntryPathwayUpdated(entry_pathway);
-            realtime_state
-                .broadcast_app_event(None, AppEvent::EntryPathwayEvent(event))
-                .await;
-
+            broadcast_entry_pathway_updated(&entry_pathway, &realtime_state).await;
             return (StatusCode::CREATED, ()).into_response();
         }
         Err(e) => {
-            // If is a unique constraint violation, return a 400 Bad Request
-            if let sqlx::Error::Database(db_error) = &e {
-                eprintln!("Database error: {}", db_error);
-                println!("Database error code: {:?}", db_error.code());
-                if db_error.code() == Some(std::borrow::Cow::Borrowed("2067")) {
-                    eprintln!("EOI already exists for this collective");
-                    return (StatusCode::BAD_REQUEST, Json(EoiError::EmailAlreadyExists))
-                        .into_response();
-                }
+            if is_constraint_violation(&e) {
+                return (StatusCode::BAD_REQUEST, Json(EoiError::EmailAlreadyExists))
+                    .into_response();
             }
 
             eprintln!("Failed to create EOI: {}", e);
@@ -101,7 +89,7 @@ pub async fn get_eoi_by_auth_token(
     Path((collective_id, auth_token)): Path<(i64, String)>,
     Extension(pool): Extension<SqlitePool>,
 ) -> impl IntoResponse {
-    let result = find_eoi_by_auth_token(CollectiveId::new(collective_id), &auth_token, &pool).await; 
+    let result = find_eoi_by_auth_token(CollectiveId::new(collective_id), &auth_token, &pool).await;
     match result {
         Ok(Some(eoi)) => {
             return (StatusCode::OK, Json(eoi)).into_response();
@@ -115,4 +103,14 @@ pub async fn get_eoi_by_auth_token(
             return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
         }
     }
+}
+
+async fn broadcast_entry_pathway_updated(
+    entry_pathway: &EntryPathway,
+    realtime_state: &RealtimeState,
+) {
+    let event = events::EntryPathwayEvent::EntryPathwayUpdated(entry_pathway.clone());
+    realtime_state
+        .broadcast_app_event(None, AppEvent::EntryPathwayEvent(event))
+        .await;
 }
