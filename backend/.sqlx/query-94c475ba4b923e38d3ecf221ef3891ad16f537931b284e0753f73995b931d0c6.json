@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM entry_pathways\n        WHERE auth_token = ? AND collective_id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "94c475ba4b923e38d3ecf221ef3891ad16f537931b284e0753f73995b931d0c6"
+}

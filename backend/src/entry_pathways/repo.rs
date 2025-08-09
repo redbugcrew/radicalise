@@ -1,13 +1,12 @@
-use sqlx::{SqlitePool};
-use uuid::Uuid;
+use sqlx::SqlitePool;
 
 use crate::shared::entities::{CollectiveId, EntryPathway, ExpressionOfInterest};
 
 pub async fn create_eoi(
     record: ExpressionOfInterest,
+    auth_token: String,
     pool: &SqlitePool,
 ) -> Result<EntryPathway, sqlx::Error> {
-    let auth_token = Uuid::new_v4().to_string();
     let result = sqlx::query!(
         "INSERT INTO entry_pathways (collective_id, name, email, interest, context, referral, conflict_experience, participant_connections, auth_token)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -50,7 +49,11 @@ pub async fn update_eoi(
     return find_entry_pathway(record.id, pool).await;
 }
 
-pub async fn delete_eoi_record(pool: &SqlitePool, auth_token: String, collective_id: CollectiveId) -> Result<(), sqlx::Error> {
+pub async fn delete_eoi_record(
+    pool: &SqlitePool,
+    auth_token: String,
+    collective_id: CollectiveId,
+) -> Result<(), sqlx::Error> {
     sqlx::query!(
         "DELETE FROM entry_pathways
         WHERE auth_token = ? AND collective_id = ?",

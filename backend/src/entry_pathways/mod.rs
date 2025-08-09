@@ -1,7 +1,9 @@
 use axum::{Extension, Json, extract::Path, http::StatusCode, response::IntoResponse};
+use resend_rs::Resend;
 use serde::Serialize;
 use sqlx::SqlitePool;
 use utoipa::ToSchema;
+use uuid::Uuid;
 
 use crate::{
     entry_pathways::repo::find_eoi_by_auth_token,
@@ -14,6 +16,7 @@ use crate::{
     },
 };
 
+mod emails;
 pub mod events;
 pub mod repo;
 
@@ -38,6 +41,7 @@ enum EoiError {
 pub async fn create_eoi(
     Extension(pool): Extension<SqlitePool>,
     Extension(realtime_state): Extension<RealtimeState>,
+    Extension(resend): Extension<Resend>,
     axum::extract::Json(submission): axum::extract::Json<ExpressionOfInterest>,
 ) -> impl IntoResponse {
     println!("Creating EOI for details: {:?}", submission);
@@ -55,9 +59,20 @@ pub async fn create_eoi(
         return (StatusCode::BAD_REQUEST, Json(EoiError::EoiFeatureDisabled)).into_response();
     }
 
-    match repo::create_eoi(submission, &pool).await {
+    let auth_token = Uuid::new_v4().to_string();
+    let email = submission.email.clone();
+
+    match repo::create_eoi(submission, auth_token.clone(), &pool).await {
         Ok(entry_pathway) => {
             broadcast_entry_pathway_updated(&entry_pathway, &realtime_state).await;
+            if let Some(slug) = collective.slug {
+                let result = emails::manage_your_eoi_email(&resend, email, slug, auth_token).await;
+                match result {
+                    Ok(_) => println!("EOI management email sent successfully."),
+                    Err(e) => eprintln!("Failed to send EOI management email: {}", e),
+                }
+            }
+
             return (StatusCode::CREATED, ()).into_response();
         }
         Err(e) => {
@@ -133,7 +148,6 @@ pub async fn update_eoi(
     .into_response()
 }
 
-
 #[utoipa::path(
     delete,
     path = "/collective/{collective_id}/eoi/{auth_token}",
@@ -150,7 +164,10 @@ pub async fn delete_eoi(
     Extension(pool): Extension<SqlitePool>,
     Path((collective_id, auth_token)): Path<(i64, String)>,
 ) -> impl IntoResponse {
-    println!("Deleting EOI for collective ID: {}, auth token: {}", collective_id, auth_token);
+    println!(
+        "Deleting EOI for collective ID: {}, auth token: {}",
+        collective_id, auth_token
+    );
     match repo::delete_eoi_record(&pool, auth_token, CollectiveId::new(collective_id)).await {
         Ok(_) => {
             return (StatusCode::OK, ());
@@ -160,7 +177,6 @@ pub async fn delete_eoi(
             return (StatusCode::BAD_REQUEST, ());
         }
     }
-    
 }
 
 #[utoipa::path(
