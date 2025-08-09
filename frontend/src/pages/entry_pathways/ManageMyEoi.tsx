@@ -1,4 +1,4 @@
-import { Container, Title, Text, Stack, Card } from "@mantine/core";
+import { Container, Title, Text, Stack, Card, Button } from "@mantine/core";
 import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getApi } from "../../api";
@@ -87,7 +87,17 @@ export default function ManageMyEoi() {
           </Card>
         )}
 
-        <EOIForm onSubmit={handleSubmit} collective={collective} eoi={eoi} actionName="Update" />
+        <Stack align="flex-start">
+          <Title order={3}>Delete your submission</Title>
+          <Text>If you delete your submission, your data will be permanently removed and cannot be recovered. You can always re-submit later if you change your mind.</Text>
+          <Button color="red">Delete</Button>
+        </Stack>
+
+        <Stack>
+          <Title order={3}>Update your answers</Title>
+          <Text>You can update your answers below, any changes here will override what you have already submitted.</Text>
+          <EOIForm onSubmit={handleSubmit} collective={collective} eoi={eoi} actionName="Update" />
+        </Stack>
       </Stack>
     </Container>
   );
