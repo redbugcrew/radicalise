@@ -1,4 +1,4 @@
-use sqlx::{pool, SqlitePool};
+use sqlx::{SqlitePool};
 use uuid::Uuid;
 
 use crate::shared::entities::{CollectiveId, EntryPathway, ExpressionOfInterest};

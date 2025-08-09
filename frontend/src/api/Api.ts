@@ -683,14 +683,11 @@ export class Api<
     deleteEoi: (
       authToken: string,
       collectiveId: number,
-      data: ExpressionOfInterest,
       params: RequestParams = {},
     ) =>
-      this.request<any, EoiError>({
+      this.request<any, any>({
         path: `/api/public/collective/${collectiveId}/eoi/${authToken}`,
         method: "DELETE",
-        body: data,
-        type: ContentType.Json,
         format: "json",
         ...params,
       }),

@@ -163,8 +163,6 @@ pub async fn delete_eoi(
     
 }
 
-//Get EOI by auth token
-
 #[utoipa::path(
     get,
     path = "/collective/{collective_id}/interest/by_auth_token/{auth_token}",
@@ -197,8 +195,6 @@ pub async fn get_eoi_by_auth_token(
         }
     }
 }
-
-// Private function to broadcast entry pathway updates
 
 async fn broadcast_entry_pathway_updated(
     entry_pathway: &EntryPathway,
