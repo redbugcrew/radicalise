@@ -11,6 +11,7 @@ export default function ManageMyEoi() {
   const collective = useContext(CollectiveContext);
   const [eoi, setEoi] = useState<ExpressionOfInterest | null | undefined>(undefined);
   const [error, setError] = useState<EoiError | null>(null);
+  const [action, setAction] = useState<"updated" | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -59,12 +60,15 @@ export default function ManageMyEoi() {
       .api.updateEoi(authToken, collective.id, values)
       .then((_) => {
         setError(null);
+        setAction("updated");
         setEoi(values);
+        window.scrollTo({ top: 0, behavior: "smooth" });
       })
       .catch((error) => {
         if (error.response?.status === 400) {
           const errorEnum = error.response.data as EoiError;
           setError(errorEnum);
+          window.scrollTo({ top: 0, behavior: "smooth" });
         }
       });
   };
@@ -101,6 +105,15 @@ export default function ManageMyEoi() {
             <Stack gap="md">
               <Title order={3}>Sorry, there was an error with your submission</Title>
               <Text>Something is broken on our end. Please try again later, or contact the collective via other means.</Text>
+            </Stack>
+          </Card>
+        )}
+
+        {action === "updated" && (
+          <Card withBorder style={{ borderColor: "var(--mantine-color-green-5)" }}>
+            <Stack gap="md">
+              <Title order={3}>Your submission has been updated</Title>
+              <Text>Thank you for updating your expression of interest.</Text>
             </Stack>
           </Card>
         )}
