@@ -1,6 +1,6 @@
 import { Container, Title, Text, Stack, Card, Button } from "@mantine/core";
 import { useContext, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { getApi } from "../../api";
 import type { EoiError, ExpressionOfInterest } from "../../api/Api";
 import { CollectiveContext } from "../PublicWithCollective";
@@ -11,6 +11,7 @@ export default function ManageMyEoi() {
   const collective = useContext(CollectiveContext);
   const [eoi, setEoi] = useState<ExpressionOfInterest | null | undefined>(undefined);
   const [error, setError] = useState<EoiError | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!authToken) {
@@ -68,6 +69,23 @@ export default function ManageMyEoi() {
       });
   };
 
+  const handleDelete = async (): Promise<void> => {
+    if (!authToken) {
+      console.error("No auth token provided for deleting EOI.");
+      return;
+    }
+
+    return getApi()
+      .api.deleteEoi(authToken, collective.id)
+      .then(() => {
+        navigate("../interest");
+      })
+      .catch((error) => {
+        console.error("Error deleting EOI:", error);
+        // setError({ type: "delete_error", message: "Failed to delete the expression of interest." });
+      });
+  };
+
   return (
     <Container pt="lg" pb="xl">
       <Stack gap="xl">
@@ -90,7 +108,9 @@ export default function ManageMyEoi() {
         <Stack align="flex-start">
           <Title order={3}>Delete your submission</Title>
           <Text>If you delete your submission, your data will be permanently removed and cannot be recovered. You can always re-submit later if you change your mind.</Text>
-          <Button color="red">Delete</Button>
+          <Button color="red" onClick={handleDelete}>
+            Delete
+          </Button>
         </Stack>
 
         <Stack>
