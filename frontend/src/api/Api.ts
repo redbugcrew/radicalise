@@ -438,7 +438,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 1.2.0
+ * @version 1.2.2
  * @license
  */
 export class Api<
@@ -670,6 +670,24 @@ export class Api<
         method: "PUT",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name DeleteEoi
+     * @request DELETE:/api/public/collective/{collective_id}/eoi/{auth_token}
+     */
+    deleteEoi: (
+      authToken: string,
+      collectiveId: number,
+      params: RequestParams = {},
+    ) =>
+      this.request<any, any>({
+        path: `/api/public/collective/${collectiveId}/eoi/${authToken}`,
+        method: "DELETE",
         format: "json",
         ...params,
       }),

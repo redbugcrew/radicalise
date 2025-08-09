@@ -91,7 +91,7 @@ pub async fn update_eoi(
     Extension(pool): Extension<SqlitePool>,
     Extension(realtime_state): Extension<RealtimeState>,
     Path((collective_id, auth_token)): Path<(i64, String)>,
-    axum::extract::Json(submission): axum::extract::Json<ExpressionOfInterest>,
+    Json(submission): Json<ExpressionOfInterest>,
 ) -> impl IntoResponse {
     println!("Updating EOI for details: {:?}", submission);
 
@@ -131,6 +131,36 @@ pub async fn update_eoi(
         }
     }
     .into_response()
+}
+
+
+#[utoipa::path(
+    delete,
+    path = "/collective/{collective_id}/eoi/{auth_token}",
+    params(
+        ("auth_token" = String, Path, description = "Authentication token for the entry pathway"),
+        ("collective_id" = i64, Path, description = "Collective ID for the entry pathway")
+    ),
+    responses(
+        (status = 200, body = ()),
+        (status = BAD_REQUEST, body = ()),
+    )
+)]
+pub async fn delete_eoi(
+    Extension(pool): Extension<SqlitePool>,
+    Path((collective_id, auth_token)): Path<(i64, String)>,
+) -> impl IntoResponse {
+    println!("Deleting EOI for collective ID: {}, auth token: {}", collective_id, auth_token);
+    match repo::delete_eoi_record(&pool, auth_token, CollectiveId::new(collective_id)).await {
+        Ok(_) => {
+            return (StatusCode::OK, ());
+        }
+        Err(e) => {
+            eprintln!("Failed to delete EOI: {}", e);
+            return (StatusCode::BAD_REQUEST, ());
+        }
+    }
+    
 }
 
 #[utoipa::path(
