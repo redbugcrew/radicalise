@@ -133,7 +133,7 @@ pub async fn update_eoi(
     .into_response()
 }
 
-// REVIEW creation of new end point fn to delete EOI (uses simlar path parameters to the update endpoint fn). Not yet completed.
+
 #[utoipa::path(
     delete,
     path = "/collective/{collective_id}/eoi/{auth_token}",
@@ -143,24 +143,21 @@ pub async fn update_eoi(
     ),
     responses(
         (status = 200, body = ()),
-        (status = BAD_REQUEST, body = EoiError),
-        (status = INTERNAL_SERVER_ERROR, body = ()),
-    ),
-    request_body(content = ExpressionOfInterest, content_type = "application/json")
+        (status = BAD_REQUEST, body = ()),
+    )
 )]
 pub async fn delete_eoi(
     Extension(pool): Extension<SqlitePool>,
-    Extension(realtime_state): Extension<RealtimeState>,
     Path((collective_id, auth_token)): Path<(i64, String)>,
 ) -> impl IntoResponse {
     println!("Deleting EOI for collective ID: {}, auth token: {}", collective_id, auth_token);
     match repo::delete_eoi_record(&pool, auth_token, CollectiveId::new(collective_id)).await {
         Ok(_) => {
-            return (StatusCode::OK, ()).into_response();
+            return (StatusCode::OK, ());
         }
         Err(e) => {
             eprintln!("Failed to delete EOI: {}", e);
-            return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
+            return (StatusCode::BAD_REQUEST, ());
         }
     }
     
