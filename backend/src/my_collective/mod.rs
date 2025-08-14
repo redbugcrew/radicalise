@@ -1,3 +1,5 @@
+use std::f64::consts::E;
+
 use axum::{Extension, Json, extract::Path, http::StatusCode, response::IntoResponse};
 use sqlx::SqlitePool;
 use utoipa_axum::{router::OpenApiRouter, routes};
@@ -42,10 +44,16 @@ async fn get_collective_state(Extension(pool): Extension<SqlitePool>) -> impl In
                 repo::find_initial_data_for_collective(collective, &pool).await;
             match initial_data_result {
                 Ok(initial_data) => (StatusCode::OK, Json(initial_data)).into_response(),
-                Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
+                Err(e) => {
+                    eprintln!("Error fetching initial data: {:?}", e);
+                    (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response()
+                }
             }
         }
-        Err(_) => (StatusCode::NOT_FOUND, ()).into_response(),
+        Err(e) => {
+            eprintln!("Error collective state: {:?}", e);
+            (StatusCode::NOT_FOUND, ()).into_response()
+        }
     }
 }
 
