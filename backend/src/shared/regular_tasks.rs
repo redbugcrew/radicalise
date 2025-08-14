@@ -1,7 +1,10 @@
 use sqlx::SqlitePool;
 
 use crate::{
-    intervals::repo::{find_intervals_needing_implicit_involvements, find_previous_interval},
+    intervals::repo::{
+        find_intervals_needing_implicit_involvements, find_previous_interval,
+        mark_implicit_involvements_processed,
+    },
     my_collective::involvements_repo::{
         find_all_collective_involvements, insert_collective_involvement_if_missing,
     },
@@ -74,6 +77,8 @@ async fn add_interval_inplicit_involvements(
             );
         }
     }
+
+    mark_implicit_involvements_processed(interval.typed_id(), true, pool).await?;
 
     Ok(())
 }
