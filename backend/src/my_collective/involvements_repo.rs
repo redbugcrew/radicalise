@@ -173,3 +173,40 @@ pub async fn upsert_collective_involvement(
         Ok(())
     }
 }
+
+pub async fn insert_collective_involvement_if_missing(
+    involvement: CollectiveInvolvementRecord,
+    pool: &SqlitePool,
+) -> Result<(), sqlx::Error> {
+    sqlx::query!(
+        "INSERT INTO collective_involvements (person_id, collective_id, interval_id, status, private_capacity_planning, wellbeing, focus, capacity_score, capacity, participation_intention, opt_out_type, opt_out_planned_return_date,
+        intention_context)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(person_id, collective_id, interval_id) DO NOTHING",
+        involvement.person_id,
+        involvement.collective_id,
+        involvement.interval_id,
+        involvement.status,
+        involvement.private_capacity_planning,
+        involvement.wellbeing,
+        involvement.focus,
+        involvement.capacity_score,
+        involvement.capacity,
+        involvement.participation_intention,
+        involvement.opt_out_type,
+        involvement.opt_out_planned_return_date,
+        involvement.intention_context
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(())
+}
+
+// pub async fn create_missing_collective_involvements_for_interval(
+//     collective_id: CollectiveId,
+//     interval_id: IntervalId,
+//     status: InvolvementStatus,
+//     pool: &SqlitePool,
+// ) -> Result<(), sqlx::Error> {
+// }

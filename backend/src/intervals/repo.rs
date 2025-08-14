@@ -103,6 +103,26 @@ pub async fn find_next_interval(
     .fetch_optional(pool)
     .await
 }
+pub async fn find_previous_interval(
+    collective_id: CollectiveId,
+    current_interval_id: IntervalId,
+    pool: &SqlitePool,
+) -> Result<Option<Interval>, sqlx::Error> {
+    sqlx::query_as!(
+        Interval,
+        "SELECT id, start_date, end_date
+        FROM intervals
+        WHERE
+            collective_id = ? AND
+            id < ?
+        ORDER BY id DESC
+        LIMIT 1",
+        collective_id.id,
+        current_interval_id.id
+    )
+    .fetch_optional(pool)
+    .await
+}
 
 pub fn get_interval_type(interval: Interval) -> IntervalType {
     let today = chrono::Utc::now().date_naive();
@@ -120,6 +140,35 @@ pub fn get_interval_type(interval: Interval) -> IntervalType {
     }
 
     return IntervalType::Current;
+}
+
+pub async fn find_intervals_needing_implicit_involvements(
+    collective_id: CollectiveId,
+    pool: &SqlitePool,
+) -> Result<Vec<Interval>, sqlx::Error> {
+    let current_interval = find_current_interval(collective_id.clone(), pool).await?;
+    let next_interval_result =
+        find_next_interval(collective_id.clone(), current_interval.typed_id(), pool).await?;
+
+    let next_interval = match next_interval_result {
+        Some(interval) => interval,
+        None => return Ok(vec![]),
+    };
+
+    sqlx::query_as!(
+        Interval,
+        "SELECT id, start_date, end_date
+        FROM intervals
+        WHERE
+          collective_id = ? AND
+          intervals.id <= ? AND
+          processed_implicit_involvements = FALSE
+        ORDER BY id ASC",
+        collective_id.id,
+        next_interval.id
+    )
+    .fetch_all(pool)
+    .await
 }
 
 pub fn parse_date_only(date_str: &str) -> Option<chrono::NaiveDate> {

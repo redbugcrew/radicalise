@@ -1,5 +1,3 @@
-use std::f64::consts::E;
-
 use axum::{Extension, Json, extract::Path, http::StatusCode, response::IntoResponse};
 use sqlx::SqlitePool;
 use utoipa_axum::{router::OpenApiRouter, routes};
@@ -16,6 +14,7 @@ use crate::{
         default_collective_id,
         entities::{Collective, IntervalId},
         events::AppEvent,
+        regular_tasks::check_intervals_tasks,
     },
 };
 
@@ -36,23 +35,32 @@ pub fn router() -> OpenApiRouter {
         (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
     ),)]
 async fn get_collective_state(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse {
-    let collective_result = repo::find_collective_with_links(default_collective_id(), &pool).await;
-
-    match collective_result {
-        Ok(collective) => {
-            let initial_data_result =
-                repo::find_initial_data_for_collective(collective, &pool).await;
-            match initial_data_result {
-                Ok(initial_data) => (StatusCode::OK, Json(initial_data)).into_response(),
-                Err(e) => {
-                    eprintln!("Error fetching initial data: {:?}", e);
-                    (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response()
-                }
-            }
-        }
+    let collective = match repo::find_collective_with_links(default_collective_id(), &pool).await {
+        Ok(collective) => collective,
         Err(e) => {
-            eprintln!("Error collective state: {:?}", e);
-            (StatusCode::NOT_FOUND, ()).into_response()
+            eprintln!("Error fetching collective: {:?}", e);
+            return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
+        }
+    };
+
+    // Run automated tasks
+    if check_intervals_tasks(collective.typed_id(), &pool)
+        .await
+        .is_err()
+    {
+        eprintln!(
+            "Error checking next interval for collective: {:?}",
+            collective
+        );
+        return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
+    }
+
+    let initial_data_result = repo::find_initial_data_for_collective(collective, &pool).await;
+    match initial_data_result {
+        Ok(initial_data) => (StatusCode::OK, Json(initial_data)).into_response(),
+        Err(e) => {
+            eprintln!("Error fetching initial data: {:?}", e);
+            (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response()
         }
     }
 }
