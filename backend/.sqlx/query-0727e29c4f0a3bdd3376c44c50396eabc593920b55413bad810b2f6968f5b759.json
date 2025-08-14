@@ -1,0 +1,32 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id, start_date, end_date\n        FROM intervals\n        WHERE\n          collective_id = ? AND\n          intervals.id <= ? AND\n          processed_implicit_involvements = FALSE\n        ORDER BY id ASC",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer"
+      },
+      {
+        "name": "start_date",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "end_date",
+        "ordinal": 2,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "0727e29c4f0a3bdd3376c44c50396eabc593920b55413bad810b2f6968f5b759"
+}
