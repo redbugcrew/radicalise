@@ -1,4 +1,9 @@
-import { Navigate, RouterProvider, createBrowserRouter, type LoaderFunction } from "react-router-dom";
+import {
+  Navigate,
+  RouterProvider,
+  createBrowserRouter,
+  type LoaderFunction,
+} from "react-router-dom";
 import { Provider as ReduxProvider } from "react-redux";
 import store, { loadInitialData, type AppStore } from "./store";
 import { MantineProvider } from "@mantine/core";
@@ -29,8 +34,12 @@ import { theme } from "./theme";
 // All packages except `@mantine/hooks` require styles imports
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
+import { EventTemplates } from "./contexts/events";
 
-function withStore(func: (store: AppStore) => any, store: AppStore): LoaderFunction<any> {
+function withStore(
+  func: (store: AppStore) => any,
+  store: AppStore
+): LoaderFunction<any> {
   const wrappedFunc: LoaderFunction<any> = async () => {
     return func(store);
   };
@@ -98,6 +107,15 @@ const router = createBrowserRouter([
       {
         path: "entry_pathways/:entryPathwayId",
         element: <DisplayEntryPathway />,
+      },
+      {
+        path: "events",
+        children: [
+          {
+            path: "event_templates",
+            element: <EventTemplates />,
+          },
+        ],
       },
       {
         path: "dev",
