@@ -148,6 +148,10 @@ export type EntryPathwayEvent = {
   EntryPathwayUpdated: EntryPathway;
 };
 
+export interface EventTemplateCreationData {
+  name: string;
+}
+
 export interface ExpressionOfInterest {
   /** @format int64 */
   collective_id: number;
@@ -301,7 +305,7 @@ export type RequestParams = Omit<
 export interface ApiConfig<SecurityDataType = unknown>
   extends Omit<AxiosRequestConfig, "data" | "cancelToken"> {
   securityWorker?: (
-    securityData: SecurityDataType | null,
+    securityData: SecurityDataType | null
   ) => Promise<AxiosRequestConfig | void> | AxiosRequestConfig | void;
   secure?: boolean;
   format?: ResponseType;
@@ -343,7 +347,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
   protected mergeRequestParams(
     params1: AxiosRequestConfig,
-    params2?: AxiosRequestConfig,
+    params2?: AxiosRequestConfig
   ): AxiosRequestConfig {
     const method = params1.method || (params2 && params2.method);
 
@@ -384,7 +388,7 @@ export class HttpClient<SecurityDataType = unknown> {
         const isFileType = formItem instanceof Blob || formItem instanceof File;
         formData.append(
           key,
-          isFileType ? formItem : this.stringifyFormItem(formItem),
+          isFileType ? formItem : this.stringifyFormItem(formItem)
         );
       }
 
@@ -443,11 +447,15 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
+<<<<<<< HEAD
  * @version 1.2.5
+=======
+ * @version 1.2.4
+>>>>>>> 0e46143 (added create event template endpoint)
  * @license
  */
 export class Api<
-  SecurityDataType extends unknown,
+  SecurityDataType extends unknown
 > extends HttpClient<SecurityDataType> {
   api = {
     /**
@@ -505,7 +513,7 @@ export class Api<
     updateCrew: (
       crewId: string,
       data: CrewWithLinks,
-      params: RequestParams = {},
+      params: RequestParams = {}
     ) =>
       this.request<AppEvent[], any>({
         path: `/api/crews/${crewId}`,
@@ -519,13 +527,18 @@ export class Api<
     /**
      * No description
      *
-     * @name RecomputeImplicitInvolvements
-     * @request POST:/api/dev/recompute_implicit_involvements
+     * @name CreateEventTemplate
+     * @request POST:/api/event_templates
      */
-    recomputeImplicitInvolvements: (params: RequestParams = {}) =>
-      this.request<any, any>({
-        path: `/api/dev/recompute_implicit_involvements`,
+    createEventTemplate: (
+      data: EventTemplateCreationData,
+      params: RequestParams = {}
+    ) =>
+      this.request<AppEvent[], any>({
+        path: `/api/event_templates`,
         method: "POST",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),
@@ -569,7 +582,7 @@ export class Api<
     updateMyParticipation: (
       intervalId: number,
       data: MyParticipationInput,
-      params: RequestParams = {},
+      params: RequestParams = {}
     ) =>
       this.request<AppEvent[], any>({
         path: `/api/me/interval/${intervalId}/my_participation`,
@@ -647,7 +660,7 @@ export class Api<
     updatePerson: (
       personId: string,
       data: Person,
-      params: RequestParams = {},
+      params: RequestParams = {}
     ) =>
       this.request<AppEvent[], any>({
         path: `/api/people/${personId}`,
@@ -682,7 +695,7 @@ export class Api<
       authToken: string,
       collectiveId: number,
       data: ExpressionOfInterest,
-      params: RequestParams = {},
+      params: RequestParams = {}
     ) =>
       this.request<any, EoiError>({
         path: `/api/public/collective/${collectiveId}/eoi/${authToken}`,
@@ -702,7 +715,7 @@ export class Api<
     deleteEoi: (
       authToken: string,
       collectiveId: number,
-      params: RequestParams = {},
+      params: RequestParams = {}
     ) =>
       this.request<any, any>({
         path: `/api/public/collective/${collectiveId}/eoi/${authToken}`,
@@ -720,7 +733,7 @@ export class Api<
     getEoiByAuthToken: (
       authToken: string,
       collectiveId: number,
-      params: RequestParams = {},
+      params: RequestParams = {}
     ) =>
       this.request<ExpressionOfInterest, any>({
         path: `/api/public/collective/${collectiveId}/interest/by_auth_token/${authToken}`,
