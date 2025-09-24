@@ -144,6 +144,10 @@ export type EntryPathwayEvent = {
   EntryPathwayUpdated: EntryPathway;
 };
 
+export interface EventTemplateCreationData {
+  name: string;
+}
+
 export interface ExpressionOfInterest {
   /** @format int64 */
   collective_id: number;
@@ -438,7 +442,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 1.2.2
+ * @version 1.2.4
  * @license
  */
 export class Api<
@@ -505,6 +509,25 @@ export class Api<
       this.request<AppEvent[], any>({
         path: `/api/crews/${crewId}`,
         method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CreateEventTemplate
+     * @request POST:/api/event_templates
+     */
+    createEventTemplate: (
+      data: EventTemplateCreationData,
+      params: RequestParams = {},
+    ) =>
+      this.request<AppEvent[], any>({
+        path: `/api/event_templates`,
+        method: "POST",
         body: data,
         type: ContentType.Json,
         format: "json",

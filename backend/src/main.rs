@@ -29,6 +29,7 @@ mod auth;
 mod crews;
 mod database;
 mod entry_pathways;
+mod event_templates;
 mod intervals;
 mod me;
 mod my_collective;
