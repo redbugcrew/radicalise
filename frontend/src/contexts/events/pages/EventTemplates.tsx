@@ -1,5 +1,6 @@
-import { Stack, Group, Title, Anchor, ActionIcon } from "@mantine/core";
+import { Stack, Group, Title, ActionIcon } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
+import { Anchor } from "../../../components";
 
 export default function EventTemplates() {
   return (
