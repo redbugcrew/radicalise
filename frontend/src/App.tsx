@@ -34,7 +34,7 @@ import { theme } from "./theme";
 // All packages except `@mantine/hooks` require styles imports
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
-import { EventTemplates } from "./contexts/events";
+import { EventTemplates, NewEventTemplate } from "./contexts/events";
 
 function withStore(
   func: (store: AppStore) => any,
@@ -113,7 +113,10 @@ const router = createBrowserRouter([
         children: [
           {
             path: "event_templates",
-            element: <EventTemplates />,
+            children: [
+              { path: "", element: <EventTemplates /> },
+              { path: "new", element: <NewEventTemplate /> },
+            ],
           },
         ],
       },
