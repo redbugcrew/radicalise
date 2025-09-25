@@ -1,20 +1,19 @@
 import { useForm } from "@mantine/form";
 import { Button, Stack, TextInput } from "@mantine/core";
-
-export interface EventTemplateInput {
-  name: string;
-}
+import type { EventTemplateCreationData } from "../../../../api/Api";
+import { LinksInput } from "../../../../components";
 
 interface EventTemplateFormProps {
-  value?: EventTemplateInput | null;
-  onSubmit: (data: EventTemplateInput) => Promise<void>;
+  value?: EventTemplateCreationData | null;
+  onSubmit: (data: EventTemplateCreationData) => Promise<void>;
 }
 
 export default function EventTemplateForm({ value, onSubmit }: EventTemplateFormProps) {
-  const form = useForm<EventTemplateInput>({
+  const form = useForm<EventTemplateCreationData>({
     mode: "controlled",
     initialValues: value || {
       name: "",
+      links: [],
     },
     validate: {
       name: (value) => (value && value.trim().length > 0 ? null : "Name is required"),
@@ -27,10 +26,17 @@ export default function EventTemplateForm({ value, onSubmit }: EventTemplateForm
         <Stack gap="md">
           <TextInput
             label="Name"
-            description="The name of the template. This is usually how you refer to this type of event. As in, we're going to have a [NAME] this weekend. It needs to be unique within your collective, so if you have multiple types of meetings, be more specific."
+            description="The name of the template. This is usually how you refer to this type of event. As in, we're going to have a SOMETHING this weekend. It needs to be unique within your collective, so if you have multiple types of meetings, be more specific."
             placeholder="e.g. Training, Meeting, Action, Party, Assembly, etc"
             withAsterisk
             {...form.getInputProps("name")}
+          />
+          <LinksInput
+            label="Links"
+            description="Add links to resources on this type of event in general. Ie; how we run meetings, not the agenda for a specific meeting"
+            placeholder="Add a link"
+            key="links"
+            {...form.getInputProps("links")}
           />
         </Stack>
         <Button type="submit" loading={form.submitting}>
