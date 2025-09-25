@@ -145,6 +145,7 @@ export type EntryPathwayEvent = {
 };
 
 export interface EventTemplateCreationData {
+  links?: any[] | null;
   name: string;
 }
 
@@ -525,7 +526,7 @@ export class Api<
       data: EventTemplateCreationData,
       params: RequestParams = {},
     ) =>
-      this.request<AppEvent[], any>({
+      this.request<any, any>({
         path: `/api/event_templates`,
         method: "POST",
         body: data,
