@@ -289,3 +289,10 @@ pub struct ExpressionOfInterest {
     pub conflict_experience: Option<String>,
     pub participant_connections: Option<String>,
 }
+
+#[derive(Deserialize, Serialize, ToSchema, Debug)]
+pub struct EventTemplate {
+    pub id: i64,
+    pub name: String,
+    pub links: Option<Vec<Link>>,
+}

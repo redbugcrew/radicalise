@@ -1,9 +1,10 @@
 import { Container, Title, Stack } from "@mantine/core";
-import EventTemplateForm, { type EventTemplateInput } from "../../components/event_templates/EventTemplateForm";
+import EventTemplateForm from "../../components/event_templates/EventTemplateForm";
 import { getApi } from "../../../../api";
+import type { EventTemplateCreationData } from "../../../../api/Api";
 
 export default function NewEventTemplate() {
-  const handleSubmit = async (data: EventTemplateInput): Promise<void> => {
+  const handleSubmit = async (data: EventTemplateCreationData): Promise<void> => {
     return getApi()
       .api.createEventTemplate(data)
       .then(() => {
