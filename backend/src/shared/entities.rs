@@ -288,7 +288,7 @@ pub struct ExpressionOfInterest {
     pub participant_connections: Option<String>,
 }
 
-#[derive(Deserialize, Serialize, ToSchema, Debug)]
+#[derive(Deserialize, Serialize, ToSchema, Debug, Clone)]
 pub struct EventTemplate {
     pub id: i64,
     pub name: String,

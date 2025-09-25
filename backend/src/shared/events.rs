@@ -9,6 +9,7 @@ pub enum AppEvent {
     CollectiveEvent(crate::my_collective::events::CollectiveEvent),
     PeopleEvent(crate::people::events::PeopleEvent),
     EntryPathwayEvent(crate::entry_pathways::events::EntryPathwayEvent),
+    EventTemplatesEvent(crate::event_templates::events::EventTemplatesEvent),
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]

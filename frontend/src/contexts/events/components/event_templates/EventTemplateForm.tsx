@@ -1,20 +1,17 @@
 import { useForm } from "@mantine/form";
 import { Button, Stack, TextInput } from "@mantine/core";
-import type { EventTemplateCreationData } from "../../../../api/Api";
+import type { EventTemplate } from "../../../../api/Api";
 import { LinksInput } from "../../../../components";
 
 interface EventTemplateFormProps {
-  value?: EventTemplateCreationData | null;
-  onSubmit: (data: EventTemplateCreationData) => Promise<void>;
+  value?: EventTemplate | null;
+  onSubmit: (data: EventTemplate) => Promise<void>;
 }
 
 export default function EventTemplateForm({ value, onSubmit }: EventTemplateFormProps) {
-  const form = useForm<EventTemplateCreationData>({
+  const form = useForm<EventTemplate>({
     mode: "controlled",
-    initialValues: value || {
-      name: "",
-      links: [],
-    },
+    initialValues: { ...value } as EventTemplate,
     validate: {
       name: (value) => (value && value.trim().length > 0 ? null : "Name is required"),
     },
