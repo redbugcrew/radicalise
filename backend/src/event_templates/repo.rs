@@ -1,26 +1,17 @@
-use serde::Deserialize;
 use sqlx::SqlitePool;
-use utoipa::ToSchema;
 
 use crate::shared::{
-    entities::{CollectiveId, EventTemplate, Link},
+    entities::{CollectiveId, EventTemplate},
     links_repo::{find_all_links_for_owner_type, hash_links_by_owner, update_links_for_owner},
 };
-
-#[derive(Deserialize, ToSchema, Debug)]
-pub struct EventTemplateCreationData {
-    pub name: String,
-    pub links: Option<Vec<Link>>,
-}
 
 struct EventTemplateRow {
     id: i64,
     name: String,
-    collective_id: i64,
 }
 
 pub async fn insert_event_template_with_links(
-    data: &EventTemplateCreationData,
+    data: &EventTemplate,
     collective_id: CollectiveId,
     pool: &SqlitePool,
 ) -> Result<EventTemplate, sqlx::Error> {
@@ -31,6 +22,40 @@ pub async fn insert_event_template_with_links(
         RETURNING id, name
         ",
         data.name,
+        collective_id.id
+    )
+    .fetch_one(pool)
+    .await?;
+
+    let links = update_links_for_owner(
+        rec.id,
+        "event_templates".to_string(),
+        data.links.clone(),
+        pool,
+    )
+    .await?;
+
+    Ok(EventTemplate {
+        id: rec.id,
+        name: rec.name,
+        links: Some(links.unwrap_or_default()),
+    })
+}
+
+pub async fn update_event_template_with_links(
+    data: &EventTemplate,
+    collective_id: CollectiveId,
+    pool: &SqlitePool,
+) -> Result<EventTemplate, sqlx::Error> {
+    let rec = sqlx::query!(
+        "
+        UPDATE event_templates
+        SET name = ?
+        WHERE id = ? AND collective_id = ?
+        RETURNING id, name
+        ",
+        data.name,
+        data.id,
         collective_id.id
     )
     .fetch_one(pool)
@@ -79,7 +104,7 @@ async fn find_all_event_template_rows(
     let rows = sqlx::query_as!(
         EventTemplateRow,
         "
-        SELECT id, name, collective_id
+        SELECT id, name
         FROM event_templates
         WHERE collective_id = ?
         ORDER BY name

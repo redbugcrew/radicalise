@@ -51,6 +51,9 @@ export type AppEvent =
     }
   | {
       EntryPathwayEvent: EntryPathwayEvent;
+    }
+  | {
+      EventTemplatesEvent: EventTemplatesEvent;
     };
 
 export interface CapacityPlanning {
@@ -155,10 +158,9 @@ export interface EventTemplate {
   name: string;
 }
 
-export interface EventTemplateCreationData {
-  links?: any[] | null;
-  name: string;
-}
+export type EventTemplatesEvent = {
+  EventTemplateUpdated: EventTemplate;
+};
 
 export interface ExpressionOfInterest {
   /** @format int64 */
@@ -539,13 +541,30 @@ export class Api<
      * @name CreateEventTemplate
      * @request POST:/api/event_templates
      */
-    createEventTemplate: (
-      data: EventTemplateCreationData,
-      params: RequestParams = {}
-    ) =>
+    createEventTemplate: (data: EventTemplate, params: RequestParams = {}) =>
       this.request<any, any>({
         path: `/api/event_templates`,
         method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdateEventTemplate
+     * @request PUT:/api/event_templates/{event_template_id}
+     */
+    updateEventTemplate: (
+      eventTemplateId: string,
+      data: EventTemplate,
+      params: RequestParams = {}
+    ) =>
+      this.request<any, any>({
+        path: `/api/event_templates/${eventTemplateId}`,
+        method: "PUT",
         body: data,
         type: ContentType.Json,
         format: "json",

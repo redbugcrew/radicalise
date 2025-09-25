@@ -1,19 +1,28 @@
-use axum::{Extension, http::StatusCode, response::IntoResponse};
+use axum::{Extension, Json, extract::Path, http::StatusCode, response::IntoResponse};
 use sqlx::SqlitePool;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
-use crate::shared::default_collective_id;
+use crate::{
+    auth::auth_backend::AuthSession,
+    realtime::RealtimeState,
+    shared::{default_collective_id, entities::EventTemplate, events::AppEvent},
+};
 
-use self::repo::EventTemplateCreationData;
+use self::events::EventTemplatesEvent;
 
+pub mod events;
 pub mod repo;
 
 pub fn router() -> OpenApiRouter {
-    OpenApiRouter::new().routes(routes!(create_event_template))
+    OpenApiRouter::new()
+        .routes(routes!(create_event_template))
+        .routes(routes!(update_event_template))
 }
 
-#[utoipa::path(post, path = "/",
-    request_body(content = EventTemplateCreationData, content_type = "application/json"),
+#[utoipa::path(
+    post,
+    path = "/",
+    request_body(content = EventTemplate, content_type = "application/json"),
     responses(
         (status = 201, body = ()),
         (status = INTERNAL_SERVER_ERROR, body = ()),
@@ -21,14 +30,60 @@ pub fn router() -> OpenApiRouter {
 )]
 async fn create_event_template(
     Extension(pool): Extension<SqlitePool>,
-    axum::extract::Json(event_template): axum::extract::Json<EventTemplateCreationData>,
+    Extension(realtime_state): Extension<RealtimeState>,
+    auth_session: AuthSession,
+    axum::extract::Json(data): axum::extract::Json<EventTemplate>,
 ) -> impl IntoResponse {
-    println!("Creating event template: {:?}", event_template);
+    println!("Creating event template: {:?}", data);
 
-    match repo::insert_event_template_with_links(&event_template, default_collective_id(), &pool)
-        .await
-    {
-        Ok(event) => (StatusCode::CREATED, ()).into_response(),
+    match repo::insert_event_template_with_links(&data, default_collective_id(), &pool).await {
+        Ok(event_template) => {
+            let event = AppEvent::EventTemplatesEvent(EventTemplatesEvent::EventTemplateUpdated(
+                event_template,
+            ));
+            realtime_state
+                .broadcast_app_event(Some(auth_session), event.clone())
+                .await;
+            (StatusCode::OK, Json(vec![event])).into_response()
+        }
+        Err(err) => {
+            eprintln!("Failed to create event template: {}", err);
+            (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response()
+        }
+    }
+}
+
+#[utoipa::path(
+    put,
+    path = "/{event_template_id}",
+    request_body(content = EventTemplate, content_type = "application/json"),
+    responses(
+        (status = 201, body = ()),
+        (status = INTERNAL_SERVER_ERROR, body = ()),
+    ),
+)]
+async fn update_event_template(
+    Path(event_template_id): Path<i64>,
+    Extension(pool): Extension<SqlitePool>,
+    Extension(realtime_state): Extension<RealtimeState>,
+    auth_session: AuthSession,
+    axum::extract::Json(data): axum::extract::Json<EventTemplate>,
+) -> impl IntoResponse {
+    println!(
+        "Updating event template with ID {}: {:?}",
+        event_template_id, data
+    );
+
+    match repo::update_event_template_with_links(&data, default_collective_id(), &pool).await {
+        Ok(event_template) => {
+            let event = AppEvent::EventTemplatesEvent(EventTemplatesEvent::EventTemplateUpdated(
+                event_template,
+            ));
+            realtime_state
+                .broadcast_app_event(Some(auth_session), event.clone())
+                .await;
+            (StatusCode::OK, Json(vec![event])).into_response()
+        }
         Err(err) => {
             eprintln!("Failed to create event template: {}", err);
             (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response()
