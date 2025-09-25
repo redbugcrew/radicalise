@@ -1,14 +1,15 @@
 import { Container, Title, Stack } from "@mantine/core";
 import EventTemplateForm from "../../components/event_templates/EventTemplateForm";
 import type { EventTemplate } from "../../../../api/Api";
-import { useParams } from "react-router-dom";
-import { useAppSelector } from "../../../../store";
+import { useNavigate, useParams } from "react-router-dom";
+import { handleAppEvents, useAppSelector } from "../../../../store";
 import { getApi } from "../../../../api";
 
 export default function EditEventTemplate() {
   const { templateId } = useParams<"templateId">();
   const templateIdNum = templateId ? parseInt(templateId, 10) : undefined;
   const template = useAppSelector((state) => state.eventTemplates.find((t) => t.id === templateIdNum));
+  const navigate = useNavigate();
 
   if (!templateIdNum || !template) {
     return (
@@ -22,8 +23,9 @@ export default function EditEventTemplate() {
   const handleSubmit = async (data: EventTemplate): Promise<void> => {
     return getApi()
       .api.updateEventTemplate(templateIdNum.toString(), data)
-      .then(() => {
-        console.log("Event template updated successfully");
+      .then((response) => {
+        handleAppEvents(response.data);
+        navigate("/events/event_templates");
       })
       .catch((error) => {
         console.error("Error updating event template:", error);

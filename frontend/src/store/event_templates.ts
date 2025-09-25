@@ -14,6 +14,8 @@ const eventTemplatesSlice = createSlice({
       const index = state.findIndex((eventTemplate) => eventTemplate.id === action.payload.id);
       if (index !== -1) {
         state[index] = action.payload;
+      } else {
+        state.push(action.payload);
       }
     },
   },
