@@ -1,9 +1,9 @@
 -- Add migration script here
 
 CREATE TABLE event_templates (
-    id INTEGER,
+    id INTEGER NOT NULL,
     name TEXT NOT NULL,
-    collective_id INTEGER,
+    collective_id INTEGER NOT NULL,
     PRIMARY KEY (id AUTOINCREMENT),
     CONSTRAINT fk_collective FOREIGN KEY (collective_id) REFERENCES collectives(id)
 );

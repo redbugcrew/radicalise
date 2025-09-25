@@ -5,6 +5,7 @@ use utoipa::ToSchema;
 use crate::{
     crews::repo::find_all_crews_with_links,
     entry_pathways::repo::find_all_entry_pathways_for_collective,
+    event_templates::repo::find_all_event_templates,
     intervals::repo::{find_current_interval, find_next_interval},
     my_collective::involvements_repo::find_all_collective_involvements,
     people::repo::find_all_people,
@@ -12,7 +13,7 @@ use crate::{
         default_collective_id,
         entities::{
             Collective, CollectiveId, CollectiveInvolvement, CrewInvolvement, CrewWithLinks,
-            EntryPathway, Interval, IntervalId, Person,
+            EntryPathway, EventTemplate, Interval, IntervalId, Person,
         },
         links_repo::{find_all_links_for_owner, update_links_for_owner},
     },
@@ -40,6 +41,7 @@ pub struct InitialData {
     pub current_interval: Interval,
     pub involvements: InvolvementData,
     pub entry_pathways: Vec<EntryPathway>,
+    pub event_templates: Vec<EventTemplate>,
 }
 
 pub async fn find_collective(
@@ -166,11 +168,13 @@ pub async fn find_initial_data_for_collective(
 
     let entry_pathways =
         find_all_entry_pathways_for_collective(collective.typed_id(), pool).await?;
+    let event_templates = find_all_event_templates(collective.typed_id(), pool).await?;
 
     Ok(InitialData {
         collective,
         people,
         crews,
+        event_templates,
         intervals,
         current_interval,
         involvements: InvolvementData {

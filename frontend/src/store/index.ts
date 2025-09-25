@@ -6,6 +6,7 @@ import intervalsReducer, { intervalsLoaded, intervalCreated } from "./intervals"
 import involvementsReducer, { involvementsLoaded, intervalDataChanged } from "./involvements";
 import crewsReducer, { crewsLoaded, crewUpdated } from "./crews";
 import entryPathwaysReducer, { entryPathwaysLoaded, entryPathwayUpdated } from "./entry_pathways";
+import eventTemplatesReducer, { eventTemplatesLoaded } from "./event_templates";
 import meReducer, { meLoaded } from "./me";
 import { getApi } from "../api";
 import { redirect } from "react-router-dom";
@@ -20,6 +21,7 @@ const store = configureStore({
     crews: crewsReducer,
     me: meReducer,
     entryPathways: entryPathwaysReducer,
+    eventTemplates: eventTemplatesReducer,
   },
 });
 
@@ -46,6 +48,7 @@ async function loadCollectiveData(store: AppStore, api: ReturnType<typeof getApi
       store.dispatch(involvementsLoaded(response.data.involvements));
       store.dispatch(entryPathwaysLoaded(response.data.entry_pathways));
       store.dispatch(collectiveLoaded(response.data.collective));
+      store.dispatch(eventTemplatesLoaded(response.data.event_templates));
 
       return null;
     })

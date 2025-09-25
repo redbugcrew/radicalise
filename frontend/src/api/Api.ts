@@ -148,6 +148,13 @@ export type EntryPathwayEvent = {
   EntryPathwayUpdated: EntryPathway;
 };
 
+export interface EventTemplate {
+  /** @format int64 */
+  id: number;
+  links?: any[] | null;
+  name: string;
+}
+
 export interface EventTemplateCreationData {
   links?: any[] | null;
   name: string;
@@ -176,6 +183,7 @@ export interface InitialData {
   crews: CrewWithLinks[];
   current_interval: Interval;
   entry_pathways: EntryPathway[];
+  event_templates: EventTemplate[];
   intervals: Interval[];
   involvements: InvolvementData;
   people: Person[];

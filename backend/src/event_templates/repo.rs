@@ -4,13 +4,19 @@ use utoipa::ToSchema;
 
 use crate::shared::{
     entities::{CollectiveId, EventTemplate, Link},
-    links_repo::update_links_for_owner,
+    links_repo::{find_all_links_for_owner_type, hash_links_by_owner, update_links_for_owner},
 };
 
 #[derive(Deserialize, ToSchema, Debug)]
 pub struct EventTemplateCreationData {
     pub name: String,
     pub links: Option<Vec<Link>>,
+}
+
+struct EventTemplateRow {
+    id: i64,
+    name: String,
+    collective_id: i64,
 }
 
 pub async fn insert_event_template_with_links(
@@ -43,4 +49,45 @@ pub async fn insert_event_template_with_links(
         name: rec.name,
         links: Some(links.unwrap_or_default()),
     })
+}
+
+pub async fn find_all_event_templates(
+    collective_id: CollectiveId,
+    pool: &SqlitePool,
+) -> Result<Vec<EventTemplate>, sqlx::Error> {
+    let rows = find_all_event_template_rows(collective_id, pool).await?;
+
+    let links = find_all_links_for_owner_type("event_templates".to_string(), pool).await?;
+    let links_hash = hash_links_by_owner(links);
+
+    let event_templates: Vec<EventTemplate> = rows
+        .into_iter()
+        .map(|row| EventTemplate {
+            id: row.id,
+            name: row.name,
+            links: Some(links_hash.get(&row.id).cloned().unwrap_or_else(Vec::new)),
+        })
+        .collect();
+
+    Ok(event_templates)
+}
+
+async fn find_all_event_template_rows(
+    collective_id: CollectiveId,
+    pool: &SqlitePool,
+) -> Result<Vec<EventTemplateRow>, sqlx::Error> {
+    let rows = sqlx::query_as!(
+        EventTemplateRow,
+        "
+        SELECT id, name, collective_id
+        FROM event_templates
+        WHERE collective_id = ?
+        ORDER BY name
+        ",
+        collective_id.id
+    )
+    .fetch_all(pool)
+    .await?;
+
+    Ok(rows)
 }
