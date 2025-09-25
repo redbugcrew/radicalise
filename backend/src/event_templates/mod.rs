@@ -6,7 +6,7 @@ use crate::shared::default_collective_id;
 
 use self::repo::EventTemplateCreationData;
 
-mod repo;
+pub mod repo;
 
 pub fn router() -> OpenApiRouter {
     OpenApiRouter::new().routes(routes!(create_event_template))
