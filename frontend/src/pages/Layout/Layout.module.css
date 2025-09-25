@@ -2,6 +2,12 @@
   padding: var(--mantine-spacing-md) 0;
 }
 
+.settings_section {
+  border-top: 1px solid var(--mantine-color-dark-4);
+  padding-top: var(--mantine-spacing-md);
+  padding-bottom: var(--mantine-spacing-md);
+}
+
 .menu_section {
   border-top: 1px solid var(--mantine-color-dark-4);
   padding-top: var(--mantine-spacing-md);
@@ -11,4 +17,16 @@
 .footer_section {
   border-top: 1px solid var(--mantine-color-dark-4);
   padding-top: var(--mantine-spacing-md);
+}
+
+.section_title {
+  font-size: var(--mantine-font-size-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-top: 0;
+  margin-bottom: var(--mantine-spacing-xs);
+  padding-left: var(--mantine-spacing-md);
+  padding-right: var(--mantine-spacing-md);
+  color: var(--mantine-color-dark-2);
+  text-align: center;
 }

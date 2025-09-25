@@ -3,6 +3,7 @@ import EventTemplateForm from "../../components/event_templates/EventTemplateFor
 import { getApi } from "../../../../api";
 import type { EventTemplate } from "../../../../api/Api";
 import { handleAppEvents } from "../../../../store";
+import { useNavigate } from "react-router-dom";
 
 export default function NewEventTemplate() {
   const navigate = useNavigate();
