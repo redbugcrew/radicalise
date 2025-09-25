@@ -1,8 +1,12 @@
 import { Stack, Group, Title, ActionIcon } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import { Anchor } from "../../../../components";
+import { useAppSelector } from "../../../../store";
+import EventTemplatesTable from "../../components/event_templates/EventTemplatesTable";
 
 export default function EventTemplates() {
+  const eventTemplates = useAppSelector((state) => state.eventTemplates);
+
   return (
     <Stack>
       <Group justify="space-between">
@@ -13,7 +17,7 @@ export default function EventTemplates() {
           </ActionIcon>
         </Anchor>
       </Group>
-      <div>Event Templates list here</div>
+      <EventTemplatesTable eventTemplates={eventTemplates} />
     </Stack>
   );
 }
