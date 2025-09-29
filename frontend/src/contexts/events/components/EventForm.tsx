@@ -2,11 +2,13 @@ import { useForm } from "@mantine/form";
 import { Button, Select, Stack, TextInput } from "@mantine/core";
 import { LinksInput } from "../../../components";
 import type { EventTemplate, Link } from "../../../api/Api";
+import { DatePickerInput, DateTimePicker, TimeInput, TimePicker } from "@mantine/dates";
 
 export interface Event {
   id: number;
   event_template_id: number | null;
   name: string;
+  start_date: string | null;
   links?: Link[] | null;
 }
 
@@ -20,6 +22,7 @@ const defaultEvent = {
   id: -1,
   event_template_id: null,
   name: "",
+  start_date: null,
   links: [] as Link[],
 };
 
@@ -56,6 +59,11 @@ export default function EventTemplateForm({ value, eventTemplates, onSubmit }: E
             withAsterisk
             {...form.getInputProps("name")}
           />
+
+          <DatePickerInput label="Start date" placeholder="Pick date" key={form.key("start_date")} {...form.getInputProps("start_date")} />
+
+          <TimePicker label="Start time" format="12h" key={form.key("start_time")} {...form.getInputProps("start_time")} />
+
           <LinksInput
             label="Links"
             description="Links that apply to this specific event. Ie; the agenda for this meeting, the location for this party, etc"
