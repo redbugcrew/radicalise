@@ -1,14 +1,12 @@
 import { Container, Title, Stack } from "@mantine/core";
-import EventTemplateForm from "../components/event_templates/EventTemplateForm";
-import { getApi } from "../../../api";
-import type { EventTemplate } from "../../../api/Api";
-import { handleAppEvents } from "../../../store";
-import { useNavigate } from "react-router-dom";
+import EventForm, { type Event } from "../components/EventForm";
+import { useAppSelector } from "../../../store";
 
 export default function NewEventTemplate() {
-  const navigate = useNavigate();
+  const eventTemplates = useAppSelector((state) => state.eventTemplates);
+  //const navigate = useNavigate();
 
-  const handleSubmit = async (data: EventTemplate): Promise<void> => {
+  const handleSubmit = async (data: Event): Promise<void> => {
     // return getApi()
     //   .api.createEventTemplate(data)
     //   .then((response) => {
@@ -24,7 +22,10 @@ export default function NewEventTemplate() {
     <Container>
       <Stack mb="md">
         <Title order={1}>New Event</Title>
-        <EventTemplateForm onSubmit={handleSubmit} />
+
+        {eventTemplates.length === 0 && <p>No event templates available. Please create one first.</p>}
+
+        {eventTemplates.length > 0 && <EventForm onSubmit={handleSubmit} eventTemplates={eventTemplates} />}
       </Stack>
     </Container>
   );
