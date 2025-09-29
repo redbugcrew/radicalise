@@ -1,6 +1,6 @@
 import { Anchor, AppShell, Burger, Container, Group } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { IconBrandGithub, IconHome2, IconSettings, IconUsers, IconUsersGroup, IconCalendarCog, IconCalendarMonth } from "@tabler/icons-react";
+import { IconBrandGithub, IconHome2, IconSettings, IconUsers, IconUsersGroup, IconCalendarCog, IconCalendarMonth, IconCalendar } from "@tabler/icons-react";
 import { Outlet } from "react-router-dom";
 import { NavLink, PersonBadge } from "../../components";
 import { handleOwnedAppEvent, useAppSelector } from "../../store";
@@ -47,6 +47,7 @@ export default function Layout() {
           <NavLink label="Dashboard" href="dashboard" leftSection={<IconHome2 size={18} />} onClick={toggle} />
           <NavLink label="People" href="people" leftSection={<IconUsers size={18} />} onClick={toggle} />
           <NavLink label="Crews" href="crews" leftSection={<IconUsersGroup size={18} />} onClick={toggle} />
+          <NavLink label="Events" href="events" leftSection={<IconCalendar size={18} />} onClick={toggle} />
           {collective?.feature_eoi && <NavLink label="Entry" href="entry_pathways" leftSection={<IconUsers size={18} />} onClick={toggle} />}
         </AppShell.Section>
         <AppShell.Section className={classes.settings_section}>

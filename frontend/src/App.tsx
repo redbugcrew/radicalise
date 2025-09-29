@@ -29,12 +29,12 @@ import {
 } from "./pages";
 import { buildRoutes as buildAuthRoutes } from "./contexts/auth";
 import { theme } from "./theme";
+import { EditEventTemplate, Events, EventTemplates, NewEventTemplate, NewEvent } from "./contexts/events";
 
 // Import styles of packages that you've installed.
 // All packages except `@mantine/hooks` require styles imports
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
-import { EditEventTemplate, EventTemplates, NewEventTemplate } from "./contexts/events";
 
 function withStore(
   func: (store: AppStore) => any,
@@ -119,6 +119,11 @@ const router = createBrowserRouter([
               { path: ":templateId/edit", element: <EditEventTemplate /> },
             ],
           },
+          {
+            path: "",
+            element: <Events />,
+          },
+          { path: "new", element: <NewEvent /> },
         ],
       },
       {
