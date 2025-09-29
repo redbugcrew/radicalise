@@ -1,18 +1,37 @@
 import { useForm } from "@mantine/form";
-import { Button, Stack, TextInput } from "@mantine/core";
-import type { EventTemplate } from "../../../api/Api";
+import { Button, Select, Stack, TextInput } from "@mantine/core";
 import { LinksInput } from "../../../components";
+import type { EventTemplate, Link } from "../../../api/Api";
 
-interface EventTemplateFormProps {
-  value?: EventTemplate | null;
-  onSubmit: (data: EventTemplate) => Promise<void>;
+export interface Event {
+  id: number;
+  event_template_id: number | null;
+  name: string;
+  links?: Link[] | null;
 }
 
-export default function EventTemplateForm({ value, onSubmit }: EventTemplateFormProps) {
-  const form = useForm<EventTemplate>({
+interface EventTemplateFormProps {
+  value?: Event | null;
+  eventTemplates: EventTemplate[];
+  onSubmit: (data: Event) => Promise<void>;
+}
+
+const defaultEvent = {
+  id: -1,
+  event_template_id: null,
+  name: "",
+  links: [] as Link[],
+};
+
+export default function EventTemplateForm({ value, eventTemplates, onSubmit }: EventTemplateFormProps) {
+  const form = useForm<Event>({
     mode: "controlled",
-    initialValues: { ...value } as EventTemplate,
+    initialValues: {
+      ...defaultEvent,
+      ...value,
+    },
     validate: {
+      event_template_id: (value) => (value ? null : "Event template is required"),
       name: (value) => (value && value.trim().length > 0 ? null : "Name is required"),
     },
   });
@@ -21,16 +40,25 @@ export default function EventTemplateForm({ value, onSubmit }: EventTemplateForm
     <form onSubmit={form.onSubmit(onSubmit, (errors) => console.log("Form submission errors:", errors))}>
       <Stack gap="lg">
         <Stack gap="md">
+          <Select
+            label="Event Template"
+            description=""
+            placeholder="Pick value"
+            data={eventTemplates.map((template) => ({ label: template.name, value: template.id.toString() }))}
+            key={form.key("event_template_id")}
+            {...form.getInputProps("event_template_id")}
+          />
+
           <TextInput
             label="Name"
-            description="The name of the template. This is usually how you refer to this type of event. As in, we're going to have a SOMETHING this weekend. It needs to be unique within your collective, so if you have multiple types of meetings, be more specific."
-            placeholder="e.g. Training, Meeting, Action, Party, Assembly, etc"
+            description="The name of this specific event. If this is a recurring event, you might want to add something to differentiate it."
+            placeholder="June Assembly, 2025 Retreat, etc"
             withAsterisk
             {...form.getInputProps("name")}
           />
           <LinksInput
             label="Links"
-            description="Add links to resources on this type of event in general. Ie; how we run meetings, not the agenda for a specific meeting"
+            description="Links that apply to this specific event. Ie; the agenda for this meeting, the location for this party, etc"
             placeholder="Add a link"
             key="links"
             {...form.getInputProps("links")}
