@@ -8,10 +8,16 @@ interface EventTemplateFormProps {
   onSubmit: (data: EventTemplate) => Promise<void>;
 }
 
+const defaultInitialValue: EventTemplate = {
+  id: -1,
+  name: "",
+  links: [],
+};
+
 export default function EventTemplateForm({ value, onSubmit }: EventTemplateFormProps) {
   const form = useForm<EventTemplate>({
     mode: "controlled",
-    initialValues: { ...value } as EventTemplate,
+    initialValues: { ...defaultInitialValue, ...value },
     validate: {
       name: (value) => (value && value.trim().length > 0 ? null : "Name is required"),
     },
