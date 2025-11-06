@@ -63,7 +63,7 @@ async fn create_event_record(
     ),
 )]
 async fn update_event_record(
-    Path(event_template_id): Path<i64>,
+    Path(event_record_id): Path<i64>,
     Extension(pool): Extension<SqlitePool>,
     Extension(realtime_state): Extension<RealtimeState>,
     auth_session: AuthSession,
