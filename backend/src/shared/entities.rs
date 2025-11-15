@@ -296,3 +296,10 @@ pub struct EventTemplate {
     pub name: String,
     pub links: Option<Vec<Link>>,
 }
+
+#[derive(Deserialize, Serialize, ToSchema, Debug, Clone)]
+pub struct EventRecord {
+    pub id: i64,
+    pub name: String,
+    pub links: Option<Vec<Link>>,
+}

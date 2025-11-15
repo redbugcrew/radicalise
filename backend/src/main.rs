@@ -29,6 +29,7 @@ mod auth;
 mod crews;
 mod database;
 mod dev;
+mod event_records;
 mod entry_pathways;
 mod event_templates;
 mod intervals;
