@@ -5,10 +5,10 @@ use crate::shared::{
     links_repo::{find_all_links_for_owner_type, hash_links_by_owner, update_links_for_owner},
 };
 
-// struct EventRecordRow {
-//     id: i64,
-//     name: String,
-// }
+struct CalendarEventRow {
+    id: i64,
+    name: String,
+}
 
 pub async fn insert_calendar_event_with_links(
     data: &CalendarEvent,
@@ -19,7 +19,7 @@ pub async fn insert_calendar_event_with_links(
         "
         INSERT INTO calendar_events (name, collective_id)
         VALUES (?, ?)
-        RETURNING id, name
+        RETURNING id
         ",
         data.name,
         collective_id.id
@@ -27,22 +27,18 @@ pub async fn insert_calendar_event_with_links(
     .fetch_one(pool)
     .await?;
 
-    let links = update_links_for_owner(
-        rec.id,
-        "calendar_event".to_string(),
-        data.links.clone(),
-        pool,
-    )
-    .await?;
+    // let links = update_links_for_owner(
+    //     rec.id,
+    //     "calendar_event".to_string(),
+    //     data.links.clone(),
+    //     pool,
+    // )
+    // .await?;
 
-    Ok(CalendarEvent {
-        id: rec.id,
-        name: rec.name,
-        links: Some(links.unwrap_or_default()),
-        event_template_id: todo!(),
-        start_at: todo!(),
-        end_at: todo!(),
-    })
+    let mut result = data.clone();
+    result.id = rec.id;
+    Ok(result)
+
 }
 
 // pub async fn update_event_records_with_links(

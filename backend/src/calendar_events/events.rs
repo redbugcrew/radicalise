@@ -5,5 +5,5 @@ use crate::shared::entities::CalendarEvent;
 
 #[derive(Serialize, Deserialize, ToSchema, Clone, Debug)]
 pub enum CalendarEventsEvent {
-    EventRecordUpdated(CalendarEvent),
+    CalendarEventUpdated(CalendarEvent),
 }
