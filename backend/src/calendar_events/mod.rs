@@ -3,9 +3,7 @@ use sqlx::SqlitePool;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
-    auth::auth_backend::AuthSession,
-    realtime::RealtimeState,
-    shared::{default_collective_id, entities::CalendarEvent, events::AppEvent},
+    auth::auth_backend::AuthSession, calendar_events, realtime::RealtimeState, shared::{default_collective_id, entities::CalendarEvent, events::AppEvent}
 };
 
 use self::events::CalendarEventsEvent;
@@ -36,21 +34,23 @@ async fn create_calendar_event(
 ) -> impl IntoResponse {
     println!("Creating calendar event: {:?}", data);
 
-    // match repo::insert_event_record_with_links(&data, default_collective_id(), &pool).await {
-    //     Ok(event_record) => {
-    //         let event = AppEvent::EventRecordsEvent(EventRecordsEvent::EventRecordUpdated(
-    //             event_record,
-    //         ));
-    //         realtime_state
-    //             .broadcast_app_event(Some(auth_session), event.clone())
-    //             .await;
-    //         (StatusCode::OK, Json(vec![event])).into_response()
-    //     }
-    //     Err(err) => {
-    //         eprintln!("Failed to create event record: {}", err);
-    //         (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response()
-    //     }
-    // }
+    match repo::insert_calendar_event_with_links(&data, default_collective_id(), &pool).await {
+        Ok(calendar_event) => {
+            let event = AppEvent::CalendarEventsEvent(CalendarEventsEvent::CalendarEventUpdated(
+                calendar_event,
+            ));
+        //     realtime_state
+        //         .broadcast_app_event(Some(auth_session), event.clone())
+        //         .await;
+        //     (StatusCode::OK, Json(vec![event])).into_response()
+            (StatusCode::OK)    
+        }
+        Err(err) => {
+            eprintln!("Failed to create calander event: {}", err);
+            // (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response()
+             (StatusCode::INTERNAL_SERVER_ERROR)
+        }
+    }
 }
 
 // #[utoipa::path(
