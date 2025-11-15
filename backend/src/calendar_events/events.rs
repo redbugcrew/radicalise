@@ -1,9 +1,9 @@
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-use crate::shared::entities::EventRecord;
+use crate::shared::entities::CalendarEvent;
 
 #[derive(Serialize, Deserialize, ToSchema, Clone, Debug)]
-pub enum EventRecordsEvent {
-    EventRecordUpdated(EventRecord),
+pub enum CalendarEventsEvent {
+    EventRecordUpdated(CalendarEvent),
 }

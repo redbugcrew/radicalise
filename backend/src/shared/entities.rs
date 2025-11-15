@@ -298,7 +298,7 @@ pub struct EventTemplate {
 }
 
 #[derive(Deserialize, Serialize, ToSchema, Debug, Clone)]
-pub struct EventRecord {
+pub struct CalendarEvent {
     pub id: i64,
     pub name: String,
     pub links: Option<Vec<Link>>,

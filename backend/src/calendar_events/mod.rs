@@ -5,36 +5,36 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 use crate::{
     auth::auth_backend::AuthSession,
     realtime::RealtimeState,
-    shared::{default_collective_id, entities::EventRecord, events::AppEvent},
+    shared::{default_collective_id, entities::CalendarEvent, events::AppEvent},
 };
 
-use self::events::EventRecordsEvent;
+use self::events::CalendarEventsEvent;
 
 pub mod events;
 pub mod repo;
 
 pub fn router() -> OpenApiRouter {
     OpenApiRouter::new()
-        .routes(routes!(create_event_record))
+        .routes(routes!(create_calendar_event))
         // .routes(routes!(update_event_record))
 }
 
 #[utoipa::path(
     post,
     path = "/",
-    request_body(content = EventRecord, content_type = "application/json"),
+    request_body(content = CalendarEvent, content_type = "application/json"),
     responses(
         (status = 201, body = ()),
         (status = INTERNAL_SERVER_ERROR, body = ()),
     ),
 )]
-async fn create_event_record(
+async fn create_calendar_event(
     Extension(pool): Extension<SqlitePool>,
     Extension(realtime_state): Extension<RealtimeState>,
     auth_session: AuthSession,
-    axum::extract::Json(data): axum::extract::Json<EventRecord>,
+    axum::extract::Json(data): axum::extract::Json<CalendarEvent>,
 ) -> impl IntoResponse {
-    println!("Creating event record: {:?}", data);
+    println!("Creating calendar event: {:?}", data);
 
     // match repo::insert_event_record_with_links(&data, default_collective_id(), &pool).await {
     //     Ok(event_record) => {

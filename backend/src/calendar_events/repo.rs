@@ -1,7 +1,7 @@
 use sqlx::SqlitePool;
 
 use crate::shared::{
-    entities::{CollectiveId, EventRecord},
+    entities::{CollectiveId, CalendarEvent},
     links_repo::{find_all_links_for_owner_type, hash_links_by_owner, update_links_for_owner},
 };
 
