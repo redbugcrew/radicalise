@@ -1,7 +1,8 @@
+use axum_login::tracing::event;
 use sqlx::SqlitePool;
 
 use crate::shared::{
-    entities::{CollectiveId, CalendarEvent},
+    entities::{CollectiveId, CalendarEvent, EventTemplate},
     links_repo::{find_all_links_for_owner_type, hash_links_by_owner, update_links_for_owner},
 };
 
@@ -9,19 +10,22 @@ struct CalendarEventRow {
     id: i64,
     name: String,
 }
-
 pub async fn insert_calendar_event_with_links(
     data: &CalendarEvent,
+    event_template: EventTemplate,
     collective_id: CollectiveId,
     pool: &SqlitePool,
 ) -> Result<CalendarEvent, sqlx::Error> {
     let rec = sqlx::query!(
         "
-        INSERT INTO calendar_events (name, collective_id)
-        VALUES (?, ?)
+        INSERT INTO calendar_events (event_template_id, name, start_at, end_at, collective_id)
+        VALUES (?, ?, ?, ?, ?)
         RETURNING id
         ",
+        event_template
         data.name,
+        data.start_at,
+        data.end_at,
         collective_id.id
     )
     .fetch_one(pool)
