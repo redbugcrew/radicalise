@@ -302,5 +302,5 @@ pub struct CalendarEvent {
     pub name: String,
     pub start_at: String,
     pub end_at: Option<String>,
-    // pub links: Option<Vec<Link>>,
+    pub links: Option<Vec<Link>>,
 }
