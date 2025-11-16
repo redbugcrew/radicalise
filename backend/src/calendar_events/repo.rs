@@ -12,7 +12,8 @@ struct CalendarEventRow {
 }
 pub async fn insert_calendar_event_with_links(
     data: &CalendarEvent,
-    event_template: EventTemplate,
+    // event_template: EventTemplate,
+    event_template_id: i64,
     collective_id: CollectiveId,
     pool: &SqlitePool,
 ) -> Result<CalendarEvent, sqlx::Error> {
@@ -22,7 +23,7 @@ pub async fn insert_calendar_event_with_links(
         VALUES (?, ?, ?, ?, ?)
         RETURNING id
         ",
-        event_template
+        event_template_id,
         data.name,
         data.start_at,
         data.end_at,
