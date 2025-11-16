@@ -34,7 +34,6 @@ async fn create_calendar_event(
 ) -> impl IntoResponse {
     println!("Creating calendar event: {:?}", data);
 
-
     match repo::insert_calendar_event_with_links(&data, data.event_template_id, default_collective_id(), &pool).await {
         Ok(calendar_event) => {
             let event = AppEvent::CalendarEventsEvent(CalendarEventsEvent::CalendarEventUpdated(

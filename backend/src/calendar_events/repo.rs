@@ -12,7 +12,6 @@ struct CalendarEventRow {
 }
 pub async fn insert_calendar_event_with_links(
     data: &CalendarEvent,
-    // event_template: EventTemplate,
     event_template_id: i64,
     collective_id: CollectiveId,
     pool: &SqlitePool,
