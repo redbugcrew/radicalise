@@ -47,7 +47,7 @@ async fn create_calendar_event(
             StatusCode::OK    
         }
         Err(err) => {
-            eprintln!("Failed to create calander event: {}", err);
+            eprintln!("Failed to create calendar event: {}", err);
             // (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response()
              StatusCode::INTERNAL_SERVER_ERROR
         }
