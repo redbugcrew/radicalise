@@ -39,16 +39,16 @@ async fn create_calendar_event(
             let event = AppEvent::CalendarEventsEvent(CalendarEventsEvent::CalendarEventUpdated(
                 calendar_event,
             ));
-        //     realtime_state
-        //         .broadcast_app_event(Some(auth_session), event.clone())
-        //         .await;
-        //     (StatusCode::OK, Json(vec![event])).into_response()
-            StatusCode::OK    
+            realtime_state
+                .broadcast_app_event(Some(auth_session), event.clone())
+                .await;
+            (StatusCode::OK, Json(vec![event])).into_response()
+            // StatusCode::OK    
         }
         Err(err) => {
             eprintln!("Failed to create calendar event: {}", err);
-            // (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response()
-             StatusCode::INTERNAL_SERVER_ERROR
+            (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response()
+            //  StatusCode::INTERNAL_SERVER_ERROR
         }
     }
 }
