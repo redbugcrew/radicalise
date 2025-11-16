@@ -42,13 +42,11 @@ async fn create_calendar_event(
             realtime_state
                 .broadcast_app_event(Some(auth_session), event.clone())
                 .await;
-            (StatusCode::OK, Json(vec![event])).into_response()
-            // StatusCode::OK    
+            (StatusCode::OK, Json(vec![event])).into_response()  
         }
         Err(err) => {
             eprintln!("Failed to create calendar event: {}", err);
             (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response()
-            //  StatusCode::INTERNAL_SERVER_ERROR
         }
     }
 }
