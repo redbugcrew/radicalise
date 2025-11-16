@@ -3,7 +3,7 @@ use sqlx::SqlitePool;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
-    auth::auth_backend::AuthSession, calendar_events, realtime::RealtimeState, shared::{default_collective_id, entities::CalendarEvent, events::AppEvent}
+    auth::auth_backend::AuthSession, calendar_events, event_templates, realtime::RealtimeState, shared::{default_collective_id, entities::{CalendarEvent, EventTemplate}, events::AppEvent}
 };
 
 use self::events::CalendarEventsEvent;
@@ -34,7 +34,8 @@ async fn create_calendar_event(
 ) -> impl IntoResponse {
     println!("Creating calendar event: {:?}", data);
 
-    match repo::insert_calendar_event_with_links(&data, default_collective_id(), &pool).await {
+
+    match repo::insert_calendar_event_with_links(&data, data.event_template_id, default_collective_id(), &pool).await {
         Ok(calendar_event) => {
             let event = AppEvent::CalendarEventsEvent(CalendarEventsEvent::CalendarEventUpdated(
                 calendar_event,
@@ -43,12 +44,12 @@ async fn create_calendar_event(
         //         .broadcast_app_event(Some(auth_session), event.clone())
         //         .await;
         //     (StatusCode::OK, Json(vec![event])).into_response()
-            (StatusCode::OK)    
+            StatusCode::OK    
         }
         Err(err) => {
             eprintln!("Failed to create calander event: {}", err);
             // (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response()
-             (StatusCode::INTERNAL_SERVER_ERROR)
+             StatusCode::INTERNAL_SERVER_ERROR
         }
     }
 }
@@ -89,4 +90,4 @@ async fn create_calendar_event(
 //     //         (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response()
 //     //     }
 //     // }
-// }
+//
