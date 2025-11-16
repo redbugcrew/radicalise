@@ -1,9 +1,9 @@
-use axum::{Extension, Json, extract::Path, http::StatusCode, response::IntoResponse};
+use axum::{Extension, Json, http::StatusCode, response::IntoResponse};
 use sqlx::SqlitePool;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
-    auth::auth_backend::AuthSession, calendar_events, event_templates, realtime::RealtimeState, shared::{default_collective_id, entities::{CalendarEvent, EventTemplate}, events::AppEvent}
+    auth::auth_backend::AuthSession, realtime::RealtimeState, shared::{default_collective_id, entities::{CalendarEvent}, events::AppEvent}
 };
 
 use self::events::CalendarEventsEvent;
@@ -22,7 +22,7 @@ pub fn router() -> OpenApiRouter {
     path = "/",
     request_body(content = CalendarEvent, content_type = "application/json"),
     responses(
-        (status = 201, body = ()),
+        (status = CREATED, body = Vec<AppEvent>),
         (status = INTERNAL_SERVER_ERROR, body = ()),
     ),
 )]
@@ -42,7 +42,7 @@ async fn create_calendar_event(
             realtime_state
                 .broadcast_app_event(Some(auth_session), event.clone())
                 .await;
-            (StatusCode::OK, Json(vec![event])).into_response()  
+            (StatusCode::CREATED, Json(vec![event])).into_response()  
         }
         Err(err) => {
             eprintln!("Failed to create calendar event: {}", err);

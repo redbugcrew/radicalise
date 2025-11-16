@@ -1,15 +1,10 @@
-use axum_login::tracing::event;
 use sqlx::SqlitePool;
 
 use crate::shared::{
-    entities::{CollectiveId, CalendarEvent, EventTemplate},
-    links_repo::{find_all_links_for_owner_type, hash_links_by_owner, update_links_for_owner},
+    entities::{CollectiveId, CalendarEvent},
+    links_repo::{update_links_for_owner},
 };
 
-struct CalendarEventRow {
-    id: i64,
-    name: String,
-}
 pub async fn insert_calendar_event_with_links(
     data: &CalendarEvent,
     event_template_id: i64,
@@ -31,16 +26,17 @@ pub async fn insert_calendar_event_with_links(
     .fetch_one(pool)
     .await?;
 
-    // let links = update_links_for_owner(
-    //     rec.id,
-    //     "calendar_event".to_string(),
-    //     data.links.clone(),
-    //     pool,
-    // )
-    // .await?;
+    let links = update_links_for_owner(
+        rec.id,
+        "calendar_event".to_string(),
+        data.links.clone(),
+        pool,
+    )
+    .await?;
 
     let mut result = data.clone();
     result.id = rec.id;
+    result.links = links;
     Ok(result)
 
 }
