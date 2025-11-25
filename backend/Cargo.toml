@@ -7,13 +7,13 @@ edition = "2024"
 anyhow = "1.0.100"
 axum = { version = "0.8.7", features = ["ws"] }
 axum-login = "0.18.0"
-chrono = "0.4.41"
+chrono = "0.4.42"
 cookie = { version = "0.18.1", features = ["signed"] }
 futures-util = "0.3.31"
 lazy_static = "1.5.0"
 password-auth = "1.0.0"
 reqwest = { version = "0.12.20", features = ["rustls-tls"] }
-resend-rs = "0.15.0"
+resend-rs = "0.17.0"
 serde = "1.0.219"
 serde_json = "1.0.140"
 sqlx = { version = "0.8.6", features = ["runtime-tokio-native-tls", "sqlite"] }
