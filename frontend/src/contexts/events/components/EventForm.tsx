@@ -2,7 +2,8 @@ import { useForm } from "@mantine/form";
 import { Button, Select, Stack, TextInput } from "@mantine/core";
 import { LinksInput } from "../../../components";
 import type { CalendarEvent, EventTemplate, Link } from "../../../api/Api";
-import { DatePickerInput, DateTimePicker, TimeInput, TimePicker } from "@mantine/dates";
+import { DateTimePicker } from "@mantine/dates";
+import { format } from "date-fns";
 
 interface CalendarEventFormData {
   id: number;
@@ -21,11 +22,33 @@ interface EventTemplateFormProps {
 
 const defaultEvent: CalendarEventFormData = {
   id: -1,
-  event_template_id: -1,
+  event_template_id: null,
   name: "",
   start_at: null,
   links: [] as Link[],
 };
+
+function validateDateTime(value: string | null | undefined): string | null {
+  if (!value) return "Date and time is required";
+  const date = new Date(value);
+  if (date.getHours() === 0 && date.getMinutes() === 0 && date.getSeconds() === 0) {
+    return "Please specify a time (cannot be 0:00:00)";
+  }
+  return null;
+}
+
+function prepareCalendarEvent(data: CalendarEventFormData): CalendarEvent | null {
+  if (!data.event_template_id || !data.name || !data.start_at) {
+    return null;
+  }
+
+  return {
+    ...data,
+    event_template_id: parseInt(data.event_template_id.toString(), 10),
+    name: data.name,
+    start_at: data.start_at,
+  };
+}
 
 export default function EventTemplateForm({ value, eventTemplates, onSubmit }: EventTemplateFormProps) {
   const form = useForm<CalendarEventFormData>({
@@ -37,11 +60,30 @@ export default function EventTemplateForm({ value, eventTemplates, onSubmit }: E
     validate: {
       event_template_id: (value) => (value ? null : "Event template is required"),
       name: (value) => (value && value.trim().length > 0 ? null : "Name is required"),
+      start_at: validateDateTime,
+      end_at: (value, values) => {
+        const dateTimeError = validateDateTime(value);
+        if (dateTimeError) return dateTimeError;
+
+        const startError = validateDateTime(values.start_at);
+        if (startError) return null;
+
+        if (value && values.start_at && new Date(value) <= new Date(values.start_at)) {
+          return "End time must be after start time";
+        }
+
+        return null;
+      },
     },
   });
 
   const onSubmitFormData = (data: CalendarEventFormData) => {
-    onSubmit(data as CalendarEvent);
+    const preparedEvent = prepareCalendarEvent(data);
+    if (preparedEvent) {
+      onSubmit(preparedEvent);
+    } else {
+      console.error("Failed to prepare calendar event from form data:", data);
+    }
   };
 
   return (
@@ -65,9 +107,9 @@ export default function EventTemplateForm({ value, eventTemplates, onSubmit }: E
             {...form.getInputProps("name")}
           />
 
-          <DatePickerInput label="Start date" placeholder="Pick date" key={form.key("start_at")} {...form.getInputProps("start_at")} />
+          <DateTimePicker label="Start at" placeholder="Pick a date and time" timePickerProps={{ format: "12h" }} key={form.key("start_at")} {...form.getInputProps("start_at")} />
 
-          <TimePicker label="Start time" format="12h" key={form.key("start_at")} {...form.getInputProps("start_at")} />
+          <DateTimePicker label="End at" placeholder="Pick a date and time" timePickerProps={{ format: "12h" }} key={form.key("end_at")} {...form.getInputProps("end_at")} />
 
           <LinksInput
             label="Links"
