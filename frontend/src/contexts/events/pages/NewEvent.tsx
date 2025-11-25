@@ -1,12 +1,25 @@
 import { Container, Title, Stack } from "@mantine/core";
-import EventForm, { type Event } from "../components/EventForm";
-import { useAppSelector } from "../../../store";
+import EventForm from "../components/EventForm";
+import { handleAppEvents, useAppSelector } from "../../../store";
+import { getApi } from "../../../api";
+import { useNavigate } from "react-router-dom";
+import type { CalendarEvent } from "../../../api/Api";
 
 export default function NewEventTemplate() {
   const eventTemplates = useAppSelector((state) => state.eventTemplates);
-  //const navigate = useNavigate();
+  const navigate = useNavigate();
 
-  const handleSubmit = async (data: Event): Promise<void> => {
+  const handleSubmit = async (data: CalendarEvent): Promise<void> => {
+    return getApi()
+      .api.createCalendarEvent(data)
+      .then((response) => {
+        handleAppEvents(response.data);
+        navigate("/events");
+      })
+      .catch((error) => {
+        console.error("Error creating event:", error);
+      });
+
     // return getApi()
     //   .api.createEventTemplate(data)
     //   .then((response) => {
