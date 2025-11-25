@@ -1,4 +1,3 @@
-use async_trait::async_trait;
 use axum_login::{AuthUser, AuthnBackend, UserId};
 use password_auth::verify_password;
 use serde::{Deserialize, Serialize};
@@ -73,7 +72,6 @@ pub enum Error {
     AuthRepo(#[from] AuthRepoError),
 }
 
-#[async_trait]
 impl AuthnBackend for AppAuthBackend {
     type User = User;
     type Credentials = Credentials;
