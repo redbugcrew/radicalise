@@ -54,7 +54,25 @@ export type AppEvent =
     }
   | {
       EventTemplatesEvent: EventTemplatesEvent;
+    }
+  | {
+      CalendarEventsEvent: CalendarEventsEvent;
     };
+
+export interface CalendarEvent {
+  end_at?: string | null;
+  /** @format int64 */
+  event_template_id: number;
+  /** @format int64 */
+  id: number;
+  links?: any[] | null;
+  name: string;
+  start_at: string;
+}
+
+export type CalendarEventsEvent = {
+  CalendarEventUpdated: CalendarEvent;
+};
 
 export interface CapacityPlanning {
   capacity?: string | null;
@@ -512,6 +530,22 @@ export class Api<
         method: "POST",
         body: data,
         type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CreateCalendarEvent
+     * @request POST:/api/calendar_events
+     */
+    createCalendarEvent: (data: CalendarEvent, params: RequestParams = {}) =>
+      this.request<AppEvent[], any>({
+        path: `/api/calendar_events`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
         ...params,
       }),
 

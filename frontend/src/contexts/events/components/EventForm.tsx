@@ -1,33 +1,34 @@
 import { useForm } from "@mantine/form";
 import { Button, Select, Stack, TextInput } from "@mantine/core";
 import { LinksInput } from "../../../components";
-import type { EventTemplate, Link } from "../../../api/Api";
+import type { CalendarEvent, EventTemplate, Link } from "../../../api/Api";
 import { DatePickerInput, DateTimePicker, TimeInput, TimePicker } from "@mantine/dates";
 
-export interface Event {
+interface CalendarEventFormData {
   id: number;
   event_template_id: number | null;
-  name: string;
-  start_date: string | null;
-  links?: Link[] | null;
+  links?: any[] | null;
+  name: string | null;
+  start_at: string | null;
+  end_at?: string | null;
 }
 
 interface EventTemplateFormProps {
-  value?: Event | null;
+  value?: CalendarEvent | null;
   eventTemplates: EventTemplate[];
-  onSubmit: (data: Event) => Promise<void>;
+  onSubmit: (data: CalendarEvent) => Promise<void>;
 }
 
-const defaultEvent = {
+const defaultEvent: CalendarEventFormData = {
   id: -1,
-  event_template_id: null,
+  event_template_id: -1,
   name: "",
-  start_date: null,
+  start_at: null,
   links: [] as Link[],
 };
 
 export default function EventTemplateForm({ value, eventTemplates, onSubmit }: EventTemplateFormProps) {
-  const form = useForm<Event>({
+  const form = useForm<CalendarEventFormData>({
     mode: "controlled",
     initialValues: {
       ...defaultEvent,
@@ -39,8 +40,12 @@ export default function EventTemplateForm({ value, eventTemplates, onSubmit }: E
     },
   });
 
+  const onSubmitFormData = (data: CalendarEventFormData) => {
+    onSubmit(data as CalendarEvent);
+  };
+
   return (
-    <form onSubmit={form.onSubmit(onSubmit, (errors) => console.log("Form submission errors:", errors))}>
+    <form onSubmit={form.onSubmit(onSubmitFormData, (errors) => console.log("Form submission errors:", errors))}>
       <Stack gap="lg">
         <Stack gap="md">
           <Select
@@ -60,9 +65,9 @@ export default function EventTemplateForm({ value, eventTemplates, onSubmit }: E
             {...form.getInputProps("name")}
           />
 
-          <DatePickerInput label="Start date" placeholder="Pick date" key={form.key("start_date")} {...form.getInputProps("start_date")} />
+          <DatePickerInput label="Start date" placeholder="Pick date" key={form.key("start_at")} {...form.getInputProps("start_at")} />
 
-          <TimePicker label="Start time" format="12h" key={form.key("start_time")} {...form.getInputProps("start_time")} />
+          <TimePicker label="Start time" format="12h" key={form.key("start_at")} {...form.getInputProps("start_at")} />
 
           <LinksInput
             label="Links"
