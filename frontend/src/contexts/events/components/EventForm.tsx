@@ -3,7 +3,6 @@ import { Button, Select, Stack, TextInput } from "@mantine/core";
 import { LinksInput } from "../../../components";
 import type { CalendarEvent, EventTemplate, Link } from "../../../api/Api";
 import { DateTimePicker } from "@mantine/dates";
-import { format } from "date-fns";
 
 interface CalendarEventFormData {
   id: number;
