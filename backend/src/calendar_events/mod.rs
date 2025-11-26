@@ -1,4 +1,5 @@
 use axum::{Extension, Json, http::StatusCode, response::IntoResponse};
+use axum_login::tracing::event;
 use sqlx::SqlitePool;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
@@ -56,7 +57,7 @@ async fn create_calendar_event(
     get,
     path = "/",
     responses(
-        (status = CREATED, body = ()),
+        (status = OK, body = Vec<CalendarEvent>),
         (status = INTERNAL_SERVER_ERROR, body = ()),
     ),
 )]
@@ -64,5 +65,6 @@ async fn create_calendar_event(
 async fn list_calendar_events(
 //    Extension(pool): Extension<SqlitePool>,
 ) -> impl IntoResponse {
-    (StatusCode::OK, ()).into_response()
+    (StatusCode::OK, 
+    Json(Vec::<CalendarEvent>::new()).into_response())
 }
