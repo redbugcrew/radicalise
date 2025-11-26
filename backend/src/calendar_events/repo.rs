@@ -1,8 +1,8 @@
 use sqlx::SqlitePool;
 
 use crate::shared::{
-    entities::{CollectiveId, CalendarEvent},
-    links_repo::{update_links_for_owner},
+    entities::{CalendarEvent, CollectiveId},
+    links_repo::{find_all_links_for_owner_type, hash_links_by_owner, update_links_for_owner},
 };
 
 pub async fn insert_calendar_event_with_links(
@@ -41,77 +41,58 @@ pub async fn insert_calendar_event_with_links(
 
 }
 
-// pub async fn update_event_records_with_links(
-//     data: &EventRecord,
-//     collective_id: CollectiveId,
-//     pool: &SqlitePool,
-// ) -> Result<EventRecord, sqlx::Error> {
-//     let rec = sqlx::query!(
-//         "
-//         UPDATE event_records
-//         SET name = ?
-//         WHERE id = ? AND collective_id = ?
-//         RETURNING id, name
-//         ",
-//         data.name,
-//         data.id,
-//         collective_id.id
-//     )
-//     .fetch_one(pool)
-//     .await?;
+pub struct CalendarEventRow {
+    pub id: i64,
+    pub event_template_id: i64, 
+    pub name: String,
+    pub start_at: String,
+    pub end_at: Option<String>,
+}
 
-//     let links = update_links_for_owner(
-//         rec.id,
-//         "event_records".to_string(),
-//         data.links.clone(),
-//         pool,
-//     )
-//     .await?;
+pub async fn list_calendar_events(
+    collective_id: CollectiveId,
+    pool: &SqlitePool,
+) -> Result<Vec<CalendarEvent>, sqlx::Error> {
+    let rows = list_calendar_event_rows(collective_id, pool).await?;
 
-//     Ok(EventRecord {
-//         id: rec.id,
-//         name: rec.name,
-//         links: Some(links.unwrap_or_default()),
-//     })
-// }
+    let links = find_all_links_for_owner_type("calendar_event".to_string(), pool).await?;
+    let links_hash = hash_links_by_owner(links);
 
-// pub async fn find_all_event_templates(
-//     collective_id: CollectiveId,
-//     pool: &SqlitePool,
-// ) -> Result<Vec<EventTemplate>, sqlx::Error> {
-//     let rows = find_all_event_template_rows(collective_id, pool).await?;
+    let calendar_events: Vec<CalendarEvent> = rows
+        .into_iter()
+        .map(|row| CalendarEvent {
+            id: row.id,
+            name: row.name,
+            event_template_id: row.event_template_id,
+            start_at: row.start_at,
+            end_at: row.end_at,
+            links: Some(links_hash.get(&row.id).cloned().unwrap_or_else(Vec::new)),
+        })
+        .collect();
 
-//     let links = find_all_links_for_owner_type("event_templates".to_string(), pool).await?;
-//     let links_hash = hash_links_by_owner(links);
+    Ok(calendar_events)
+}
 
-//     let event_templates: Vec<EventTemplate> = rows
-//         .into_iter()
-//         .map(|row| EventTemplate {
-//             id: row.id,
-//             name: row.name,
-//             links: Some(links_hash.get(&row.id).cloned().unwrap_or_else(Vec::new)),
-//         })
-//         .collect();
+async fn list_calendar_event_rows(
+    collective_id: CollectiveId,
+    pool: &SqlitePool,
+) -> Result<Vec<CalendarEventRow>, sqlx::Error> {
+    let rows = sqlx::query_as!(
+        CalendarEventRow, 
+         r#"
+         SELECT 
+            id, 
+            event_template_id, 
+            name, 
+            start_at AS "start_at: String", 
+            end_at AS "end_at: String"
+         FROM calendar_events
+         WHERE collective_id = ?
+         "#,
+         collective_id.id,
+    )
+     .fetch_all(pool)
+     .await?;
 
-//     Ok(event_templates)
-// }
-
-// async fn find_all_event_template_rows(
-//     collective_id: CollectiveId,
-//     pool: &SqlitePool,
-// ) -> Result<Vec<EventTemplateRow>, sqlx::Error> {
-//     let rows = sqlx::query_as!(
-//         EventTemplateRow,
-//         "
-//         SELECT id, name
-//         FROM event_templates
-//         WHERE collective_id = ?
-//         ORDER BY name
-//         ",
-//         collective_id.id
-//     )
-//     .fetch_all(pool)
-//     .await?;
-
-//     Ok(rows)
-// }
+    Ok(rows)
+}
