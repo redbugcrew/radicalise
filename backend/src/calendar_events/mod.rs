@@ -76,6 +76,3 @@ async fn list_calendar_events(
         }
     }
 }
-
-    // (StatusCode::OK, 
-    // Json(Vec::<CalendarEvent>::new()).into_response())
