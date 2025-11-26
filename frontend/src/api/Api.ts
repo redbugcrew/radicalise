@@ -197,6 +197,7 @@ export interface ForgotPasswordRequest {
 }
 
 export interface InitialData {
+  calendar_events: CalendarEvent[];
   collective: Collective;
   crews: CrewWithLinks[];
   current_interval: Interval;
@@ -528,6 +529,20 @@ export class Api<
         method: "POST",
         body: data,
         type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ListCalendarEvents
+     * @request GET:/api/calendar_events
+     */
+    listCalendarEvents: (params: RequestParams = {}) =>
+      this.request<CalendarEvent[], any>({
+        path: `/api/calendar_events`,
+        method: "GET",
+        format: "json",
         ...params,
       }),
 
