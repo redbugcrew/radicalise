@@ -1,6 +1,6 @@
 use axum::{Extension, Json, http::StatusCode, response::IntoResponse};
 use axum_login::tracing::event;
-use sqlx::SqlitePool;
+use sqlx::{SqlitePool, pool};
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
@@ -63,8 +63,19 @@ async fn create_calendar_event(
 )]
 
 async fn list_calendar_events(
-//    Extension(pool): Extension<SqlitePool>,
+    Extension(pool): Extension<SqlitePool>,
 ) -> impl IntoResponse {
-    (StatusCode::OK, 
-    Json(Vec::<CalendarEvent>::new()).into_response())
+
+    match repo::list_calendar_events(default_collective_id(),&pool).await {
+        Ok(calendar_events) => {
+            (StatusCode::OK, Json(calendar_events)).into_response()
+        }
+        Err(err) => {
+            eprintln!("Failed to list calendar event: {}", err);
+            (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response()
+        }
+    }
 }
+
+    // (StatusCode::OK, 
+    // Json(Vec::<CalendarEvent>::new()).into_response())
