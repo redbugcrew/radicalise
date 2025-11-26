@@ -38,12 +38,11 @@ pub async fn insert_calendar_event_with_links(
     result.id = rec.id;
     result.links = links;
     Ok(result)
-
 }
 
 pub struct CalendarEventRow {
     pub id: i64,
-    pub event_template_id: i64, 
+    pub event_template_id: i64,
     pub name: String,
     pub start_at: String,
     pub end_at: Option<String>,
@@ -78,21 +77,22 @@ async fn list_calendar_event_rows(
     pool: &SqlitePool,
 ) -> Result<Vec<CalendarEventRow>, sqlx::Error> {
     let rows = sqlx::query_as!(
-        CalendarEventRow, 
-         r#"
-         SELECT 
-            id, 
-            event_template_id, 
-            name, 
-            start_at AS "start_at: String", 
+        CalendarEventRow,
+        r#"
+         SELECT
+            id,
+            event_template_id,
+            name,
+            start_at AS "start_at: String",
             end_at AS "end_at: String"
          FROM calendar_events
          WHERE collective_id = ?
+         ORDER BY start_at ASC
          "#,
-         collective_id.id,
+        collective_id.id,
     )
-     .fetch_all(pool)
-     .await?;
+    .fetch_all(pool)
+    .await?;
 
     Ok(rows)
 }
