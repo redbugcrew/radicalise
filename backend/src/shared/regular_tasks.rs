@@ -66,7 +66,7 @@ async fn add_interval_inplicit_involvements(
             opt_out_type: None,
             opt_out_planned_return_date: None,
             intention_context: None,
-            implicit_counter: 0,
+            implicit_counter: previous_involvement.implicit_counter + 1,
         };
         let result = insert_collective_involvement_if_missing(new_involvement.into(), pool).await;
         if result.is_err() {
