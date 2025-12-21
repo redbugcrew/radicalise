@@ -2,26 +2,28 @@ import { Group, ActionIcon, Text, Stack, Button } from "@mantine/core";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import type { Interval } from "../../api/Api";
 import DateText from "./../DateText";
+import { useNavigate } from "react-router-dom";
 
 interface IntervalSelectorProps {
   intervals: Interval[];
   selectedInterval: Interval | null;
   currentInterval?: Interval | null;
-  onChangeInterval: (interval: Interval) => void;
 }
 
 interface IntervalNavigationButtonProps {
   variant: "previous" | "next";
   to: Interval | null;
-  onChange: (interval: Interval) => void;
 }
 
-function IntervalNavigationButton({ variant, to, onChange }: IntervalNavigationButtonProps) {
+function IntervalNavigationButton({ variant, to }: IntervalNavigationButtonProps) {
+  const navigate = useNavigate();
   const IconComponent = variant === "previous" ? IconChevronLeft : IconChevronRight;
   const disabled = !to;
   const label = variant === "previous" ? "Previous Interval" : "Next Interval";
   const onClick = () => {
-    if (to) onChange(to);
+    navigate({
+      hash: to ? `#interval${to.id}` : "",
+    });
   };
 
   return (
@@ -31,7 +33,21 @@ function IntervalNavigationButton({ variant, to, onChange }: IntervalNavigationB
   );
 }
 
-export default function IntervalSelector({ intervals, selectedInterval, currentInterval, onChangeInterval }: IntervalSelectorProps) {
+function ReturnToCurrentButton() {
+  const navigate = useNavigate();
+  const onClick = () => {
+    navigate({
+      hash: "",
+    });
+  };
+  return (
+    <Button variant="filled" size="xs" onClick={onClick} mt="md">
+      Return to current
+    </Button>
+  );
+}
+
+export default function IntervalSelector({ intervals, selectedInterval, currentInterval }: IntervalSelectorProps) {
   if (!selectedInterval) {
     return null;
   }
@@ -42,7 +58,7 @@ export default function IntervalSelector({ intervals, selectedInterval, currentI
 
   return (
     <Group justify="space-between">
-      <IntervalNavigationButton variant="previous" to={previousInterval} onChange={onChangeInterval} />
+      <IntervalNavigationButton variant="previous" to={previousInterval} />
       <Stack align="center" justify="center" gap={0}>
         <Text span fw="bold" size="lg">
           Interval {selectedInterval.id}
@@ -51,13 +67,9 @@ export default function IntervalSelector({ intervals, selectedInterval, currentI
         <Text span c="dimmed">
           <DateText date={selectedInterval.start_date} /> - <DateText date={selectedInterval.end_date} />
         </Text>
-        {currentInterval && selectedInterval.id !== currentInterval.id && (
-          <Button variant="filled" size="xs" onClick={() => onChangeInterval(currentInterval)} mt="md">
-            Return to current
-          </Button>
-        )}
+        {currentInterval && selectedInterval.id !== currentInterval.id && <ReturnToCurrentButton />}
       </Stack>
-      <IntervalNavigationButton variant="next" to={nextInterval} onChange={onChangeInterval} />
+      <IntervalNavigationButton variant="next" to={nextInterval} />
     </Group>
   );
 }

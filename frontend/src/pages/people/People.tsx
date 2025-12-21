@@ -1,19 +1,12 @@
 import { Group, Stack, Title } from "@mantine/core";
 import { IntervalSelector } from "../../components";
 import { useAppSelector } from "../../store";
-import { useEffect, useState } from "react";
-import type { Interval } from "../../api/Api";
 import PeopleForInterval from "./PeopleForInterval";
+import { useSelectedInterval } from "../intervals/WithIntervalInvolvements";
 
 export default function People() {
   const intervals = useAppSelector((state) => state.intervals);
-
-  const [selectedInterval, setSelectedInterval] = useState<Interval | null>(null);
-  useEffect(() => {
-    if (intervals.currentInterval != selectedInterval) {
-      setSelectedInterval(intervals.currentInterval);
-    }
-  }, [intervals.currentInterval]);
+  const selectedInterval = useSelectedInterval();
 
   return (
     <Stack>
@@ -25,7 +18,7 @@ export default function People() {
           </ActionIcon>
         </Anchor> */}
       </Group>
-      <IntervalSelector intervals={intervals.allIntervals} selectedInterval={selectedInterval} currentInterval={intervals.currentInterval} onChangeInterval={setSelectedInterval} />
+      <IntervalSelector intervals={intervals.allIntervals} selectedInterval={selectedInterval} currentInterval={intervals.currentInterval} />
       {selectedInterval && <PeopleForInterval interval={selectedInterval} key={selectedInterval.id} />}
     </Stack>
   );
