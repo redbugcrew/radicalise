@@ -30,3 +30,26 @@ pub async fn manage_your_eoi_email(
 
     resend.emails.send(email).await
 }
+
+pub async fn eoi_received_notification_email(
+    resend: &Resend,
+    to_addresses: Vec<String>,
+    collective_name: String,
+) -> Result<CreateEmailResponse, resend_rs::Error> {
+    let from = "RADicalise <noreply@radicalise.radhousing.org>";
+    let to = to_addresses;
+    let subject = format!("New expression of interest for {}", collective_name);
+
+    let base_url =
+        std::env::var("BASE_URL").unwrap_or_else(|_| "http://localhost:5173".to_string());
+    let eoi_url = format!("{}/entry_pathways", base_url);
+
+    let html_content = format!(
+        "<p>A new expression of interest has been received for your collective, {}.</p><p>You can view all expressions of interest <a href=\"{}\">here</a>.</p>",
+        collective_name, eoi_url
+    );
+
+    let email = CreateEmailBaseOptions::new(from, to, subject).with_html(&html_content);
+
+    resend.emails.send(email).await
+}
