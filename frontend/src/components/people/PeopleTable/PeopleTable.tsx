@@ -5,7 +5,6 @@ import { useState } from "react";
 import classes from "./PeopleTable.module.css";
 import CapacityScoreIcon from "../../CapacityScoreIcon";
 import Avatar from "../Avatar";
-import { interval } from "date-fns";
 
 interface Crew {
   id: number;
