@@ -80,6 +80,7 @@ pub async fn update_my_involvements(
             opt_out_type: input.opt_out_type,
             opt_out_planned_return_date: input.opt_out_planned_return_date,
             intention_context: input.intention_context,
+            implicit_counter: 0,
         },
         pool,
     )

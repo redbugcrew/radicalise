@@ -21,6 +21,7 @@ pub struct CollectiveInvolvementRecord {
     pub opt_out_type: Option<OptOutType>,
     pub opt_out_planned_return_date: Option<String>,
     pub intention_context: Option<String>,
+    pub implicit_counter: i64,
 }
 
 impl From<CollectiveInvolvementRecord> for CollectiveInvolvement {
@@ -42,6 +43,7 @@ impl From<CollectiveInvolvementRecord> for CollectiveInvolvement {
             opt_out_type: record.opt_out_type,
             opt_out_planned_return_date: record.opt_out_planned_return_date,
             intention_context: record.intention_context,
+            implicit_counter: record.implicit_counter,
         }
     }
 }
@@ -72,6 +74,7 @@ impl From<CollectiveInvolvement> for CollectiveInvolvementRecord {
             opt_out_type: involvement.opt_out_type,
             opt_out_planned_return_date: involvement.opt_out_planned_return_date,
             intention_context: involvement.intention_context,
+            implicit_counter: involvement.implicit_counter,
         }
     }
 }
@@ -84,12 +87,21 @@ pub async fn find_collective_involvement(
 ) -> Result<Option<CollectiveInvolvement>, sqlx::Error> {
     let record: Option<CollectiveInvolvementRecord> = sqlx::query_as!(
         CollectiveInvolvementRecord,
-        "SELECT id, person_id, collective_id, interval_id,
-        status as \"status: InvolvementStatus\", private_capacity_planning,
-        wellbeing, focus, capacity_score, capacity,
-        participation_intention as \"participation_intention: ParticipationIntention\",
-        opt_out_type as \"opt_out_type: OptOutType\", opt_out_planned_return_date,
-        intention_context
+        "SELECT
+            id,
+            person_id,
+            collective_id,
+            interval_id,
+            status as \"status: InvolvementStatus\",
+            private_capacity_planning,
+            wellbeing,
+            focus,
+            capacity_score,
+            capacity,
+            participation_intention as \"participation_intention: ParticipationIntention\",
+            opt_out_type as \"opt_out_type: OptOutType\", opt_out_planned_return_date,
+            intention_context,
+            implicit_counter
         FROM collective_involvements
         WHERE
             collective_id = ? AND
@@ -112,12 +124,22 @@ pub async fn find_all_collective_involvements(
 ) -> Result<Vec<CollectiveInvolvement>, sqlx::Error> {
     let records = sqlx::query_as!(
         CollectiveInvolvementRecord,
-        "SELECT id, person_id, collective_id, interval_id,
-        status as \"status: InvolvementStatus\", private_capacity_planning,
-        wellbeing, focus, capacity_score, capacity,
-        participation_intention as \"participation_intention: ParticipationIntention\",
-        opt_out_type as \"opt_out_type: OptOutType\", opt_out_planned_return_date,
-        intention_context
+        "SELECT
+            id,
+            person_id,
+            collective_id,
+            interval_id,
+            status as \"status: InvolvementStatus\",
+            private_capacity_planning,
+            wellbeing,
+            focus,
+            capacity_score,
+            capacity,
+            participation_intention as \"participation_intention: ParticipationIntention\",
+            opt_out_type as \"opt_out_type: OptOutType\",
+            opt_out_planned_return_date,
+            intention_context,
+            implicit_counter
         FROM collective_involvements
         WHERE
             collective_id = ? AND

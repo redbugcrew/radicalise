@@ -214,6 +214,7 @@ pub struct CollectiveInvolvement {
     pub opt_out_type: Option<OptOutType>,
     pub opt_out_planned_return_date: Option<String>,
     pub intention_context: Option<String>,
+    pub implicit_counter: i64,
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Debug)]
