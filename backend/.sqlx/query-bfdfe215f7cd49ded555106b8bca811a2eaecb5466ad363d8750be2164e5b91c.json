@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM collective_involvements\n        WHERE\n            interval_id = ? AND\n            collective_id = ? AND\n            participation_intention IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "bfdfe215f7cd49ded555106b8bca811a2eaecb5466ad363d8750be2164e5b91c"
+}
