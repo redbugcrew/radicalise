@@ -5,6 +5,7 @@ import { useState } from "react";
 import classes from "./PeopleTable.module.css";
 import CapacityScoreIcon from "../../CapacityScoreIcon";
 import Avatar from "../Avatar";
+import { interval } from "date-fns";
 
 interface Crew {
   id: number;
@@ -99,11 +100,41 @@ function Th({ children }: ThProps) {
   );
 }
 
-interface PeopleTableProps {
-  people: PeopleTableRow[];
+interface PersonLinkWithCapacityProps {
+  personId: number;
+  personName: string;
+  avatarId: number;
+  capacityScore: number | null;
+  dimmed?: boolean;
+  intervalId?: number | null;
 }
 
-export default function PeopleTable({ people }: PeopleTableProps) {
+function PersonLinkWithCapacity({ personId, personName, avatarId, capacityScore, dimmed, intervalId }: PersonLinkWithCapacityProps) {
+  let link = `/people/${personId}`;
+  if (intervalId) {
+    link += `#interval${intervalId}`;
+  }
+
+  return (
+    <Anchor href={link}>
+      <Group gap="sm" wrap="nowrap">
+        <Avatar avatarId={avatarId} />
+        <Text fz="sm" fw={500} c={dimmed ? "dimmed" : "default"}>
+          {personName}
+        </Text>
+
+        <CapacityScoreIcon score={capacityScore} />
+      </Group>
+    </Anchor>
+  );
+}
+
+interface PeopleTableProps {
+  people: PeopleTableRow[];
+  intervalId?: number | null;
+}
+
+export default function PeopleTable({ people, intervalId }: PeopleTableProps) {
   const [search, setSearch] = useState("");
   const [sortedData, setSortedData] = useState(people);
   const [sortBy, setSortBy] = useState<keyof SortableRowData | null>(null);
@@ -125,16 +156,7 @@ export default function PeopleTable({ people }: PeopleTableProps) {
   const rows = sortedData.map((item) => (
     <Table.Tr key={item.id}>
       <Table.Td>
-        <Anchor href={`/people/${item.id}`}>
-          <Group gap="sm" wrap="nowrap">
-            <Avatar avatarId={item.avatar_id} />
-            <Text fz="sm" fw={500} c={item.dimmed ? "dimmed" : "default"}>
-              {item.name}
-            </Text>
-
-            <CapacityScoreIcon score={item.capacity_score} />
-          </Group>
-        </Anchor>
+        <PersonLinkWithCapacity personId={item.id} personName={item.name} avatarId={item.avatar_id} capacityScore={item.capacity_score} dimmed={item.dimmed} intervalId={intervalId} />
       </Table.Td>
 
       <Table.Td>

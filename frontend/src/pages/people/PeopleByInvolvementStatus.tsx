@@ -29,9 +29,10 @@ interface PeopleByInvolvementStatusProps {
   involvements: CollectiveInvolvement[];
   crewEnrolments?: CrewInvolvement[];
   tableKey?: React.Key;
+  intervalId?: number | null;
 }
 
-export default function PeopleByInvolvementStatus({ involvements, crewEnrolments, tableKey }: PeopleByInvolvementStatusProps) {
+export default function PeopleByInvolvementStatus({ involvements, crewEnrolments, tableKey, intervalId }: PeopleByInvolvementStatusProps) {
   const states = [InvolvementStatus.Participating];
   involvements.forEach((involvement) => {
     if (states.indexOf(involvement.status) === -1) {
@@ -69,7 +70,7 @@ export default function PeopleByInvolvementStatus({ involvements, crewEnrolments
 
       {states.map((state) => (
         <Tabs.Panel value={state} key={`${state}-${tableKey}`} pt="md">
-          <PeopleTable key={tableKey} people={peopleForInvolvements(hashedInvolvements.get(state) || [], hashedCrewEnrolments, allPeople, allCrews)} />
+          <PeopleTable key={tableKey} people={peopleForInvolvements(hashedInvolvements.get(state) || [], hashedCrewEnrolments, allPeople, allCrews)} intervalId={intervalId} />
         </Tabs.Panel>
       ))}
     </Tabs>
