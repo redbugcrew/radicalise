@@ -15,3 +15,4 @@ export { default as ManageMyEoi } from "./entry_pathways/ManageMyEoi";
 export { default as EntryPathways } from "./entry_pathways/EntryPathways";
 export { default as DisplayEntryPathway } from "./entry_pathways/DisplayEntryPathway";
 export { default as PublicWithCollective } from "./PublicWithCollective";
+export { default as Dev } from "./Dev";

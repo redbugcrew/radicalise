@@ -83,6 +83,8 @@ export interface CollectiveInvolvement {
   collective_id: number;
   /** @format int64 */
   id: number;
+  /** @format int64 */
+  implicit_counter: number;
   intention_context?: string | null;
   /** @format int64 */
   interval_id: number;
@@ -305,6 +307,7 @@ export interface ApiConfig<SecurityDataType = unknown>
 
 export enum ContentType {
   Json = "application/json",
+  JsonApi = "application/vnd.api+json",
   FormData = "multipart/form-data",
   UrlEncoded = "application/x-www-form-urlencoded",
   Text = "text/plain",
@@ -438,7 +441,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 1.2.2
+ * @version 1.2.5
  * @license
  */
 export class Api<
@@ -507,6 +510,20 @@ export class Api<
         method: "PUT",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name RecomputeImplicitInvolvements
+     * @request POST:/api/dev/recompute_implicit_involvements
+     */
+    recomputeImplicitInvolvements: (params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/dev/recompute_implicit_involvements`,
+        method: "POST",
         format: "json",
         ...params,
       }),

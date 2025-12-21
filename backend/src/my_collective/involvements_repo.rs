@@ -202,8 +202,8 @@ pub async fn insert_collective_involvement_if_missing(
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(
         "INSERT INTO collective_involvements (person_id, collective_id, interval_id, status, private_capacity_planning, wellbeing, focus, capacity_score, capacity, participation_intention, opt_out_type, opt_out_planned_return_date,
-        intention_context)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        intention_context, implicit_counter)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(person_id, collective_id, interval_id) DO NOTHING",
         involvement.person_id,
         involvement.collective_id,
@@ -217,7 +217,8 @@ pub async fn insert_collective_involvement_if_missing(
         involvement.participation_intention,
         involvement.opt_out_type,
         involvement.opt_out_planned_return_date,
-        involvement.intention_context
+        involvement.intention_context,
+        involvement.implicit_counter
     )
     .execute(pool)
     .await?;
@@ -225,10 +226,22 @@ pub async fn insert_collective_involvement_if_missing(
     Ok(())
 }
 
-// pub async fn create_missing_collective_involvements_for_interval(
-//     collective_id: CollectiveId,
-//     interval_id: IntervalId,
-//     status: InvolvementStatus,
-//     pool: &SqlitePool,
-// ) -> Result<(), sqlx::Error> {
-// }
+pub async fn delete_implicit_collective_involvements(
+    collective_id: CollectiveId,
+    interval_id: IntervalId,
+    pool: &SqlitePool,
+) -> Result<(), sqlx::Error> {
+    sqlx::query!(
+        "DELETE FROM collective_involvements
+        WHERE
+            interval_id = ? AND
+            collective_id = ? AND
+            participation_intention IS NULL",
+        interval_id.id,
+        collective_id.id
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(())
+}

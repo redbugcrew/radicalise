@@ -51,6 +51,23 @@ pub async fn insert_interval(
     })
 }
 
+pub async fn find_all_intervals(
+    collective_id: CollectiveId,
+    pool: &SqlitePool,
+) -> Result<Vec<Interval>, sqlx::Error> {
+    sqlx::query_as!(
+        Interval,
+        "SELECT id, start_date, end_date
+        FROM intervals
+        WHERE
+          collective_id = ?
+        ORDER BY id ASC",
+        collective_id.id
+    )
+    .fetch_all(pool)
+    .await
+}
+
 pub async fn find_interval(
     interval_id: IntervalId,
     pool: &SqlitePool,

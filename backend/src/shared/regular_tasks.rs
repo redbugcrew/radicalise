@@ -6,7 +6,8 @@ use crate::{
         mark_implicit_involvements_processed,
     },
     my_collective::involvements_repo::{
-        find_all_collective_involvements, insert_collective_involvement_if_missing,
+        delete_implicit_collective_involvements, find_all_collective_involvements,
+        insert_collective_involvement_if_missing,
     },
 };
 
@@ -25,7 +26,7 @@ pub async fn check_intervals_tasks(
             interval.id
         );
         if let Err(e) =
-            add_interval_inplicit_involvements(&interval, collective_id.clone(), pool).await
+            add_interval_implicit_involvements(&interval, collective_id.clone(), false, pool).await
         {
             eprintln!(
                 "Error adding implicit involvements for interval {}: {:?}",
@@ -37,9 +38,10 @@ pub async fn check_intervals_tasks(
     Ok(())
 }
 
-async fn add_interval_inplicit_involvements(
+pub async fn add_interval_implicit_involvements(
     interval: &Interval,
     collective_id: CollectiveId,
+    recompute: bool,
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
     let previous_interval =
@@ -51,6 +53,11 @@ async fn add_interval_inplicit_involvements(
     let previous_collective_involvements =
         find_all_collective_involvements(collective_id.clone(), previous_interval.typed_id(), pool)
             .await?;
+
+    if recompute {
+        delete_implicit_collective_involvements(collective_id.clone(), interval.typed_id(), pool)
+            .await?;
+    }
 
     for previous_involvement in previous_collective_involvements {
         let new_involvement = CollectiveInvolvement {

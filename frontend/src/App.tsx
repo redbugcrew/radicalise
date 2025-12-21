@@ -20,6 +20,7 @@ import {
   DisplayEntryPathway,
   ManageMyEoi,
   PublicWithCollective,
+  Dev,
 } from "./pages";
 import { buildRoutes as buildAuthRoutes } from "./contexts/auth";
 import { theme } from "./theme";
@@ -97,6 +98,10 @@ const router = createBrowserRouter([
       {
         path: "entry_pathways/:entryPathwayId",
         element: <DisplayEntryPathway />,
+      },
+      {
+        path: "dev",
+        element: <Dev />,
       },
     ],
   },
