@@ -1,17 +1,25 @@
 import { Stack, Title } from "@mantine/core";
-import { CrewsList } from "../../components";
+import CrewsForInterval from "./CrewsForInterval";
+import { IntervalSelector } from "../../components";
+import { useEffect, useState } from "react";
+import type { Interval } from "../../api/Api";
 import { useAppSelector } from "../../store";
 
 export default function Crews() {
-  const crewsMap = useAppSelector((state) => state.crews);
-  const crews = Object.values(crewsMap);
-  const involvements = useAppSelector((state) => state.involvements.current_interval?.crew_involvements || []);
-  const people = useAppSelector((state) => state.people);
+  const intervals = useAppSelector((state) => state.intervals);
+  const [selectedInterval, setSelectedInterval] = useState<Interval | null>(null);
+  useEffect(() => {
+    if (intervals.currentInterval != selectedInterval) {
+      setSelectedInterval(intervals.currentInterval);
+    }
+  }, [intervals.currentInterval]);
 
   return (
     <Stack>
       <Title order={1}>Crews</Title>
-      <CrewsList crews={crews} involvements={involvements} people={people} />
+      <IntervalSelector intervals={intervals.allIntervals} selectedInterval={selectedInterval} currentInterval={intervals.currentInterval} onChangeInterval={setSelectedInterval} />
+
+      {selectedInterval && <CrewsForInterval interval={selectedInterval} key={selectedInterval.id} />}
     </Stack>
   );
 }
