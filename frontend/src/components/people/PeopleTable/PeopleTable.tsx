@@ -21,6 +21,7 @@ export interface PeopleTableRow {
   avatar_id: number;
   capacity_score: number | null;
   dimmed?: boolean;
+  counter: number;
   crews: Crew[];
 }
 
@@ -115,13 +116,12 @@ function PersonLinkWithCapacity({ personId, personName, avatarId, capacityScore,
   }
 
   return (
-    <Anchor href={link}>
+    <Anchor href={link} className={classes.personLink}>
       <Group gap="sm" wrap="nowrap">
         <Avatar avatarId={avatarId} />
         <Text fz="sm" fw={500} c={dimmed ? "dimmed" : "default"}>
           {personName}
         </Text>
-
         <CapacityScoreIcon score={capacityScore} />
       </Group>
     </Anchor>
@@ -155,7 +155,14 @@ export default function PeopleTable({ people, intervalId }: PeopleTableProps) {
   const rows = sortedData.map((item) => (
     <Table.Tr key={item.id}>
       <Table.Td>
-        <PersonLinkWithCapacity personId={item.id} personName={item.name} avatarId={item.avatar_id} capacityScore={item.capacity_score} dimmed={item.dimmed} intervalId={intervalId} />
+        <Group justify="space-between">
+          <PersonLinkWithCapacity personId={item.id} personName={item.name} avatarId={item.avatar_id} capacityScore={item.capacity_score} dimmed={item.dimmed} intervalId={intervalId} />
+          {item.counter > 0 ? (
+            <Text c="dimmed" size="sm">
+              {item.counter}
+            </Text>
+          ) : null}
+        </Group>
       </Table.Td>
 
       <Table.Td>

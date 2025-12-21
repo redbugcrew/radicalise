@@ -20,6 +20,7 @@ function peopleForInvolvements(involvements: CollectiveInvolvement[], allCrewInv
       avatar_id: person.avatar_id ?? person.id,
       capacity_score: involvement.capacity_score ?? null,
       dimmed: !involvement.participation_intention,
+      counter: involvement.implicit_counter,
       crews: crewInvolvements.map((crewInvolvement) => allCrews[crewInvolvement.crew_id] || null).filter((crew) => crew),
     };
   });

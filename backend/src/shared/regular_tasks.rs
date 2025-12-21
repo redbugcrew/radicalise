@@ -9,6 +9,7 @@ use crate::{
         delete_implicit_collective_involvements, find_all_collective_involvements,
         insert_collective_involvement_if_missing,
     },
+    shared::entities::OptOutType,
 };
 
 use super::entities::{CollectiveId, CollectiveInvolvement, Interval};
@@ -60,6 +61,11 @@ pub async fn add_interval_implicit_involvements(
     }
 
     for previous_involvement in previous_collective_involvements {
+        match previous_involvement.opt_out_type {
+            Some(OptOutType::Exit) => continue,
+            _ => {}
+        }
+
         let new_involvement = CollectiveInvolvement {
             id: -1, // -1 indicates a new record
             person_id: previous_involvement.person_id.clone(),
