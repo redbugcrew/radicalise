@@ -5,11 +5,15 @@ export type CrewWithLinks = CrewWithAnyLinks & {
   links: Link[] | undefined;
 };
 
-interface CrewObjectMap {
+export interface CrewObjectMap {
   [key: number]: CrewWithLinks;
 }
 
 export type CrewsState = CrewObjectMap;
+
+export function crewsArrayFromObjectMap(crewsMap: CrewObjectMap): CrewWithLinks[] {
+  return Object.values(crewsMap);
+}
 
 const crewsSlice = createSlice({
   name: "crews",

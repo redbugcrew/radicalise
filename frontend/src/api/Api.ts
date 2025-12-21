@@ -62,6 +62,8 @@ export interface CapacityPlanning {
 export interface Collective {
   description?: string | null;
   eoi_description?: string | null;
+  /** @format int64 */
+  eoi_managing_crew_id?: number | null;
   feature_eoi: boolean;
   /** @format int64 */
   id: number;
@@ -305,6 +307,7 @@ export interface ApiConfig<SecurityDataType = unknown>
 
 export enum ContentType {
   Json = "application/json",
+  JsonApi = "application/vnd.api+json",
   FormData = "multipart/form-data",
   UrlEncoded = "application/x-www-form-urlencoded",
   Text = "text/plain",
@@ -438,7 +441,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 1.2.2
+ * @version 1.2.5
  * @license
  */
 export class Api<

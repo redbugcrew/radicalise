@@ -47,7 +47,7 @@ pub async fn find_collective(
     pool: &SqlitePool,
 ) -> Result<Collective, sqlx::Error> {
     sqlx::query!(
-        "SELECT id, name, noun_name, description, slug, feature_eoi, eoi_description
+        "SELECT id, name, noun_name, description, slug, feature_eoi, eoi_description, eoi_managing_crew_id
         FROM collectives WHERE id = ?",
         collective_id.id
     )
@@ -62,6 +62,7 @@ pub async fn find_collective(
         slug: row.slug,
         feature_eoi: row.feature_eoi,
         eoi_description: row.eoi_description,
+        eoi_managing_crew_id: row.eoi_managing_crew_id,
     })
 }
 
@@ -70,7 +71,7 @@ pub async fn find_collective_by_slug(
     pool: &SqlitePool,
 ) -> Result<Collective, sqlx::Error> {
     sqlx::query!(
-        "SELECT id, name, noun_name, description, slug, feature_eoi, eoi_description
+        "SELECT id, name, noun_name, description, slug, feature_eoi, eoi_description, eoi_managing_crew_id
         FROM collectives WHERE slug = ?",
         collective_slug
     )
@@ -85,6 +86,7 @@ pub async fn find_collective_by_slug(
         slug: row.slug,
         feature_eoi: row.feature_eoi,
         eoi_description: row.eoi_description,
+        eoi_managing_crew_id: row.eoi_managing_crew_id,
     })
 }
 
@@ -96,14 +98,8 @@ pub async fn find_collective_with_links(
     let links = find_all_links_for_owner(collective_id.id, "collectives".to_string(), pool).await?;
 
     Ok(Collective {
-        id: collective.id,
-        name: collective.name,
-        noun_name: collective.noun_name,
-        description: collective.description,
         links,
-        slug: collective.slug,
-        feature_eoi: collective.feature_eoi,
-        eoi_description: collective.eoi_description,
+        ..collective
     })
 }
 
@@ -192,7 +188,9 @@ pub async fn update_collective(
 ) -> Result<Collective, sqlx::Error> {
     sqlx::query!(
         "UPDATE collectives
-         SET name = ?, noun_name = ?, description = ?, slug = ?, feature_eoi = ?, eoi_description = ?
+         SET
+            name = ?, noun_name = ?, description = ?, slug = ?,
+            feature_eoi = ?, eoi_description = ?, eoi_managing_crew_id = ?
          WHERE id = ?",
         input.name,
         input.noun_name,
@@ -200,6 +198,7 @@ pub async fn update_collective(
         input.slug,
         input.feature_eoi,
         input.eoi_description,
+        input.eoi_managing_crew_id,
         collective_id.id
     )
     .execute(pool)
@@ -223,13 +222,7 @@ pub async fn update_collective_with_links(
     .await?;
 
     Ok(Collective {
-        id: collective.id,
-        name: collective.name,
-        noun_name: collective.noun_name,
-        description: collective.description,
         links: links.unwrap_or_default(),
-        slug: collective.slug,
-        feature_eoi: collective.feature_eoi,
-        eoi_description: collective.eoi_description,
+        ..collective
     })
 }
