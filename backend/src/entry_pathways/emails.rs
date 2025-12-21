@@ -1,14 +1,10 @@
-use resend_rs::{
-    Resend,
-    types::{CreateEmailBaseOptions, CreateEmailResponse},
-};
+use resend_rs::types::CreateEmailBaseOptions;
 
-pub async fn manage_your_eoi_email(
-    resend: &Resend,
+pub fn manage_your_eoi_email(
     to_address: String,
     collective_slug: String,
     eoi_auth_token: String,
-) -> Result<CreateEmailResponse, resend_rs::Error> {
+) -> CreateEmailBaseOptions {
     let from = "RADicalise <noreply@radicalise.radhousing.org>";
     let to = [to_address];
     let subject = "Thanks for your expression of interest";
@@ -26,30 +22,25 @@ pub async fn manage_your_eoi_email(
         manage_eoi_url,
     );
 
-    let email = CreateEmailBaseOptions::new(from, to, subject).with_html(&html_content);
-
-    resend.emails.send(email).await
+    CreateEmailBaseOptions::new(from, to, subject).with_html(&html_content)
 }
 
-pub async fn eoi_received_notification_email(
-    resend: &Resend,
+pub fn eoi_received_notification_email(
     to_addresses: Vec<String>,
-    collective_name: String,
-) -> Result<CreateEmailResponse, resend_rs::Error> {
+    collective_name: Option<String>,
+) -> CreateEmailBaseOptions {
     let from = "RADicalise <noreply@radicalise.radhousing.org>";
     let to = to_addresses;
-    let subject = format!("New expression of interest for {}", collective_name);
-
+    let name = collective_name.unwrap_or_else(|| "your collective".to_string());
+    let subject = format!("New expression of interest for {}", name);
     let base_url =
         std::env::var("BASE_URL").unwrap_or_else(|_| "http://localhost:5173".to_string());
     let eoi_url = format!("{}/entry_pathways", base_url);
 
     let html_content = format!(
         "<p>A new expression of interest has been received for your collective, {}.</p><p>You can view all expressions of interest <a href=\"{}\">here</a>.</p>",
-        collective_name, eoi_url
+        name, eoi_url
     );
 
-    let email = CreateEmailBaseOptions::new(from, to, subject).with_html(&html_content);
-
-    resend.emails.send(email).await
+    CreateEmailBaseOptions::new(from, to, subject).with_html(&html_content)
 }

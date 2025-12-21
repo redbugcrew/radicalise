@@ -8,10 +8,13 @@ use uuid::Uuid;
 use crate::{
     entry_pathways::repo::find_eoi_by_auth_token,
     my_collective::repo::find_collective,
+    people::repo::find_crew_involved_emails,
     realtime::RealtimeState,
     shared::{
         db_helpers::is_constraint_violation,
-        entities::{CollectiveId, EntryPathway, ExpressionOfInterest},
+        entities::{
+            Collective, CollectiveId, CrewId, EntryPathway, ExpressionOfInterest, Interval,
+        },
         events::AppEvent,
     },
 };
@@ -55,6 +58,22 @@ pub async fn create_eoi(
         }
     };
 
+    let current_interval = match crate::intervals::repo::find_current_interval(
+        CollectiveId::new(submission.collective_id),
+        &pool,
+    )
+    .await
+    {
+        Ok(interval) => interval,
+        Err(e) => {
+            eprintln!(
+                "Failed to find current interval for collective ID {}: {}",
+                submission.collective_id, e
+            );
+            return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
+        }
+    };
+
     if !collective.feature_eoi {
         return (StatusCode::BAD_REQUEST, Json(EoiError::EoiFeatureDisabled)).into_response();
     }
@@ -66,12 +85,19 @@ pub async fn create_eoi(
         Ok(entry_pathway) => {
             broadcast_entry_pathway_updated(&entry_pathway, &realtime_state).await;
 
-            if let Some(slug) = collective.slug {
-                let result = emails::manage_your_eoi_email(&resend, email, slug, auth_token).await;
+            if let Some(slug) = collective.slug.clone() {
+                let email = emails::manage_your_eoi_email(email, slug, auth_token);
+                let result = resend.emails.send(email).await;
                 match result {
                     Ok(_) => println!("EOI management email sent successfully."),
                     Err(e) => eprintln!("Failed to send EOI management email: {}", e),
                 }
+            }
+
+            match send_notification_of_new_eoi(&collective, &current_interval, &resend, &pool).await
+            {
+                Ok(_) => println!("Notification email for new EOI sent successfully."),
+                Err(e) => eprintln!("Failed to send notification email for new EOI: {}", e),
             }
 
             return (StatusCode::CREATED, ()).into_response();
@@ -221,4 +247,41 @@ async fn broadcast_entry_pathway_updated(
     realtime_state
         .broadcast_app_event(None, AppEvent::EntryPathwayEvent(event))
         .await;
+}
+
+async fn send_notification_of_new_eoi(
+    collective: &Collective,
+    current_interval: &Interval,
+    resend: &Resend,
+    pool: &SqlitePool,
+) -> Result<(), anyhow::Error> {
+    match collective.eoi_managing_crew_id {
+        None => {
+            println!(
+                "No EOI managing crew set for collective ID {}, skipping notification email.",
+                collective.id
+            );
+            return Ok(());
+        }
+        Some(crew_id) => {
+            let emails =
+                find_crew_involved_emails(CrewId::new(crew_id), current_interval.typed_id(), pool)
+                    .await?;
+
+            if emails.is_empty() {
+                println!(
+                    "No people found in crew ID {} for collective ID {}, skipping notification email.",
+                    crew_id, collective.id
+                );
+                return Ok(());
+            }
+
+            let email =
+                emails::eoi_received_notification_email(emails, collective.noun_name.clone());
+
+            resend.emails.send(email).await?;
+
+            return Ok(());
+        }
+    }
 }
