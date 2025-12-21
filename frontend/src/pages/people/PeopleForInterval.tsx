@@ -9,8 +9,16 @@ interface PeopleForIntervalProps {
 export default function PeopleForInterval({ interval }: PeopleForIntervalProps) {
   return (
     <WithIntervalInvolvements interval={interval}>
-      {({ involvements, key }) =>
-        involvements && <PeopleByInvolvementStatus involvements={involvements.collective_involvements} crewEnrolments={involvements.crew_involvements} key={key} tableKey={key} intervalId={interval?.id} />
+      {({ involvements, key, isCurrentInterval }) =>
+        involvements && (
+          <PeopleByInvolvementStatus
+            involvements={involvements.collective_involvements}
+            crewEnrolments={involvements.crew_involvements}
+            key={key}
+            tableKey={key}
+            intervalId={isCurrentInterval ? undefined : interval?.id}
+          />
+        )
       }
     </WithIntervalInvolvements>
   );

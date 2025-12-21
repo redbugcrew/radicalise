@@ -9,6 +9,7 @@ interface WithIntervalInvolvementsChildProps {
   interval: Interval;
   involvements: IntervalInvolvementData | null;
   key: string;
+  isCurrentInterval: boolean;
 }
 
 interface WithIntervalInvolvementsProps {
@@ -82,5 +83,5 @@ export default function WithIntervalInvolvements({ children }: WithIntervalInvol
     incrementCacheKey();
   }, [pathIntervalId, currentInterval, involvementState]);
 
-  return children({ interval: selectedInterval, involvements, key: tableKey });
+  return children({ interval: selectedInterval, involvements, key: tableKey, isCurrentInterval: selectedInterval.id === currentInterval?.id });
 }
