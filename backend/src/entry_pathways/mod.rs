@@ -65,6 +65,7 @@ pub async fn create_eoi(
     match repo::create_eoi(submission, auth_token.clone(), &pool).await {
         Ok(entry_pathway) => {
             broadcast_entry_pathway_updated(&entry_pathway, &realtime_state).await;
+
             if let Some(slug) = collective.slug {
                 let result = emails::manage_your_eoi_email(&resend, email, slug, auth_token).await;
                 match result {
