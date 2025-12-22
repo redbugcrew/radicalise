@@ -1,6 +1,6 @@
 use sqlx::SqlitePool;
 
-use crate::shared::entities::{CollectiveId, Person, PersonId};
+use crate::shared::entities::{CollectiveId, CrewId, IntervalId, Person, PersonId};
 
 pub async fn update_person(
     input: Person,
@@ -59,4 +59,24 @@ pub async fn find_all_people(
     )
     .fetch_all(pool)
     .await
+}
+
+pub async fn find_crew_involved_emails(
+    crew_id: CrewId,
+    interval_id: IntervalId,
+    pool: &SqlitePool,
+) -> Result<Vec<String>, sqlx::Error> {
+    let rows = sqlx::query!(
+        "SELECT email
+        FROM users
+        INNER JOIN people ON users.id = people.user_id
+        INNER JOIN crew_involvements ON people.id = crew_involvements.person_id
+        WHERE crew_involvements.crew_id = ? AND crew_involvements.interval_id = ?",
+        crew_id.id,
+        interval_id.id
+    )
+    .fetch_all(pool)
+    .await?;
+
+    Ok(rows.into_iter().filter_map(|row| row.email).collect())
 }

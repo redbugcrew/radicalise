@@ -23,6 +23,7 @@ pub struct Collective {
     pub slug: Option<String>,
     pub feature_eoi: bool,
     pub eoi_description: Option<String>,
+    pub eoi_managing_crew_id: Option<i64>,
 }
 
 impl Collective {

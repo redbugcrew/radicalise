@@ -4,9 +4,11 @@ import { CollectiveForm } from "../components";
 import type { Collective } from "../api/Api";
 import { getApi } from "../api";
 import { useNavigate } from "react-router-dom";
+import { crewsArrayFromObjectMap } from "../store/crews";
 
 export default function EditCollective() {
   const collective = useAppSelector((state) => state.collective);
+  const crews = useAppSelector((state) => crewsArrayFromObjectMap(state.crews));
   const navigate = useNavigate();
 
   if (!collective) return <Container>Error: Collective not found</Container>;
@@ -33,7 +35,7 @@ export default function EditCollective() {
       <Title order={2} size="h4" mb="lg">
         {collective.name}
       </Title>
-      <CollectiveForm collective={collective} onSubmit={onSubmit} />
+      <CollectiveForm collective={collective} crews={crews} onSubmit={onSubmit} />
     </Container>
   );
 }

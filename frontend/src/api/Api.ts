@@ -62,6 +62,8 @@ export interface CapacityPlanning {
 export interface Collective {
   description?: string | null;
   eoi_description?: string | null;
+  /** @format int64 */
+  eoi_managing_crew_id?: number | null;
   feature_eoi: boolean;
   /** @format int64 */
   id: number;
