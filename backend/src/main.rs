@@ -40,6 +40,7 @@ mod public;
 mod realtime;
 mod shared;
 mod static_server;
+mod calander_event_attendances;
 
 #[macro_use]
 extern crate lazy_static;
