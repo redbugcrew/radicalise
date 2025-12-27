@@ -1,5 +1,4 @@
 
-
 // pub async fn event_attendance_status(
 //     calendar_event_id: CalendarEventId,
 //     user_id: UserId,

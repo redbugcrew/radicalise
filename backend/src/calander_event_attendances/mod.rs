@@ -1,4 +1,4 @@
-mod repo;
+pub mod repo;
 
 use axum::{
     response::IntoResponse,
@@ -7,6 +7,8 @@ use axum::{
 use serde::Deserialize;
 use utoipa::ToSchema;
 use utoipa_axum::{router::OpenApiRouter, routes};
+
+use crate::auth::auth_backend::AuthSession;
 
 pub fn router() -> OpenApiRouter {
     OpenApiRouter::new()
@@ -30,9 +32,11 @@ pub struct CreateAttendanceRequest {
     )]
 
 async fn create_calendar_event_attendance(
+    auth_session: AuthSession,
     axum::extract::Json(input): axum::extract::Json<CreateAttendanceRequest>,
 ) ->impl IntoResponse {
-    println!("intention: {}, calendar_event_id:{}", input.intention, input.calendar_event_id);   
+    let user_id = auth_session.user.unwrap().id;
+    println!("intention: {}, calendar_event_id:{}, user_id:{}", input.intention, input.calendar_event_id, user_id);   
     (StatusCode::OK, ())
 }
 
