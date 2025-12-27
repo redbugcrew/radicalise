@@ -19,9 +19,11 @@
     "backend/.sqlx": true
   },
   "explorerExclude.backup": {},
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "[javascript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "editor.wordWrapColumn": 180
+  "editor.wordWrapColumn": 180,
+  "[rust]": {
+    "editor.defaultFormatter": "rust-lang.rust-analyzer"
+  }
 }
