@@ -6,9 +6,11 @@ pub async fn upsert_event_attendance(
     user_id: i64,
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
-    let result = sqlx::query!(
+    sqlx::query!(
         "INSERT INTO calendar_event_attendances (user_id, calendar_event_id, intention)
-        VALUES (?, ?, ?)",
+        VALUES (?, ?, ?)
+        ON CONFLICT(user_id, calendar_event_id) DO UPDATE SET
+            intention = excluded.intention",
         user_id,
         calendar_event_id,
         intention
