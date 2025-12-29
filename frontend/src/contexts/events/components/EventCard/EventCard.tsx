@@ -1,14 +1,18 @@
 import { Card, Title } from "@mantine/core";
-import type { CalendarEvent } from "../../../../api/Api";
+import type { AttendanceIntention, CalendarEvent } from "../../../../api/Api";
 import styles from "./EventCard.module.css";
 import { TimeRangeText } from "../../../../components";
 import AttendanceSelector from "../AttendanceSelector";
 
 interface EventCardProps {
   event: CalendarEvent;
+  myIntention?: {
+    intention?: AttendanceIntention | null;
+    onChange?: (intention: AttendanceIntention | null) => Promise<void>;
+  };
 }
 
-export default function EventCard({ event }: EventCardProps) {
+export default function EventCard({ event, myIntention }: EventCardProps) {
   const cardStyles = [styles.card];
 
   return (
@@ -28,9 +32,11 @@ export default function EventCard({ event }: EventCardProps) {
           </ul>
         )}
       </Card.Section>
-      <Card.Section p="md" className={styles.cardTextSection}>
-        <AttendanceSelector />
-      </Card.Section>
+      {myIntention && (
+        <Card.Section p="md" className={styles.cardTextSection}>
+          <AttendanceSelector intention={myIntention.intention} onChange={myIntention.onChange} />
+        </Card.Section>
+      )}
     </Card>
   );
 }

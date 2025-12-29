@@ -121,6 +121,34 @@ impl TryFrom<String> for InvolvementStatus {
     }
 }
 
+#[derive(Serialize, Deserialize, ToSchema, sqlx::Type, Clone, Debug)]
+pub enum AttendanceIntention {
+    Going,
+    Uncertain,
+    NotGoing,
+}
+
+impl FromStr for AttendanceIntention {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "Going" => Ok(AttendanceIntention::Going),
+            "Uncertain" => Ok(AttendanceIntention::Uncertain),
+            "NotGoing" => Ok(AttendanceIntention::NotGoing),
+            _ => Err(()),
+        }
+    }
+}
+
+impl TryFrom<String> for AttendanceIntention {
+    type Error = ();
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        AttendanceIntention::from_str(&value)
+    }
+}
+
 #[derive(Serialize, Deserialize, ToSchema, sqlx::Type, Debug, Clone)]
 pub enum ParticipationIntention {
     OptIn,
@@ -300,7 +328,7 @@ pub struct EventTemplate {
 #[derive(Deserialize, Serialize, ToSchema, Debug, Clone)]
 pub struct CalendarEvent {
     pub id: i64,
-    pub event_template_id: i64, 
+    pub event_template_id: i64,
     pub name: String,
     pub start_at: String,
     pub end_at: Option<String>,

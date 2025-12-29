@@ -33,6 +33,12 @@ export enum EoiError {
   EmailAlreadyExists = "EmailAlreadyExists",
 }
 
+export enum AttendanceIntention {
+  Going = "Going",
+  Uncertain = "Uncertain",
+  NotGoing = "NotGoing",
+}
+
 export type AppEvent =
   | {
       MeEvent: MeEvent;
@@ -118,6 +124,12 @@ export interface CollectiveInvolvement {
   person_id: number;
   private_capacity_planning: boolean;
   status: InvolvementStatus;
+}
+
+export interface CreateAttendanceRequest {
+  /** @format int64 */
+  calendar_event_id: number;
+  intention?: null | AttendanceIntention;
 }
 
 export interface Credentials {
@@ -343,6 +355,7 @@ export interface ApiConfig<SecurityDataType = unknown>
 
 export enum ContentType {
   Json = "application/json",
+  JsonApi = "application/vnd.api+json",
   FormData = "multipart/form-data",
   UrlEncoded = "application/x-www-form-urlencoded",
   Text = "text/plain",
@@ -526,6 +539,25 @@ export class Api<
         method: "POST",
         body: data,
         type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CreateCalendarEventAttendance
+     * @request POST:/api/calendar_event_attendances
+     */
+    createCalendarEventAttendance: (
+      data: CreateAttendanceRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<any, any>({
+        path: `/api/calendar_event_attendances`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
         ...params,
       }),
 

@@ -8,6 +8,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     auth::auth_backend::AuthSession, calander_event_attendances::repo::upsert_event_attendance,
+    shared::entities::AttendanceIntention,
 };
 
 pub fn router() -> OpenApiRouter {
@@ -17,7 +18,7 @@ pub fn router() -> OpenApiRouter {
 #[derive(Deserialize, ToSchema)]
 pub struct CreateAttendanceRequest {
     pub calendar_event_id: i64,
-    pub intention: String,
+    pub intention: Option<AttendanceIntention>,
 }
 
 #[utoipa::path(
@@ -36,7 +37,7 @@ async fn create_calendar_event_attendance(
 ) -> impl IntoResponse {
     let user_id = auth_session.user.unwrap().id;
     println!(
-        "updating calender event attendance with: intention: {}, calendar_event_id:{}, user_id:{}",
+        "updating calender event attendance with: intention: {:?}, calendar_event_id:{}, user_id:{}",
         input.intention, input.calendar_event_id, user_id
     );
     let result =

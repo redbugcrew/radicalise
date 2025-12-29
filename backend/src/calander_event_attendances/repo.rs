@@ -1,8 +1,9 @@
+use crate::shared::entities::AttendanceIntention;
 use sqlx::SqlitePool;
 
 pub async fn upsert_event_attendance(
     calendar_event_id: i64,
-    intention: String,
+    intention: Option<AttendanceIntention>,
     user_id: i64,
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
