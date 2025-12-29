@@ -3,3 +3,13 @@
   border-style: solid;
   border-color: var(--mantine-color-dark-4);
 }
+
+.cardTextSection {
+  border-width: 0 0 2px 0;
+  border-style: solid;
+  border-color: var(--mantine-color-dark-4);
+}
+
+.cardTextSection:last-child {
+  border-width: 0;
+}
