@@ -1,0 +1,5 @@
+.card {
+  border-width: 2px;
+  border-style: solid;
+  border-color: var(--mantine-color-dark-4);
+}
