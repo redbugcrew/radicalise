@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT id, name, noun_name, description, slug, feature_eoi, eoi_description\n        FROM collectives WHERE id = ?",
+  "query": "SELECT id, name, noun_name, description, slug, feature_eoi, eoi_description, eoi_managing_crew_id\n        FROM collectives WHERE id = ?",
   "describe": {
     "columns": [
       {
@@ -37,6 +37,11 @@
         "name": "eoi_description",
         "ordinal": 6,
         "type_info": "Text"
+      },
+      {
+        "name": "eoi_managing_crew_id",
+        "ordinal": 7,
+        "type_info": "Integer"
       }
     ],
     "parameters": {
@@ -49,8 +54,9 @@
       true,
       true,
       false,
+      true,
       true
     ]
   },
-  "hash": "ae80102bbeee2973a078acda9703173e61bbfec8b981025307ad8db0936295bc"
+  "hash": "16c1745b6f8de458087df9f8327d0121c48f8daeb51f60b2ad3b80a222f483eb"
 }

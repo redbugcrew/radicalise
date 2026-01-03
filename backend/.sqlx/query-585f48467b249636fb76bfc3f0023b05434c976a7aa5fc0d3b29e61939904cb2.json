@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT email\n        FROM users\n        INNER JOIN people ON users.id = people.user_id\n        INNER JOIN crew_involvements ON people.id = crew_involvements.person_id\n        WHERE crew_involvements.crew_id = ? AND crew_involvements.interval_id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "email",
+        "ordinal": 0,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "585f48467b249636fb76bfc3f0023b05434c976a7aa5fc0d3b29e61939904cb2"
+}

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE collectives\n         SET\n            name = ?, noun_name = ?, description = ?, slug = ?,\n            feature_eoi = ?, eoi_description = ?, eoi_managing_crew_id = ?\n         WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 8
+    },
+    "nullable": []
+  },
+  "hash": "f60be21daa76d3b70e877ede985d58f6fc1e90090647dd5d78285b52c2660828"
+}
