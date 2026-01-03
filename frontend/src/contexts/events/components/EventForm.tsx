@@ -119,7 +119,7 @@ export default function EventTemplateForm({ value, eventTemplates, onSubmit }: E
           />
         </Stack>
         <Button type="submit" loading={form.submitting}>
-          Create template
+          Create event
         </Button>
       </Stack>
     </form>
