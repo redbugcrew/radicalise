@@ -6,7 +6,6 @@ import { useAppSelector } from "../../../store";
 
 export default function Events() {
   const events = useAppSelector((state) => state.events);
-  const currentPersonId = useAppSelector((state) => state.me?.person_id);
 
   return (
     <Stack>
@@ -18,7 +17,7 @@ export default function Events() {
           </ActionIcon>
         </Anchor>
       </Group>
-      <EventsList events={events} currentPersonId={currentPersonId} />
+      <EventsList events={events} />
     </Stack>
   );
 }

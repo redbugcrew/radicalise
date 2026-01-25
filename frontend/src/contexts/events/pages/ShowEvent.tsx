@@ -1,6 +1,7 @@
 import { Group, Stack, Title } from "@mantine/core";
 import { useParams } from "react-router-dom";
 import { useAppSelector } from "../../../store";
+import MyAttendance from "../components/MyAttendance";
 
 export default function ShowEvent() {
   const { eventId } = useParams<"eventId">();
@@ -23,7 +24,9 @@ export default function ShowEvent() {
         </Anchor> */}
       </Group>
 
-      <div>Event details go here</div>
+      <Stack align="flex-start">
+        <MyAttendance event={event} />
+      </Stack>
     </Stack>
   );
 }
