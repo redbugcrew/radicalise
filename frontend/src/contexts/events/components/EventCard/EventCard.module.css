@@ -13,3 +13,17 @@
 .cardTextSection:last-child {
   border-width: 0;
 }
+
+a.cardLink:hover {
+  text-decoration: none;
+}
+
+a.cardLink:hover .card {
+  border-color: var(--mantine-color-blue-7);
+  background-color: var(--mantine-color-dark-5);
+  color: white;
+}
+
+a.cardLink:hover .cardTextSection {
+  border-color: var(--mantine-color-dark-3);
+}
