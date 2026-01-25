@@ -489,7 +489,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 1.2.7
+ * @version 1.2.8
  * @license
  */
 export class Api<
@@ -557,20 +557,6 @@ export class Api<
         method: "POST",
         body: data,
         type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name ListCalendarEvents
-     * @request GET:/api/calendar_events
-     */
-    listCalendarEvents: (params: RequestParams = {}) =>
-      this.request<CalendarEvent[], any>({
-        path: `/api/calendar_events`,
-        method: "GET",
         format: "json",
         ...params,
       }),

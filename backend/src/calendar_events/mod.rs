@@ -14,9 +14,7 @@ pub mod events;
 pub mod repo;
 
 pub fn router() -> OpenApiRouter {
-    OpenApiRouter::new()
-        .routes(routes!(create_calendar_event))
-        .routes(routes!(list_calendar_events))
+    OpenApiRouter::new().routes(routes!(create_calendar_event))
     // .routes(routes!(update_event_record))
 }
 
@@ -56,25 +54,6 @@ async fn create_calendar_event(
         }
         Err(err) => {
             eprintln!("Failed to create calendar event: {}", err);
-            (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response()
-        }
-    }
-}
-
-#[utoipa::path(
-    get,
-    path = "/",
-    responses(
-        (status = OK, body = Vec<CalendarEvent>),
-        (status = INTERNAL_SERVER_ERROR, body = ()),
-    ),
-)]
-
-async fn list_calendar_events(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse {
-    match repo::list_calendar_events(default_collective_id(), &pool).await {
-        Ok(calendar_events) => (StatusCode::OK, Json(calendar_events)).into_response(),
-        Err(err) => {
-            eprintln!("Failed to list calendar event: {}", err);
             (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response()
         }
     }
