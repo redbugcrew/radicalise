@@ -66,6 +66,7 @@ export type AppEvent =
     };
 
 export interface CalendarEvent {
+  attendances?: any[] | null;
   end_at?: string | null;
   /** @format int64 */
   event_template_id: number;
@@ -74,6 +75,16 @@ export interface CalendarEvent {
   links?: any[] | null;
   name: string;
   start_at: string;
+}
+
+export interface CalendarEventAttendance {
+  /** @format int64 */
+  calendar_event_id: number;
+  /** @format int64 */
+  id: number;
+  intention?: null | AttendanceIntention;
+  /** @format int64 */
+  person_id: number;
 }
 
 export type CalendarEventsEvent = {

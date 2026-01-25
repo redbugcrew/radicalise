@@ -333,4 +333,13 @@ pub struct CalendarEvent {
     pub start_at: String,
     pub end_at: Option<String>,
     pub links: Option<Vec<Link>>,
+    pub attendances: Option<Vec<CalendarEventAttendance>>,
+}
+
+#[derive(Deserialize, Serialize, ToSchema, Debug, Clone)]
+pub struct CalendarEventAttendance {
+    pub id: i64,
+    pub person_id: i64,
+    pub calendar_event_id: i64,
+    pub intention: Option<AttendanceIntention>,
 }

@@ -66,6 +66,7 @@ pub async fn list_calendar_events(
             start_at: row.start_at,
             end_at: row.end_at,
             links: Some(links_hash.get(&row.id).cloned().unwrap_or_else(Vec::new)),
+            attendances: None,
         })
         .collect();
 
