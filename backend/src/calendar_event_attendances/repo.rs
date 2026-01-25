@@ -10,7 +10,7 @@ pub async fn upsert_event_attendance(
     intention: Option<AttendanceIntention>,
     person_id: PersonId,
     pool: &SqlitePool,
-) -> Result<(), sqlx::Error> {
+) -> Result<CalendarEventAttendance, sqlx::Error> {
     sqlx::query!(
         "INSERT INTO calendar_event_attendances (person_id, calendar_event_id, intention)
         VALUES (?, ?, ?)
@@ -22,7 +22,33 @@ pub async fn upsert_event_attendance(
     )
     .execute(pool)
     .await?;
-    Ok(())
+
+    let calendar_event =
+        find_event_attendance_by_person_and_event(calendar_event_id, person_id, pool).await?;
+
+    match calendar_event {
+        None => Err(sqlx::Error::RowNotFound),
+        Some(attendance) => Ok(attendance),
+    }
+}
+
+pub async fn find_event_attendance_by_person_and_event(
+    calendar_event_id: i64,
+    person_id: PersonId,
+    pool: &SqlitePool,
+) -> Result<Option<CalendarEventAttendance>, sqlx::Error> {
+    let result = sqlx::query_as!(
+        CalendarEventAttendance,
+        "SELECT id, person_id, calendar_event_id, intention as \"intention: AttendanceIntention\"
+        FROM calendar_event_attendances
+        WHERE person_id = ? AND calendar_event_id = ?",
+        person_id.id,
+        calendar_event_id
+    )
+    .fetch_optional(pool)
+    .await?;
+
+    Ok(result)
 }
 
 pub async fn attendances_for_calendar_events(

@@ -65,7 +65,7 @@ export type AppEvent =
       CalendarEventsEvent: CalendarEventsEvent;
     }
   | {
-      CalenderEventAttendancesEvent: CalendarEventAttendancesEvent;
+      CalendarEventAttendancesEvent: CalendarEventAttendancesEvent;
     };
 
 export interface CalendarEvent {
