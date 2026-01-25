@@ -1,6 +1,6 @@
 use sqlx::SqlitePool;
 
-use crate::shared::entities::{CollectiveId, CrewId, IntervalId, Person, PersonId};
+use crate::shared::entities::{CollectiveId, CrewId, IntervalId, Person, PersonId, UserId};
 
 pub async fn update_person(
     input: Person,
@@ -39,6 +39,26 @@ pub async fn find_person_by_id(
             id = ? AND
             collective_id = ?",
         person_id.id,
+        collective_id.id
+    )
+    .fetch_one(pool)
+    .await
+}
+
+pub async fn find_person_by_user_id(
+    user_id: UserId,
+    collective_id: CollectiveId,
+    pool: &SqlitePool,
+) -> Result<Person, sqlx::Error> {
+    sqlx::query_as!(
+        Person,
+        "
+        SELECT id, collective_id, display_name, about, avatar_id
+        FROM people
+        WHERE
+            user_id = ? AND
+            collective_id = ?",
+        user_id.id,
         collective_id.id
     )
     .fetch_one(pool)

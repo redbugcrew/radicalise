@@ -7,8 +7,10 @@ use utoipa::ToSchema;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
-    auth::auth_backend::AuthSession, calander_event_attendances::repo::upsert_event_attendance,
-    shared::entities::AttendanceIntention,
+    auth::auth_backend::AuthSession,
+    calander_event_attendances::repo::upsert_event_attendance,
+    people::repo::find_person_by_user_id,
+    shared::entities::{AttendanceIntention, UserId},
 };
 
 pub fn router() -> OpenApiRouter {
@@ -35,13 +37,34 @@ async fn create_calendar_event_attendance(
     Extension(pool): Extension<SqlitePool>,
     axum::extract::Json(input): axum::extract::Json<CreateAttendanceRequest>,
 ) -> impl IntoResponse {
-    let user_id = auth_session.user.unwrap().id;
+    let user_id = UserId::new(auth_session.user.unwrap().id);
+
+    let person = match find_person_by_user_id(
+        user_id.clone(),
+        crate::shared::default_collective_id(),
+        &pool,
+    )
+    .await
+    {
+        Ok(person) => person,
+        Err(e) => {
+            println!("error finding person for user_id {:?}: {}", user_id, e);
+            return (StatusCode::INTERNAL_SERVER_ERROR, ());
+        }
+    };
+
     println!(
-        "updating calender event attendance with: intention: {:?}, calendar_event_id:{}, user_id:{}",
-        input.intention, input.calendar_event_id, user_id
+        "updating calender event attendance with: intention: {:?}, calendar_event_id:{}, person_id: {}",
+        input.intention, input.calendar_event_id, person.id
     );
-    let result =
-        upsert_event_attendance(input.calendar_event_id, input.intention, user_id, &pool).await;
+
+    let result = upsert_event_attendance(
+        input.calendar_event_id,
+        input.intention,
+        person.typed_id(),
+        &pool,
+    )
+    .await;
     match result {
         Ok(_) => (StatusCode::OK, ()),
         Err(e) => {
