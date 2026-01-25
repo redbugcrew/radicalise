@@ -1,25 +1,19 @@
-import { Badge, SegmentedControl } from "@mantine/core";
+import { SegmentedControl } from "@mantine/core";
 import { AttendanceIntention } from "../../../api/Api";
 import { useState } from "react";
 
 interface AttendanceSelectorProps {
   intention?: AttendanceIntention | null;
   onChange?: (intention: AttendanceIntention | null) => Promise<void>;
-  readonly?: boolean;
 }
 
 const toTitleCase = (str: string) => {
   return str.replace(/([A-Z])/g, " $1").trim();
 };
 
-export default function AttendanceSelector({ intention, onChange, readonly }: AttendanceSelectorProps) {
+export default function AttendanceSelector({ intention, onChange }: AttendanceSelectorProps) {
   const possibleIntentions = [AttendanceIntention.Going, AttendanceIntention.Uncertain, AttendanceIntention.NotGoing];
   const [loading, setLoading] = useState(false);
-
-  if (readonly) {
-    const label = intention ? toTitleCase(intention) : "No Response";
-    return <Badge color={intention ? "blue" : "gray"}>{label}</Badge>;
-  }
 
   const onSelect = (value: string) => {
     if (!onChange) return;

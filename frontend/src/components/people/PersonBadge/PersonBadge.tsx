@@ -8,9 +8,10 @@ interface PersonBadgeProps {
   me?: boolean;
   highlight?: boolean;
   variant?: "default" | "transparent";
+  textOverride?: string;
 }
 
-export default function PersonBadge({ person, me, highlight, variant = "default" }: PersonBadgeProps) {
+export default function PersonBadge({ person, me, highlight, textOverride, variant = "default" }: PersonBadgeProps) {
   if (!person) {
     return null;
   }
@@ -24,7 +25,7 @@ export default function PersonBadge({ person, me, highlight, variant = "default"
     <Group gap="xs" className={groupClasses.join(" ")}>
       <Avatar avatarId={person.avatar_id ?? person.id} />
       <Text fz="sm" fw={500}>
-        {person.display_name}
+        {textOverride ?? person.display_name}
       </Text>
     </Group>
   );

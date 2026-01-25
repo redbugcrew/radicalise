@@ -1,5 +1,6 @@
 import { getApi } from "../../../api";
 import type { AttendanceIntention, CalendarEvent } from "../../../api/Api";
+import { PersonBadge } from "../../../components";
 import { handleAppEvents, useAppSelector } from "../../../store";
 import AttendanceSelector from "./AttendanceSelector";
 
@@ -9,7 +10,15 @@ interface MyAttendanceSelectorProps {
 }
 
 export default function MyAttendance({ event, readonly }: MyAttendanceSelectorProps) {
-  const currentPersonId = useAppSelector((state) => state.me?.person_id);
+  const currentPerson = useAppSelector((state) => state.me?.person_id && state.people[state.me?.person_id]);
+
+  if (!currentPerson) return null;
+
+  const intention = intentionForEvent(currentPerson.id, event);
+
+  if (readonly) {
+    return <PersonBadge person={currentPerson} textOverride={intention ? intention : "No Response"} />;
+  }
 
   const onIntentionChange = async (eventId: number, intention: AttendanceIntention | null): Promise<void> => {
     console.log(`Event ID: ${eventId}, New Intention: ${intention}`);
@@ -27,15 +36,12 @@ export default function MyAttendance({ event, readonly }: MyAttendanceSelectorPr
       });
   };
 
-  let myIntention = undefined;
-  if (currentPersonId !== undefined) {
-    myIntention = {
-      intention: intentionForEvent(currentPersonId, event),
-      onChange: (intention: AttendanceIntention | null) => onIntentionChange(event.id, intention),
-    };
-  }
+  let myIntention = {
+    intention: intention,
+    onChange: (intention: AttendanceIntention | null) => onIntentionChange(event.id, intention),
+  };
 
-  return <AttendanceSelector {...myIntention} readonly={readonly} />;
+  return <AttendanceSelector {...myIntention} />;
 }
 
 function intentionForEvent(personId: number, event: CalendarEvent): AttendanceIntention | null | undefined {
