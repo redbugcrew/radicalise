@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO calendar_event_attendances (person_id, calendar_event_id, intention)\n        VALUES (?, ?, ?)\n        ON CONFLICT(person_id, calendar_event_id) DO UPDATE SET\n            intention = excluded.intention",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "bc84fd0a5f428e686ecd277dd3526d42b287c74c9c3027a20ee63f02ea54e4f5"
+}

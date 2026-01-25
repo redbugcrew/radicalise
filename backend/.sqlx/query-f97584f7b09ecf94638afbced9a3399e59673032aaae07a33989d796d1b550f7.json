@@ -1,0 +1,38 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id, person_id, calendar_event_id, intention as \"intention: AttendanceIntention\"\n        FROM calendar_event_attendances\n        WHERE person_id = ? AND calendar_event_id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer"
+      },
+      {
+        "name": "person_id",
+        "ordinal": 1,
+        "type_info": "Integer"
+      },
+      {
+        "name": "calendar_event_id",
+        "ordinal": 2,
+        "type_info": "Integer"
+      },
+      {
+        "name": "intention: AttendanceIntention",
+        "ordinal": 3,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "f97584f7b09ecf94638afbced9a3399e59673032aaae07a33989d796d1b550f7"
+}
