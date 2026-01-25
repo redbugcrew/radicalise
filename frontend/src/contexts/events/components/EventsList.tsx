@@ -2,6 +2,7 @@ import { Stack } from "@mantine/core";
 import type { AttendanceIntention, CalendarEvent } from "../../../api/Api";
 import EventCard from "./EventCard/EventCard";
 import { getApi } from "../../../api";
+import { handleAppEvents } from "../../../store";
 
 interface EventsListProps {
   events: CalendarEvent[];
@@ -16,6 +17,9 @@ export default function EventsList({ events, currentPersonId }: EventsListProps)
       .api.createCalendarEventAttendance({
         calendar_event_id: eventId,
         intention: intention,
+      })
+      .then((response) => {
+        handleAppEvents(response.data);
       })
       .catch((error) => {
         console.error("Failed to update attendance intention:", error);

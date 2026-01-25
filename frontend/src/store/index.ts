@@ -7,11 +7,11 @@ import involvementsReducer, { involvementsLoaded, intervalDataChanged } from "./
 import crewsReducer, { crewsLoaded, crewUpdated } from "./crews";
 import entryPathwaysReducer, { entryPathwaysLoaded, entryPathwayUpdated } from "./entry_pathways";
 import eventTemplatesReducer, { eventTemplatesLoaded, eventTemplateUpdated } from "./event_templates";
-import eventsReducer, { eventsLoaded, eventUpdated } from "./events";
+import eventsReducer, { eventsLoaded, eventUpdated, singleAttendanceUpdate } from "./events";
 import meReducer, { meLoaded } from "./me";
 import { getApi } from "../api";
 import { redirect } from "react-router-dom";
-import type { AppEvent, CalendarEventsEvent, CollectiveEvent, CrewsEvent, EntryPathwayEvent, EventTemplatesEvent, IntervalsEvent, MeEvent, PeopleEvent } from "../api/Api";
+import type { AppEvent, CalendarEventAttendancesEvent, CalendarEventsEvent, CollectiveEvent, CrewsEvent, EntryPathwayEvent, EventTemplatesEvent, IntervalsEvent, MeEvent, PeopleEvent } from "../api/Api";
 
 const store = configureStore({
   reducer: {
@@ -144,6 +144,12 @@ export async function handleEventsEvent(event: CalendarEventsEvent) {
   }
 }
 
+export async function handleCalendarEventAttendancesEvent(event: CalendarEventAttendancesEvent) {
+  if (event.CalendarEventAttendanceUpdated) {
+    store.dispatch(singleAttendanceUpdate(event.CalendarEventAttendanceUpdated));
+  }
+}
+
 export async function handleAppEvent(event: AppEvent) {
   console.log("Handling AppEvent:", event);
 
@@ -163,6 +169,8 @@ export async function handleAppEvent(event: AppEvent) {
     handleEventTemplatesEvent(event.EventTemplatesEvent);
   } else if ("CalendarEventsEvent" in event && event.CalendarEventsEvent) {
     handleEventsEvent(event.CalendarEventsEvent);
+  } else if ("CalendarEventAttendancesEvent" in event && event.CalendarEventAttendancesEvent) {
+    handleCalendarEventAttendancesEvent(event.CalendarEventAttendancesEvent);
   } else {
     console.warn("Unknown event type:", event);
   }

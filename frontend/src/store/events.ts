@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { CalendarEvent } from "../api/Api";
+import type { CalendarEvent, CalendarEventAttendance } from "../api/Api";
 
 export type EventsState = CalendarEvent[];
 
@@ -18,12 +18,29 @@ const eventsSlice = createSlice({
         state.push(action.payload);
       }
     },
+    singleAttendanceUpdate: (state: EventsState, action: PayloadAction<CalendarEventAttendance>) => {
+      const eventIndex = state.findIndex((event) => event.id === action.payload.calendar_event_id);
+
+      if (eventIndex === -1) {
+        console.warn("Updating attendance for event that doesn't exist:", action.payload.calendar_event_id);
+      } else {
+        const event = state[eventIndex];
+        event.attendances = [];
+        const attendanceIndex = event.attendances.findIndex((attendance) => attendance.id === action.payload.id);
+
+        if (attendanceIndex === -1) {
+          event.attendances.push(action.payload);
+        } else {
+          event.attendances[attendanceIndex] = action.payload;
+        }
+      }
+    },
   },
 });
 
 // `createSlice` automatically generated action creators with these names.
 // export them as named exports from this "slice" file
-export const { eventsLoaded, eventUpdated } = eventsSlice.actions;
+export const { eventsLoaded, eventUpdated, singleAttendanceUpdate } = eventsSlice.actions;
 
 // Export the slice reducer as the default export
 export default eventsSlice.reducer;
