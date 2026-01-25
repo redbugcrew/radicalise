@@ -11,6 +11,9 @@ pub enum AppEvent {
     EntryPathwayEvent(crate::entry_pathways::events::EntryPathwayEvent),
     EventTemplatesEvent(crate::event_templates::events::EventTemplatesEvent),
     CalendarEventsEvent(crate::calendar_events::events::CalendarEventsEvent),
+    CalenderEventAttendancesEvent(
+        crate::calendar_event_attendances::events::CalendarEventAttendancesEvent,
+    ),
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]

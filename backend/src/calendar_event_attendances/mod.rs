@@ -1,3 +1,4 @@
+pub mod events;
 pub mod repo;
 
 use axum::{Extension, http::StatusCode, response::IntoResponse};
@@ -8,7 +9,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     auth::auth_backend::AuthSession,
-    calander_event_attendances::repo::upsert_event_attendance,
+    calendar_event_attendances::repo::upsert_event_attendance,
     people::repo::find_person_by_user_id,
     shared::entities::{AttendanceIntention, UserId},
 };

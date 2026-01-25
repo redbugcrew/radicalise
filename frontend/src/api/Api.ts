@@ -63,6 +63,9 @@ export type AppEvent =
     }
   | {
       CalendarEventsEvent: CalendarEventsEvent;
+    }
+  | {
+      CalenderEventAttendancesEvent: CalendarEventAttendancesEvent;
     };
 
 export interface CalendarEvent {
@@ -86,6 +89,10 @@ export interface CalendarEventAttendance {
   /** @format int64 */
   person_id: number;
 }
+
+export type CalendarEventAttendancesEvent = {
+  CalendarEventAttendanceUpdated: CalendarEventAttendance;
+};
 
 export type CalendarEventsEvent = {
   CalendarEventUpdated: CalendarEvent;

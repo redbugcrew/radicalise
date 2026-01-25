@@ -10,7 +10,10 @@ pub fn private_api_router() -> OpenApiRouter {
         .nest("/dev", crate::dev::router())
         .nest("/event_templates", crate::event_templates::router())
         .nest("/calendar_events", crate::calendar_events::router())
-        .nest("/calendar_event_attendances", crate::calander_event_attendances::router())
+        .nest(
+            "/calendar_event_attendances",
+            crate::calendar_event_attendances::router(),
+        )
 }
 
 pub fn public_api_router() -> OpenApiRouter {

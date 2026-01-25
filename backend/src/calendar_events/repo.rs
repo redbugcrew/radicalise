@@ -1,7 +1,7 @@
 use sqlx::SqlitePool;
 
 use crate::{
-    calander_event_attendances::repo::{
+    calendar_event_attendances::repo::{
         attendances_for_calendar_events, hash_attendances_by_event,
     },
     shared::{

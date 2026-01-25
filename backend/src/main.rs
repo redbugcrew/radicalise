@@ -26,10 +26,11 @@ use crate::{
 
 mod api;
 mod auth;
+mod calendar_event_attendances;
+mod calendar_events;
 mod crews;
 mod database;
 mod dev;
-mod calendar_events;
 mod entry_pathways;
 mod event_templates;
 mod intervals;
@@ -40,7 +41,6 @@ mod public;
 mod realtime;
 mod shared;
 mod static_server;
-mod calander_event_attendances;
 
 #[macro_use]
 extern crate lazy_static;
