@@ -1,8 +1,13 @@
 use sqlx::SqlitePool;
 
-use crate::shared::{
-    entities::{CalendarEvent, CollectiveId},
-    links_repo::{find_all_links_for_owner_type, hash_links_by_owner, update_links_for_owner},
+use crate::{
+    calander_event_attendances::repo::{
+        attendances_for_calendar_events, hash_attendances_by_event,
+    },
+    shared::{
+        entities::{CalendarEvent, CollectiveId},
+        links_repo::{find_all_links_for_owner_type, hash_links_by_owner, update_links_for_owner},
+    },
 };
 
 pub async fn insert_calendar_event_with_links(
@@ -46,6 +51,25 @@ pub struct CalendarEventRow {
     pub name: String,
     pub start_at: String,
     pub end_at: Option<String>,
+}
+
+pub async fn list_calendar_events_with_attendances(
+    collective_id: CollectiveId,
+    pool: &SqlitePool,
+) -> Result<Vec<CalendarEvent>, sqlx::Error> {
+    let without_attendances = list_calendar_events(collective_id.clone(), pool).await?;
+    let attendances = attendances_for_calendar_events(&without_attendances, pool).await?;
+    let attendances_hash = hash_attendances_by_event(attendances);
+
+    let with_attendances = without_attendances
+        .into_iter()
+        .map(|event| CalendarEvent {
+            attendances: attendances_hash.get(&event.id).cloned().or_else(|| None),
+            ..event
+        })
+        .collect::<Vec<CalendarEvent>>();
+
+    Ok(with_attendances)
 }
 
 pub async fn list_calendar_events(

@@ -3,7 +3,7 @@ use sqlx::SqlitePool;
 use utoipa::ToSchema;
 
 use crate::{
-    calendar_events::repo::list_calendar_events,
+    calendar_events::repo::list_calendar_events_with_attendances,
     crews::repo::find_all_crews_with_links,
     entry_pathways::repo::find_all_entry_pathways_for_collective,
     event_templates::repo::find_all_event_templates,
@@ -171,7 +171,8 @@ pub async fn find_initial_data_for_collective(
     let entry_pathways =
         find_all_entry_pathways_for_collective(collective.typed_id(), pool).await?;
     let event_templates = find_all_event_templates(collective.typed_id(), pool).await?;
-    let calendar_events = list_calendar_events(collective.typed_id(), pool).await?;
+    let calendar_events =
+        list_calendar_events_with_attendances(collective.typed_id(), pool).await?;
 
     Ok(InitialData {
         collective,
