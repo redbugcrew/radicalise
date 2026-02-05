@@ -373,7 +373,6 @@ export interface ApiConfig<SecurityDataType = unknown>
 
 export enum ContentType {
   Json = "application/json",
-  JsonApi = "application/vnd.api+json",
   FormData = "multipart/form-data",
   UrlEncoded = "application/x-www-form-urlencoded",
   Text = "text/plain",
@@ -570,7 +569,7 @@ export class Api<
       data: CreateAttendanceRequest,
       params: RequestParams = {},
     ) =>
-      this.request<any, any>({
+      this.request<AppEvent[], any>({
         path: `/api/calendar_event_attendances`,
         method: "POST",
         body: data,
