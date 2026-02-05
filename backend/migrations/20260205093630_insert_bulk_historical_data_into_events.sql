@@ -79,3 +79,8 @@ INSERT INTO calendar_events
 VALUES
 (16, 1, 'Assembly 16', '2026-01-18 16:00:00', '2026-01-18 18:00:00', 1);
 
+INSERT INTO calendar_events
+(id, event_template_id, name, start_at, end_at, collective_id)
+VALUES
+(17, 2, 'Retreat 1', '2025-10-09 16:00:00', '2025-10-12 14:00:00', 1);
+
