@@ -19,3 +19,4 @@ export { default as Markdown } from "./Markdown";
 export { default as EntryPathwaysTable } from "./entry_pathways/EntryPathwaysTable";
 export { default as DateText } from "./DateText";
 export { default as TimeRangeText } from "./TimeRangeText";
+export { default as NoData } from "./NoData";
