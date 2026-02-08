@@ -373,6 +373,7 @@ export interface ApiConfig<SecurityDataType = unknown>
 
 export enum ContentType {
   Json = "application/json",
+  JsonApi = "application/vnd.api+json",
   FormData = "multipart/form-data",
   UrlEncoded = "application/x-www-form-urlencoded",
   Text = "text/plain",
@@ -506,7 +507,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 1.2.8
+ * @version 1.3.0
  * @license
  */
 export class Api<
