@@ -39,7 +39,9 @@ pub async fn find_event_attendance_by_person_and_event(
 ) -> Result<Option<CalendarEventAttendance>, sqlx::Error> {
     let result = sqlx::query_as!(
         CalendarEventAttendance,
-        "SELECT id, person_id, calendar_event_id, intention as \"intention: AttendanceIntention\"
+        "SELECT
+            id, person_id, calendar_event_id, intention as \"intention: AttendanceIntention\",
+            actual
         FROM calendar_event_attendances
         WHERE person_id = ? AND calendar_event_id = ?",
         person_id.id,
@@ -58,7 +60,9 @@ pub async fn attendances_for_calendar_events(
     let event_ids: Vec<i64> = events.iter().map(|e| e.id).collect();
 
     let mut query_builder: QueryBuilder<Sqlite> = QueryBuilder::new(
-        "SELECT id, person_id, calendar_event_id, intention
+        "SELECT
+            id, person_id, calendar_event_id,
+            intention, actual
         FROM calendar_event_attendances
         WHERE
         calendar_event_id IN (",
@@ -78,6 +82,7 @@ pub async fn attendances_for_calendar_events(
             person_id: row.get::<i64, _>("person_id"),
             calendar_event_id: row.get::<i64, _>("calendar_event_id"),
             intention: row.get::<Option<AttendanceIntention>, _>("intention"),
+            actual: row.get::<Option<bool>, _>("actual"),
         })
         .collect::<Vec<CalendarEventAttendance>>();
 

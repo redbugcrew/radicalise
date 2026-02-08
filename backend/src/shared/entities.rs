@@ -353,4 +353,5 @@ pub struct CalendarEventAttendance {
     pub person_id: i64,
     pub calendar_event_id: i64,
     pub intention: Option<AttendanceIntention>,
+    pub actual: Option<bool>,
 }

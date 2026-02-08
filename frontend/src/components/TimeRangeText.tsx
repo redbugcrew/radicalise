@@ -4,10 +4,11 @@ import { format, isThisYear, isSameYear, isSameDay } from "date-fns";
 interface FormatDateStringProps {
   displayDate?: boolean;
   displayYear?: boolean;
+  displayTime?: boolean;
   displayMinutes?: boolean;
 }
 
-function formatDateString({ displayDate, displayYear, displayMinutes }: FormatDateStringProps): string {
+function formatDateString({ displayDate, displayYear, displayTime, displayMinutes }: FormatDateStringProps): string {
   let datePart = "";
   if (displayDate) {
     datePart += "MMM d";
@@ -15,6 +16,8 @@ function formatDateString({ displayDate, displayYear, displayMinutes }: FormatDa
       datePart += " yyy";
     }
   }
+
+  if (!displayTime) return datePart;
 
   let timePart = "h";
   if (displayMinutes) {
@@ -40,6 +43,7 @@ export default function TimeRangeText({ startAt, endAt }: TimeRangeTextProps) {
     endAtProps = {
       displayDate: !isSameDay(startAt, endAt),
       displayYear: !isThisYear(endAt),
+      displayTime: true,
     };
   }
 
@@ -47,6 +51,7 @@ export default function TimeRangeText({ startAt, endAt }: TimeRangeTextProps) {
 
   const startAtProps = {
     displayDate: true,
+    displayTime: true,
     displayYear: !isThisYear(startAt) && !(endYearDisplayed && isSameYear(startAt, endAt)),
   };
 
@@ -55,4 +60,8 @@ export default function TimeRangeText({ startAt, endAt }: TimeRangeTextProps) {
       <Text span>{format(startAt, formatDateString(startAtProps))}</Text> <Text span>-</Text> {endAt && <Text span>{format(endAt, formatDateString(endAtProps))}</Text>}
     </Text>
   );
+}
+
+export function DateText({ date }: { date: string }) {
+  return <Text>{format(date, formatDateString({ displayDate: true, displayYear: true, displayTime: false }))}</Text>;
 }

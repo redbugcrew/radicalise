@@ -1,6 +1,6 @@
 export { default as Anchor } from "./Anchor";
 export { default as NavLink } from "./NavLink";
-export { default as PeopleTable } from "./people/PeopleTable/PeopleTable";
+export { default as PeopleTable } from "./people/PeopleTable";
 export { default as PersonBadge } from "./people/PersonBadge/PersonBadge";
 export { default as PersonForm } from "./people/PersonForm";
 export { default as CrewParticipationsInput } from "./CrewParticipationsInput/CrewParticipationsInput";
@@ -19,3 +19,4 @@ export { default as Markdown } from "./Markdown";
 export { default as EntryPathwaysTable } from "./entry_pathways/EntryPathwaysTable";
 export { default as DateText } from "./DateText";
 export { default as TimeRangeText } from "./TimeRangeText";
+export { default as NoData } from "./NoData";
