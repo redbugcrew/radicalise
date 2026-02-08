@@ -1,10 +1,9 @@
-import { Badge, Group, Table, Text, TextInput, Stack } from "@mantine/core";
+import { Badge, Group, Table, Text, Stack } from "@mantine/core";
 import { Anchor } from "..";
-import { IconSearch } from "@tabler/icons-react";
 import { useState } from "react";
 import CapacityScoreIcon from "../CapacityScoreIcon";
 import Avatar from "./Avatar";
-import { SortableTh, sortData, Th } from "../SortableTable/SortableTable";
+import { SearchField, SortableTh, sortData, Th } from "../SortableTable/SortableTable";
 
 interface Crew {
   id: number;
@@ -21,9 +20,8 @@ export interface PeopleTableRow {
   crews: Crew[];
 }
 
-function matchesFilter(item: PeopleTableRow, query: string): boolean {
-  const lowerQuery = query.toLowerCase();
-  return item.name.toLowerCase().includes(lowerQuery) || item.crews.some((crew) => crew.name.toLowerCase().includes(lowerQuery));
+function matchesFilter(item: PeopleTableRow, lowerCaseQuery: string): boolean {
+  return item.name.toLowerCase().includes(lowerCaseQuery) || item.crews.some((crew) => crew.name.toLowerCase().includes(lowerCaseQuery));
 }
 
 const crewColours: Record<number, string> = {
@@ -83,8 +81,7 @@ export default function PeopleTable({ people, intervalId }: PeopleTableProps) {
     setSortedData(sortData(people, { sortBy: field, reversed, search }, matchesFilter));
   };
 
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { value } = event.currentTarget;
+  const handleSearchChange = (value: string) => {
     setSearch(value);
     setSortedData(sortData(people, { sortBy, reversed: reverseSortDirection, search: value }, matchesFilter));
   };
@@ -114,7 +111,7 @@ export default function PeopleTable({ people, intervalId }: PeopleTableProps) {
 
   return (
     <Stack align="stretch">
-      <TextInput placeholder="Search by any field" leftSection={<IconSearch size={16} stroke={1.5} />} value={search} onChange={handleSearchChange} />
+      <SearchField value={search} onSearchChange={handleSearchChange} />
       <Table verticalSpacing="sm">
         <Table.Thead>
           <Table.Tr>

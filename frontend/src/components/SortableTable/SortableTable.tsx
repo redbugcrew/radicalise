@@ -1,5 +1,5 @@
-import { Center, Group, Table, Text, UnstyledButton } from "@mantine/core";
-import { IconChevronDown, IconChevronUp, IconSelector } from "@tabler/icons-react";
+import { Center, Group, Table, Text, TextInput, UnstyledButton } from "@mantine/core";
+import { IconChevronDown, IconChevronUp, IconSearch, IconSelector } from "@tabler/icons-react";
 import classes from "./SortableTable.module.css";
 import { compareAsc } from "date-fns";
 
@@ -100,4 +100,18 @@ function compareValues(a: ComparableType, b: ComparableType, type_override?: Typ
   }
 
   return 0;
+}
+
+interface SearchFieldProps {
+  value: string;
+  placeholder?: string;
+  onSearchChange: (value: string) => void;
+}
+
+export function SearchField({ value, placeholder, onSearchChange }: SearchFieldProps) {
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    onSearchChange(event.currentTarget.value);
+  };
+
+  return <TextInput placeholder={placeholder ?? "Search by any field"} leftSection={<IconSearch size={16} stroke={1.5} />} value={value} onChange={handleSearchChange} />;
 }

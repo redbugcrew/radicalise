@@ -3,11 +3,16 @@ import { IconLayoutList, IconPlus, IconTable } from "@tabler/icons-react";
 import { Anchor } from "../../../../components";
 import { Outlet, useNavigate, useParams } from "react-router-dom";
 
+type TabId = "upcoming" | "all";
+
 export default function Events() {
   const tabIconSize = 18;
 
   const navigate = useNavigate();
   const { tabValue } = useParams();
+  const tab: TabId = (tabValue as TabId) || "upcoming";
+
+  console.log("tab is: ", tab);
 
   return (
     <Stack>
@@ -19,7 +24,7 @@ export default function Events() {
           </ActionIcon>
         </Anchor>
       </Group>
-      <Tabs value={tabValue} onChange={(value) => navigate(tabPath(value))}>
+      <Tabs value={tab} onChange={(value) => navigate(tabPath(tabValueFromString(value)))}>
         <Tabs.List>
           <Tabs.Tab value="upcoming" leftSection={<IconLayoutList size={tabIconSize} />}>
             Upcoming
@@ -35,12 +40,22 @@ export default function Events() {
   );
 }
 
-const tabPath = (tabValue: string | null) => {
-  if (!tabValue) tabValue = "upcoming";
+function tabValueFromString(value: string | undefined | null): TabId {
+  switch (value) {
+    case "all":
+      return "all";
+    case "upcoming":
+      return "upcoming";
+    default:
+      console.warn(`Unknown tab value: ${value}, defaulting to upcoming`);
+      return "upcoming";
+  }
+}
 
+const tabPath = (tabValue: TabId) => {
   switch (tabValue) {
     case "all":
-      return "/events/all";
+      return "/events/list/all";
     default:
       return "/events";
   }

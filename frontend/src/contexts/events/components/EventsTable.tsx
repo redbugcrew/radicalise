@@ -1,18 +1,19 @@
-import { Table, Text } from "@mantine/core";
+import { Stack, Table, Text } from "@mantine/core";
 import { AttendanceIntention, type CalendarEvent, type CalendarEventAttendance } from "../../../api/Api";
 import { Anchor, NoData } from "../../../components";
 import type React from "react";
 import { DateText } from "../../../components/TimeRangeText";
 import { useState } from "react";
-import { SortableTh, sortData } from "../../../components/SortableTable/SortableTable";
+import { SearchField, SortableTh, sortData } from "../../../components/SortableTable/SortableTable";
+import { format } from "date-fns";
 
 interface EventsTableProps {
   events: CalendarEvent[];
   noDataMessage?: React.ReactNode;
 }
 
-function matchesFilter(_item: CalendarEvent, _query: string): boolean {
-  return true;
+function matchesFilter(item: CalendarEvent, lowerCaseQuery: string): boolean {
+  return item.name.toLowerCase().includes(lowerCaseQuery) || searchableDateString(item.start_at).includes(lowerCaseQuery);
 }
 
 export default function EventsTable({ events, noDataMessage }: EventsTableProps) {
@@ -20,6 +21,7 @@ export default function EventsTable({ events, noDataMessage }: EventsTableProps)
     return <NoData>{noDataMessage || "No events found"}</NoData>;
   }
 
+  const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<keyof CalendarEvent>("start_at");
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
 
@@ -29,44 +31,58 @@ export default function EventsTable({ events, noDataMessage }: EventsTableProps)
     setSortBy(field);
   };
 
-  // let sortedEvents = sortEventsByStartDate(events);
-  let sortedEvents = sortData<CalendarEvent>(events, { sortBy: sortBy, reversed: reverseSortDirection, type_override: sortBy === "start_at" ? "string-date" : undefined, search: "" }, matchesFilter);
+  let sortedEvents = sortData<CalendarEvent>(events, { sortBy: sortBy, reversed: reverseSortDirection, type_override: sortBy === "start_at" ? "string-date" : undefined, search: search }, matchesFilter);
 
   return (
-    <Table>
-      <Table.Thead>
-        <Table.Tr>
-          <SortableTh sorted={sortBy == "start_at"} reversed={reverseSortDirection} onSort={() => setSorting("start_at")}>
-            Date
-          </SortableTh>
-          <SortableTh sorted={sortBy == "name"} reversed={reverseSortDirection} onSort={() => setSorting("name")}>
-            Name
-          </SortableTh>
-          <Table.Th>
-            <Text visibleFrom="sm">Going</Text>
-            <Text hiddenFrom="sm">Go</Text>
-          </Table.Th>
-          <Table.Th>
-            <Text visibleFrom="sm">Attended</Text>
-            <Text hiddenFrom="sm">At</Text>
-          </Table.Th>
-        </Table.Tr>
-      </Table.Thead>
-      <Table.Tbody>
-        {sortedEvents.map((event) => (
-          <Table.Tr key={event.id}>
-            <Table.Td>
-              <DateText date={event.start_at} />
-            </Table.Td>
-            <Table.Td>
-              <Anchor href={`/events/${event.id}`}>{event.name}</Anchor>
-            </Table.Td>
-            <Table.Td>{countGoingIntentions(event.attendances)}</Table.Td>
-            <Table.Td>{countAttended(event.attendances)}</Table.Td>
+    <Stack align="stretch">
+      <SearchField value={search} onSearchChange={setSearch} />
+      <Table>
+        <Table.Thead>
+          <Table.Tr>
+            <SortableTh sorted={sortBy == "start_at"} reversed={reverseSortDirection} onSort={() => setSorting("start_at")}>
+              Date
+            </SortableTh>
+            <SortableTh sorted={sortBy == "name"} reversed={reverseSortDirection} onSort={() => setSorting("name")}>
+              Name
+            </SortableTh>
+            <Table.Th ta="right">
+              <Text visibleFrom="sm" span ta="right">
+                Going
+              </Text>
+              <Text hiddenFrom="sm" span ta="right">
+                Go
+              </Text>
+            </Table.Th>
+            <Table.Th ta="right">
+              <Text visibleFrom="sm" span ta="right">
+                Attended
+              </Text>
+              <Text hiddenFrom="sm" span ta="right">
+                At
+              </Text>
+            </Table.Th>
           </Table.Tr>
-        ))}
-      </Table.Tbody>
-    </Table>
+        </Table.Thead>
+        <Table.Tbody>
+          {sortedEvents.map((event) => (
+            <Table.Tr key={event.id}>
+              <Table.Td maw="10em">
+                <DateText date={event.start_at} />
+              </Table.Td>
+              <Table.Td>
+                <Anchor href={`/events/${event.id}`}>{event.name}</Anchor>
+              </Table.Td>
+              <Table.Td maw="5em" align="right">
+                {countGoingIntentions(event.attendances)}
+              </Table.Td>
+              <Table.Td maw="5em" align="right">
+                {countAttended(event.attendances)}
+              </Table.Td>
+            </Table.Tr>
+          ))}
+        </Table.Tbody>
+      </Table>
+    </Stack>
   );
 }
 
@@ -78,4 +94,8 @@ function countGoingIntentions(attendances: CalendarEventAttendance[] | undefined
 function countAttended(attendances: CalendarEventAttendance[] | undefined | null): number {
   if (!attendances) return 0;
   return attendances.filter((attendance) => attendance.actual === true).length;
+}
+
+function searchableDateString(date: string): string {
+  return format(date, "MMMM d, yyyy").toLowerCase();
 }

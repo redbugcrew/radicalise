@@ -116,7 +116,7 @@ const router = createBrowserRouter([
             element: <Events />,
             children: [
               { path: "", element: <UpcomingEvents /> },
-              { path: "all", element: <AllEvents /> },
+              { path: "list/:tabValue", element: <AllEvents /> },
             ],
           },
           { path: "new", element: <NewEvent /> },
