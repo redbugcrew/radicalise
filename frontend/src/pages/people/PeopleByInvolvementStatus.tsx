@@ -5,7 +5,7 @@ import { useAppSelector } from "../../store";
 import { capitalCase } from "change-case";
 import { useEffect, useState } from "react";
 import type { PeopleState } from "../../store/people";
-import type { PeopleTableRow } from "../../components/people/PeopleTable/PeopleTable";
+import type { PeopleTableRow } from "../../components/people/PeopleTable";
 import type { CrewsState } from "../../store/crews";
 import { hashByPerson, hashByStatus, type HashById } from "../../utilities/hashing";
 

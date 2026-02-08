@@ -1,17 +1,13 @@
-import { Badge, Center, Group, Table, Text, TextInput, UnstyledButton, Stack } from "@mantine/core";
-import { Anchor } from "../..";
-import { IconChevronDown, IconChevronUp, IconSearch, IconSelector } from "@tabler/icons-react";
+import { Badge, Group, Table, Text, TextInput, Stack } from "@mantine/core";
+import { Anchor } from "..";
+import { IconSearch } from "@tabler/icons-react";
 import { useState } from "react";
-import classes from "./PeopleTable.module.css";
-import CapacityScoreIcon from "../../CapacityScoreIcon";
-import Avatar from "../Avatar";
+import CapacityScoreIcon from "../CapacityScoreIcon";
+import Avatar from "./Avatar";
+import { SortableTh, sortData, Th } from "../SortableTable/SortableTable";
 
 interface Crew {
   id: number;
-  name: string;
-}
-
-interface SortableRowData {
   name: string;
 }
 
@@ -25,33 +21,9 @@ export interface PeopleTableRow {
   crews: Crew[];
 }
 
-function matchesFilter(item: PeopleTableRow, query: string) {
+function matchesFilter(item: PeopleTableRow, query: string): boolean {
   const lowerQuery = query.toLowerCase();
   return item.name.toLowerCase().includes(lowerQuery) || item.crews.some((crew) => crew.name.toLowerCase().includes(lowerQuery));
-}
-
-function filterData(data: PeopleTableRow[], search: string) {
-  const query = search.toLowerCase().trim();
-  return data.filter((item) => matchesFilter(item, query));
-}
-
-function sortData(data: PeopleTableRow[], payload: { sortBy: keyof SortableRowData | null; reversed: boolean; search: string }) {
-  const { sortBy } = payload;
-
-  if (!sortBy) {
-    return filterData(data, payload.search);
-  }
-
-  return filterData(
-    [...data].sort((a, b) => {
-      if (payload.reversed) {
-        return b[sortBy].localeCompare(a[sortBy]);
-      }
-
-      return a[sortBy].localeCompare(b[sortBy]);
-    }),
-    payload.search
-  );
 }
 
 const crewColours: Record<number, string> = {
@@ -60,45 +32,6 @@ const crewColours: Record<number, string> = {
   4: "pink",
   5: "green",
 };
-
-interface SortableThProps {
-  children: React.ReactNode;
-  reversed: boolean;
-  sorted: boolean;
-  onSort: () => void;
-}
-
-function SortableTh({ children, reversed, sorted, onSort }: SortableThProps) {
-  const Icon = sorted ? (reversed ? IconChevronUp : IconChevronDown) : IconSelector;
-  return (
-    <Table.Th className={classes.th}>
-      <UnstyledButton onClick={onSort} className={classes.control}>
-        <Group justify="space-between">
-          <Text fw={500} fz="sm">
-            {children}
-          </Text>
-          <Center className={classes.icon}>
-            <Icon size={16} stroke={1.5} />
-          </Center>
-        </Group>
-      </UnstyledButton>
-    </Table.Th>
-  );
-}
-
-interface ThProps {
-  children: React.ReactNode;
-}
-
-function Th({ children }: ThProps) {
-  return (
-    <Table.Th className={classes.th}>
-      <Text fw={500} fz="sm">
-        {children}
-      </Text>
-    </Table.Th>
-  );
-}
 
 interface PersonLinkWithCapacityProps {
   personId: number;
@@ -116,7 +49,7 @@ function PersonLinkWithCapacity({ personId, personName, avatarId, capacityScore,
   }
 
   return (
-    <Anchor href={link} className={classes.personLink}>
+    <Anchor href={link}>
       <Group gap="sm" wrap="nowrap">
         <Avatar avatarId={avatarId} />
         <Text fz="sm" fw={500} c={dimmed ? "dimmed" : "default"}>
@@ -126,6 +59,10 @@ function PersonLinkWithCapacity({ personId, personName, avatarId, capacityScore,
       </Group>
     </Anchor>
   );
+}
+
+export interface SortableRowData {
+  name: string;
 }
 
 interface PeopleTableProps {
@@ -143,13 +80,13 @@ export default function PeopleTable({ people, intervalId }: PeopleTableProps) {
     const reversed = field === sortBy ? !reverseSortDirection : false;
     setReverseSortDirection(reversed);
     setSortBy(field);
-    setSortedData(sortData(people, { sortBy: field, reversed, search }));
+    setSortedData(sortData(people, { sortBy: field, reversed, search }, matchesFilter));
   };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = event.currentTarget;
     setSearch(value);
-    setSortedData(sortData(people, { sortBy, reversed: reverseSortDirection, search: value }));
+    setSortedData(sortData(people, { sortBy, reversed: reverseSortDirection, search: value }, matchesFilter));
   };
 
   const rows = sortedData.map((item) => (

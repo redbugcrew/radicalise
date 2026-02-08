@@ -2,12 +2,17 @@ import { Table, Text } from "@mantine/core";
 import { AttendanceIntention, type CalendarEvent, type CalendarEventAttendance } from "../../../api/Api";
 import { Anchor, NoData } from "../../../components";
 import type React from "react";
-import { compareAsc } from "date-fns";
 import { DateText } from "../../../components/TimeRangeText";
+import { useState } from "react";
+import { SortableTh, sortData } from "../../../components/SortableTable/SortableTable";
 
 interface EventsTableProps {
   events: CalendarEvent[];
   noDataMessage?: React.ReactNode;
+}
+
+function matchesFilter(_item: CalendarEvent, _query: string): boolean {
+  return true;
 }
 
 export default function EventsTable({ events, noDataMessage }: EventsTableProps) {
@@ -15,14 +20,28 @@ export default function EventsTable({ events, noDataMessage }: EventsTableProps)
     return <NoData>{noDataMessage || "No events found"}</NoData>;
   }
 
-  let sortedEvents = sortEventsByStartDate(events);
+  const [sortBy, setSortBy] = useState<keyof CalendarEvent>("start_at");
+  const [reverseSortDirection, setReverseSortDirection] = useState(false);
+
+  const setSorting = (field: keyof CalendarEvent) => {
+    const reversed = field === sortBy ? !reverseSortDirection : false;
+    setReverseSortDirection(reversed);
+    setSortBy(field);
+  };
+
+  // let sortedEvents = sortEventsByStartDate(events);
+  let sortedEvents = sortData<CalendarEvent>(events, { sortBy: sortBy, reversed: reverseSortDirection, type_override: sortBy === "start_at" ? "string-date" : undefined, search: "" }, matchesFilter);
 
   return (
     <Table>
       <Table.Thead>
         <Table.Tr>
-          <Table.Th>Date</Table.Th>
-          <Table.Th>Name</Table.Th>
+          <SortableTh sorted={sortBy == "start_at"} reversed={reverseSortDirection} onSort={() => setSorting("start_at")}>
+            Date
+          </SortableTh>
+          <SortableTh sorted={sortBy == "name"} reversed={reverseSortDirection} onSort={() => setSorting("name")}>
+            Name
+          </SortableTh>
           <Table.Th>
             <Text visibleFrom="sm">Going</Text>
             <Text hiddenFrom="sm">Go</Text>
@@ -49,10 +68,6 @@ export default function EventsTable({ events, noDataMessage }: EventsTableProps)
       </Table.Tbody>
     </Table>
   );
-}
-
-function sortEventsByStartDate(events: CalendarEvent[]): CalendarEvent[] {
-  return [...events].sort((a, b) => compareAsc(a.start_at, b.start_at));
 }
 
 function countGoingIntentions(attendances: CalendarEventAttendance[] | undefined | null): number {
