@@ -507,7 +507,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 1.3.0
+ * @version 1.3.1
  * @license
  */
 export class Api<
@@ -589,6 +589,26 @@ export class Api<
       this.request<AppEvent[], any>({
         path: `/api/calendar_events`,
         method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdateCalendarEvent
+     * @request PUT:/api/calendar_events/{event_id}
+     */
+    updateCalendarEvent: (
+      eventId: string,
+      data: CalendarEvent,
+      params: RequestParams = {},
+    ) =>
+      this.request<AppEvent[], any>({
+        path: `/api/calendar_events/${eventId}`,
+        method: "PUT",
         body: data,
         type: ContentType.Json,
         format: "json",

@@ -4,3 +4,4 @@ export { default as EditEventTemplate } from "./pages/event_templates/EditEventT
 export { default as Events } from "./pages/Events";
 export { default as NewEvent } from "./pages/NewEvent";
 export { default as ShowEvent } from "./pages/ShowEvent";
+export { default as EditEvent } from "./pages/EditEvent";

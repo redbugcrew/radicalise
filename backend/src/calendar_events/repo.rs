@@ -5,7 +5,7 @@ use crate::{
         attendances_for_calendar_events, hash_attendances_by_event,
     },
     shared::{
-        entities::{CalendarEvent, CollectiveId},
+        entities::{CalendarEvent, CalendarEventId, CollectiveId},
         links_repo::{find_all_links_for_owner_type, hash_links_by_owner, update_links_for_owner},
     },
 };
@@ -41,6 +41,42 @@ pub async fn insert_calendar_event_with_links(
 
     let mut result = data.clone();
     result.id = rec.id;
+    result.links = links;
+    Ok(result)
+}
+
+pub async fn update_calendar_event_with_links(
+    event_id: CalendarEventId,
+    data: &CalendarEvent,
+    event_template_id: i64,
+    collective_id: CollectiveId,
+    pool: &SqlitePool,
+) -> Result<CalendarEvent, sqlx::Error> {
+    sqlx::query!(
+        "
+        UPDATE calendar_events
+        SET event_template_id = ?, name = ?, start_at = ?, end_at = ?
+        WHERE id = ? AND collective_id = ?
+        ",
+        event_template_id,
+        data.name,
+        data.start_at,
+        data.end_at,
+        event_id.id,
+        collective_id.id
+    )
+    .execute(pool)
+    .await?;
+
+    let links = update_links_for_owner(
+        event_id.id,
+        "calendar_event".to_string(),
+        data.links.clone(),
+        pool,
+    )
+    .await?;
+
+    let mut result = data.clone();
     result.links = links;
     Ok(result)
 }

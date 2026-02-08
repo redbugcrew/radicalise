@@ -5,7 +5,7 @@ import { getApi } from "../../../api";
 import { useNavigate } from "react-router-dom";
 import type { CalendarEvent } from "../../../api/Api";
 
-export default function NewEventTemplate() {
+export default function NewEvent() {
   const eventTemplates = useAppSelector((state) => state.eventTemplates);
   const navigate = useNavigate();
 
@@ -19,16 +19,6 @@ export default function NewEventTemplate() {
       .catch((error) => {
         console.error("Error creating event:", error);
       });
-
-    // return getApi()
-    //   .api.createEventTemplate(data)
-    //   .then((response) => {
-    //     handleAppEvents(response.data);
-    //     navigate("/events/event_templates");
-    //   })
-    //   .catch((error) => {
-    //     console.error("Error creating event template:", error);
-    //   });
   };
 
   return (

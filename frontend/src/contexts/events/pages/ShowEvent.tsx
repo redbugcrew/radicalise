@@ -1,7 +1,9 @@
-import { Group, Stack, Title } from "@mantine/core";
+import { ActionIcon, Group, Stack, Title } from "@mantine/core";
 import { useParams } from "react-router-dom";
 import { useAppSelector } from "../../../store";
 import MyAttendance from "../components/MyAttendance";
+import { Anchor } from "../../../components";
+import { IconEdit } from "@tabler/icons-react";
 
 export default function ShowEvent() {
   const { eventId } = useParams<"eventId">();
@@ -17,11 +19,11 @@ export default function ShowEvent() {
       <Group justify="space-between">
         <Title order={1}>{event.name}</Title>
 
-        {/* <Anchor href="edit">
+        <Anchor href="edit">
           <ActionIcon variant="filled" aria-label="Edit Event" size="lg">
             <IconEdit style={{ width: "70%", height: "70%" }} stroke={2} />
           </ActionIcon>
-        </Anchor> */}
+        </Anchor>
       </Group>
 
       <Stack align="flex-start">
