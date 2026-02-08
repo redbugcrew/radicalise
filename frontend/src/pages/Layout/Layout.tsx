@@ -58,7 +58,7 @@ export default function Layout() {
 
         <AppShell.Section className={classes.footer_section}>
           <NavLink c="dimmed" label={"v" + packageJson.version} href={packageJson.homepage + "/releases/tag/v" + packageJson.version} leftSection={<IconBrandGithub size={18} />} onClick={toggle} />
-          <NavLink c="dimmed" label="Collecive settings" href="/collective/edit" leftSection={<IconSettings size={18} />} onClick={toggle} />
+          <NavLink c="dimmed" label="Collective settings" href="/collective/edit" leftSection={<IconSettings size={18} />} onClick={toggle} />
         </AppShell.Section>
       </AppShell.Navbar>
       <AppShell.Main>

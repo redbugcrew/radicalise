@@ -24,7 +24,7 @@ import {
 } from "./pages";
 import { buildRoutes as buildAuthRoutes } from "./contexts/auth";
 import { theme } from "./theme";
-import { EditEventTemplate, Events, EventTemplates, NewEventTemplate, NewEvent, ShowEvent } from "./contexts/events";
+import { EditEventTemplate, Events, EventTemplates, NewEventTemplate, NewEvent, ShowEvent, EditEvent } from "./contexts/events";
 
 // Import styles of packages that you've installed.
 // All packages except `@mantine/hooks` require styles imports
@@ -117,6 +117,7 @@ const router = createBrowserRouter([
           },
           { path: "new", element: <NewEvent /> },
           { path: ":eventId", element: <ShowEvent /> },
+          { path: ":eventId/edit", element: <EditEvent /> },
         ],
       },
       {

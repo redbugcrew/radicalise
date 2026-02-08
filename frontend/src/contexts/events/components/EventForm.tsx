@@ -15,7 +15,8 @@ interface CalendarEventFormData {
 
 interface EventTemplateFormProps {
   value?: CalendarEvent | null;
-  eventTemplates: EventTemplate[];
+  eventTemplates?: EventTemplate[];
+  submitText?: string;
   onSubmit: (data: CalendarEvent) => Promise<void>;
 }
 
@@ -49,7 +50,7 @@ function prepareCalendarEvent(data: CalendarEventFormData): CalendarEvent | null
   };
 }
 
-export default function EventTemplateForm({ value, eventTemplates, onSubmit }: EventTemplateFormProps) {
+export default function EventTemplateForm({ value, eventTemplates, submitText, onSubmit }: EventTemplateFormProps) {
   const form = useForm<CalendarEventFormData>({
     mode: "controlled",
     initialValues: {
@@ -89,14 +90,16 @@ export default function EventTemplateForm({ value, eventTemplates, onSubmit }: E
     <form onSubmit={form.onSubmit(onSubmitFormData, (errors) => console.log("Form submission errors:", errors))}>
       <Stack gap="lg">
         <Stack gap="md">
-          <Select
-            label="Event Template"
-            description=""
-            placeholder="Pick value"
-            data={eventTemplates.map((template) => ({ label: template.name, value: template.id.toString() }))}
-            key={form.key("event_template_id")}
-            {...form.getInputProps("event_template_id")}
-          />
+          {eventTemplates && eventTemplates.length >= 0 && (
+            <Select
+              label="Event Template"
+              description=""
+              placeholder="Pick value"
+              data={eventTemplates.map((template) => ({ label: template.name, value: template.id.toString() }))}
+              key={form.key("event_template_id")}
+              {...form.getInputProps("event_template_id")}
+            />
+          )}
 
           <TextInput
             label="Name"
@@ -119,7 +122,7 @@ export default function EventTemplateForm({ value, eventTemplates, onSubmit }: E
           />
         </Stack>
         <Button type="submit" loading={form.submitting}>
-          Create event
+          {submitText || "Create event"}
         </Button>
       </Stack>
     </form>

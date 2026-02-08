@@ -336,6 +336,17 @@ pub struct CalendarEvent {
     pub attendances: Option<Vec<CalendarEventAttendance>>,
 }
 
+#[derive(Clone, Debug, PartialEq)]
+pub struct CalendarEventId {
+    pub id: i64,
+}
+
+impl CalendarEventId {
+    pub fn new(id: i64) -> Self {
+        CalendarEventId { id }
+    }
+}
+
 #[derive(Deserialize, Serialize, ToSchema, Debug, Clone)]
 pub struct CalendarEventAttendance {
     pub id: i64,
