@@ -55,6 +55,14 @@ export default function EventsTable({ events, noDataMessage }: EventsTableProps)
             </Table.Th>
             <Table.Th ta="right">
               <Text visibleFrom="sm" span ta="right">
+                Apologies
+              </Text>
+              <Text hiddenFrom="sm" span ta="right">
+                Ap
+              </Text>
+            </Table.Th>
+            <Table.Th ta="right">
+              <Text visibleFrom="sm" span ta="right">
                 Attended
               </Text>
               <Text hiddenFrom="sm" span ta="right">
@@ -73,7 +81,10 @@ export default function EventsTable({ events, noDataMessage }: EventsTableProps)
                 <Anchor href={`/events/${event.id}`}>{event.name}</Anchor>
               </Table.Td>
               <Table.Td maw="5em" align="right">
-                {countGoingIntentions(event.attendances)}
+                {countIntentions(event.attendances, AttendanceIntention.Going)}
+              </Table.Td>
+              <Table.Td maw="5em" align="right">
+                {countIntentions(event.attendances, AttendanceIntention.NotGoing)}
               </Table.Td>
               <Table.Td maw="5em" align="right">
                 {countAttended(event.attendances)}
@@ -86,9 +97,9 @@ export default function EventsTable({ events, noDataMessage }: EventsTableProps)
   );
 }
 
-function countGoingIntentions(attendances: CalendarEventAttendance[] | undefined | null): number {
+function countIntentions(attendances: CalendarEventAttendance[] | undefined | null, intention: AttendanceIntention): number {
   if (!attendances) return 0;
-  return attendances.filter((attendance) => attendance.intention === AttendanceIntention.Going).length;
+  return attendances.filter((attendance) => attendance.intention === intention).length;
 }
 
 function countAttended(attendances: CalendarEventAttendance[] | undefined | null): number {
