@@ -81,6 +81,7 @@ export interface CalendarEvent {
 }
 
 export interface CalendarEventAttendance {
+  actual?: boolean | null;
   /** @format int64 */
   calendar_event_id: number;
   /** @format int64 */
@@ -507,7 +508,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 1.3.1
+ * @version 1.3.3
  * @license
  */
 export class Api<

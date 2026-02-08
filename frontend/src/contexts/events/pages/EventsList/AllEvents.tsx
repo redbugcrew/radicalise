@@ -1,8 +1,8 @@
 import { useAppSelector } from "../../../../store";
-import EventsList from "../../components/EventsList";
+import EventsTable from "../../components/EventsTable";
 
 export default function AllEvents() {
   const events = useAppSelector((state) => state.events);
 
-  return <EventsList events={events} />;
+  return <EventsTable events={events} />;
 }
