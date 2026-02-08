@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        UPDATE calendar_events\n        SET event_template_id = ?, name = ?, start_at = ?, end_at = ?\n        WHERE id = ? AND collective_id = ?\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 6
+    },
+    "nullable": []
+  },
+  "hash": "11bb8223adcbf82f34933bb25076e9f0bdf5a510bc409bd3dee0c9c9cb8133a6"
+}
