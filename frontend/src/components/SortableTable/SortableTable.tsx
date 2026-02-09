@@ -7,18 +7,35 @@ interface SortableThProps {
   children: React.ReactNode;
   reversed: boolean;
   sorted: boolean;
+  right?: boolean;
+  abbreviated?: string;
   onSort: () => void;
 }
 
-export function SortableTh({ children, reversed, sorted, onSort }: SortableThProps) {
+export function SortableTh({ children, reversed, sorted, onSort, right, abbreviated }: SortableThProps) {
   const Icon = sorted ? (reversed ? IconChevronUp : IconChevronDown) : IconSelector;
+  const rightProps = right ? { ta: "right" as const } : {};
+  const textProps = { fw: 500, fz: "sm" };
+
   return (
     <Table.Th className={classes.th}>
       <UnstyledButton onClick={onSort} className={classes.control}>
-        <Group justify="space-between">
-          <Text fw={500} fz="sm">
-            {children}
-          </Text>
+        <Group justify={right ? "flex-end" : "space-between"} wrap="nowrap" gap="xs">
+          {abbreviated && (
+            <>
+              <Text {...textProps} {...rightProps} visibleFrom="sm">
+                {children}
+              </Text>
+              <Text {...textProps} {...rightProps} hiddenFrom="sm">
+                {abbreviated}
+              </Text>
+            </>
+          )}
+          {!abbreviated && (
+            <Text {...textProps} {...rightProps}>
+              {children}
+            </Text>
+          )}
           <Center className={classes.icon}>
             <Icon size={16} stroke={1.5} />
           </Center>
@@ -109,7 +126,7 @@ function compareValues(a: ComparableType, b: ComparableType, type_override?: Typ
   }
 
   if (typeof a === "number" && typeof b === "number") {
-    return a - b;
+    return b - a;
   }
 
   if (typeof a === "boolean" && typeof b === "boolean") {

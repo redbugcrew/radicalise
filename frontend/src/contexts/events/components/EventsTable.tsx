@@ -14,7 +14,19 @@ interface EventsTableProps {
   noDataMessage?: React.ReactNode;
 }
 
-function matchesFilter(item: CalendarEvent, lowerCaseQuery: string): boolean {
+interface CalendarEventRowData {
+  id: number;
+  start_at: string;
+  name: string;
+  yourAttendance: CalendarEventAttendance | undefined;
+  going: number;
+  notGoing: number;
+  attended: number;
+}
+
+type SortableEventField = keyof CalendarEventRowData;
+
+function matchesFilter(item: CalendarEventRowData, lowerCaseQuery: string): boolean {
   return item.name.toLowerCase().includes(lowerCaseQuery) || searchableDateString(item.start_at).includes(lowerCaseQuery);
 }
 
@@ -25,17 +37,19 @@ export default function EventsTable({ events, noDataMessage }: EventsTableProps)
     return <NoData>{noDataMessage || "No events found"}</NoData>;
   }
 
+  const rowData: CalendarEventRowData[] = buildAllRowData(events, currentPersonId);
+
   const [search, setSearch] = useState("");
-  const [sortBy, setSortBy] = useState<keyof CalendarEvent>("start_at");
+  const [sortBy, setSortBy] = useState<SortableEventField>("start_at");
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
 
-  const setSorting = (field: keyof CalendarEvent) => {
+  const setSorting = (field: SortableEventField) => {
     const reversed = field === sortBy ? !reverseSortDirection : false;
     setReverseSortDirection(reversed);
     setSortBy(field);
   };
 
-  let sortedEvents = sortData<CalendarEvent>(events, { sortBy: sortBy, reversed: reverseSortDirection, type_override: sortBy === "start_at" ? "string-date" : undefined, search: search }, matchesFilter);
+  let sortedRowData = sortData<CalendarEventRowData>(rowData, { sortBy: sortBy, reversed: reverseSortDirection, type_override: sortBy === "start_at" ? "string-date" : undefined, search: search }, matchesFilter);
 
   return (
     <Stack align="stretch">
@@ -50,39 +64,39 @@ export default function EventsTable({ events, noDataMessage }: EventsTableProps)
               Name
             </SortableTh>
             {currentPersonId && <Th right>You</Th>}
-            <Th right abbreviated="Go">
+            <SortableTh right abbreviated="Go" sorted={sortBy == "going"} reversed={reverseSortDirection} onSort={() => setSorting("going")}>
               Going
-            </Th>
-            <Th right abbreviated="Ap">
+            </SortableTh>
+            <SortableTh right abbreviated="Ap" sorted={sortBy == "notGoing"} reversed={reverseSortDirection} onSort={() => setSorting("notGoing")}>
               Apologies
-            </Th>
-            <Th right abbreviated="At">
+            </SortableTh>
+            <SortableTh right abbreviated="At" sorted={sortBy == "attended"} reversed={reverseSortDirection} onSort={() => setSorting("attended")}>
               Attended
-            </Th>
+            </SortableTh>
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>
-          {sortedEvents.map((event) => (
-            <Table.Tr key={event.id}>
+          {sortedRowData.map((row) => (
+            <Table.Tr key={row.id}>
               <Table.Td maw="10em">
-                <DateText date={event.start_at} />
+                <DateText date={row.start_at} />
               </Table.Td>
               <Table.Td>
-                <Anchor href={`/events/${event.id}`}>{event.name}</Anchor>
+                <Anchor href={`/events/${row.id}`}>{row.name}</Anchor>
               </Table.Td>
               {currentPersonId && (
                 <Table.Td maw="5em" align="right">
-                  {attendanceIcon(personAttendance(event, currentPersonId))}
+                  {attendanceIcon(row.yourAttendance)}
                 </Table.Td>
               )}
               <Table.Td maw="5em" align="right">
-                {countIntentions(event.attendances, AttendanceIntention.Going)}
+                {row.going}
               </Table.Td>
               <Table.Td maw="5em" align="right">
-                {countIntentions(event.attendances, AttendanceIntention.NotGoing)}
+                {row.notGoing}
               </Table.Td>
               <Table.Td maw="5em" align="right">
-                {countAttended(event.attendances)}
+                {row.attended}
               </Table.Td>
             </Table.Tr>
           ))}
@@ -141,4 +155,20 @@ function countAttended(attendances: CalendarEventAttendance[] | undefined | null
 
 function searchableDateString(date: string): string {
   return format(date, "MMMM d, yyyy").toLowerCase();
+}
+
+function buildAllRowData(events: CalendarEvent[], currentPersonId: number | null | undefined): CalendarEventRowData[] {
+  return events.map((event) => buildRowData(event, currentPersonId));
+}
+
+function buildRowData(event: CalendarEvent, currentPersonId: number | null | undefined): CalendarEventRowData {
+  return {
+    id: event.id,
+    start_at: event.start_at,
+    name: event.name,
+    yourAttendance: currentPersonId ? personAttendance(event, currentPersonId) : undefined,
+    going: countIntentions(event.attendances, AttendanceIntention.Going),
+    notGoing: countIntentions(event.attendances, AttendanceIntention.NotGoing),
+    attended: countAttended(event.attendances),
+  };
 }
