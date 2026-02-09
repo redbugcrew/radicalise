@@ -4,7 +4,7 @@ import { Anchor, NoData } from "../../../components";
 import React from "react";
 import { DateText } from "../../../components/TimeRangeText";
 import { useState } from "react";
-import { SearchField, SortableTh, sortData, Th } from "../../../components/SortableTable/SortableTable";
+import { SearchField, SortableTh, sortData } from "../../../components/SortableTable/SortableTable";
 import { format } from "date-fns";
 import { useAppSelector } from "../../../store";
 import { IconCheck, IconCircleCheck, IconCircleDashedCheck, IconCircleDashedX, IconCircleX } from "@tabler/icons-react";
