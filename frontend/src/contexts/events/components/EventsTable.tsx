@@ -5,7 +5,7 @@ import React from "react";
 import { DateText } from "../../../components/TimeRangeText";
 import { useState } from "react";
 import { SearchField, SortableTh, sortData } from "../../../components/SortableTable/SortableTable";
-import { format } from "date-fns";
+import { format, isFuture } from "date-fns";
 import { useAppSelector } from "../../../store";
 import PersonEventAttendanceIcon from "./AttendanceIcon";
 
@@ -94,7 +94,7 @@ export default function EventsTable({ events, noDataMessage }: EventsTableProps)
               </Table.Td>
               {currentPersonId && (
                 <Table.Td maw="5em" align="right">
-                  <PersonEventAttendanceIcon attendance={row.yourAttendance} />
+                  <PersonEventAttendanceIcon attendance={row.yourAttendance} inFuture={isFuture(row.start_at)} />
                 </Table.Td>
               )}
               <Table.Td maw="5em" align="right">
