@@ -1,11 +1,13 @@
-import { Stack, Table, Text } from "@mantine/core";
+import { Stack, Table } from "@mantine/core";
 import { AttendanceIntention, type CalendarEvent, type CalendarEventAttendance } from "../../../api/Api";
 import { Anchor, NoData } from "../../../components";
-import type React from "react";
+import React from "react";
 import { DateText } from "../../../components/TimeRangeText";
 import { useState } from "react";
-import { SearchField, SortableTh, sortData } from "../../../components/SortableTable/SortableTable";
+import { SearchField, SortableTh, sortData, Th } from "../../../components/SortableTable/SortableTable";
 import { format } from "date-fns";
+import { useAppSelector } from "../../../store";
+import { IconCheck, IconCircleCheck, IconCircleDashedCheck, IconCircleDashedX, IconCircleX } from "@tabler/icons-react";
 
 interface EventsTableProps {
   events: CalendarEvent[];
@@ -17,6 +19,8 @@ function matchesFilter(item: CalendarEvent, lowerCaseQuery: string): boolean {
 }
 
 export default function EventsTable({ events, noDataMessage }: EventsTableProps) {
+  const currentPersonId = useAppSelector((state) => state.me?.person_id);
+
   if (events.length === 0) {
     return <NoData>{noDataMessage || "No events found"}</NoData>;
   }
@@ -45,30 +49,16 @@ export default function EventsTable({ events, noDataMessage }: EventsTableProps)
             <SortableTh sorted={sortBy == "name"} reversed={reverseSortDirection} onSort={() => setSorting("name")}>
               Name
             </SortableTh>
-            <Table.Th ta="right">
-              <Text visibleFrom="sm" span ta="right">
-                Going
-              </Text>
-              <Text hiddenFrom="sm" span ta="right">
-                Go
-              </Text>
-            </Table.Th>
-            <Table.Th ta="right">
-              <Text visibleFrom="sm" span ta="right">
-                Apologies
-              </Text>
-              <Text hiddenFrom="sm" span ta="right">
-                Ap
-              </Text>
-            </Table.Th>
-            <Table.Th ta="right">
-              <Text visibleFrom="sm" span ta="right">
-                Attended
-              </Text>
-              <Text hiddenFrom="sm" span ta="right">
-                At
-              </Text>
-            </Table.Th>
+            {currentPersonId && <Th right>You</Th>}
+            <Th right abbreviated="Go">
+              Going
+            </Th>
+            <Th right abbreviated="Ap">
+              Apologies
+            </Th>
+            <Th right abbreviated="At">
+              Attended
+            </Th>
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>
@@ -80,6 +70,11 @@ export default function EventsTable({ events, noDataMessage }: EventsTableProps)
               <Table.Td>
                 <Anchor href={`/events/${event.id}`}>{event.name}</Anchor>
               </Table.Td>
+              {currentPersonId && (
+                <Table.Td maw="5em" align="right">
+                  {attendanceIcon(personAttendance(event, currentPersonId))}
+                </Table.Td>
+              )}
               <Table.Td maw="5em" align="right">
                 {countIntentions(event.attendances, AttendanceIntention.Going)}
               </Table.Td>
@@ -95,6 +90,43 @@ export default function EventsTable({ events, noDataMessage }: EventsTableProps)
       </Table>
     </Stack>
   );
+}
+
+function attendanceIcon(attendance: CalendarEventAttendance | undefined): React.ReactNode {
+  const intention = attendance?.intention;
+  const actual = attendance?.actual;
+
+  const setIntention: boolean = intention === AttendanceIntention.Going || intention === AttendanceIntention.NotGoing;
+  const metIntention = (intention === AttendanceIntention.Going && actual === true) || (intention === AttendanceIntention.NotGoing && actual === false);
+  const went = actual === true;
+
+  if (went) {
+    if (setIntention) {
+      if (metIntention) {
+        return <IconCircleCheck color="green" />;
+      } else {
+        return <IconCircleDashedCheck color="green" />;
+      }
+    } else {
+      return <IconCheck color="green" />;
+    }
+  } else {
+    if (setIntention) {
+      if (metIntention) {
+        return <IconCircleX color="orange" />;
+      } else {
+        return <IconCircleDashedX color="red" />;
+      }
+    } else {
+      return null;
+    }
+  }
+
+  return null;
+}
+
+function personAttendance(event: CalendarEvent, personId: number): CalendarEventAttendance | undefined {
+  return event.attendances?.find((attendance) => attendance.person_id === personId);
 }
 
 function countIntentions(attendances: CalendarEventAttendance[] | undefined | null, intention: AttendanceIntention): number {

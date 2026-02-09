@@ -29,15 +29,32 @@ export function SortableTh({ children, reversed, sorted, onSort }: SortableThPro
 }
 
 interface ThProps {
+  right?: boolean;
+  abbreviated?: string;
   children: React.ReactNode;
 }
 
-export function Th({ children }: ThProps) {
+export function Th({ children, right, abbreviated }: ThProps) {
+  const textProps = { fw: 500, fz: "sm" };
+  const rightProps = right ? { ta: "right" as const } : {};
+
   return (
-    <Table.Th className={classes.th}>
-      <Text fw={500} fz="sm">
-        {children}
-      </Text>
+    <Table.Th className={classes.th} {...rightProps}>
+      {!abbreviated && (
+        <Text {...textProps} {...rightProps}>
+          {children}
+        </Text>
+      )}
+      {abbreviated && (
+        <>
+          <Text {...textProps} {...rightProps} visibleFrom="sm">
+            {children}
+          </Text>
+          <Text {...textProps} {...rightProps} hiddenFrom="sm">
+            {abbreviated}
+          </Text>
+        </>
+      )}
     </Table.Th>
   );
 }
