@@ -1,4 +1,4 @@
-import { Stack, Table, Tooltip } from "@mantine/core";
+import { Stack, Table } from "@mantine/core";
 import { AttendanceIntention, type CalendarEvent, type CalendarEventAttendance } from "../../../api/Api";
 import { Anchor, NoData } from "../../../components";
 import React from "react";
@@ -7,7 +7,7 @@ import { useState } from "react";
 import { SearchField, SortableTh, sortData } from "../../../components/SortableTable/SortableTable";
 import { format } from "date-fns";
 import { useAppSelector } from "../../../store";
-import { IconCheck, IconCircleCheck, IconCircleDashedCheck, IconCircleDashedX, IconCircleX } from "@tabler/icons-react";
+import PersonEventAttendanceIcon from "./AttendanceIcon";
 
 interface EventsTableProps {
   events: CalendarEvent[];
@@ -94,7 +94,7 @@ export default function EventsTable({ events, noDataMessage }: EventsTableProps)
               </Table.Td>
               {currentPersonId && (
                 <Table.Td maw="5em" align="right">
-                  {attendanceIcon(row.yourAttendance)}
+                  <PersonEventAttendanceIcon attendance={row.yourAttendance} />
                 </Table.Td>
               )}
               <Table.Td maw="5em" align="right">
@@ -112,57 +112,6 @@ export default function EventsTable({ events, noDataMessage }: EventsTableProps)
       </Table>
     </Stack>
   );
-}
-
-function attendanceIcon(attendance: CalendarEventAttendance | undefined): React.ReactNode {
-  const intention = attendance?.intention;
-  const actual = attendance?.actual;
-
-  const setIntention: boolean = intention === AttendanceIntention.Going || intention === AttendanceIntention.NotGoing;
-  const metIntention = (intention === AttendanceIntention.Going && actual === true) || (intention === AttendanceIntention.NotGoing && actual === false);
-  const went = actual === true;
-
-  if (went) {
-    if (setIntention) {
-      if (metIntention) {
-        return (
-          <Tooltip label="RSVP'd going and attended">
-            <IconCircleCheck color="green" />
-          </Tooltip>
-        );
-      } else {
-        return (
-          <Tooltip label="RSVP'd not going but attended">
-            <IconCircleDashedCheck color="green" />
-          </Tooltip>
-        );
-      }
-    } else {
-      return (
-        <Tooltip label="Did not RSVP but attended">
-          <IconCheck color="green" />
-        </Tooltip>
-      );
-    }
-  } else {
-    if (setIntention) {
-      if (metIntention) {
-        return (
-          <Tooltip label="RSVP'd not going and did not attend">
-            <IconCircleX color="orange" />
-          </Tooltip>
-        );
-      } else {
-        return (
-          <Tooltip label="RSVP'd going but did not attend">
-            <IconCircleDashedX color="red" />
-          </Tooltip>
-        );
-      }
-    } else {
-      return null;
-    }
-  }
 }
 
 function personAttendance(event: CalendarEvent, personId: number): CalendarEventAttendance | undefined {

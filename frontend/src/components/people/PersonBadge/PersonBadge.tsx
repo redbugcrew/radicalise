@@ -22,7 +22,7 @@ export default function PersonBadge({ person, me, highlight, textOverride, varia
   if (highlight) groupClasses.push(classes.highlighted);
 
   return (
-    <Group gap="xs" className={groupClasses.join(" ")}>
+    <Group gap="xs" className={groupClasses.join(" ")} wrap="nowrap">
       <Avatar avatarId={person.avatar_id ?? person.id} />
       <Text fz="sm" fw={500}>
         {textOverride ?? person.display_name}
