@@ -1,11 +1,13 @@
 import { Button, Card, Container, Title, Stack, Text, Badge, Group } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import { useAppSelector } from "../../store";
-import type { CollectiveInvolvement, CrewInvolvement, Interval, PersonIntervalInvolvementData } from "../../api/Api";
+import { AttendanceIntention, type CalendarEvent, type CollectiveInvolvement, type CrewInvolvement, type Interval, type PersonIntervalInvolvementData } from "../../api/Api";
 import DateText from "../../components/DateText";
 import classes from "./Dashboard.module.css";
 import { CrewsList, LinksStack } from "../../components";
 import { compareStrings } from "../../utilities/comparison";
+import { isFuture } from "date-fns";
+import EventsList from "../../contexts/events/components/EventsList";
 
 interface MyIntervalPartipationCardProps {
   interval: Interval;
@@ -84,6 +86,7 @@ export default function Dashboard() {
   const intervals = useAppSelector((state) => state.intervals);
   const myData = useAppSelector((state) => state.me);
   const collective = useAppSelector((state) => state.collective);
+  const events = useAppSelector((state) => myUpcomingEvents(state.events, state.me?.person_id));
 
   if (!myData || !collective) {
     return <Text>Error: Data not found.</Text>;
@@ -109,12 +112,33 @@ export default function Dashboard() {
           {current_interval && myData.current_interval && <MyIntervalPartipationCard interval={current_interval} data={myData.current_interval} current={true} />}
           {next_interval && myData.next_interval && <MyIntervalPartipationCard interval={next_interval} data={myData.next_interval} current={false} />}
         </Stack>
+        {events.length > 0 && (
+          <Stack gap="md">
+            <Title order={2}>My Upcoming Events</Title>
+            <EventsList events={events} noDataMessage="No upcoming events found" />
+          </Stack>
+        )}
+        {myData.current_interval && <MyCrews personId={myData.person_id} myInvolvements={myData.current_interval.crew_involvements} />}
         <Stack gap="md">
           <Title order={2}>Resources</Title>
           <LinksStack links={collective.links} />
         </Stack>
-        {myData.current_interval && <MyCrews personId={myData.person_id} myInvolvements={myData.current_interval.crew_involvements} />}
       </Stack>
     </Container>
   );
+}
+
+function myUpcomingEvents(events: CalendarEvent[], personId: number | null | undefined): CalendarEvent[] {
+  if (!personId) return [];
+  return events.filter((event) => {
+    const attendances = event.attendances || [];
+    const intentions = [AttendanceIntention.Going, AttendanceIntention.Uncertain];
+    const isParticipant = attendances.some((attendance) => attendance.person_id === personId && intentions.includes(attendance.intention));
+    const isFutureEvent = isFutureOrStillInProgress(event);
+    return isParticipant && isFutureEvent;
+  });
+}
+
+function isFutureOrStillInProgress(event: CalendarEvent): boolean {
+  return (event.end_at && isFuture(event.end_at)) || isFuture(event.start_at);
 }
