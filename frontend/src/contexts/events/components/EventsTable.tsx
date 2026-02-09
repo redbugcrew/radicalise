@@ -49,7 +49,11 @@ export default function EventsTable({ events, noDataMessage }: EventsTableProps)
     setSortBy(field);
   };
 
-  let sortedRowData = sortData<CalendarEventRowData>(rowData, { sortBy: sortBy, reversed: reverseSortDirection, type_override: sortBy === "start_at" ? "string-date" : undefined, search: search }, matchesFilter);
+  let sortedRowData = sortData<CalendarEventRowData>(
+    rowData,
+    { sortBy: sortBy, reversed: reverseSortDirection, type_override: sortBy === "start_at" ? "string-date" : undefined, compare_override: sortBy === "yourAttendance" ? compareAttendances : null, search: search },
+    matchesFilter,
+  );
 
   return (
     <Stack align="stretch">
@@ -63,7 +67,11 @@ export default function EventsTable({ events, noDataMessage }: EventsTableProps)
             <SortableTh sorted={sortBy == "name"} reversed={reverseSortDirection} onSort={() => setSorting("name")}>
               Name
             </SortableTh>
-            {currentPersonId && <Th right>You</Th>}
+            {currentPersonId && (
+              <SortableTh right sorted={sortBy == "yourAttendance"} reversed={reverseSortDirection} onSort={() => setSorting("yourAttendance")}>
+                You
+              </SortableTh>
+            )}
             <SortableTh right abbreviated="Go" sorted={sortBy == "going"} reversed={reverseSortDirection} onSort={() => setSorting("going")}>
               Going
             </SortableTh>
@@ -171,4 +179,14 @@ function buildRowData(event: CalendarEvent, currentPersonId: number | null | und
     notGoing: countIntentions(event.attendances, AttendanceIntention.NotGoing),
     attended: countAttended(event.attendances),
   };
+}
+
+function compareAttendances(a: CalendarEventAttendance | undefined, b: CalendarEventAttendance | undefined): number {
+  return compareBools(a?.actual, b?.actual);
+}
+
+function compareBools(a: boolean | undefined | null, b: boolean | undefined | null): number {
+  const asAsInt = a ? 1 : 0;
+  const bsAsInt = b ? 1 : 0;
+  return bsAsInt - asAsInt;
 }

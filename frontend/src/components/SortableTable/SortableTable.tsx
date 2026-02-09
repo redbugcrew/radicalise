@@ -85,7 +85,15 @@ export function filterData<T>(data: T[], search: string, matchesFunction: Matche
 
 export type TypeOverrides = "string-date";
 
-export function sortData<T>(data: T[], payload: { sortBy: keyof T | null; reversed: boolean; search: string; type_override?: TypeOverrides | null }, matchesFunction: MatchesFunction<T>) {
+interface sortDataPayload<T> {
+  sortBy: keyof T | null;
+  reversed: boolean;
+  search: string;
+  type_override?: TypeOverrides | null;
+  compare_override?: ((a: any, b: any) => number) | null;
+}
+
+export function sortData<T>(data: T[], payload: sortDataPayload<T>, matchesFunction: MatchesFunction<T>) {
   const { sortBy } = payload;
 
   if (!sortBy) {
@@ -97,7 +105,9 @@ export function sortData<T>(data: T[], payload: { sortBy: keyof T | null; revers
       const valA = a[sortBy] as ComparableType;
       const valB = b[sortBy] as ComparableType;
 
-      let result = compareValues(valA, valB, payload.type_override);
+      const compareFunc = payload.compare_override ?? compareValues;
+
+      let result = compareFunc(valA, valB, payload.type_override);
 
       if (payload.reversed) {
         return -result;
