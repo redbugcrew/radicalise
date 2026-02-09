@@ -1,4 +1,4 @@
-import { Stack, Table } from "@mantine/core";
+import { Stack, Table, Tooltip } from "@mantine/core";
 import { AttendanceIntention, type CalendarEvent, type CalendarEventAttendance } from "../../../api/Api";
 import { Anchor, NoData } from "../../../components";
 import React from "react";
@@ -125,26 +125,44 @@ function attendanceIcon(attendance: CalendarEventAttendance | undefined): React.
   if (went) {
     if (setIntention) {
       if (metIntention) {
-        return <IconCircleCheck color="green" />;
+        return (
+          <Tooltip label="RSVP'd going and attended">
+            <IconCircleCheck color="green" />
+          </Tooltip>
+        );
       } else {
-        return <IconCircleDashedCheck color="green" />;
+        return (
+          <Tooltip label="RSVP'd not going but attended">
+            <IconCircleDashedCheck color="green" />
+          </Tooltip>
+        );
       }
     } else {
-      return <IconCheck color="green" />;
+      return (
+        <Tooltip label="Did not RSVP but attended">
+          <IconCheck color="green" />
+        </Tooltip>
+      );
     }
   } else {
     if (setIntention) {
       if (metIntention) {
-        return <IconCircleX color="orange" />;
+        return (
+          <Tooltip label="RSVP'd not going and did not attend">
+            <IconCircleX color="orange" />
+          </Tooltip>
+        );
       } else {
-        return <IconCircleDashedX color="red" />;
+        return (
+          <Tooltip label="RSVP'd going but did not attend">
+            <IconCircleDashedX color="red" />
+          </Tooltip>
+        );
       }
     } else {
       return null;
     }
   }
-
-  return null;
 }
 
 function personAttendance(event: CalendarEvent, personId: number): CalendarEventAttendance | undefined {
