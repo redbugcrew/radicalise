@@ -25,7 +25,7 @@ const eventsSlice = createSlice({
         console.warn("Updating attendance for event that doesn't exist:", action.payload.calendar_event_id);
       } else {
         const event = state[eventIndex];
-        event.attendances = [];
+        event.attendances ||= [];
         const attendanceIndex = event.attendances.findIndex((attendance) => attendance.id === action.payload.id);
 
         if (attendanceIndex === -1) {
