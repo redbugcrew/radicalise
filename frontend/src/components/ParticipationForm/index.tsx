@@ -9,6 +9,7 @@ import type { MyParticipationFormData } from "./shared";
 import CapacityStep from "./CapacityStep";
 import { ParticipationStep } from "./ParticipationStep";
 import ContributionStep from "./ContributionStep";
+export type { MyParticipationFormData } from "./shared";
 
 interface ParticipationFormProps {
   personId: number;
@@ -102,7 +103,7 @@ export default function ParticipationForm({ personId, interval, previousInterval
           <CapacityStep form={form} readOnly={readOnly} />
         </Stepper.Step>
         <Stepper.Step label="Participation">
-          <ParticipationStep form={form} readOnly={readOnly} />
+          <ParticipationStep form={form} readOnly={readOnly} interval={interval} personId={personId} />
         </Stepper.Step>
         <Stepper.Step label="Contribution" disabled={!additionalParticipationActive} allowStepSelect={additionalParticipationActive} icon={additionalParticipationActive ? null : <IconLock size={24} />}>
           <ContributionStep form={form} readOnly={readOnly} personId={personId} intervalId={interval.id} crewInvolvements={crewInvolvements} previousInvolvements={previousInvolvements} />

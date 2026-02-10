@@ -9,9 +9,10 @@ interface EventsListProps {
   events: CalendarEvent[];
   noDataMessage?: React.ReactNode;
   showParticipantCounts?: boolean;
+  interactive?: boolean;
 }
 
-export default function EventsList({ events, noDataMessage, showParticipantCounts }: EventsListProps) {
+export default function EventsList({ events, noDataMessage, showParticipantCounts, interactive }: EventsListProps) {
   if (events.length === 0) {
     return <NoData>{noDataMessage || "No events found"}</NoData>;
   }
@@ -21,7 +22,7 @@ export default function EventsList({ events, noDataMessage, showParticipantCount
   return (
     <Stack>
       {sortedEvents.map((event) => (
-        <EventCard key={event.id} event={event} showParticipantCounts={showParticipantCounts} />
+        <EventCard key={event.id} event={event} showParticipantCounts={showParticipantCounts} interactive={interactive} />
       ))}
     </Stack>
   );

@@ -342,6 +342,7 @@ pub struct CalendarEvent {
     pub start_at: String,
     pub end_at: Option<String>,
     pub links: Option<Vec<Link>>,
+    pub response_expectation: EventResponseExpectation,
     pub attendances: Option<Vec<CalendarEventAttendance>>,
 }
 

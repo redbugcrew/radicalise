@@ -5,7 +5,7 @@ use crate::{
         attendances_for_calendar_events, hash_attendances_by_event,
     },
     shared::{
-        entities::{CalendarEvent, CalendarEventId, CollectiveId},
+        entities::{CalendarEvent, CalendarEventId, CollectiveId, EventResponseExpectation},
         links_repo::{find_all_links_for_owner_type, hash_links_by_owner, update_links_for_owner},
     },
 };
@@ -87,6 +87,7 @@ pub struct CalendarEventRow {
     pub name: String,
     pub start_at: String,
     pub end_at: Option<String>,
+    pub response_expectation: EventResponseExpectation,
 }
 
 pub async fn list_calendar_events_with_attendances(
@@ -126,6 +127,7 @@ pub async fn list_calendar_events(
             start_at: row.start_at,
             end_at: row.end_at,
             links: Some(links_hash.get(&row.id).cloned().unwrap_or_else(Vec::new)),
+            response_expectation: row.response_expectation,
             attendances: None,
         })
         .collect();
@@ -141,14 +143,16 @@ async fn list_calendar_event_rows(
         CalendarEventRow,
         r#"
          SELECT
-            id,
-            event_template_id,
-            name,
-            start_at AS "start_at: String",
-            end_at AS "end_at: String"
-         FROM calendar_events
-         WHERE collective_id = ?
-         ORDER BY start_at ASC
+            e.id,
+            e.event_template_id,
+            e.name,
+            e.start_at AS "start_at: String",
+            e.end_at AS "end_at: String",
+            t.response_expectation AS "response_expectation: EventResponseExpectation"
+         FROM calendar_events AS e
+         INNER JOIN event_templates AS t ON e.event_template_id = t.id
+         WHERE e.collective_id = ?
+         ORDER BY e.start_at ASC
          "#,
         collective_id.id,
     )

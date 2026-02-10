@@ -83,6 +83,7 @@ export interface CalendarEvent {
   id: number;
   links?: any[] | null;
   name: string;
+  response_expectation: EventResponseExpectation;
   start_at: string;
 }
 
@@ -516,7 +517,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 1.3.8
+ * @version 1.3.9
  * @license
  */
 export class Api<

@@ -1,5 +1,5 @@
 import { Container, Stack, Title, Text } from "@mantine/core";
-import ParticipationForm, { type MyParticipationFormData } from "../components/ParticipationForm/ParticipationForm";
+import ParticipationForm, { type MyParticipationFormData } from "../components/ParticipationForm";
 import { handleAppEvents, useAppSelector } from "../store";
 import { useNavigate, useParams } from "react-router-dom";
 import DateText from "../components/DateText";
