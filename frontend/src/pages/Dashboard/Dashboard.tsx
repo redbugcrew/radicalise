@@ -11,6 +11,7 @@ import EventsList from "../../contexts/events/components/EventsList";
 import { IconCalendar } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
 import CopyIconButton from "../../components/CopyIconButton";
+import { getApiUrl } from "../../api";
 
 interface MyIntervalPartipationCardProps {
   interval: Interval;
@@ -85,8 +86,9 @@ function MyCrews({ personId, myInvolvements }: { personId: number; myInvolvement
   );
 }
 
-function SubscribeDetails() {
-  const calendarUrl = "https://calendar.google.com/calendar/ical/secret_calendar_url/basic.ics";
+function SubscribeDetails({ calendarToken }: { calendarToken: string }) {
+  const apiUrl = getApiUrl();
+  const calendarUrl = `${apiUrl.replace(/\/?$/, "/")}public/${calendarToken}/calendar.ics`;
 
   return (
     <Card mb="md">
@@ -113,19 +115,24 @@ function SubscribeDetails() {
 function MyEvents() {
   const events = useAppSelector((state) => myUpcomingEvents(state.events, state.me?.person_id));
   const [opened, { toggle }] = useDisclosure(false);
+  const calendarToken = useAppSelector((state) => state.me?.calendar_token);
 
   return (
     <Stack gap="md">
       <Group justify="space-between">
         <Title order={2}>My Upcoming Events</Title>
-        <Button rightSection={<IconCalendar />} variant="outline" onClick={toggle}>
-          {opened ? "Hide" : "Subscribe"}
-        </Button>
+        {calendarToken && (
+          <Button rightSection={<IconCalendar />} variant="outline" onClick={toggle}>
+            {opened ? "Hide" : "Subscribe"}
+          </Button>
+        )}
       </Group>
       <Stack gap={0}>
-        <Collapse in={opened}>
-          <SubscribeDetails />
-        </Collapse>
+        {calendarToken && (
+          <Collapse in={opened}>
+            <SubscribeDetails calendarToken={calendarToken} />
+          </Collapse>
+        )}
         <EventsList events={events} noDataMessage="No upcoming events found" />
       </Stack>
     </Stack>

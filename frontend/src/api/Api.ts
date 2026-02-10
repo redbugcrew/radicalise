@@ -289,6 +289,7 @@ export type MeEvent = {
 };
 
 export interface MyInitialData {
+  calendar_token?: string | null;
   current_interval?: null | PersonIntervalInvolvementData;
   next_interval?: null | PersonIntervalInvolvementData;
   /** @format int64 */
@@ -517,7 +518,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 1.3.9
+ * @version 1.3.10
  * @license
  */
 export class Api<
