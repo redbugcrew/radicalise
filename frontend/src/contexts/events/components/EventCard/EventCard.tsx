@@ -7,9 +7,10 @@ import EventAttendanceTotals from "../EventAttendanceTotals";
 
 interface EventCardProps {
   event: CalendarEvent;
+  showParticipantCounts?: boolean;
 }
 
-export default function EventCard({ event }: EventCardProps) {
+export default function EventCard({ event, showParticipantCounts }: EventCardProps) {
   const cardStyles = [styles.card];
 
   return (
@@ -28,7 +29,7 @@ export default function EventCard({ event }: EventCardProps) {
 
               <MyAttendance event={event} readonly />
             </Group>
-            <EventAttendanceTotals event={event} />
+            {showParticipantCounts && <EventAttendanceTotals event={event} />}
           </Stack>
         </Card.Section>
       </Card>

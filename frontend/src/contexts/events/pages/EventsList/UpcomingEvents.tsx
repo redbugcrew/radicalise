@@ -6,7 +6,7 @@ import EventsList from "../../components/EventsList";
 export default function UpcomingEvents() {
   const events = useAppSelector((state) => filterUpcomingEvents(state.events));
 
-  return <EventsList events={events} noDataMessage="No upcoming events found" />;
+  return <EventsList events={events} noDataMessage="No upcoming events found" showParticipantCounts />;
 }
 
 function filterUpcomingEvents(events: CalendarEvent[]): CalendarEvent[] {
