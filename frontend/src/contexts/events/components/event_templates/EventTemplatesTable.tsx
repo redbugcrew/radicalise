@@ -1,4 +1,4 @@
-import { Table } from "@mantine/core";
+import { Stack, Table, Text } from "@mantine/core";
 import type { EventTemplate } from "../../../../api/Api";
 import { Anchor } from "../../../../components";
 
@@ -12,7 +12,12 @@ function EventTemplateTableRow({ template }: { template: EventTemplate }) {
   return (
     <Table.Tr key={template.id}>
       <Table.Td>{template.id}</Table.Td>
-      <Table.Td>{template.name}</Table.Td>
+      <Table.Td>
+        <Stack gap={0}>
+          <Text>{template.name}</Text>
+          <Text c="dimmed">{template.summary}</Text>
+        </Stack>
+      </Table.Td>
       <Table.Td>
         <Anchor href={`${template.id}/edit`}>Edit</Anchor>
       </Table.Td>

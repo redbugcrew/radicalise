@@ -1,4 +1,4 @@
-import { ActionIcon, Group, Stack, Title } from "@mantine/core";
+import { ActionIcon, Group, Stack, Title, Text } from "@mantine/core";
 import { useParams } from "react-router-dom";
 import { useAppSelector } from "../../../store";
 import MyAttendance from "../components/MyAttendance";
@@ -23,7 +23,10 @@ export default function ShowEvent() {
   return (
     <Stack>
       <Group justify="space-between">
-        <Title order={1}>{event.name}</Title>
+        <Stack gap={0}>
+          <Title order={1}>{event.name}</Title>
+          {eventTemplate && <Text c="dimmed">{[eventTemplate.name, eventTemplate.summary].filter(Boolean).join(": ")}</Text>}
+        </Stack>
 
         <Anchor href="edit">
           <ActionIcon variant="filled" aria-label="Edit Event" size="lg">

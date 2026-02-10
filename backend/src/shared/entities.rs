@@ -318,10 +318,19 @@ pub struct ExpressionOfInterest {
     pub participant_connections: Option<String>,
 }
 
+#[derive(Serialize, Deserialize, ToSchema, sqlx::Type, Debug, Clone)]
+pub enum EventResponseExpectation {
+    Expected,
+    Encouraged,
+    Welcome,
+}
+
 #[derive(Deserialize, Serialize, ToSchema, Debug, Clone)]
 pub struct EventTemplate {
     pub id: i64,
     pub name: String,
+    pub summary: String,
+    pub response_expectation: EventResponseExpectation,
     pub links: Option<Vec<Link>>,
 }
 

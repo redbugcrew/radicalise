@@ -26,6 +26,12 @@ export enum InvolvementStatus {
   Exiting = "Exiting",
 }
 
+export enum EventResponseExpectation {
+  Expected = "Expected",
+  Encouraged = "Encouraged",
+  Welcome = "Welcome",
+}
+
 export enum EoiError {
   CollectiveNotFound = "CollectiveNotFound",
   EoiNotFound = "EoiNotFound",
@@ -205,6 +211,8 @@ export interface EventTemplate {
   id: number;
   links?: any[] | null;
   name: string;
+  response_expectation: EventResponseExpectation;
+  summary: string;
 }
 
 export type EventTemplatesEvent = {
@@ -508,7 +516,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 1.3.3
+ * @version 1.3.8
  * @license
  */
 export class Api<

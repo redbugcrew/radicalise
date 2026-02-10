@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "\n        INSERT INTO event_templates (name, collective_id)\n        VALUES (?, ?)\n        RETURNING id, name\n        ",
+  "query": "\n        INSERT INTO event_templates (name, collective_id, summary, response_expectation)\n        VALUES (?, ?, ?, ?)\n        RETURNING id, name\n        ",
   "describe": {
     "columns": [
       {
@@ -15,12 +15,12 @@
       }
     ],
     "parameters": {
-      "Right": 2
+      "Right": 4
     },
     "nullable": [
       false,
       false
     ]
   },
-  "hash": "186ba2910bfe35356ed7c61a7a113898578eb928fa51c8b0d3cf880c1c5ba128"
+  "hash": "08705c6c2776539aacee4199d24c959f12f8ff3c4f8a9bb54d28ecb4b20210bc"
 }

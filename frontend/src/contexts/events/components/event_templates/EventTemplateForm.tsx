@@ -1,6 +1,6 @@
 import { useForm } from "@mantine/form";
-import { Button, Stack, TextInput } from "@mantine/core";
-import type { EventTemplate } from "../../../../api/Api";
+import { Button, NativeSelect, Stack, TextInput } from "@mantine/core";
+import { EventResponseExpectation, type EventTemplate } from "../../../../api/Api";
 import { LinksInput } from "../../../../components";
 
 interface EventTemplateFormProps {
@@ -11,6 +11,8 @@ interface EventTemplateFormProps {
 const defaultInitialValue: EventTemplate = {
   id: -1,
   name: "",
+  summary: "",
+  response_expectation: EventResponseExpectation.Welcome,
   links: [],
 };
 
@@ -34,6 +36,21 @@ export default function EventTemplateForm({ value, onSubmit }: EventTemplateForm
             withAsterisk
             {...form.getInputProps("name")}
           />
+
+          <TextInput
+            label="Summary"
+            description="A brief, optional, summary of the template. This should give a quick overview of what this type of event is about."
+            placeholder="e.g. This is the main meeting where we make decisions together as a group."
+            {...form.getInputProps("summary")}
+          />
+
+          <NativeSelect
+            label="Response Expectation"
+            description="What expectation does the group have that invitees will respond to this type of event?"
+            data={Object.values(EventResponseExpectation)}
+            {...form.getInputProps("response_expectation")}
+          />
+
           <LinksInput
             label="Links"
             description="Add links to resources on this type of event in general. Ie; how we run meetings, not the agenda for a specific meeting"
