@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "\n        SELECT id, name\n        FROM event_templates\n        WHERE collective_id = ?\n        ORDER BY name\n        ",
+  "query": "\n        UPDATE event_templates\n        SET name = ?, summary = ?, response_expectation = ?\n        WHERE id = ? AND collective_id = ?\n        RETURNING id, name\n        ",
   "describe": {
     "columns": [
       {
@@ -15,12 +15,12 @@
       }
     ],
     "parameters": {
-      "Right": 1
+      "Right": 5
     },
     "nullable": [
       false,
       false
     ]
   },
-  "hash": "1e197bfebf27a7243206e092ecc4e2cfb1305783e80961c0f5af88ed2ec8f583"
+  "hash": "e0c827a4ab7e06692bc388f45d42d3671fd5a29b7164238ac2147726f81b45ac"
 }
