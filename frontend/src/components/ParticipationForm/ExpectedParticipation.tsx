@@ -6,10 +6,9 @@ import { occurInInterval, withResponseExpection } from "../../store/events";
 
 interface ExpectedParticipationProps {
   interval: Interval;
-  personId: number;
 }
 
-export default function ExpectedParticipation({ interval, personId }: ExpectedParticipationProps) {
+export default function ExpectedParticipation({ interval }: ExpectedParticipationProps) {
   const expectations = [EventResponseExpectation.Expected];
   const events = useAppSelector((state) => withResponseExpection(occurInInterval(state.events, interval), expectations));
 

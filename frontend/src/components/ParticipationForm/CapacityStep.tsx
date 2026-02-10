@@ -10,7 +10,7 @@ export default function CapacityStep({ form, readOnly }: StepProps) {
   const collective_noun_name = useAppSelector((state) => state.collective?.noun_name || "the collective");
 
   return (
-    <Stack mt="lg" gap="md">
+    <Stack gap="md">
       <Stack gap={0} mb="md">
         <Flex direction={{ base: "column", sm: "row" }} justify="space-between" align={{ base: "flex-start", sm: "center" }} gap="xs" mb={{ base: "md", sm: 0 }}>
           <Title order={3} m={0}>

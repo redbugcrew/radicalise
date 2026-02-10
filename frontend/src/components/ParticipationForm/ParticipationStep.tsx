@@ -9,10 +9,9 @@ import ExpectedParticipation from "./ExpectedParticipation";
 
 type ParticipationStepProps = StepProps & {
   interval: Interval;
-  personId: number;
 };
 
-export function ParticipationStep({ form, readOnly, interval, personId }: ParticipationStepProps) {
+export function ParticipationStep({ form, readOnly, interval }: ParticipationStepProps) {
   const [intention, setIntention] = useState<ParticipationIntention | null>(form.values.participation_intention);
   const [optOutType, setOptOutType] = useState<OptOutType | null>(form.values.opt_out_type);
   const collective_noun_name = useAppSelector((state) => state.collective?.noun_name || "the collective");
@@ -30,7 +29,7 @@ export function ParticipationStep({ form, readOnly, interval, personId }: Partic
   const showExpectedParticipation = intention === "OptIn";
 
   return (
-    <Stack mt="lg" gap="xl">
+    <Stack gap="xl">
       <Stack gap="md">
         <Select
           label="Participation intention"
@@ -95,7 +94,7 @@ export function ParticipationStep({ form, readOnly, interval, personId }: Partic
         )}
       </Stack>
 
-      {showExpectedParticipation && <ExpectedParticipation interval={interval} personId={personId} />}
+      {showExpectedParticipation && <ExpectedParticipation interval={interval} />}
     </Stack>
   );
 }

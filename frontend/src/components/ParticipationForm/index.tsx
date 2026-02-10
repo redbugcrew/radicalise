@@ -1,4 +1,4 @@
-import { Stepper, Group, Button } from "@mantine/core";
+import { Stepper, Group, Button, Box } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useState } from "react";
 import type { CollectiveInvolvement, Interval } from "../../api/Api";
@@ -100,13 +100,19 @@ export default function ParticipationForm({ personId, interval, previousInterval
     <form onSubmit={form.onSubmit(onSubmit, (errors) => console.log("Form submission errors:", errors))}>
       <Stepper active={step} onStepClick={setStepIfValid} iconSize={32} size="lg" mt="xl">
         <Stepper.Step label="Capacity">
-          <CapacityStep form={form} readOnly={readOnly} />
+          <Box mt="lg">
+            <CapacityStep form={form} readOnly={readOnly} />
+          </Box>
         </Stepper.Step>
         <Stepper.Step label="Participation">
-          <ParticipationStep form={form} readOnly={readOnly} interval={interval} personId={personId} />
+          <Box mt="lg">
+            <ParticipationStep form={form} readOnly={readOnly} interval={interval} />
+          </Box>
         </Stepper.Step>
         <Stepper.Step label="Contribution" disabled={!additionalParticipationActive} allowStepSelect={additionalParticipationActive} icon={additionalParticipationActive ? null : <IconLock size={24} />}>
-          <ContributionStep form={form} readOnly={readOnly} personId={personId} intervalId={interval.id} crewInvolvements={crewInvolvements} previousInvolvements={previousInvolvements} />
+          <Box mt="lg">
+            <ContributionStep form={form} readOnly={readOnly} personId={personId} interval={interval} crewInvolvements={crewInvolvements} previousInvolvements={previousInvolvements} />
+          </Box>
         </Stepper.Step>
 
         <Stepper.Completed>Completed, click back button to get to previous step</Stepper.Completed>
