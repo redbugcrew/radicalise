@@ -106,3 +106,19 @@ async fn update_calendar_event(
         }
     }
 }
+
+#[utoipa::path(
+    get,
+    path = "/{calendar_token}/calendar.ics",
+    responses(
+        (status = OK, body = ()),
+        (status = INTERNAL_SERVER_ERROR, body = ()),
+    ),
+)]
+pub async fn get_calendar_ics(Path(calendar_token): Path<String>) -> impl IntoResponse {
+    println!(
+        "Received request for calendar ICS with token: {}",
+        calendar_token
+    );
+    (StatusCode::OK, ()).into_response()
+}

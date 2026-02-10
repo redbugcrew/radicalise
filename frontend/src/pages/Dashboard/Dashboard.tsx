@@ -88,7 +88,7 @@ function MyCrews({ personId, myInvolvements }: { personId: number; myInvolvement
 
 function SubscribeDetails({ calendarToken }: { calendarToken: string }) {
   const apiUrl = getApiUrl();
-  const calendarUrl = `${apiUrl.replace(/\/?$/, "/")}public/${calendarToken}/calendar.ics`;
+  const calendarUrl = `${apiUrl.replace(/\/?$/, "/")}api/public/${calendarToken}/calendar.ics`;
 
   return (
     <Card mb="md">
