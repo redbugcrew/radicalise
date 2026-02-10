@@ -15,6 +15,7 @@ use crate::{
 use self::events::CalendarEventsEvent;
 
 pub mod events;
+mod ical;
 pub mod repo;
 
 pub fn router() -> OpenApiRouter {
@@ -111,7 +112,7 @@ async fn update_calendar_event(
     get,
     path = "/{calendar_token}/calendar.ics",
     responses(
-        (status = OK, body = ()),
+        (status = OK, body = String, description = "ICS calendar data"),
         (status = INTERNAL_SERVER_ERROR, body = ()),
     ),
 )]
@@ -120,5 +121,8 @@ pub async fn get_calendar_ics(Path(calendar_token): Path<String>) -> impl IntoRe
         "Received request for calendar ICS with token: {}",
         calendar_token
     );
-    (StatusCode::OK, ()).into_response()
+
+    let my_calendar = ical::get_ical_string();
+
+    (StatusCode::OK, my_calendar).into_response()
 }
