@@ -23,6 +23,7 @@ export const theme = createTheme({
         return result;
       },
     }),
+
     Input: Input.extend({
       vars: (_theme: any, _props: any) => {
         return {

@@ -8,9 +8,11 @@ import { compareAsc } from "date-fns";
 interface EventsListProps {
   events: CalendarEvent[];
   noDataMessage?: React.ReactNode;
+  showParticipantCounts?: boolean;
+  interactive?: boolean;
 }
 
-export default function EventsList({ events, noDataMessage }: EventsListProps) {
+export default function EventsList({ events, noDataMessage, showParticipantCounts, interactive }: EventsListProps) {
   if (events.length === 0) {
     return <NoData>{noDataMessage || "No events found"}</NoData>;
   }
@@ -20,7 +22,7 @@ export default function EventsList({ events, noDataMessage }: EventsListProps) {
   return (
     <Stack>
       {sortedEvents.map((event) => (
-        <EventCard key={event.id} event={event} />
+        <EventCard key={event.id} event={event} showParticipantCounts={showParticipantCounts} interactive={interactive} />
       ))}
     </Stack>
   );

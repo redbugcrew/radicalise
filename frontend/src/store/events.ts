@@ -1,7 +1,23 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { CalendarEvent, CalendarEventAttendance } from "../api/Api";
+import type { CalendarEvent, CalendarEventAttendance, EventResponseExpectation, Interval } from "../api/Api";
+import { endOfDay, startOfDay, toDate } from "date-fns";
 
 export type EventsState = CalendarEvent[];
+
+export function occurInInterval(events: CalendarEvent[], interval: Interval): CalendarEvent[] {
+  const intervalStart = startOfDay(interval.start_date);
+  const intervalEnd = endOfDay(interval.end_date);
+
+  return events.filter((event) => {
+    const eventStart = toDate(event.start_at);
+    const eventEnd = event.end_at ? toDate(event.end_at) : eventStart;
+    return eventStart < intervalEnd && eventEnd > intervalStart;
+  });
+}
+
+export function withResponseExpection(events: CalendarEvent[], expections: EventResponseExpectation[]): CalendarEvent[] {
+  return events.filter((event) => expections.includes(event.response_expectation));
+}
 
 const eventsSlice = createSlice({
   name: "events",

@@ -1,7 +1,7 @@
 import { useForm } from "@mantine/form";
 import { Button, Select, Stack, TextInput } from "@mantine/core";
 import { LinksInput } from "../../../components";
-import type { CalendarEvent, EventTemplate, Link } from "../../../api/Api";
+import { EventResponseExpectation, type CalendarEvent, type EventTemplate, type Link } from "../../../api/Api";
 import { DateTimePicker } from "@mantine/dates";
 
 interface CalendarEventFormData {
@@ -25,6 +25,7 @@ const defaultEvent: CalendarEventFormData = {
   event_template_id: null,
   name: "",
   start_at: null,
+
   links: [] as Link[],
 };
 
@@ -47,6 +48,7 @@ function prepareCalendarEvent(data: CalendarEventFormData): CalendarEvent | null
     event_template_id: parseInt(data.event_template_id.toString(), 10),
     name: data.name,
     start_at: data.start_at,
+    response_expectation: EventResponseExpectation.Welcome, // This has no effect
   };
 }
 
