@@ -1,7 +1,7 @@
 {
   "name": "radicalise",
   "private": true,
-  "version": "1.3.10",
+  "version": "1.3.11",
   "devDependencies": {
     "@j-ulrich/release-it-regex-bumper": "^5.0.0",
     "release-it": "^18.1.0"
