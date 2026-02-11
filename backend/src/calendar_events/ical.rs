@@ -3,6 +3,11 @@ use icalendar::{Calendar, Component, Event, EventLike};
 
 use crate::shared::entities::CalendarEvent;
 
+lazy_static! {
+    pub static ref BASE_URL: String =
+        std::env::var("BASE_URL").unwrap_or_else(|_| "http://localhost:5173".to_string());
+}
+
 pub fn get_ical_string(name: String, events: Vec<CalendarEvent>) -> String {
     let mut my_calendar = Calendar::new();
 
@@ -12,10 +17,16 @@ pub fn get_ical_string(name: String, events: Vec<CalendarEvent>) -> String {
         let mut cal_event = Event::new();
         let start_at = parse_naive_date_time(&event.start_at);
         let end_at = parse_optional_naive_date_time(&event.end_at);
+        let id = event.id.to_string();
+
+        let url = format!("{}/events/{}", *BASE_URL, id);
 
         cal_event
-            .summary(&event.name)
-            .description("")
+            .uid(&id)
+            .summary(&event.summary)
+            .description(&event.description)
+            .location(&event.location)
+            .url(&url)
             .starts(start_at);
 
         if let Some(end_at) = &end_at {
