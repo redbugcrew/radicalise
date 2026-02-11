@@ -1,8 +1,8 @@
-import { ActionIcon, Group, Stack, Title, Text } from "@mantine/core";
+import { ActionIcon, Group, Stack, Title, Text, Table } from "@mantine/core";
 import { useParams } from "react-router-dom";
 import { useAppSelector } from "../../../store";
 import MyAttendance from "../components/MyAttendance";
-import { Anchor, LinksStack } from "../../../components";
+import { Anchor, LinksStack, Markdown } from "../../../components";
 import { IconEdit } from "@tabler/icons-react";
 import EventAttendeeTable from "../components/EventAttendeeTable";
 import { isPast } from "date-fns";
@@ -22,11 +22,8 @@ export default function ShowEvent() {
 
   return (
     <Stack>
-      <Group justify="space-between">
-        <Stack gap={0}>
-          <Title order={1}>{event.name}</Title>
-          {eventTemplate && <Text c="dimmed">{[eventTemplate.name, eventTemplate.summary].filter(Boolean).join(": ")}</Text>}
-        </Stack>
+      <Group justify="space-between" align="center" wrap="nowrap" gap="md">
+        <Title order={1}>{event.name}</Title>
 
         <Anchor href="edit">
           <ActionIcon variant="filled" aria-label="Edit Event" size="lg">
@@ -36,6 +33,47 @@ export default function ShowEvent() {
       </Group>
 
       <Stack gap="lg">
+        <Stack gap="md">
+          <Title order={2}>Details</Title>
+          <Table variant="vertical">
+            <Table.Tbody>
+              <Table.Tr>
+                <Table.Th>Type</Table.Th>
+                <Table.Td>
+                  <Text fw="bold">{eventTemplate?.name}</Text>
+                  <Text>{eventTemplate?.summary}</Text>
+                </Table.Td>
+              </Table.Tr>
+              <Table.Tr>
+                <Table.Th>Summary</Table.Th>
+                <Table.Td>
+                  <Text>{event?.summary}</Text>
+                </Table.Td>
+              </Table.Tr>
+              <Table.Tr>
+                <Table.Th>Description</Table.Th>
+                <Table.Td>
+                  <Markdown>{event?.description}</Markdown>
+                </Table.Td>
+              </Table.Tr>
+              <Table.Tr>
+                <Table.Th>Location</Table.Th>
+                <Table.Td>
+                  <Text>{event?.location}</Text>
+                </Table.Td>
+              </Table.Tr>
+              <Table.Tr>
+                <Table.Th>Start Time</Table.Th>
+                <Table.Td>{new Date(event.start_at).toLocaleString()}</Table.Td>
+              </Table.Tr>
+              <Table.Tr>
+                <Table.Th>End Time</Table.Th>
+                <Table.Td>{event.end_at ? new Date(event.end_at).toLocaleString() : "N/A"}</Table.Td>
+              </Table.Tr>
+            </Table.Tbody>
+          </Table>
+        </Stack>
+
         <Stack gap="md" align="flex-start">
           <Title order={2}>Me</Title>
           <MyAttendance event={event} readonly={inPast} />

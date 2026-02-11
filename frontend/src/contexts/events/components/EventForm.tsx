@@ -1,5 +1,5 @@
 import { useForm } from "@mantine/form";
-import { Button, Select, Stack, TextInput } from "@mantine/core";
+import { Button, Select, Stack, Textarea, TextInput } from "@mantine/core";
 import { LinksInput } from "../../../components";
 import { EventResponseExpectation, type CalendarEvent, type EventTemplate, type Link } from "../../../api/Api";
 import { DateTimePicker } from "@mantine/dates";
@@ -9,6 +9,9 @@ interface CalendarEventFormData {
   event_template_id: number | null;
   links?: any[] | null;
   name: string | null;
+  summary: string;
+  description: string;
+  location: string;
   start_at: string | null;
   end_at?: string | null;
 }
@@ -24,8 +27,11 @@ const defaultEvent: CalendarEventFormData = {
   id: -1,
   event_template_id: null,
   name: "",
+  summary: "",
+  description: "",
+  location: "",
   start_at: null,
-
+  end_at: null,
   links: [] as Link[],
 };
 
@@ -109,6 +115,23 @@ export default function EventTemplateForm({ value, eventTemplates, submitText, o
             placeholder="June Assembly, 2025 Retreat, etc"
             withAsterisk
             {...form.getInputProps("name")}
+          />
+
+          <TextInput label="Location" description="The location of the event." placeholder="A building name, address, or online meeting link" {...form.getInputProps("location")} />
+
+          <TextInput
+            label="Summary"
+            description="A short summary of the event. This is optional, but can be useful to provide more context about the event."
+            placeholder="A brief summary of the event"
+            {...form.getInputProps("summary")}
+          />
+
+          <Textarea
+            label="Description"
+            description="A longer description of the event. This is optional, but can be useful to provide more context about the event."
+            placeholder="A detailed description of the event"
+            rows={4}
+            {...form.getInputProps("description")}
           />
 
           <DateTimePicker label="Start at" placeholder="Pick a date and time" timePickerProps={{ format: "12h" }} key={form.key("start_at")} {...form.getInputProps("start_at")} />

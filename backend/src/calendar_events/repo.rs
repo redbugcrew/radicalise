@@ -6,7 +6,7 @@ use crate::{
     },
     shared::{
         entities::{
-            CalendarEvent, CalendarEventId, CollectiveId, EventResponseExpectation, PersonId,
+            CalendarEvent, CalendarEventId, CollectiveId, EventResponseExpectation, Link, PersonId,
         },
         links_repo::{find_all_links_for_owner_type, hash_links_by_owner, update_links_for_owner},
     },
@@ -89,7 +89,28 @@ pub struct CalendarEventRow {
     pub name: String,
     pub start_at: String,
     pub end_at: Option<String>,
+    pub summary: String,
+    pub description: String,
+    pub location: String,
     pub response_expectation: EventResponseExpectation,
+}
+
+impl CalendarEventRow {
+    pub fn to_calendar_event(&self, links: Option<Vec<Link>>) -> CalendarEvent {
+        CalendarEvent {
+            id: self.id,
+            event_template_id: self.event_template_id,
+            name: self.name.clone(),
+            summary: self.summary.clone(),
+            description: self.description.clone(),
+            location: self.location.clone(),
+            start_at: self.start_at.clone(),
+            end_at: self.end_at.clone(),
+            links,
+            response_expectation: self.response_expectation.clone(),
+            attendances: None,
+        }
+    }
 }
 
 pub async fn list_calendar_events_with_attendances(
@@ -122,15 +143,10 @@ pub async fn list_calendar_events(
 
     let calendar_events: Vec<CalendarEvent> = rows
         .into_iter()
-        .map(|row| CalendarEvent {
-            id: row.id,
-            name: row.name,
-            event_template_id: row.event_template_id,
-            start_at: row.start_at,
-            end_at: row.end_at,
-            links: Some(links_hash.get(&row.id).cloned().unwrap_or_else(Vec::new)),
-            response_expectation: row.response_expectation,
-            attendances: None,
+        .map(|row| {
+            row.to_calendar_event(Some(
+                links_hash.get(&row.id).cloned().unwrap_or_else(Vec::new),
+            ))
         })
         .collect();
 
@@ -146,16 +162,7 @@ pub async fn list_calendar_events_person_attending(
 
     let calendar_events: Vec<CalendarEvent> = rows
         .into_iter()
-        .map(|row| CalendarEvent {
-            id: row.id,
-            name: row.name,
-            event_template_id: row.event_template_id,
-            start_at: row.start_at,
-            end_at: row.end_at,
-            links: None,
-            response_expectation: row.response_expectation,
-            attendances: None,
-        })
+        .map(|row| row.to_calendar_event(None))
         .collect();
 
     Ok(calendar_events)
@@ -173,6 +180,9 @@ async fn list_calendar_event_rows_person_attending(
             e.id,
             e.event_template_id,
             e.name,
+            e.summary,
+            e.description,
+            e.location,
             e.start_at AS "start_at: String",
             e.end_at AS "end_at: String",
             t.response_expectation AS "response_expectation: EventResponseExpectation"
@@ -205,6 +215,9 @@ async fn list_calendar_event_rows(
             e.id,
             e.event_template_id,
             e.name,
+            e.summary,
+            e.description,
+            e.location,
             e.start_at AS "start_at: String",
             e.end_at AS "end_at: String",
             t.response_expectation AS "response_expectation: EventResponseExpectation"

@@ -76,15 +76,18 @@ export type AppEvent =
 
 export interface CalendarEvent {
   attendances?: any[] | null;
+  description: string;
   end_at?: string | null;
   /** @format int64 */
   event_template_id: number;
   /** @format int64 */
   id: number;
   links?: any[] | null;
+  location: string;
   name: string;
   response_expectation: EventResponseExpectation;
   start_at: string;
+  summary: string;
 }
 
 export interface CalendarEventAttendance {
@@ -518,7 +521,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 1.3.10
+ * @version 1.3.12
  * @license
  */
 export class Api<
@@ -908,6 +911,19 @@ export class Api<
         body: data,
         type: ContentType.Json,
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GetCalendarIcs
+     * @request GET:/api/public/{calendar_token}/calendar.ics
+     */
+    getCalendarIcs: (calendarToken: string, params: RequestParams = {}) =>
+      this.request<string, any>({
+        path: `/api/public/${calendarToken}/calendar.ics`,
+        method: "GET",
         ...params,
       }),
   };
