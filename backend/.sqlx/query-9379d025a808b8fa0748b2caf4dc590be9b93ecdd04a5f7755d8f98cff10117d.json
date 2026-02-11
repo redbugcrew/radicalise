@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE users\n        SET calendar_token = ?\n        WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "9379d025a808b8fa0748b2caf4dc590be9b93ecdd04a5f7755d8f98cff10117d"
+}

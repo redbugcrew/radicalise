@@ -1,0 +1,50 @@
+{
+  "db_name": "SQLite",
+  "query": "\n         SELECT\n            e.id,\n            e.event_template_id,\n            e.name,\n            e.start_at AS \"start_at: String\",\n            e.end_at AS \"end_at: String\",\n            t.response_expectation AS \"response_expectation: EventResponseExpectation\"\n         FROM calendar_events AS e\n         INNER JOIN event_templates AS t ON e.event_template_id = t.id\n         INNER JOIN calendar_event_attendances AS a ON e.id = a.calendar_event_id\n         WHERE\n            e.collective_id = ? AND\n            a.person_id = ? AND\n            (a.intention = 'Going' OR a.intention = 'Uncertain')\n         ORDER BY e.start_at ASC\n         ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer"
+      },
+      {
+        "name": "event_template_id",
+        "ordinal": 1,
+        "type_info": "Integer"
+      },
+      {
+        "name": "name",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "start_at: String",
+        "ordinal": 3,
+        "type_info": "Datetime"
+      },
+      {
+        "name": "end_at: String",
+        "ordinal": 4,
+        "type_info": "Datetime"
+      },
+      {
+        "name": "response_expectation: EventResponseExpectation",
+        "ordinal": 5,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "795ee2d35f85b353c87a188e381f24c411abf2969e4814f57563263e88a16468"
+}

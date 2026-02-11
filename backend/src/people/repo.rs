@@ -65,6 +65,26 @@ pub async fn find_person_by_user_id(
     .await
 }
 
+pub async fn find_person_by_calendar_token(
+    calendar_token: &str,
+    pool: &SqlitePool,
+) -> Result<Person, sqlx::Error> {
+    let result = sqlx::query_as!(
+        Person,
+        "
+        SELECT p.id, p.collective_id, p.display_name, p.about, p.avatar_id
+        FROM people AS p
+        INNER JOIN users ON p.user_id = users.id
+        WHERE
+            users.calendar_token = ?",
+        calendar_token,
+    )
+    .fetch_one(pool)
+    .await?;
+
+    Ok(result)
+}
+
 pub async fn find_all_people(
     collective_id: CollectiveId,
     pool: &SqlitePool,

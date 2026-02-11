@@ -22,6 +22,7 @@ pub struct PersonIntervalInvolvementData {
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct MyInitialData {
     pub person_id: i64,
+    pub calendar_token: Option<String>,
     pub current_interval: Option<PersonIntervalInvolvementData>,
     pub next_interval: Option<PersonIntervalInvolvementData>,
 }
@@ -55,7 +56,7 @@ pub async fn find_initial_data_for_user(
     let current_interval = find_current_interval(collective_id.clone(), pool).await?;
     let next_interval =
         find_next_interval(collective_id.clone(), current_interval.typed_id(), pool).await?;
-    let person = find_person_for_user(collective_id.clone(), user_id, pool).await?;
+    let person = find_person_for_user(collective_id.clone(), user_id.clone(), pool).await?;
     let person_id = person.typed_id();
 
     let current_interval_data = find_interval_data_for_person(
@@ -80,8 +81,16 @@ pub async fn find_initial_data_for_user(
         None
     };
 
+    let calendar_token =
+        if let Some(token) = find_calendar_token_for_user(user_id.clone(), pool).await? {
+            Some(token)
+        } else {
+            create_calendar_token_for_user(user_id, pool).await?
+        };
+
     Ok(MyInitialData {
         person_id: person_id.id,
+        calendar_token,
         current_interval: Some(current_interval_data),
         next_interval: next_interval_data,
     })
@@ -215,6 +224,39 @@ pub async fn find_person_for_user(
     )
     .fetch_one(pool)
     .await
+}
+
+pub async fn find_calendar_token_for_user(
+    user_id: UserId,
+    pool: &SqlitePool,
+) -> Result<Option<String>, sqlx::Error> {
+    sqlx::query!(
+        "SELECT calendar_token
+        FROM users
+        WHERE id = ?",
+        user_id.id,
+    )
+    .fetch_one(pool)
+    .await
+    .map(|record| record.calendar_token)
+}
+
+pub async fn create_calendar_token_for_user(
+    user_id: UserId,
+    pool: &SqlitePool,
+) -> Result<Option<String>, sqlx::Error> {
+    let token = uuid::Uuid::new_v4().to_string();
+    sqlx::query!(
+        "UPDATE users
+        SET calendar_token = ?
+        WHERE id = ?",
+        token,
+        user_id.id,
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(Some(token))
 }
 
 pub async fn find_person_id_for_user(

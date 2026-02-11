@@ -1,0 +1,44 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        SELECT p.id, p.collective_id, p.display_name, p.about, p.avatar_id\n        FROM people AS p\n        INNER JOIN users ON p.user_id = users.id\n        WHERE\n            users.calendar_token = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer"
+      },
+      {
+        "name": "collective_id",
+        "ordinal": 1,
+        "type_info": "Integer"
+      },
+      {
+        "name": "display_name",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "about",
+        "ordinal": 3,
+        "type_info": "Text"
+      },
+      {
+        "name": "avatar_id",
+        "ordinal": 4,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "beb2a34390bf3f483478870e1a5bcb16ddc529634879ddbb61b5887e9507de86"
+}

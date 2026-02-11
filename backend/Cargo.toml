@@ -30,3 +30,4 @@ utoipa-axum = "0.2.0"
 utoipa-swagger-ui = { version = "9.0.2", features = ["axum", "vendored"] }
 uuid = { version = "1.17.0", features = ["v4"] }
 openssl = { version = "0.10", features = ["vendored"] }
+icalendar = { version = "0.17.6", default-features = false }

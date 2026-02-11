@@ -1,4 +1,4 @@
-import { Button, Card, Container, Title, Stack, Text, Badge, Group } from "@mantine/core";
+import { Button, Card, Container, Title, Stack, Text, Badge, Group, Collapse } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import { useAppSelector } from "../../store";
 import { AttendanceIntention, type CalendarEvent, type CollectiveInvolvement, type CrewInvolvement, type Interval, type PersonIntervalInvolvementData } from "../../api/Api";
@@ -8,6 +8,10 @@ import { CrewsList, LinksStack } from "../../components";
 import { compareStrings } from "../../utilities/comparison";
 import { isFuture } from "date-fns";
 import EventsList from "../../contexts/events/components/EventsList";
+import { IconCalendar } from "@tabler/icons-react";
+import { useDisclosure } from "@mantine/hooks";
+import CopyIconButton from "../../components/CopyIconButton";
+import { getApiUrl } from "../../api";
 
 interface MyIntervalPartipationCardProps {
   interval: Interval;
@@ -82,11 +86,63 @@ function MyCrews({ personId, myInvolvements }: { personId: number; myInvolvement
   );
 }
 
+function SubscribeDetails({ calendarToken }: { calendarToken: string }) {
+  const apiUrl = getApiUrl();
+  const calendarUrl = `${apiUrl.replace(/\/?$/, "/")}api/public/${calendarToken}/calendar.ics`;
+
+  return (
+    <Card mb="md">
+      <Title order={3}>Subscribe your calendar</Title>
+      <Text>To have a live subscription to your calendar events, copy the URL below, and in your calendar application, add it as a new subscription.</Text>
+      <Group mt="md" wrap="nowrap" justify="flex-start">
+        <CopyIconButton value={calendarUrl} />
+        <Text
+          component="pre"
+          style={{
+            border: "1px solid var(--mantine-color-gray-6)",
+            padding: "4px 10px",
+            borderRadius: "4px",
+            overflow: "hidden",
+          }}
+        >
+          {calendarUrl}
+        </Text>
+      </Group>
+    </Card>
+  );
+}
+
+function MyEvents() {
+  const events = useAppSelector((state) => myUpcomingEvents(state.events, state.me?.person_id));
+  const [opened, { toggle }] = useDisclosure(false);
+  const calendarToken = useAppSelector((state) => state.me?.calendar_token);
+
+  return (
+    <Stack gap="md">
+      <Group justify="space-between">
+        <Title order={2}>My Upcoming Events</Title>
+        {calendarToken && (
+          <Button rightSection={<IconCalendar />} variant="outline" onClick={toggle}>
+            {opened ? "Hide" : "Subscribe"}
+          </Button>
+        )}
+      </Group>
+      <Stack gap={0}>
+        {calendarToken && (
+          <Collapse in={opened}>
+            <SubscribeDetails calendarToken={calendarToken} />
+          </Collapse>
+        )}
+        <EventsList events={events} noDataMessage="No upcoming events found" />
+      </Stack>
+    </Stack>
+  );
+}
+
 export default function Dashboard() {
   const intervals = useAppSelector((state) => state.intervals);
   const myData = useAppSelector((state) => state.me);
   const collective = useAppSelector((state) => state.collective);
-  const events = useAppSelector((state) => myUpcomingEvents(state.events, state.me?.person_id));
 
   if (!myData || !collective) {
     return <Text>Error: Data not found.</Text>;
@@ -112,12 +168,7 @@ export default function Dashboard() {
           {current_interval && myData.current_interval && <MyIntervalPartipationCard interval={current_interval} data={myData.current_interval} current={true} />}
           {next_interval && myData.next_interval && <MyIntervalPartipationCard interval={next_interval} data={myData.next_interval} current={false} />}
         </Stack>
-        {events.length > 0 && (
-          <Stack gap="md">
-            <Title order={2}>My Upcoming Events</Title>
-            <EventsList events={events} noDataMessage="No upcoming events found" />
-          </Stack>
-        )}
+        <MyEvents />
         {myData.current_interval && <MyCrews personId={myData.person_id} myInvolvements={myData.current_interval.crew_involvements} />}
         <Stack gap="md">
           <Title order={2}>Resources</Title>

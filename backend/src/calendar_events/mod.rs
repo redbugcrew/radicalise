@@ -1,9 +1,17 @@
-use axum::{Extension, Json, extract::Path, http::StatusCode, response::IntoResponse};
+use axum::{
+    Extension, Json,
+    extract::Path,
+    http::{StatusCode, header},
+    response::IntoResponse,
+};
 use sqlx::SqlitePool;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     auth::auth_backend::AuthSession,
+    calendar_events::repo::list_calendar_events_person_attending,
+    my_collective::repo::find_collective,
+    people::repo::find_person_by_calendar_token,
     realtime::RealtimeState,
     shared::{
         default_collective_id,
@@ -15,6 +23,7 @@ use crate::{
 use self::events::CalendarEventsEvent;
 
 pub mod events;
+mod ical;
 pub mod repo;
 
 pub fn router() -> OpenApiRouter {
@@ -105,4 +114,67 @@ async fn update_calendar_event(
             (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response()
         }
     }
+}
+
+#[utoipa::path(
+    get,
+    path = "/{calendar_token}/calendar.ics",
+    responses(
+        (status = OK, body = String, description = "ICS calendar data", content_type = "text/calendar"),
+        (status = INTERNAL_SERVER_ERROR, body = ()),
+    ),
+)]
+pub async fn get_calendar_ics(
+    Path(calendar_token): Path<String>,
+    Extension(pool): Extension<SqlitePool>,
+) -> impl IntoResponse {
+    println!(
+        "Received request for calendar ICS with token: {}",
+        calendar_token
+    );
+
+    let collective = match find_collective(default_collective_id(), &pool).await {
+        Ok(collective) => collective,
+        Err(err) => {
+            eprintln!("Error looking up collective: {}", err);
+            return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
+        }
+    };
+
+    let person = match find_person_by_calendar_token(&calendar_token, &pool).await {
+        Ok(person) => person,
+        Err(err) => {
+            eprintln!("Error looking up person by calendar token: {}", err);
+            return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
+        }
+    };
+
+    let events = match list_calendar_events_person_attending(
+        collective.typed_id(),
+        person.typed_id(),
+        &pool,
+    )
+    .await
+    {
+        Ok(events) => events,
+        Err(err) => {
+            eprintln!("Error listing calendar events for person: {}", err);
+            return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
+        }
+    };
+
+    let calendar_name = format!(
+        "{} - {}",
+        collective.name.unwrap_or("Radicalize".to_string()),
+        person.display_name
+    );
+
+    let my_calendar = ical::get_ical_string(calendar_name, events);
+
+    (
+        StatusCode::OK,
+        [(header::CONTENT_TYPE, "text/calendar")],
+        my_calendar,
+    )
+        .into_response()
 }

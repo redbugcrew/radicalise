@@ -5,7 +5,9 @@ use crate::{
         attendances_for_calendar_events, hash_attendances_by_event,
     },
     shared::{
-        entities::{CalendarEvent, CalendarEventId, CollectiveId, EventResponseExpectation},
+        entities::{
+            CalendarEvent, CalendarEventId, CollectiveId, EventResponseExpectation, PersonId,
+        },
         links_repo::{find_all_links_for_owner_type, hash_links_by_owner, update_links_for_owner},
     },
 };
@@ -133,6 +135,63 @@ pub async fn list_calendar_events(
         .collect();
 
     Ok(calendar_events)
+}
+
+pub async fn list_calendar_events_person_attending(
+    collective_id: CollectiveId,
+    person_id: PersonId,
+    pool: &SqlitePool,
+) -> Result<Vec<CalendarEvent>, sqlx::Error> {
+    let rows = list_calendar_event_rows_person_attending(collective_id, person_id, pool).await?;
+
+    let calendar_events: Vec<CalendarEvent> = rows
+        .into_iter()
+        .map(|row| CalendarEvent {
+            id: row.id,
+            name: row.name,
+            event_template_id: row.event_template_id,
+            start_at: row.start_at,
+            end_at: row.end_at,
+            links: None,
+            response_expectation: row.response_expectation,
+            attendances: None,
+        })
+        .collect();
+
+    Ok(calendar_events)
+}
+
+async fn list_calendar_event_rows_person_attending(
+    collective_id: CollectiveId,
+    person_id: PersonId,
+    pool: &SqlitePool,
+) -> Result<Vec<CalendarEventRow>, sqlx::Error> {
+    let rows = sqlx::query_as!(
+        CalendarEventRow,
+        r#"
+         SELECT
+            e.id,
+            e.event_template_id,
+            e.name,
+            e.start_at AS "start_at: String",
+            e.end_at AS "end_at: String",
+            t.response_expectation AS "response_expectation: EventResponseExpectation"
+         FROM calendar_events AS e
+         INNER JOIN event_templates AS t ON e.event_template_id = t.id
+         INNER JOIN calendar_event_attendances AS a ON e.id = a.calendar_event_id
+         WHERE
+            e.collective_id = ? AND
+            a.person_id = ? AND
+            (a.intention = 'Going' OR a.intention = 'Uncertain')
+         ORDER BY e.start_at ASC
+         "#,
+        collective_id.id,
+        person_id.id,
+    )
+    .fetch_all(pool)
+    .await?;
+
+    Ok(rows)
 }
 
 async fn list_calendar_event_rows(
