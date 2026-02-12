@@ -23,7 +23,7 @@ pub fn get_ical_string(name: String, events: Vec<CalendarEvent>) -> String {
 
         cal_event
             .uid(&id)
-            .summary(&event.summary)
+            .summary(&event.name)
             .description(&event.description)
             .location(&event.location)
             .url(&url)
