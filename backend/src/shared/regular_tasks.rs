@@ -66,6 +66,11 @@ pub async fn add_interval_implicit_involvements(
             _ => {}
         }
 
+        let new_counter = match previous_involvement.participation_intention {
+            Some(_) => 0,
+            None => previous_involvement.implicit_counter + 1,
+        };
+
         let new_involvement = CollectiveInvolvement {
             id: -1, // -1 indicates a new record
             person_id: previous_involvement.person_id.clone(),
@@ -79,7 +84,7 @@ pub async fn add_interval_implicit_involvements(
             opt_out_type: None,
             opt_out_planned_return_date: None,
             intention_context: None,
-            implicit_counter: previous_involvement.implicit_counter + 1,
+            implicit_counter: new_counter,
         };
         let result = insert_collective_involvement_if_missing(new_involvement.into(), pool).await;
         if result.is_err() {

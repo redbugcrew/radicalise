@@ -245,3 +245,20 @@ pub async fn delete_implicit_collective_involvements(
 
     Ok(())
 }
+
+pub async fn set_implicit_counter_to_zero(
+    collective_id: CollectiveId,
+    pool: &SqlitePool,
+) -> Result<(), sqlx::Error> {
+    sqlx::query!(
+        "UPDATE collective_involvements
+        SET implicit_counter = 0
+        WHERE
+            collective_id = ?",
+        collective_id.id
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(())
+}

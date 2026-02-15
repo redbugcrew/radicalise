@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE collective_involvements\n        SET implicit_counter = 0\n        WHERE\n            collective_id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "1cb736555b691a964da61b33074a1298ef3cf9f29a90f92bf6ec31c93c31a55f"
+}
