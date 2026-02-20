@@ -20,15 +20,21 @@ pub async fn insert_calendar_event_with_links(
 ) -> Result<CalendarEvent, sqlx::Error> {
     let rec = sqlx::query!(
         "
-        INSERT INTO calendar_events (event_template_id, name, start_at, end_at, collective_id)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO calendar_events (
+                event_template_id, name, start_at, end_at, collective_id,
+                location, summary, description
+            )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         RETURNING id
         ",
         event_template_id,
         data.name,
         data.start_at,
         data.end_at,
-        collective_id.id
+        collective_id.id,
+        data.location,
+        data.summary,
+        data.description
     )
     .fetch_one(pool)
     .await?;
@@ -57,13 +63,16 @@ pub async fn update_calendar_event_with_links(
     sqlx::query!(
         "
         UPDATE calendar_events
-        SET event_template_id = ?, name = ?, start_at = ?, end_at = ?
+        SET event_template_id = ?, name = ?, start_at = ?, end_at = ?, location = ?, summary = ?, description = ?
         WHERE id = ? AND collective_id = ?
         ",
         event_template_id,
         data.name,
         data.start_at,
         data.end_at,
+        data.location,
+        data.summary,
+        data.description,
         event_id.id,
         collective_id.id
     )

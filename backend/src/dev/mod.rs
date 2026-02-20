@@ -5,10 +5,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 use crate::{
     intervals::repo::find_all_intervals,
     my_collective::involvements_repo::set_implicit_counter_to_zero,
-    shared::{
-        default_collective_id, entities::CollectiveId,
-        regular_tasks::add_interval_implicit_involvements,
-    },
+    shared::{default_collective_id, regular_tasks::add_interval_implicit_involvements},
 };
 
 pub fn router() -> OpenApiRouter {
