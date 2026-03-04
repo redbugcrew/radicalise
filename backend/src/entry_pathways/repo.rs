@@ -8,7 +8,7 @@ pub async fn create_eoi(
     pool: &SqlitePool,
 ) -> Result<EntryPathway, sqlx::Error> {
     let result = sqlx::query!(
-        "INSERT INTO entry_pathways (collective_id, name, email, interest, context, referral, conflict_experience, participant_connections, auth_token)
+        "INSERT INTO entry_pathways (project_id, name, email, interest, context, referral, conflict_experience, participant_connections, auth_token)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
         record.collective_id,
         record.name,
@@ -56,7 +56,7 @@ pub async fn delete_eoi_record(
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(
         "DELETE FROM entry_pathways
-        WHERE auth_token = ? AND collective_id = ?",
+        WHERE auth_token = ? AND project_id = ?",
         auth_token,
         collective_id.id
     )
@@ -69,7 +69,7 @@ pub async fn delete_eoi_record(
 pub async fn find_entry_pathway(id: i64, pool: &SqlitePool) -> Result<EntryPathway, sqlx::Error> {
     let entry_pathway = sqlx::query_as!(
         EntryPathway,
-        "SELECT id, collective_id, name, interest, context, referral, conflict_experience, participant_connections
+        "SELECT id, project_id AS collective_id, name, interest, context, referral, conflict_experience, participant_connections
         FROM entry_pathways
         WHERE id = ?",
         id
@@ -87,9 +87,9 @@ pub async fn find_eoi_by_auth_token(
 ) -> Result<Option<ExpressionOfInterest>, sqlx::Error> {
     sqlx::query_as!(
         ExpressionOfInterest,
-        "SELECT id, collective_id, name, interest, context, referral, email, conflict_experience, participant_connections
+        "SELECT id, project_id AS collective_id, name, interest, context, referral, email, conflict_experience, participant_connections
         FROM entry_pathways
-        WHERE auth_token = ? AND collective_id = ?",
+        WHERE auth_token = ? AND project_id = ?",
         auth_token,
         collective_id.id
     )
@@ -103,7 +103,7 @@ pub async fn find_all_entry_pathways_for_collective(
 ) -> Result<Vec<EntryPathway>, sqlx::Error> {
     let eois = sqlx::query_as!(
         EntryPathway,
-        "SELECT id, collective_id, name, interest, context, referral, conflict_experience, participant_connections FROM entry_pathways WHERE collective_id = ?",
+        "SELECT id, project_id AS collective_id, name, interest, context, referral, conflict_experience, participant_connections FROM entry_pathways WHERE project_id = ?",
         collective_id.id
     )
     .fetch_all(pool)

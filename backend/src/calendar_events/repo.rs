@@ -21,7 +21,7 @@ pub async fn insert_calendar_event_with_links(
     let rec = sqlx::query!(
         "
         INSERT INTO calendar_events (
-                event_template_id, name, start_at, end_at, collective_id,
+                event_template_id, name, start_at, end_at, project_id,
                 location, summary, description
             )
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -64,7 +64,7 @@ pub async fn update_calendar_event_with_links(
         "
         UPDATE calendar_events
         SET event_template_id = ?, name = ?, start_at = ?, end_at = ?, location = ?, summary = ?, description = ?
-        WHERE id = ? AND collective_id = ?
+        WHERE id = ? AND project_id = ?
         ",
         event_template_id,
         data.name,
@@ -199,7 +199,7 @@ async fn list_calendar_event_rows_person_attending(
          INNER JOIN event_templates AS t ON e.event_template_id = t.id
          INNER JOIN calendar_event_attendances AS a ON e.id = a.calendar_event_id
          WHERE
-            e.collective_id = ? AND
+            e.project_id = ? AND
             a.person_id = ? AND
             (a.intention = 'Going' OR a.intention = 'Uncertain')
          ORDER BY e.start_at ASC
@@ -232,7 +232,7 @@ async fn list_calendar_event_rows(
             t.response_expectation AS "response_expectation: EventResponseExpectation"
          FROM calendar_events AS e
          INNER JOIN event_templates AS t ON e.event_template_id = t.id
-         WHERE e.collective_id = ?
+         WHERE e.project_id = ?
          ORDER BY e.start_at ASC
          "#,
         collective_id.id,

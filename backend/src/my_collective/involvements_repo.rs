@@ -90,7 +90,7 @@ pub async fn find_collective_involvement(
         "SELECT
             id,
             person_id,
-            collective_id,
+            project_id AS collective_id,
             interval_id,
             status as \"status: InvolvementStatus\",
             private_capacity_planning,
@@ -104,7 +104,7 @@ pub async fn find_collective_involvement(
             implicit_counter
         FROM collective_involvements
         WHERE
-            collective_id = ? AND
+            project_id = ? AND
             person_id = ? AND
             interval_id = ?",
         collective_id.id,
@@ -127,7 +127,7 @@ pub async fn find_all_collective_involvements(
         "SELECT
             id,
             person_id,
-            collective_id,
+            project_id AS collective_id,
             interval_id,
             status as \"status: InvolvementStatus\",
             private_capacity_planning,
@@ -142,7 +142,7 @@ pub async fn find_all_collective_involvements(
             implicit_counter
         FROM collective_involvements
         WHERE
-            collective_id = ? AND
+            project_id = ? AND
             interval_id = ?",
         collective_id.id,
         interval_id.id,
@@ -158,10 +158,10 @@ pub async fn upsert_collective_involvement(
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
     let result = sqlx::query!(
-        "INSERT INTO collective_involvements (person_id, collective_id, interval_id, status, private_capacity_planning, wellbeing, focus, capacity_score, capacity, participation_intention, opt_out_type, opt_out_planned_return_date,
+        "INSERT INTO collective_involvements (person_id, project_id, interval_id, status, private_capacity_planning, wellbeing, focus, capacity_score, capacity, participation_intention, opt_out_type, opt_out_planned_return_date,
         intention_context)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(person_id, collective_id, interval_id) DO UPDATE SET
+        ON CONFLICT(person_id, project_id, interval_id) DO UPDATE SET
             status = excluded.status,
             private_capacity_planning = excluded.private_capacity_planning,
             wellbeing = excluded.wellbeing,
@@ -201,10 +201,10 @@ pub async fn insert_collective_involvement_if_missing(
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(
-        "INSERT INTO collective_involvements (person_id, collective_id, interval_id, status, private_capacity_planning, wellbeing, focus, capacity_score, capacity, participation_intention, opt_out_type, opt_out_planned_return_date,
+        "INSERT INTO collective_involvements (person_id, project_id, interval_id, status, private_capacity_planning, wellbeing, focus, capacity_score, capacity, participation_intention, opt_out_type, opt_out_planned_return_date,
         intention_context, implicit_counter)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(person_id, collective_id, interval_id) DO NOTHING",
+        ON CONFLICT(person_id, project_id, interval_id) DO NOTHING",
         involvement.person_id,
         involvement.collective_id,
         involvement.interval_id,
@@ -235,7 +235,7 @@ pub async fn delete_implicit_collective_involvements(
         "DELETE FROM collective_involvements
         WHERE
             interval_id = ? AND
-            collective_id = ? AND
+            project_id = ? AND
             participation_intention IS NULL",
         interval_id.id,
         collective_id.id
@@ -254,7 +254,7 @@ pub async fn set_implicit_counter_to_zero(
         "UPDATE collective_involvements
         SET implicit_counter = 0
         WHERE
-            collective_id = ?",
+            project_id = ?",
         collective_id.id
     )
     .execute(pool)

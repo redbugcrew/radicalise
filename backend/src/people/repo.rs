@@ -12,7 +12,7 @@ pub async fn update_person(
         "
         UPDATE people
         SET display_name = ?, about = ?, avatar_id = ?
-        WHERE id = ? AND collective_id = ?",
+        WHERE id = ? AND project_id = ?",
         input.display_name,
         input.about,
         input.avatar_id,
@@ -33,11 +33,11 @@ pub async fn find_person_by_id(
     sqlx::query_as!(
         Person,
         "
-        SELECT id, collective_id, display_name, about, avatar_id
+        SELECT id, project_id AS collective_id, display_name, about, avatar_id
         FROM people
         WHERE
             id = ? AND
-            collective_id = ?",
+            project_id = ?",
         person_id.id,
         collective_id.id
     )
@@ -53,11 +53,11 @@ pub async fn find_person_by_user_id(
     sqlx::query_as!(
         Person,
         "
-        SELECT id, collective_id, display_name, about, avatar_id
+        SELECT id, project_id AS collective_id, display_name, about, avatar_id
         FROM people
         WHERE
             user_id = ? AND
-            collective_id = ?",
+            project_id = ?",
         user_id.id,
         collective_id.id
     )
@@ -72,7 +72,7 @@ pub async fn find_person_by_calendar_token(
     let result = sqlx::query_as!(
         Person,
         "
-        SELECT p.id, p.collective_id, p.display_name, p.about, p.avatar_id
+        SELECT p.id, p.project_id AS collective_id, p.display_name, p.about, p.avatar_id
         FROM people AS p
         INNER JOIN users ON p.user_id = users.id
         WHERE
@@ -92,9 +92,9 @@ pub async fn find_all_people(
     sqlx::query_as!(
         Person,
         "
-        SELECT id, collective_id, display_name, about, avatar_id
+        SELECT id, project_id AS collective_id, display_name, about, avatar_id
         FROM people
-        WHERE collective_id = ?",
+        WHERE project_id = ?",
         collective_id.id
     )
     .fetch_all(pool)

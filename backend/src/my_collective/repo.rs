@@ -52,7 +52,7 @@ pub async fn find_collective(
 ) -> Result<Collective, sqlx::Error> {
     sqlx::query!(
         "SELECT id, name, noun_name, description, slug, feature_eoi, eoi_description, eoi_managing_crew_id
-        FROM collectives WHERE id = ?",
+        FROM projects WHERE id = ?",
         collective_id.id
     )
     .fetch_one(pool)
@@ -76,7 +76,7 @@ pub async fn find_collective_by_slug(
 ) -> Result<Collective, sqlx::Error> {
     sqlx::query!(
         "SELECT id, name, noun_name, description, slug, feature_eoi, eoi_description, eoi_managing_crew_id
-        FROM collectives WHERE slug = ?",
+        FROM projects WHERE slug = ?",
         collective_slug
     )
     .fetch_one(pool)
@@ -149,7 +149,7 @@ pub async fn find_initial_data_for_collective(
 
     let intervals = sqlx::query_as!(
         Interval,
-        "SELECT id, start_date, end_date FROM intervals WHERE collective_id = ?",
+        "SELECT id, start_date, end_date FROM intervals WHERE project_id = ?",
         collective.id
     )
     .fetch_all(pool)
@@ -196,7 +196,7 @@ pub async fn update_collective(
     pool: &SqlitePool,
 ) -> Result<Collective, sqlx::Error> {
     sqlx::query!(
-        "UPDATE collectives
+        "UPDATE projects
          SET
             name = ?, noun_name = ?, description = ?, slug = ?,
             feature_eoi = ?, eoi_description = ?, eoi_managing_crew_id = ?

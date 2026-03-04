@@ -216,9 +216,9 @@ pub async fn find_person_for_user(
 ) -> Result<Person, sqlx::Error> {
     sqlx::query_as!(
         Person,
-        "SELECT id, collective_id, display_name, about, avatar_id
+        "SELECT id, project_id AS collective_id, display_name, about, avatar_id
         FROM people
-        WHERE user_id = ? AND collective_id = ?",
+        WHERE user_id = ? AND project_id = ?",
         user_id.id,
         collective_id.id
     )
@@ -271,7 +271,7 @@ pub async fn find_person_id_for_user(
         FROM people
         WHERE
           user_id = ? AND
-          collective_id = ?",
+          project_id = ?",
         user_id.id,
         collective_id.id
     )

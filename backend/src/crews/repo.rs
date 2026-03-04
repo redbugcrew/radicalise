@@ -36,7 +36,7 @@ pub async fn find_all_crews(
 ) -> Result<Vec<Crew>, sqlx::Error> {
     sqlx::query_as!(
         Crew,
-        "SELECT id, name, description, collective_id FROM crews WHERE collective_id = ?",
+        "SELECT id, name, description, project_id AS collective_id FROM crews WHERE project_id = ?",
         collective_id.id
     )
     .fetch_all(pool)
@@ -50,7 +50,7 @@ pub async fn update_crew(
 ) -> Result<Crew, sqlx::Error> {
     sqlx::query_as!(
         Crew,
-        "UPDATE crews SET name = ?, description = ? WHERE id = ? AND collective_id = ? ",
+        "UPDATE crews SET name = ?, description = ? WHERE id = ? AND project_id = ? ",
         crew.name,
         crew.description,
         crew.id,

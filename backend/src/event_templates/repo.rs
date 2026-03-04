@@ -19,7 +19,7 @@ pub async fn insert_event_template_with_links(
 ) -> Result<EventTemplate, sqlx::Error> {
     let rec = sqlx::query!(
         "
-        INSERT INTO event_templates (name, collective_id, summary, response_expectation)
+        INSERT INTO event_templates (name, project_id, summary, response_expectation)
         VALUES (?, ?, ?, ?)
         RETURNING id, name
         ",
@@ -57,7 +57,7 @@ pub async fn update_event_template_with_links(
         "
         UPDATE event_templates
         SET name = ?, summary = ?, response_expectation = ?
-        WHERE id = ? AND collective_id = ?
+        WHERE id = ? AND project_id = ?
         RETURNING id, name
         ",
         data.name,
@@ -115,7 +115,7 @@ async fn find_all_event_template_rows(
         "
         SELECT id, name, summary, response_expectation as \"response_expectation: EventResponseExpectation\"
         FROM event_templates
-        WHERE collective_id = ?
+        WHERE project_id = ?
         ORDER BY name
         ",
         collective_id.id

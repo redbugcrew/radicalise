@@ -20,7 +20,7 @@ pub async fn insert_interval(
         "SELECT MAX(id) AS id
         FROM intervals
         WHERE
-            collective_id = ?",
+            project_id = ?",
         collective_id.id
     )
     .fetch_one(&mut *transaction)
@@ -31,7 +31,7 @@ pub async fn insert_interval(
 
     sqlx::query_as!(
         Interval,
-        "INSERT INTO intervals (id, start_date, end_date, collective_id)
+        "INSERT INTO intervals (id, start_date, end_date, project_id)
          VALUES (?, ?, ?, ?)
          RETURNING id, start_date, end_date",
         next_id,
@@ -60,7 +60,7 @@ pub async fn find_all_intervals(
         "SELECT id, start_date, end_date
         FROM intervals
         WHERE
-          collective_id = ?
+          project_id = ?
         ORDER BY id ASC",
         collective_id.id
     )
@@ -90,7 +90,7 @@ pub async fn find_current_interval(
         "SELECT id, start_date, end_date
         FROM intervals
         WHERE
-            collective_id = ? AND
+            project_id = ? AND
             start_date <= date('now') AND (end_date IS NULL OR end_date >= date('now'))
         ORDER BY id ASC
         LIMIT 1",
@@ -110,7 +110,7 @@ pub async fn find_next_interval(
         "SELECT id, start_date, end_date
         FROM intervals
         WHERE
-            collective_id = ? AND
+            project_id = ? AND
             id > ?
         ORDER BY id ASC
         LIMIT 1",
@@ -130,7 +130,7 @@ pub async fn find_previous_interval(
         "SELECT id, start_date, end_date
         FROM intervals
         WHERE
-            collective_id = ? AND
+            project_id = ? AND
             id < ?
         ORDER BY id DESC
         LIMIT 1",
@@ -177,7 +177,7 @@ pub async fn find_intervals_needing_implicit_involvements(
         "SELECT id, start_date, end_date
         FROM intervals
         WHERE
-          collective_id = ? AND
+          project_id = ? AND
           intervals.id <= ? AND
           processed_implicit_involvements = FALSE
         ORDER BY id ASC",
