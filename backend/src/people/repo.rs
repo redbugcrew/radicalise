@@ -33,7 +33,7 @@ pub async fn find_person_by_id(
     sqlx::query_as!(
         Person,
         "
-        SELECT id, project_id AS collective_id, display_name, about, avatar_id
+        SELECT id, project_id, display_name, about, avatar_id
         FROM people
         WHERE
             id = ? AND
@@ -53,7 +53,7 @@ pub async fn find_person_by_user_id(
     sqlx::query_as!(
         Person,
         "
-        SELECT id, project_id AS collective_id, display_name, about, avatar_id
+        SELECT id, project_id, display_name, about, avatar_id
         FROM people
         WHERE
             user_id = ? AND
@@ -72,7 +72,7 @@ pub async fn find_person_by_calendar_token(
     let result = sqlx::query_as!(
         Person,
         "
-        SELECT p.id, p.project_id AS collective_id, p.display_name, p.about, p.avatar_id
+        SELECT p.id, p.project_id, p.display_name, p.about, p.avatar_id
         FROM people AS p
         INNER JOIN users ON p.user_id = users.id
         WHERE
@@ -92,7 +92,7 @@ pub async fn find_all_people(
     sqlx::query_as!(
         Person,
         "
-        SELECT id, project_id AS collective_id, display_name, about, avatar_id
+        SELECT id, project_id, display_name, about, avatar_id
         FROM people
         WHERE project_id = ?",
         collective_id.id

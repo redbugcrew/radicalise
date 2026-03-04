@@ -323,11 +323,11 @@ export interface Person {
   about?: string | null;
   /** @format int64 */
   avatar_id?: number | null;
-  /** @format int64 */
-  collective_id: number;
   display_name: string;
   /** @format int64 */
   id: number;
+  /** @format int64 */
+  project_id: number;
 }
 
 export interface PersonIntervalInvolvementData {
@@ -521,7 +521,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 1.3.12
+ * @version 1.3.16
  * @license
  */
 export class Api<
