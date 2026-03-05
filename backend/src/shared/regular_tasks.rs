@@ -74,7 +74,7 @@ pub async fn add_interval_implicit_involvements(
         let new_involvement = CollectiveInvolvement {
             id: -1, // -1 indicates a new record
             person_id: previous_involvement.person_id.clone(),
-            collective_id: previous_involvement.collective_id,
+            project_id: previous_involvement.project_id,
             interval_id: interval.id,
             status: previous_involvement.status,
             private_capacity_planning: false,

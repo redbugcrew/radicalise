@@ -22,7 +22,7 @@ pub async fn find_all_crews_with_links(
             id: crew.id,
             name: crew.name,
             description: crew.description,
-            collective_id: crew.collective_id,
+            collective_id: crew.project_id,
             links: Some(links_hash.get(&crew.id).cloned().unwrap_or_else(Vec::new)),
         })
         .collect();
@@ -36,7 +36,7 @@ pub async fn find_all_crews(
 ) -> Result<Vec<Crew>, sqlx::Error> {
     sqlx::query_as!(
         Crew,
-        "SELECT id, name, description, project_id AS collective_id FROM crews WHERE project_id = ?",
+        "SELECT id, name, description, project_id FROM crews WHERE project_id = ?",
         collective_id.id
     )
     .fetch_all(pool)
@@ -73,7 +73,7 @@ pub async fn update_crew_with_links(
             id: crew.id,
             name: crew.name,
             description: crew.description,
-            collective_id: crew.collective_id,
+            project_id: crew.collective_id,
         },
         pool,
     )
@@ -85,7 +85,7 @@ pub async fn update_crew_with_links(
         id: crew_result.id,
         name: crew_result.name,
         description: crew_result.description,
-        collective_id: crew_result.collective_id,
+        collective_id: crew_result.project_id,
         links,
     })
 }

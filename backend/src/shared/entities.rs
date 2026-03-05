@@ -233,7 +233,7 @@ pub struct CapacityPlanning {
 pub struct CollectiveInvolvement {
     pub id: i64,
     pub person_id: i64,
-    pub collective_id: i64,
+    pub project_id: i64,
     pub interval_id: i64,
     pub status: InvolvementStatus,
     pub private_capacity_planning: bool,
@@ -251,7 +251,7 @@ pub struct Crew {
     pub id: i64,
     pub name: String,
     pub description: Option<String>,
-    pub collective_id: i64,
+    pub project_id: i64,
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]

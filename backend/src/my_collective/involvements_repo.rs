@@ -29,7 +29,7 @@ impl From<CollectiveInvolvementRecord> for CollectiveInvolvement {
         CollectiveInvolvement {
             id: record.id,
             person_id: record.person_id,
-            collective_id: record.collective_id,
+            project_id: record.collective_id,
             interval_id: record.interval_id,
             status: record.status,
             private_capacity_planning: record.private_capacity_planning,
@@ -53,7 +53,7 @@ impl From<CollectiveInvolvement> for CollectiveInvolvementRecord {
         CollectiveInvolvementRecord {
             id: involvement.id,
             person_id: involvement.person_id,
-            collective_id: involvement.collective_id,
+            collective_id: involvement.project_id,
             interval_id: involvement.interval_id,
             status: involvement.status,
             private_capacity_planning: involvement.private_capacity_planning,
