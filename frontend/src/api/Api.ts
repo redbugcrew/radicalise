@@ -253,10 +253,10 @@ export interface Interval {
 }
 
 export interface IntervalInvolvementData {
+  circle_involvements: CircleInvolvement[];
   crew_involvements: CrewInvolvement[];
   /** @format int64 */
   interval_id: number;
-  project_involvements: CircleInvolvement[];
 }
 
 export type IntervalsEvent = {

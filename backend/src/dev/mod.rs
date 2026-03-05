@@ -5,7 +5,9 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 use crate::{
     intervals::repo::find_all_intervals,
     my_project::involvements_repo::set_implicit_counter_to_zero,
-    shared::{default_project_id, regular_tasks::add_interval_implicit_involvements},
+    shared::{
+        default_circle_id, default_project_id, regular_tasks::add_interval_implicit_involvements,
+    },
 };
 
 pub fn router() -> OpenApiRouter {
@@ -27,7 +29,7 @@ async fn recompute_implicit_involvements(
         .await
         .unwrap();
 
-    set_implicit_counter_to_zero(default_project_id(), &pool)
+    set_implicit_counter_to_zero(default_circle_id(), &pool)
         .await
         .unwrap();
 

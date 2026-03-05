@@ -154,7 +154,7 @@ pub async fn find_all_circle_involvements(
         INNER JOIN circles ON circle_involvements.circle_id = circles.id
         WHERE
             project_id = ? AND
-            circle_involvements.id = ? AND
+            circles.id = ? AND
             interval_id = ?",
         project_id.id,
         circle_id.id,
@@ -209,17 +209,17 @@ pub async fn upsert_circle_involvement(
     }
 }
 
-pub async fn insert_project_involvement_if_missing(
+pub async fn insert_circle_involvement_if_missing(
     involvement: CircleInvolvementRecord,
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(
-        "INSERT INTO project_involvements (person_id, project_id, interval_id, status, private_capacity_planning, wellbeing, focus, capacity_score, capacity, participation_intention, opt_out_type, opt_out_planned_return_date,
+        "INSERT INTO circle_involvements (person_id, circle_id, interval_id, status, private_capacity_planning, wellbeing, focus, capacity_score, capacity, participation_intention, opt_out_type, opt_out_planned_return_date,
         intention_context, implicit_counter)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(person_id, project_id, interval_id) DO NOTHING",
+        ON CONFLICT(person_id, circle_id, interval_id) DO NOTHING",
         involvement.person_id,
-        involvement.project_id,
+        involvement.circle_id,
         involvement.interval_id,
         involvement.status,
         involvement.private_capacity_planning,
@@ -239,19 +239,19 @@ pub async fn insert_project_involvement_if_missing(
     Ok(())
 }
 
-pub async fn delete_implicit_project_involvements(
-    project_id: ProjectId,
+pub async fn delete_implicit_circle_involvements(
+    circle_id: CircleId,
     interval_id: IntervalId,
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(
-        "DELETE FROM project_involvements
+        "DELETE FROM circle_involvements
         WHERE
             interval_id = ? AND
-            project_id = ? AND
+            circle_id = ? AND
             participation_intention IS NULL",
         interval_id.id,
-        project_id.id
+        circle_id.id
     )
     .execute(pool)
     .await?;
@@ -260,15 +260,15 @@ pub async fn delete_implicit_project_involvements(
 }
 
 pub async fn set_implicit_counter_to_zero(
-    project_id: ProjectId,
+    circle_id: CircleId,
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(
-        "UPDATE project_involvements
+        "UPDATE circle_involvements
         SET implicit_counter = 0
         WHERE
-            project_id = ?",
-        project_id.id
+            circle_id = ?",
+        circle_id.id
     )
     .execute(pool)
     .await?;
