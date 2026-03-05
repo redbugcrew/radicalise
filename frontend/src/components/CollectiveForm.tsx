@@ -1,13 +1,13 @@
 import { useForm } from "@mantine/form";
 import { Button, Fieldset, Select, Stack, Switch, Textarea, TextInput } from "@mantine/core";
-import type { Collective, CrewWithLinks, Link } from "../api/Api";
+import type { Project, CrewWithLinks, Link } from "../api/Api";
 import LinksInput, { linksValidator } from "./links/LinksInput/LinksInput";
 
 interface CollectiveFormProps {
-  collective: Collective;
+  collective: Project;
   crews: CrewWithLinks[];
 
-  onSubmit: (values: Collective) => void;
+  onSubmit: (values: Project) => void;
 }
 
 interface CollectiveFormValues {
@@ -22,7 +22,7 @@ interface CollectiveFormValues {
   slug?: string | null;
 }
 
-function convertCollectiveToFormValues(input: Collective): CollectiveFormValues {
+function convertCollectiveToFormValues(input: Project): CollectiveFormValues {
   const crew_id = input.eoi_managing_crew_id !== null && input.eoi_managing_crew_id !== undefined ? input.eoi_managing_crew_id.toString() : null;
 
   return {
@@ -31,7 +31,7 @@ function convertCollectiveToFormValues(input: Collective): CollectiveFormValues 
   };
 }
 
-function convertFormValuesToCollective(input: CollectiveFormValues): Collective {
+function convertFormValuesToCollective(input: CollectiveFormValues): Project {
   const crew_id = input.eoi_managing_crew_id !== null && input.eoi_managing_crew_id !== undefined ? parseInt(input.eoi_managing_crew_id.toString(), 10) : null;
 
   return {

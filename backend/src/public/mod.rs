@@ -2,7 +2,7 @@ use axum::{Extension, Json, extract::Path, http::StatusCode, response::IntoRespo
 use sqlx::SqlitePool;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
-use crate::{my_collective::repo::find_collective_by_slug, shared::entities::Collective};
+use crate::{my_collective::repo::find_collective_by_slug, shared::entities::Project};
 
 pub fn router() -> OpenApiRouter {
     OpenApiRouter::new()
@@ -15,7 +15,7 @@ pub fn router() -> OpenApiRouter {
 }
 
 #[utoipa::path(get, path = "/collective/by_slug/{collective_slug}", responses(
-        (status = 200, body = Collective),
+        (status = 200, body = Project),
         (status = NOT_FOUND, description = "Collective was not found", body = ()),
         (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
     ), params(

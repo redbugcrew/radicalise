@@ -14,7 +14,7 @@ impl ProjectId {
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
-pub struct Collective {
+pub struct Project {
     pub id: i64,
     pub name: Option<String>,
     pub noun_name: Option<String>,
@@ -26,7 +26,7 @@ pub struct Collective {
     pub eoi_managing_crew_id: Option<i64>,
 }
 
-impl Collective {
+impl Project {
     pub fn typed_id(&self) -> ProjectId {
         ProjectId { id: self.id }
     }

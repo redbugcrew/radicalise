@@ -14,7 +14,7 @@ type ParticipationStepProps = StepProps & {
 export function ParticipationStep({ form, readOnly, interval }: ParticipationStepProps) {
   const [intention, setIntention] = useState<ParticipationIntention | null>(form.values.participation_intention);
   const [optOutType, setOptOutType] = useState<OptOutType | null>(form.values.opt_out_type);
-  const collective_noun_name = useAppSelector((state) => state.collective?.noun_name || "the collective");
+  const collective_noun_name = useAppSelector((state) => state.project?.noun_name || "the collective");
 
   form.watch("participation_intention", ({ value }) => {
     setIntention(value);

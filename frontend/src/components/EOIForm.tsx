@@ -1,9 +1,9 @@
 import { Button, Card, Stack, TextInput, Textarea, Title, Text, List, LoadingOverlay } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import type { Collective, ExpressionOfInterest } from "../api/Api";
+import type { Project, ExpressionOfInterest } from "../api/Api";
 
 interface EOIFormProps {
-  collective: Collective;
+  collective: Project;
   eoi?: ExpressionOfInterest;
   actionName?: String;
   onSubmit: (values: ExpressionOfInterest) => Promise<void>;

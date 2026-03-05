@@ -12,7 +12,7 @@ use crate::{
     realtime::RealtimeState,
     shared::{
         default_collective_id,
-        entities::{Collective, IntervalId},
+        entities::{Project, IntervalId},
         events::AppEvent,
         regular_tasks::check_intervals_tasks,
     },
@@ -98,7 +98,7 @@ async fn get_involvements(
 }
 
 #[utoipa::path(put, path = "/",
-    request_body(content = Collective, content_type = "application/json"),
+    request_body(content = Project, content_type = "application/json"),
     responses(
         (status = 200, body = Vec<AppEvent>),
         (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
@@ -108,7 +108,7 @@ pub async fn update_collective(
     auth_session: AuthSession,
     Extension(pool): Extension<SqlitePool>,
     Extension(realtime_state): Extension<RealtimeState>,
-    Json(input): Json<Collective>,
+    Json(input): Json<Project>,
 ) -> impl IntoResponse {
     println!("Updating collective: {:?}", input);
 

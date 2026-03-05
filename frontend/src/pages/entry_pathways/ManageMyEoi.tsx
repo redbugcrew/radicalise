@@ -3,12 +3,12 @@ import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getApi } from "../../api";
 import type { EoiError, ExpressionOfInterest } from "../../api/Api";
-import { CollectiveContext } from "../PublicWithCollective";
+import { ProjectContext } from "../PublicWithCollective";
 import { EOIForm } from "../../components";
 
 export default function ManageMyEoi() {
   const { authToken } = useParams<"authToken">();
-  const collective = useContext(CollectiveContext);
+  const collective = useContext(ProjectContext);
   const [eoi, setEoi] = useState<ExpressionOfInterest | null | undefined>(undefined);
   const [error, setError] = useState<EoiError | null>(null);
   const [action, setAction] = useState<"updated" | null>(null);

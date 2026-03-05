@@ -4,7 +4,7 @@ import { Anchor, EntryPathwaysTable } from "../../components";
 
 export default function EntryPathways() {
   const entryPathways = useAppSelector((state) => state.entryPathways);
-  const collectiveSlug = useAppSelector((state) => state.collective?.slug);
+  const collectiveSlug = useAppSelector((state) => state.project?.slug);
 
   return (
     <Container>

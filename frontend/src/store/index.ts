@@ -1,6 +1,6 @@
 import { useDispatch, useSelector, useStore } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
-import collectiveReducer, { collectiveLoaded, collectiveUpdated } from "./collective";
+import projectReducer, { projectLoaded, projectUpdated } from "./project";
 import peopleReducer, { peopleLoaded, personUpdated } from "./people";
 import intervalsReducer, { intervalsLoaded, intervalCreated } from "./intervals";
 import involvementsReducer, { involvementsLoaded, intervalDataChanged } from "./involvements";
@@ -15,7 +15,7 @@ import type { AppEvent, CalendarEventAttendancesEvent, CalendarEventsEvent, Coll
 
 const store = configureStore({
   reducer: {
-    collective: collectiveReducer,
+    project: projectReducer,
     people: peopleReducer,
     intervals: intervalsReducer,
     involvements: involvementsReducer,
@@ -49,7 +49,7 @@ async function loadCollectiveData(store: AppStore, api: ReturnType<typeof getApi
       store.dispatch(intervalsLoaded({ allIntervals: response.data.intervals, currentInterval: response.data.current_interval }));
       store.dispatch(involvementsLoaded(response.data.involvements));
       store.dispatch(entryPathwaysLoaded(response.data.entry_pathways));
-      store.dispatch(collectiveLoaded(response.data.collective));
+      store.dispatch(projectLoaded(response.data.collective));
       store.dispatch(eventTemplatesLoaded(response.data.event_templates));
       store.dispatch(eventsLoaded(response.data.calendar_events));
 
@@ -87,7 +87,7 @@ async function loadMeData(store: AppStore, api: ReturnType<typeof getApi>): Prom
 export async function loadInitialData(store: AppStore) {
   const api = getApi();
 
-  const dataHasLoaded = store.getState().collective;
+  const dataHasLoaded = store.getState().project;
 
   if (!dataHasLoaded) {
     console.log("Loading initial data from API...");
@@ -116,7 +116,7 @@ export async function handleCrewsEvent(event: CrewsEvent) {
 
 export async function handleCollectiveEvent(event: CollectiveEvent) {
   if (event.CollectiveUpdated) {
-    store.dispatch(collectiveUpdated(event.CollectiveUpdated));
+    store.dispatch(projectUpdated(event.CollectiveUpdated));
   }
 }
 

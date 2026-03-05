@@ -12,7 +12,7 @@ import { getSocketUrl } from "../../api";
 
 export default function Layout() {
   const [opened, { toggle }] = useDisclosure();
-  const collective = useAppSelector((state) => state.collective);
+  const collective = useAppSelector((state) => state.project);
   const person_id = useAppSelector((state) => state.me?.person_id);
   const person = useAppSelector((state) => state.people[person_id || -1]);
 

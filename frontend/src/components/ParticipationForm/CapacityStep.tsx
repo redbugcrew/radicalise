@@ -7,7 +7,7 @@ import { IconCheck } from "@tabler/icons-react";
 import CapacityScoreIcon from "../CapacityScoreIcon";
 
 export default function CapacityStep({ form, readOnly }: StepProps) {
-  const collective_noun_name = useAppSelector((state) => state.collective?.noun_name || "the collective");
+  const collective_noun_name = useAppSelector((state) => state.project?.noun_name || "the collective");
 
   return (
     <Stack gap="md">

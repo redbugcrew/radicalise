@@ -115,22 +115,8 @@ export interface CapacityPlanning {
   wellbeing?: string | null;
 }
 
-export interface Collective {
-  description?: string | null;
-  eoi_description?: string | null;
-  /** @format int64 */
-  eoi_managing_crew_id?: number | null;
-  feature_eoi: boolean;
-  /** @format int64 */
-  id: number;
-  links: Link[];
-  name?: string | null;
-  noun_name?: string | null;
-  slug?: string | null;
-}
-
 export type CollectiveEvent = {
-  CollectiveUpdated: Collective;
+  CollectiveUpdated: Project;
 };
 
 export interface CollectiveInvolvement {
@@ -243,7 +229,7 @@ export interface ForgotPasswordRequest {
 
 export interface InitialData {
   calendar_events: CalendarEvent[];
-  collective: Collective;
+  collective: Project;
   crews: CrewWithLinks[];
   current_interval: Interval;
   entry_pathways: EntryPathway[];
@@ -337,6 +323,20 @@ export interface PersonIntervalInvolvementData {
   interval_id: number;
   /** @format int64 */
   person_id: number;
+}
+
+export interface Project {
+  description?: string | null;
+  eoi_description?: string | null;
+  /** @format int64 */
+  eoi_managing_crew_id?: number | null;
+  feature_eoi: boolean;
+  /** @format int64 */
+  id: number;
+  links: Link[];
+  name?: string | null;
+  noun_name?: string | null;
+  slug?: string | null;
 }
 
 export interface ResetPasswordRequest {
@@ -769,7 +769,7 @@ export class Api<
      * @name UpdateCollective
      * @request PUT:/api/my_collective
      */
-    updateCollective: (data: Collective, params: RequestParams = {}) =>
+    updateCollective: (data: Project, params: RequestParams = {}) =>
       this.request<AppEvent[], any>({
         path: `/api/my_collective`,
         method: "PUT",
@@ -834,7 +834,7 @@ export class Api<
      * @request GET:/api/public/collective/by_slug/{collective_slug}
      */
     getCollectiveBySlug: (collectiveSlug: string, params: RequestParams = {}) =>
-      this.request<Collective, any>({
+      this.request<Project, any>({
         path: `/api/public/collective/by_slug/${collectiveSlug}`,
         method: "GET",
         format: "json",

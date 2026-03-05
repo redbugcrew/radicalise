@@ -12,9 +12,7 @@ use crate::{
     realtime::RealtimeState,
     shared::{
         db_helpers::is_constraint_violation,
-        entities::{
-            Collective, ProjectId, CrewId, EntryPathway, ExpressionOfInterest, Interval,
-        },
+        entities::{CrewId, EntryPathway, ExpressionOfInterest, Interval, Project, ProjectId},
         events::AppEvent,
     },
 };
@@ -136,8 +134,7 @@ pub async fn update_eoi(
 ) -> impl IntoResponse {
     println!("Updating EOI for details: {:?}", submission);
 
-    let eoi = match find_eoi_by_auth_token(ProjectId::new(collective_id), &auth_token, &pool)
-        .await
+    let eoi = match find_eoi_by_auth_token(ProjectId::new(collective_id), &auth_token, &pool).await
     {
         Ok(Some(result)) => result,
         Ok(None) => return (StatusCode::BAD_REQUEST, Json(EoiError::EoiNotFound)).into_response(),
@@ -249,7 +246,7 @@ async fn broadcast_entry_pathway_updated(
 }
 
 async fn send_notification_of_new_eoi(
-    collective: &Collective,
+    collective: &Project,
     current_interval: &Interval,
     resend: &Resend,
     pool: &SqlitePool,

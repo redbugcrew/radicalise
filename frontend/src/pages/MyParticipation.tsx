@@ -10,7 +10,7 @@ import { findPreviousInterval } from "../store/intervals";
 
 export default function MyParticipation() {
   const { allIntervals, currentInterval } = useAppSelector((state) => state.intervals);
-  const collective = useAppSelector((state) => state.collective);
+  const collective = useAppSelector((state) => state.project);
   const personId = useAppSelector((state) => state.me?.person_id);
 
   const navigate = useNavigate();

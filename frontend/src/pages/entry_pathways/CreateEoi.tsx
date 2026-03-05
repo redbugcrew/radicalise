@@ -3,7 +3,7 @@ import { EOIForm, Markdown } from "../../components";
 import { getApi } from "../../api";
 import { useContext, useState } from "react";
 import { EoiError, type EntryPathway, type ExpressionOfInterest } from "../../api/Api";
-import { CollectiveContext } from "../PublicWithCollective";
+import { ProjectContext } from "../PublicWithCollective";
 
 interface EoiPageResult {
   eoi: EntryPathway | null;
@@ -11,7 +11,7 @@ interface EoiPageResult {
 }
 
 export default function CreateEoi() {
-  const collective = useContext(CollectiveContext);
+  const collective = useContext(ProjectContext);
   const [result, setResult] = useState<EoiPageResult>({
     eoi: null,
     error: null,

@@ -147,7 +147,7 @@ function MyEvents() {
 export default function Dashboard() {
   const intervals = useAppSelector((state) => state.intervals);
   const myData = useAppSelector((state) => state.me);
-  const collective = useAppSelector((state) => state.collective);
+  const collective = useAppSelector((state) => state.project);
 
   if (!myData || !collective) {
     return <Text>Error: Data not found.</Text>;

@@ -1,19 +1,19 @@
 import { createContext, useEffect, useState } from "react";
 import { Outlet, useParams } from "react-router-dom";
-import type { Collective } from "../api/Api";
+import type { Project } from "../api/Api";
 import { getApi } from "../api";
 import { Container, Stack, Title, Text } from "@mantine/core";
 
-const dummyCollective: Collective = {
+const dummyProject: Project = {
   feature_eoi: false,
   id: -1,
   links: [],
 };
-export const CollectiveContext = createContext<Collective>(dummyCollective);
+export const ProjectContext = createContext<Project>(dummyProject);
 
 export default function PublicWithCollective() {
   const { collectiveSlug } = useParams<"collectiveSlug">();
-  const [collective, setCollective] = useState<Collective | null | undefined>(undefined);
+  const [collective, setCollective] = useState<Project | null | undefined>(undefined);
 
   useEffect(() => {
     if (!collectiveSlug) {
@@ -47,8 +47,8 @@ export default function PublicWithCollective() {
     );
 
   return (
-    <CollectiveContext value={collective}>
+    <ProjectContext value={collective}>
       <Outlet />
-    </CollectiveContext>
+    </ProjectContext>
   );
 }
