@@ -6,7 +6,7 @@ use crate::{
     auth::auth_backend::AuthSession,
     people::events::PeopleEvent,
     realtime::RealtimeState,
-    shared::{default_collective_id, entities::Person, events::AppEvent},
+    shared::{default_project_id, entities::Person, events::AppEvent},
 };
 
 pub mod events;
@@ -37,7 +37,7 @@ pub async fn update_person(
         return (StatusCode::BAD_REQUEST, "Person ID mismatch").into_response();
     }
 
-    match repo::update_person(input, default_collective_id(), &pool).await {
+    match repo::update_person(input, default_project_id(), &pool).await {
         Ok(response) => {
             let event = AppEvent::PeopleEvent(PeopleEvent::PersonUpdated(response));
             realtime_state

@@ -10,11 +10,11 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 use crate::{
     auth::auth_backend::AuthSession,
     calendar_events::repo::list_calendar_events_person_attending,
-    my_collective::repo::find_collective,
+    my_project::repo::find_collective,
     people::repo::find_person_by_calendar_token,
     realtime::RealtimeState,
     shared::{
-        default_collective_id,
+        default_project_id,
         entities::{CalendarEvent, CalendarEventId},
         events::AppEvent,
     },
@@ -52,7 +52,7 @@ async fn create_calendar_event(
     match repo::insert_calendar_event_with_links(
         &data,
         data.event_template_id,
-        default_collective_id(),
+        default_project_id(),
         &pool,
     )
     .await
@@ -95,7 +95,7 @@ async fn update_calendar_event(
         CalendarEventId::new(event_id),
         &data,
         data.event_template_id,
-        default_collective_id(),
+        default_project_id(),
         &pool,
     )
     .await
@@ -133,7 +133,7 @@ pub async fn get_calendar_ics(
         calendar_token
     );
 
-    let collective = match find_collective(default_collective_id(), &pool).await {
+    let collective = match find_collective(default_project_id(), &pool).await {
         Ok(collective) => collective,
         Err(err) => {
             eprintln!("Error looking up collective: {}", err);

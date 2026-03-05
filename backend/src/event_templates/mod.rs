@@ -5,7 +5,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 use crate::{
     auth::auth_backend::AuthSession,
     realtime::RealtimeState,
-    shared::{default_collective_id, entities::EventTemplate, events::AppEvent},
+    shared::{default_project_id, entities::EventTemplate, events::AppEvent},
 };
 
 use self::events::EventTemplatesEvent;
@@ -36,7 +36,7 @@ async fn create_event_template(
 ) -> impl IntoResponse {
     println!("Creating event template: {:?}", data);
 
-    match repo::insert_event_template_with_links(&data, default_collective_id(), &pool).await {
+    match repo::insert_event_template_with_links(&data, default_project_id(), &pool).await {
         Ok(event_template) => {
             let event = AppEvent::EventTemplatesEvent(EventTemplatesEvent::EventTemplateUpdated(
                 event_template,
@@ -74,7 +74,7 @@ async fn update_event_template(
         event_template_id, data
     );
 
-    match repo::update_event_template_with_links(&data, default_collective_id(), &pool).await {
+    match repo::update_event_template_with_links(&data, default_project_id(), &pool).await {
         Ok(event_template) => {
             let event = AppEvent::EventTemplatesEvent(EventTemplatesEvent::EventTemplateUpdated(
                 event_template,

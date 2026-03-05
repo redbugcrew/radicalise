@@ -40,9 +40,9 @@ export const useAppStore = useStore.withTypes<AppStore>();
 //   payload: data,
 // });
 
-async function loadCollectiveData(store: AppStore, api: ReturnType<typeof getApi>): Promise<Response | null> {
+async function loadProjectData(store: AppStore, api: ReturnType<typeof getApi>): Promise<Response | null> {
   return api.api
-    .getCollectiveState()
+    .getProjectState()
     .then((response) => {
       store.dispatch(peopleLoaded(response.data.people));
       store.dispatch(crewsLoaded(response.data.crews));
@@ -91,7 +91,7 @@ export async function loadInitialData(store: AppStore) {
 
   if (!dataHasLoaded) {
     console.log("Loading initial data from API...");
-    return loadMeData(store, api).then(() => loadCollectiveData(store, api));
+    return loadMeData(store, api).then(() => loadProjectData(store, api));
   }
   return null;
 }

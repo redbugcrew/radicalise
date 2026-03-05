@@ -7,9 +7,7 @@ use crate::{
     },
     intervals::repo::{IntervalType, find_interval, get_interval_type},
     me::repo::{self},
-    my_collective::involvements_repo::{
-        CollectiveInvolvementRecord, upsert_collective_involvement,
-    },
+    my_project::involvements_repo::{CollectiveInvolvementRecord, upsert_collective_involvement},
     shared::entities::{
         CrewId, CrewInvolvement, IntervalId, InvolvementStatus, OptOutType, ParticipationIntention,
         PersonId,

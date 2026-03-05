@@ -2,7 +2,7 @@ use axum::{Extension, Json, extract::Path, http::StatusCode, response::IntoRespo
 use sqlx::SqlitePool;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
-use crate::{my_collective::repo::find_collective_by_slug, shared::entities::Project};
+use crate::{my_project::repo::find_collective_by_slug, shared::entities::Project};
 
 pub fn router() -> OpenApiRouter {
     OpenApiRouter::new()

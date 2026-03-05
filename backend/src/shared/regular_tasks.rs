@@ -5,14 +5,14 @@ use crate::{
         find_intervals_needing_implicit_involvements, find_previous_interval,
         mark_implicit_involvements_processed,
     },
-    my_collective::involvements_repo::{
+    my_project::involvements_repo::{
         delete_implicit_collective_involvements, find_all_collective_involvements,
         insert_collective_involvement_if_missing,
     },
     shared::entities::OptOutType,
 };
 
-use super::entities::{ProjectId, CollectiveInvolvement, Interval};
+use super::entities::{CollectiveInvolvement, Interval, ProjectId};
 
 pub async fn check_intervals_tasks(
     collective_id: ProjectId,

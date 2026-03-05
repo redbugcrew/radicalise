@@ -9,10 +9,10 @@ use crate::{
         my_involvement::{MyParticipationInput, update_my_involvements},
         repo::{MyInitialData, find_person_id_for_user},
     },
-    my_collective::involvements_repo::find_collective_involvement,
+    my_project::involvements_repo::find_collective_involvement,
     realtime::RealtimeState,
     shared::{
-        default_collective_id,
+        default_project_id,
         entities::{CollectiveInvolvement, IntervalId, UserId},
         events::AppEvent,
     },
@@ -40,12 +40,9 @@ async fn get_my_state(
 ) -> impl IntoResponse {
     match auth_session.user {
         Some(user) => {
-            let result = repo::find_initial_data_for_user(
-                default_collective_id(),
-                UserId::new(user.id),
-                &pool,
-            )
-            .await;
+            let result =
+                repo::find_initial_data_for_user(default_project_id(), UserId::new(user.id), &pool)
+                    .await;
 
             match result {
                 Ok(initial_data) => (StatusCode::OK, Json(initial_data)).into_response(),
@@ -75,7 +72,7 @@ async fn my_participation(
     match auth_session.user {
         Some(user) => {
             let person_id =
-                find_person_id_for_user(default_collective_id(), UserId::new(user.id), &pool).await;
+                find_person_id_for_user(default_project_id(), UserId::new(user.id), &pool).await;
             if person_id.is_err() {
                 return (StatusCode::NOT_FOUND, ()).into_response();
             }
@@ -83,7 +80,7 @@ async fn my_participation(
             let interval_id = IntervalId::new(interval_id);
 
             let result =
-                find_collective_involvement(default_collective_id(), person_id, interval_id, &pool)
+                find_collective_involvement(default_project_id(), person_id, interval_id, &pool)
                     .await;
 
             match result {
@@ -121,7 +118,7 @@ async fn update_my_participation(
     match auth_session.user {
         Some(user) => {
             let person_id =
-                find_person_id_for_user(default_collective_id(), UserId::new(user.id), &pool).await;
+                find_person_id_for_user(default_project_id(), UserId::new(user.id), &pool).await;
             if person_id.is_err() {
                 return (StatusCode::NOT_FOUND, ()).into_response();
             }
@@ -138,7 +135,7 @@ async fn update_my_participation(
 
             // Fetch the updated involvement to return
             let output_result = repo::find_interval_data_for_person(
-                default_collective_id(),
+                default_project_id(),
                 person_id,
                 interval_id,
                 &pool,

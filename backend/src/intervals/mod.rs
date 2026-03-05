@@ -6,7 +6,7 @@ use crate::{
     auth::auth_backend::AuthSession,
     intervals::events::IntervalsEvent,
     realtime::RealtimeState,
-    shared::{default_collective_id, entities::Interval, events::AppEvent},
+    shared::{default_project_id, entities::Interval, events::AppEvent},
 };
 
 pub mod events;
@@ -31,7 +31,7 @@ async fn create_interval(
 ) -> impl IntoResponse {
     println!("Creating interval: {:?}", interval);
 
-    match repo::insert_interval(interval, default_collective_id(), &pool).await {
+    match repo::insert_interval(interval, default_project_id(), &pool).await {
         Ok(response) => {
             let event = AppEvent::IntervalsEvent(IntervalsEvent::IntervalCreated(response));
             realtime_state

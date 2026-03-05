@@ -4,8 +4,8 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     intervals::repo::find_all_intervals,
-    my_collective::involvements_repo::set_implicit_counter_to_zero,
-    shared::{default_collective_id, regular_tasks::add_interval_implicit_involvements},
+    my_project::involvements_repo::set_implicit_counter_to_zero,
+    shared::{default_project_id, regular_tasks::add_interval_implicit_involvements},
 };
 
 pub fn router() -> OpenApiRouter {
@@ -23,11 +23,11 @@ pub fn router() -> OpenApiRouter {
 async fn recompute_implicit_involvements(
     Extension(pool): Extension<SqlitePool>,
 ) -> impl IntoResponse {
-    let intervals = find_all_intervals(default_collective_id(), &pool)
+    let intervals = find_all_intervals(default_project_id(), &pool)
         .await
         .unwrap();
 
-    set_implicit_counter_to_zero(default_collective_id(), &pool)
+    set_implicit_counter_to_zero(default_project_id(), &pool)
         .await
         .unwrap();
 
@@ -37,8 +37,7 @@ async fn recompute_implicit_involvements(
             interval.id
         );
         if let Err(e) =
-            add_interval_implicit_involvements(&interval, default_collective_id(), true, &pool)
-                .await
+            add_interval_implicit_involvements(&interval, default_project_id(), true, &pool).await
         {
             eprintln!(
                 "Error recomputing implicit involvements for interval {}: {:?}",

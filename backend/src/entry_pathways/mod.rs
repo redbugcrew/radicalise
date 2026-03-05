@@ -7,7 +7,7 @@ use uuid::Uuid;
 
 use crate::{
     entry_pathways::repo::find_eoi_by_auth_token,
-    my_collective::repo::find_collective,
+    my_project::repo::find_collective,
     people::repo::find_crew_involved_emails,
     realtime::RealtimeState,
     shared::{

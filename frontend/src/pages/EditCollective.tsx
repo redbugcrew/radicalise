@@ -15,17 +15,17 @@ export default function EditCollective() {
 
   const onSubmit = (values: Project) => {
     getApi()
-      .api.updateCollective(values)
+      .api.updateProject(values)
       .then((response) => {
         if (response.status === 200) {
           handleAppEvents(response.data);
           navigate("/");
         } else {
-          console.error("Failed to update collective:", response);
+          console.error("Failed to update project:", response);
         }
       })
       .catch((error) => {
-        console.error("Error updating collective:", error);
+        console.error("Error updating project:", error);
       });
   };
 

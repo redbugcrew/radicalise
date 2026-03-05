@@ -4,7 +4,7 @@ use utoipa::ToSchema;
 
 use crate::{
     intervals::repo::{find_current_interval, find_next_interval},
-    my_collective::involvements_repo::find_collective_involvement,
+    my_project::involvements_repo::find_collective_involvement,
     shared::entities::{
         CollectiveInvolvement, CrewId, CrewInvolvement, IntervalId, Person, PersonId, ProjectId,
         UserId,

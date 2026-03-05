@@ -8,13 +8,13 @@ use crate::{
     entry_pathways::repo::find_all_entry_pathways_for_collective,
     event_templates::repo::find_all_event_templates,
     intervals::repo::{find_current_interval, find_next_interval},
-    my_collective::involvements_repo::find_all_collective_involvements,
+    my_project::involvements_repo::find_all_collective_involvements,
     people::repo::find_all_people,
     shared::{
-        default_collective_id,
+        default_project_id,
         entities::{
-            CalendarEvent, Project, ProjectId, CollectiveInvolvement, CrewInvolvement,
-            CrewWithLinks, EntryPathway, EventTemplate, Interval, IntervalId, Person,
+            CalendarEvent, CollectiveInvolvement, CrewInvolvement, CrewWithLinks, EntryPathway,
+            EventTemplate, Interval, IntervalId, Person, Project, ProjectId,
         },
         links_repo::{find_all_links_for_owner, update_links_for_owner},
     },
@@ -128,8 +128,7 @@ async fn find_interval_involvement_data(
     pool: &SqlitePool,
 ) -> Result<IntervalInvolvementData, sqlx::Error> {
     let collective_involvements =
-        find_all_collective_involvements(default_collective_id(), interval_id.clone(), pool)
-            .await?;
+        find_all_collective_involvements(default_project_id(), interval_id.clone(), pool).await?;
     let crew_involvements = find_all_crew_involvements(interval_id.clone(), pool).await?;
 
     Ok(IntervalInvolvementData {
@@ -216,7 +215,7 @@ pub async fn update_collective(
     Ok(input)
 }
 
-pub async fn update_collective_with_links(
+pub async fn update_project_with_links(
     input: Project,
     collective_id: ProjectId,
     pool: &SqlitePool,
