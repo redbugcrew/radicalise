@@ -5,7 +5,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 use crate::{
     auth::auth_backend::AuthSession,
     my_project::{
-        events::CollectiveEvent,
+        events::ProjectEvent,
         involvements_repo::find_all_project_involvements,
         repo::{InitialData, IntervalInvolvementData},
     },
@@ -38,7 +38,7 @@ async fn get_project_state(Extension(pool): Extension<SqlitePool>) -> impl IntoR
     let project = match repo::find_project_with_links(default_project_id(), &pool).await {
         Ok(project) => project,
         Err(e) => {
-            eprintln!("Error fetching collective: {:?}", e);
+            eprintln!("Error fetching project: {:?}", e);
             return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
         }
     };
@@ -48,7 +48,7 @@ async fn get_project_state(Extension(pool): Extension<SqlitePool>) -> impl IntoR
         .await
         .is_err()
     {
-        eprintln!("Error checking next interval for collective: {:?}", project);
+        eprintln!("Error checking next interval for project: {:?}", project);
         return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
     }
 
@@ -111,7 +111,7 @@ pub async fn update_project(
 
     match repo::update_project_with_links(input, default_project_id(), &pool).await {
         Ok(response) => {
-            let event = AppEvent::CollectiveEvent(CollectiveEvent::CollectiveUpdated(response));
+            let event = AppEvent::ProjectEvent(ProjectEvent::ProjectUpdated(response));
             realtime_state
                 .broadcast_app_event(Some(auth_session), event.clone())
                 .await;

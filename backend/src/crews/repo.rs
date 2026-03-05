@@ -8,10 +8,10 @@ use crate::shared::{
 };
 
 pub async fn find_all_crews_with_links(
-    collective_id: ProjectId,
+    project_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Vec<CrewWithLinks>, sqlx::Error> {
-    let crews = find_all_crews(collective_id, pool).await?;
+    let crews = find_all_crews(project_id, pool).await?;
 
     let links = find_all_links_for_owner_type("crews".to_string(), pool).await?;
     let links_hash = hash_links_by_owner(links);
@@ -31,20 +31,20 @@ pub async fn find_all_crews_with_links(
 }
 
 pub async fn find_all_crews(
-    collective_id: ProjectId,
+    project_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Vec<Crew>, sqlx::Error> {
     sqlx::query_as!(
         Crew,
         "SELECT id, name, description, project_id FROM crews WHERE project_id = ?",
-        collective_id.id
+        project_id.id
     )
     .fetch_all(pool)
     .await
 }
 
 pub async fn update_crew(
-    collective_id: ProjectId,
+    project_id: ProjectId,
     crew: Crew,
     pool: &SqlitePool,
 ) -> Result<Crew, sqlx::Error> {
@@ -54,7 +54,7 @@ pub async fn update_crew(
         crew.name,
         crew.description,
         crew.id,
-        collective_id.id
+        project_id.id
     )
     .execute(pool)
     .await?;
@@ -63,12 +63,12 @@ pub async fn update_crew(
 }
 
 pub async fn update_crew_with_links(
-    collective_id: ProjectId,
+    project_id: ProjectId,
     crew: CrewWithLinks,
     pool: &SqlitePool,
 ) -> Result<CrewWithLinks, sqlx::Error> {
     let crew_result = update_crew(
-        collective_id,
+        project_id,
         Crew {
             id: crew.id,
             name: crew.name,

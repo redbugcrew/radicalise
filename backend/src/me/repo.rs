@@ -4,9 +4,9 @@ use utoipa::ToSchema;
 
 use crate::{
     intervals::repo::{find_current_interval, find_next_interval},
-    my_project::involvements_repo::find_collective_involvement,
+    my_project::involvements_repo::find_project_involvement,
     shared::entities::{
-        ProjectInvolvement, CrewId, CrewInvolvement, IntervalId, Person, PersonId, ProjectId,
+        CrewId, CrewInvolvement, IntervalId, Person, PersonId, ProjectId, ProjectInvolvement,
         UserId,
     },
 };
@@ -15,7 +15,7 @@ use crate::{
 pub struct PersonIntervalInvolvementData {
     pub interval_id: i64,
     pub person_id: i64,
-    pub collective_involvement: Option<ProjectInvolvement>,
+    pub project_involvement: Option<ProjectInvolvement>,
     pub crew_involvements: Vec<CrewInvolvement>,
 }
 
@@ -28,14 +28,13 @@ pub struct MyInitialData {
 }
 
 pub async fn find_interval_data_for_person(
-    collective_id: ProjectId,
+    project_id: ProjectId,
     person_id: PersonId,
     interval_id: IntervalId,
     pool: &SqlitePool,
 ) -> Result<PersonIntervalInvolvementData, sqlx::Error> {
     let involvement =
-        find_collective_involvement(collective_id, person_id.clone(), interval_id.clone(), pool)
-            .await?;
+        find_project_involvement(project_id, person_id.clone(), interval_id.clone(), pool).await?;
 
     let crew_involvements =
         find_my_crew_involvements(person_id.clone(), interval_id.clone(), pool).await?;
@@ -43,24 +42,24 @@ pub async fn find_interval_data_for_person(
     Ok(PersonIntervalInvolvementData {
         interval_id: interval_id.id,
         person_id: person_id.id,
-        collective_involvement: involvement,
+        project_involvement: involvement,
         crew_involvements,
     })
 }
 
 pub async fn find_initial_data_for_user(
-    collective_id: ProjectId,
+    project_id: ProjectId,
     user_id: UserId,
     pool: &SqlitePool,
 ) -> Result<MyInitialData, sqlx::Error> {
-    let current_interval = find_current_interval(collective_id.clone(), pool).await?;
+    let current_interval = find_current_interval(project_id.clone(), pool).await?;
     let next_interval =
-        find_next_interval(collective_id.clone(), current_interval.typed_id(), pool).await?;
-    let person = find_person_for_user(collective_id.clone(), user_id.clone(), pool).await?;
+        find_next_interval(project_id.clone(), current_interval.typed_id(), pool).await?;
+    let person = find_person_for_user(project_id.clone(), user_id.clone(), pool).await?;
     let person_id = person.typed_id();
 
     let current_interval_data = find_interval_data_for_person(
-        collective_id.clone(),
+        project_id.clone(),
         person_id.clone(),
         current_interval.typed_id(),
         pool,
@@ -70,7 +69,7 @@ pub async fn find_initial_data_for_user(
     let next_interval_data = if let Some(interval) = next_interval {
         Some(
             find_interval_data_for_person(
-                collective_id.clone(),
+                project_id.clone(),
                 person_id.clone(),
                 interval.typed_id(),
                 pool,
@@ -210,7 +209,7 @@ pub async fn upsert_crew_involvements(
 }
 
 pub async fn find_person_for_user(
-    collective_id: ProjectId,
+    project_id: ProjectId,
     user_id: UserId,
     pool: &SqlitePool,
 ) -> Result<Person, sqlx::Error> {
@@ -220,7 +219,7 @@ pub async fn find_person_for_user(
         FROM people
         WHERE user_id = ? AND project_id = ?",
         user_id.id,
-        collective_id.id
+        project_id.id
     )
     .fetch_one(pool)
     .await
@@ -260,7 +259,7 @@ pub async fn create_calendar_token_for_user(
 }
 
 pub async fn find_person_id_for_user(
-    collective_id: ProjectId,
+    project_id: ProjectId,
     user_id: UserId,
     pool: &SqlitePool,
 ) -> Result<PersonId, sqlx::Error> {
@@ -273,7 +272,7 @@ pub async fn find_person_id_for_user(
           user_id = ? AND
           project_id = ?",
         user_id.id,
-        collective_id.id
+        project_id.id
     )
     .fetch_one(pool)
     .await

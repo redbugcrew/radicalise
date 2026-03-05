@@ -9,11 +9,11 @@ use crate::{
         my_involvement::{MyParticipationInput, update_my_involvements},
         repo::{MyInitialData, find_person_id_for_user},
     },
-    my_project::involvements_repo::find_collective_involvement,
+    my_project::involvements_repo::find_project_involvement,
     realtime::RealtimeState,
     shared::{
         default_project_id,
-        entities::{ProjectInvolvement, IntervalId, UserId},
+        entities::{IntervalId, ProjectInvolvement, UserId},
         events::AppEvent,
     },
 };
@@ -30,8 +30,8 @@ pub fn router() -> OpenApiRouter {
 }
 
 #[utoipa::path(get, path = "/", responses(
-        (status = 200, description = "Collective found successfully", body = MyInitialData),
-        (status = NOT_FOUND, description = "Collective was not found", body = ()),
+        (status = 200, description = "Project found successfully", body = MyInitialData),
+        (status = NOT_FOUND, description = "Project was not found", body = ()),
         (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
     ),)]
 async fn get_my_state(
@@ -80,8 +80,7 @@ async fn my_participation(
             let interval_id = IntervalId::new(interval_id);
 
             let result =
-                find_collective_involvement(default_project_id(), person_id, interval_id, &pool)
-                    .await;
+                find_project_involvement(default_project_id(), person_id, interval_id, &pool).await;
 
             match result {
                 Ok(Some(data)) => (StatusCode::OK, Json(data)).into_response(),

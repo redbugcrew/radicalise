@@ -1,6 +1,6 @@
 use sqlx::SqlitePool;
 
-use crate::shared::entities::{ProjectId, Interval, IntervalId};
+use crate::shared::entities::{Interval, IntervalId, ProjectId};
 
 #[derive(PartialEq, Debug, Clone, Copy)]
 pub enum IntervalType {
@@ -11,7 +11,7 @@ pub enum IntervalType {
 
 pub async fn insert_interval(
     interval: Interval,
-    collective_id: ProjectId,
+    project_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Interval, sqlx::Error> {
     let mut transaction = pool.begin().await?;
@@ -21,7 +21,7 @@ pub async fn insert_interval(
         FROM intervals
         WHERE
             project_id = ?",
-        collective_id.id
+        project_id.id
     )
     .fetch_one(&mut *transaction)
     .await
@@ -37,7 +37,7 @@ pub async fn insert_interval(
         next_id,
         interval.start_date,
         interval.end_date,
-        collective_id.id
+        project_id.id
     )
     .fetch_one(&mut *transaction)
     .await?;
@@ -52,7 +52,7 @@ pub async fn insert_interval(
 }
 
 pub async fn find_all_intervals(
-    collective_id: ProjectId,
+    project_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Vec<Interval>, sqlx::Error> {
     sqlx::query_as!(
@@ -62,7 +62,7 @@ pub async fn find_all_intervals(
         WHERE
           project_id = ?
         ORDER BY id ASC",
-        collective_id.id
+        project_id.id
     )
     .fetch_all(pool)
     .await
@@ -82,7 +82,7 @@ pub async fn find_interval(
 }
 
 pub async fn find_current_interval(
-    collective_id: ProjectId,
+    project_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Interval, sqlx::Error> {
     sqlx::query_as!(
@@ -94,14 +94,14 @@ pub async fn find_current_interval(
             start_date <= date('now') AND (end_date IS NULL OR end_date >= date('now'))
         ORDER BY id ASC
         LIMIT 1",
-        collective_id.id
+        project_id.id
     )
     .fetch_one(pool)
     .await
 }
 
 pub async fn find_next_interval(
-    collective_id: ProjectId,
+    project_id: ProjectId,
     current_interval_id: IntervalId,
     pool: &SqlitePool,
 ) -> Result<Option<Interval>, sqlx::Error> {
@@ -114,14 +114,14 @@ pub async fn find_next_interval(
             id > ?
         ORDER BY id ASC
         LIMIT 1",
-        collective_id.id,
+        project_id.id,
         current_interval_id.id
     )
     .fetch_optional(pool)
     .await
 }
 pub async fn find_previous_interval(
-    collective_id: ProjectId,
+    project_id: ProjectId,
     current_interval_id: IntervalId,
     pool: &SqlitePool,
 ) -> Result<Option<Interval>, sqlx::Error> {
@@ -134,7 +134,7 @@ pub async fn find_previous_interval(
             id < ?
         ORDER BY id DESC
         LIMIT 1",
-        collective_id.id,
+        project_id.id,
         current_interval_id.id
     )
     .fetch_optional(pool)
@@ -160,12 +160,12 @@ pub fn get_interval_type(interval: Interval) -> IntervalType {
 }
 
 pub async fn find_intervals_needing_implicit_involvements(
-    collective_id: ProjectId,
+    project_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Vec<Interval>, sqlx::Error> {
-    let current_interval = find_current_interval(collective_id.clone(), pool).await?;
+    let current_interval = find_current_interval(project_id.clone(), pool).await?;
     let next_interval_result =
-        find_next_interval(collective_id.clone(), current_interval.typed_id(), pool).await?;
+        find_next_interval(project_id.clone(), current_interval.typed_id(), pool).await?;
 
     let next_interval = match next_interval_result {
         Some(interval) => interval,
@@ -181,7 +181,7 @@ pub async fn find_intervals_needing_implicit_involvements(
           intervals.id <= ? AND
           processed_implicit_involvements = FALSE
         ORDER BY id ASC",
-        collective_id.id,
+        project_id.id,
         next_interval.id
     )
     .fetch_all(pool)

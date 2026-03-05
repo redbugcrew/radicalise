@@ -52,13 +52,13 @@ pub async fn update_eoi(
 pub async fn delete_eoi_record(
     pool: &SqlitePool,
     auth_token: String,
-    collective_id: ProjectId,
+    project_id: ProjectId,
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(
         "DELETE FROM entry_pathways
         WHERE auth_token = ? AND project_id = ?",
         auth_token,
-        collective_id.id
+        project_id.id
     )
     .execute(pool)
     .await?;
@@ -81,7 +81,7 @@ pub async fn find_entry_pathway(id: i64, pool: &SqlitePool) -> Result<EntryPathw
 }
 
 pub async fn find_eoi_by_auth_token(
-    collective_id: ProjectId,
+    project_id: ProjectId,
     auth_token: &str,
     pool: &SqlitePool,
 ) -> Result<Option<ExpressionOfInterest>, sqlx::Error> {
@@ -91,20 +91,20 @@ pub async fn find_eoi_by_auth_token(
         FROM entry_pathways
         WHERE auth_token = ? AND project_id = ?",
         auth_token,
-        collective_id.id
+        project_id.id
     )
     .fetch_optional(pool)
     .await
 }
 
 pub async fn find_all_entry_pathways_for_project(
-    collective_id: ProjectId,
+    project_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Vec<EntryPathway>, sqlx::Error> {
     let eois = sqlx::query_as!(
         EntryPathway,
         "SELECT id, project_id, name, interest, context, referral, conflict_experience, participant_connections FROM entry_pathways WHERE project_id = ?",
-        collective_id.id
+        project_id.id
     )
     .fetch_all(pool)
     .await?;

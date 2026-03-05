@@ -22,7 +22,7 @@ export default function PublicWithCollective() {
     }
 
     getApi()
-      .api.getCollectiveBySlug(collectiveSlug)
+      .api.getProjectBySlug(collectiveSlug)
       .then((response) => {
         if (response.status === 200) {
           setCollective(response.data);

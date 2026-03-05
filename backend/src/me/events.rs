@@ -10,14 +10,14 @@ pub enum MeEvent {
 
 pub fn strip_private_data(data: &PersonIntervalInvolvementData) -> PersonIntervalInvolvementData {
     let mut result = data.clone();
-    result.collective_involvement = data
-        .collective_involvement
+    result.project_involvement = data
+        .project_involvement
         .as_ref()
-        .map(strip_private_data_from_collective_involvement);
+        .map(strip_private_data_from_project_involvement);
     result
 }
 
-fn strip_private_data_from_collective_involvement(
+fn strip_private_data_from_project_involvement(
     involvement: &ProjectInvolvement,
 ) -> ProjectInvolvement {
     match involvement.private_capacity_planning {

@@ -1,7 +1,7 @@
 use sqlx::SqlitePool;
 
 use crate::shared::{
-    entities::{ProjectId, EventResponseExpectation, EventTemplate},
+    entities::{EventResponseExpectation, EventTemplate, ProjectId},
     links_repo::{find_all_links_for_owner_type, hash_links_by_owner, update_links_for_owner},
 };
 
@@ -14,7 +14,7 @@ struct EventTemplateRow {
 
 pub async fn insert_event_template_with_links(
     data: &EventTemplate,
-    collective_id: ProjectId,
+    project_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<EventTemplate, sqlx::Error> {
     let rec = sqlx::query!(
@@ -24,7 +24,7 @@ pub async fn insert_event_template_with_links(
         RETURNING id, name
         ",
         data.name,
-        collective_id.id,
+        project_id.id,
         data.summary,
         data.response_expectation
     )
@@ -50,7 +50,7 @@ pub async fn insert_event_template_with_links(
 
 pub async fn update_event_template_with_links(
     data: &EventTemplate,
-    collective_id: ProjectId,
+    project_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<EventTemplate, sqlx::Error> {
     let rec = sqlx::query!(
@@ -64,7 +64,7 @@ pub async fn update_event_template_with_links(
         data.summary,
         data.response_expectation,
         data.id,
-        collective_id.id
+        project_id.id
     )
     .fetch_one(pool)
     .await?;
@@ -84,10 +84,10 @@ pub async fn update_event_template_with_links(
 }
 
 pub async fn find_all_event_templates(
-    collective_id: ProjectId,
+    project_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Vec<EventTemplate>, sqlx::Error> {
-    let rows = find_all_event_template_rows(collective_id, pool).await?;
+    let rows = find_all_event_template_rows(project_id, pool).await?;
 
     let links = find_all_links_for_owner_type("event_templates".to_string(), pool).await?;
     let links_hash = hash_links_by_owner(links);
@@ -107,7 +107,7 @@ pub async fn find_all_event_templates(
 }
 
 async fn find_all_event_template_rows(
-    collective_id: ProjectId,
+    project_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Vec<EventTemplateRow>, sqlx::Error> {
     let rows = sqlx::query_as!(
@@ -118,7 +118,7 @@ async fn find_all_event_template_rows(
         WHERE project_id = ?
         ORDER BY name
         ",
-        collective_id.id
+        project_id.id
     )
     .fetch_all(pool)
     .await?;

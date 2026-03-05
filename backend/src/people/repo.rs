@@ -1,10 +1,10 @@
 use sqlx::SqlitePool;
 
-use crate::shared::entities::{ProjectId, CrewId, IntervalId, Person, PersonId, UserId};
+use crate::shared::entities::{CrewId, IntervalId, Person, PersonId, ProjectId, UserId};
 
 pub async fn update_person(
     input: Person,
-    collective_id: ProjectId,
+    project_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Person, sqlx::Error> {
     sqlx::query_as!(
@@ -17,17 +17,17 @@ pub async fn update_person(
         input.about,
         input.avatar_id,
         input.id,
-        collective_id.id
+        project_id.id
     )
     .execute(pool)
     .await?;
 
-    find_person_by_id(input.typed_id(), collective_id, pool).await
+    find_person_by_id(input.typed_id(), project_id, pool).await
 }
 
 pub async fn find_person_by_id(
     person_id: PersonId,
-    collective_id: ProjectId,
+    project_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Person, sqlx::Error> {
     sqlx::query_as!(
@@ -39,7 +39,7 @@ pub async fn find_person_by_id(
             id = ? AND
             project_id = ?",
         person_id.id,
-        collective_id.id
+        project_id.id
     )
     .fetch_one(pool)
     .await
@@ -47,7 +47,7 @@ pub async fn find_person_by_id(
 
 pub async fn find_person_by_user_id(
     user_id: UserId,
-    collective_id: ProjectId,
+    project_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Person, sqlx::Error> {
     sqlx::query_as!(
@@ -59,7 +59,7 @@ pub async fn find_person_by_user_id(
             user_id = ? AND
             project_id = ?",
         user_id.id,
-        collective_id.id
+        project_id.id
     )
     .fetch_one(pool)
     .await
@@ -86,7 +86,7 @@ pub async fn find_person_by_calendar_token(
 }
 
 pub async fn find_all_people(
-    collective_id: ProjectId,
+    project_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Vec<Person>, sqlx::Error> {
     sqlx::query_as!(
@@ -95,7 +95,7 @@ pub async fn find_all_people(
         SELECT id, project_id, display_name, about, avatar_id
         FROM people
         WHERE project_id = ?",
-        collective_id.id
+        project_id.id
     )
     .fetch_all(pool)
     .await

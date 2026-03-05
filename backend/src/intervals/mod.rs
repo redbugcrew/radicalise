@@ -19,7 +19,7 @@ pub fn router() -> OpenApiRouter {
 #[utoipa::path(post, path = "/",
     request_body(content = Interval, content_type = "application/json"),
     responses(
-        (status = 201, description = "Collective found successfully", body = Vec<AppEvent>),
+        (status = 201, description = "Project found successfully", body = Vec<AppEvent>),
         (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
     ),
 )]

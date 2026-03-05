@@ -9,7 +9,7 @@ use crate::shared::entities::{
 pub struct ProjectInvolvementRecord {
     pub id: i64,
     pub person_id: i64,
-    pub collective_id: i64,
+    pub project_id: i64,
     pub interval_id: i64,
     pub status: InvolvementStatus,
     pub private_capacity_planning: bool,
@@ -29,7 +29,7 @@ impl From<ProjectInvolvementRecord> for ProjectInvolvement {
         ProjectInvolvement {
             id: record.id,
             person_id: record.person_id,
-            project_id: record.collective_id,
+            project_id: record.project_id,
             interval_id: record.interval_id,
             status: record.status,
             private_capacity_planning: record.private_capacity_planning,
@@ -53,7 +53,7 @@ impl From<ProjectInvolvement> for ProjectInvolvementRecord {
         ProjectInvolvementRecord {
             id: involvement.id,
             person_id: involvement.person_id,
-            collective_id: involvement.project_id,
+            project_id: involvement.project_id,
             interval_id: involvement.interval_id,
             status: involvement.status,
             private_capacity_planning: involvement.private_capacity_planning,
@@ -79,8 +79,8 @@ impl From<ProjectInvolvement> for ProjectInvolvementRecord {
     }
 }
 
-pub async fn find_collective_involvement(
-    collective_id: ProjectId,
+pub async fn find_project_involvement(
+    project_id: ProjectId,
     person_id: PersonId,
     interval_id: IntervalId,
     pool: &SqlitePool,
@@ -90,7 +90,7 @@ pub async fn find_collective_involvement(
         "SELECT
             id,
             person_id,
-            project_id AS collective_id,
+            project_id AS project_id,
             interval_id,
             status as \"status: InvolvementStatus\",
             private_capacity_planning,
@@ -107,7 +107,7 @@ pub async fn find_collective_involvement(
             project_id = ? AND
             person_id = ? AND
             interval_id = ?",
-        collective_id.id,
+        project_id.id,
         person_id.id,
         interval_id.id,
     )
@@ -118,7 +118,7 @@ pub async fn find_collective_involvement(
 }
 
 pub async fn find_all_project_involvements(
-    collective_id: ProjectId,
+    project_id: ProjectId,
     interval_id: IntervalId,
     pool: &SqlitePool,
 ) -> Result<Vec<ProjectInvolvement>, sqlx::Error> {
@@ -127,7 +127,7 @@ pub async fn find_all_project_involvements(
         "SELECT
             id,
             person_id,
-            project_id AS collective_id,
+            project_id AS project_id,
             interval_id,
             status as \"status: InvolvementStatus\",
             private_capacity_planning,
@@ -144,7 +144,7 @@ pub async fn find_all_project_involvements(
         WHERE
             project_id = ? AND
             interval_id = ?",
-        collective_id.id,
+        project_id.id,
         interval_id.id,
     )
     .fetch_all(pool)
@@ -153,7 +153,7 @@ pub async fn find_all_project_involvements(
     Ok(records.into_iter().map(Into::into).collect())
 }
 
-pub async fn upsert_collective_involvement(
+pub async fn upsert_project_involvement(
     involvement: ProjectInvolvementRecord,
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
@@ -173,7 +173,7 @@ pub async fn upsert_collective_involvement(
             opt_out_planned_return_date = excluded.opt_out_planned_return_date,
             intention_context = excluded.intention_context",
         involvement.person_id,
-        involvement.collective_id,
+        involvement.project_id,
         involvement.interval_id,
         involvement.status,
         involvement.private_capacity_planning,
@@ -196,7 +196,7 @@ pub async fn upsert_collective_involvement(
     }
 }
 
-pub async fn insert_collective_involvement_if_missing(
+pub async fn insert_project_involvement_if_missing(
     involvement: ProjectInvolvementRecord,
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
@@ -206,7 +206,7 @@ pub async fn insert_collective_involvement_if_missing(
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(person_id, project_id, interval_id) DO NOTHING",
         involvement.person_id,
-        involvement.collective_id,
+        involvement.project_id,
         involvement.interval_id,
         involvement.status,
         involvement.private_capacity_planning,
@@ -227,7 +227,7 @@ pub async fn insert_collective_involvement_if_missing(
 }
 
 pub async fn delete_implicit_project_involvements(
-    collective_id: ProjectId,
+    project_id: ProjectId,
     interval_id: IntervalId,
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
@@ -238,7 +238,7 @@ pub async fn delete_implicit_project_involvements(
             project_id = ? AND
             participation_intention IS NULL",
         interval_id.id,
-        collective_id.id
+        project_id.id
     )
     .execute(pool)
     .await?;
@@ -247,7 +247,7 @@ pub async fn delete_implicit_project_involvements(
 }
 
 pub async fn set_implicit_counter_to_zero(
-    collective_id: ProjectId,
+    project_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(
@@ -255,7 +255,7 @@ pub async fn set_implicit_counter_to_zero(
         SET implicit_counter = 0
         WHERE
             project_id = ?",
-        collective_id.id
+        project_id.id
     )
     .execute(pool)
     .await?;

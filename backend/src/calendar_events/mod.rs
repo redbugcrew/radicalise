@@ -133,10 +133,10 @@ pub async fn get_calendar_ics(
         calendar_token
     );
 
-    let collective = match find_project(default_project_id(), &pool).await {
-        Ok(collective) => collective,
+    let project = match find_project(default_project_id(), &pool).await {
+        Ok(project) => project,
         Err(err) => {
-            eprintln!("Error looking up collective: {}", err);
+            eprintln!("Error looking up project: {}", err);
             return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
         }
     };
@@ -149,23 +149,20 @@ pub async fn get_calendar_ics(
         }
     };
 
-    let events = match list_calendar_events_person_attending(
-        collective.typed_id(),
-        person.typed_id(),
-        &pool,
-    )
-    .await
-    {
-        Ok(events) => events,
-        Err(err) => {
-            eprintln!("Error listing calendar events for person: {}", err);
-            return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
-        }
-    };
+    let events =
+        match list_calendar_events_person_attending(project.typed_id(), person.typed_id(), &pool)
+            .await
+        {
+            Ok(events) => events,
+            Err(err) => {
+                eprintln!("Error listing calendar events for person: {}", err);
+                return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
+            }
+        };
 
     let calendar_name = format!(
         "{} - {}",
-        collective.name.unwrap_or("Radicalize".to_string()),
+        project.name.unwrap_or("Radicalize".to_string()),
         person.display_name
     );
 

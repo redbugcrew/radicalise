@@ -52,7 +52,7 @@ export default function MyParticipation() {
 
   const onSubmit = (values: MyParticipationFormData) => {
     const inputData: MyParticipationInput = {
-      collective_id: collective.id,
+      project_id: collective.id,
       ...involvement,
       ...values,
       capacity_score: values.capacity_score ? parseInt(values.capacity_score) : null,

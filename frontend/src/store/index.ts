@@ -11,7 +11,7 @@ import eventsReducer, { eventsLoaded, eventUpdated, singleAttendanceUpdate } fro
 import meReducer, { meLoaded } from "./me";
 import { getApi } from "../api";
 import { redirect } from "react-router-dom";
-import type { AppEvent, CalendarEventAttendancesEvent, CalendarEventsEvent, CollectiveEvent, CrewsEvent, EntryPathwayEvent, EventTemplatesEvent, IntervalsEvent, MeEvent, PeopleEvent } from "../api/Api";
+import type { AppEvent, CalendarEventAttendancesEvent, CalendarEventsEvent, ProjectEvent, CrewsEvent, EntryPathwayEvent, EventTemplatesEvent, IntervalsEvent, MeEvent, PeopleEvent } from "../api/Api";
 
 const store = configureStore({
   reducer: {
@@ -114,9 +114,9 @@ export async function handleCrewsEvent(event: CrewsEvent) {
   }
 }
 
-export async function handleCollectiveEvent(event: CollectiveEvent) {
-  if (event.CollectiveUpdated) {
-    store.dispatch(projectUpdated(event.CollectiveUpdated));
+export async function handleProjectEvent(event: ProjectEvent) {
+  if (event.ProjectUpdated) {
+    store.dispatch(projectUpdated(event.ProjectUpdated));
   }
 }
 
@@ -159,8 +159,8 @@ export async function handleAppEvent(event: AppEvent) {
     handleIntervalsEvent(event.IntervalsEvent);
   } else if ("CrewsEvent" in event && event.CrewsEvent) {
     handleCrewsEvent(event.CrewsEvent);
-  } else if ("CollectiveEvent" in event && event.CollectiveEvent) {
-    handleCollectiveEvent(event.CollectiveEvent);
+  } else if ("ProjectEvent" in event && event.ProjectEvent) {
+    handleProjectEvent(event.ProjectEvent);
   } else if ("PeopleEvent" in event && event.PeopleEvent) {
     handlePeopleEvent(event.PeopleEvent);
   } else if ("EntryPathwayEvent" in event && event.EntryPathwayEvent) {
