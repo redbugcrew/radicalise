@@ -119,28 +119,6 @@ export type CollectiveEvent = {
   CollectiveUpdated: Project;
 };
 
-export interface CollectiveInvolvement {
-  capacity_planning?: null | CapacityPlanning;
-  /** @format int64 */
-  capacity_score?: number | null;
-  /** @format int64 */
-  id: number;
-  /** @format int64 */
-  implicit_counter: number;
-  intention_context?: string | null;
-  /** @format int64 */
-  interval_id: number;
-  opt_out_planned_return_date?: string | null;
-  opt_out_type?: null | OptOutType;
-  participation_intention?: null | ParticipationIntention;
-  /** @format int64 */
-  person_id: number;
-  private_capacity_planning: boolean;
-  /** @format int64 */
-  project_id: number;
-  status: InvolvementStatus;
-}
-
 export interface CreateAttendanceRequest {
   /** @format int64 */
   calendar_event_id: number;
@@ -247,10 +225,10 @@ export interface Interval {
 }
 
 export interface IntervalInvolvementData {
-  collective_involvements: CollectiveInvolvement[];
   crew_involvements: CrewInvolvement[];
   /** @format int64 */
   interval_id: number;
+  project_involvements: ProjectInvolvement[];
 }
 
 export type IntervalsEvent = {
@@ -317,7 +295,7 @@ export interface Person {
 }
 
 export interface PersonIntervalInvolvementData {
-  collective_involvement?: null | CollectiveInvolvement;
+  project_involvement?: null | ProjectInvolvement;
   crew_involvements: CrewInvolvement[];
   /** @format int64 */
   interval_id: number;
@@ -339,24 +317,39 @@ export interface Project {
   slug?: string | null;
 }
 
+export interface ProjectInvolvement {
+  capacity_planning?: null | CapacityPlanning;
+  /** @format int64 */
+  capacity_score?: number | null;
+  /** @format int64 */
+  id: number;
+  /** @format int64 */
+  implicit_counter: number;
+  intention_context?: string | null;
+  /** @format int64 */
+  interval_id: number;
+  opt_out_planned_return_date?: string | null;
+  opt_out_type?: null | OptOutType;
+  participation_intention?: null | ParticipationIntention;
+  /** @format int64 */
+  person_id: number;
+  private_capacity_planning: boolean;
+  /** @format int64 */
+  project_id: number;
+  status: InvolvementStatus;
+}
+
 export interface ResetPasswordRequest {
   password: string;
   token: string;
 }
 
-import type {
-  AxiosInstance,
-  AxiosRequestConfig,
-  AxiosResponse,
-  HeadersDefaults,
-  ResponseType,
-} from "axios";
+import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, ResponseType } from "axios";
 import axios from "axios";
 
 export type QueryParamsType = Record<string | number, any>;
 
-export interface FullRequestParams
-  extends Omit<AxiosRequestConfig, "data" | "params" | "url" | "responseType"> {
+export interface FullRequestParams extends Omit<AxiosRequestConfig, "data" | "params" | "url" | "responseType"> {
   /** set parameter to `true` for call `securityWorker` for this request */
   secure?: boolean;
   /** request path */
@@ -371,16 +364,10 @@ export interface FullRequestParams
   body?: unknown;
 }
 
-export type RequestParams = Omit<
-  FullRequestParams,
-  "body" | "method" | "query" | "path"
->;
+export type RequestParams = Omit<FullRequestParams, "body" | "method" | "query" | "path">;
 
-export interface ApiConfig<SecurityDataType = unknown>
-  extends Omit<AxiosRequestConfig, "data" | "cancelToken"> {
-  securityWorker?: (
-    securityData: SecurityDataType | null,
-  ) => Promise<AxiosRequestConfig | void> | AxiosRequestConfig | void;
+export interface ApiConfig<SecurityDataType = unknown> extends Omit<AxiosRequestConfig, "data" | "cancelToken"> {
+  securityWorker?: (securityData: SecurityDataType | null) => Promise<AxiosRequestConfig | void> | AxiosRequestConfig | void;
   secure?: boolean;
   format?: ResponseType;
 }
@@ -400,12 +387,7 @@ export class HttpClient<SecurityDataType = unknown> {
   private secure?: boolean;
   private format?: ResponseType;
 
-  constructor({
-    securityWorker,
-    secure,
-    format,
-    ...axiosConfig
-  }: ApiConfig<SecurityDataType> = {}) {
+  constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
     this.instance = axios.create({
       ...axiosConfig,
       baseURL: axiosConfig.baseURL || "",
@@ -419,10 +401,7 @@ export class HttpClient<SecurityDataType = unknown> {
     this.securityData = data;
   };
 
-  protected mergeRequestParams(
-    params1: AxiosRequestConfig,
-    params2?: AxiosRequestConfig,
-  ): AxiosRequestConfig {
+  protected mergeRequestParams(params1: AxiosRequestConfig, params2?: AxiosRequestConfig): AxiosRequestConfig {
     const method = params1.method || (params2 && params2.method);
 
     return {
@@ -430,11 +409,7 @@ export class HttpClient<SecurityDataType = unknown> {
       ...params1,
       ...(params2 || {}),
       headers: {
-        ...((method &&
-          this.instance.defaults.headers[
-            method.toLowerCase() as keyof HeadersDefaults
-          ]) ||
-          {}),
+        ...((method && this.instance.defaults.headers[method.toLowerCase() as keyof HeadersDefaults]) || {}),
         ...(params1.headers || {}),
         ...((params2 && params2.headers) || {}),
       },
@@ -455,53 +430,27 @@ export class HttpClient<SecurityDataType = unknown> {
     }
     return Object.keys(input || {}).reduce((formData, key) => {
       const property = input[key];
-      const propertyContent: any[] =
-        property instanceof Array ? property : [property];
+      const propertyContent: any[] = property instanceof Array ? property : [property];
 
       for (const formItem of propertyContent) {
         const isFileType = formItem instanceof Blob || formItem instanceof File;
-        formData.append(
-          key,
-          isFileType ? formItem : this.stringifyFormItem(formItem),
-        );
+        formData.append(key, isFileType ? formItem : this.stringifyFormItem(formItem));
       }
 
       return formData;
     }, new FormData());
   }
 
-  public request = async <T = any, _E = any>({
-    secure,
-    path,
-    type,
-    query,
-    format,
-    body,
-    ...params
-  }: FullRequestParams): Promise<AxiosResponse<T>> => {
-    const secureParams =
-      ((typeof secure === "boolean" ? secure : this.secure) &&
-        this.securityWorker &&
-        (await this.securityWorker(this.securityData))) ||
-      {};
+  public request = async <T = any, _E = any>({ secure, path, type, query, format, body, ...params }: FullRequestParams): Promise<AxiosResponse<T>> => {
+    const secureParams = ((typeof secure === "boolean" ? secure : this.secure) && this.securityWorker && (await this.securityWorker(this.securityData))) || {};
     const requestParams = this.mergeRequestParams(params, secureParams);
     const responseFormat = format || this.format || undefined;
 
-    if (
-      type === ContentType.FormData &&
-      body &&
-      body !== null &&
-      typeof body === "object"
-    ) {
+    if (type === ContentType.FormData && body && body !== null && typeof body === "object") {
       body = this.createFormData(body as Record<string, unknown>);
     }
 
-    if (
-      type === ContentType.Text &&
-      body &&
-      body !== null &&
-      typeof body !== "string"
-    ) {
+    if (type === ContentType.Text && body && body !== null && typeof body !== "string") {
       body = JSON.stringify(body);
     }
 
@@ -524,9 +473,7 @@ export class HttpClient<SecurityDataType = unknown> {
  * @version 1.3.16
  * @license
  */
-export class Api<
-  SecurityDataType extends unknown,
-> extends HttpClient<SecurityDataType> {
+export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
   api = {
     /**
      * No description
@@ -580,10 +527,7 @@ export class Api<
      * @name CreateCalendarEventAttendance
      * @request POST:/api/calendar_event_attendances
      */
-    createCalendarEventAttendance: (
-      data: CreateAttendanceRequest,
-      params: RequestParams = {},
-    ) =>
+    createCalendarEventAttendance: (data: CreateAttendanceRequest, params: RequestParams = {}) =>
       this.request<AppEvent[], any>({
         path: `/api/calendar_event_attendances`,
         method: "POST",
@@ -615,11 +559,7 @@ export class Api<
      * @name UpdateCalendarEvent
      * @request PUT:/api/calendar_events/{event_id}
      */
-    updateCalendarEvent: (
-      eventId: string,
-      data: CalendarEvent,
-      params: RequestParams = {},
-    ) =>
+    updateCalendarEvent: (eventId: string, data: CalendarEvent, params: RequestParams = {}) =>
       this.request<AppEvent[], any>({
         path: `/api/calendar_events/${eventId}`,
         method: "PUT",
@@ -635,11 +575,7 @@ export class Api<
      * @name UpdateCrew
      * @request PUT:/api/crews/{crew_id}
      */
-    updateCrew: (
-      crewId: string,
-      data: CrewWithLinks,
-      params: RequestParams = {},
-    ) =>
+    updateCrew: (crewId: string, data: CrewWithLinks, params: RequestParams = {}) =>
       this.request<AppEvent[], any>({
         path: `/api/crews/${crewId}`,
         method: "PUT",
@@ -685,11 +621,7 @@ export class Api<
      * @name UpdateEventTemplate
      * @request PUT:/api/event_templates/{event_template_id}
      */
-    updateEventTemplate: (
-      eventTemplateId: string,
-      data: EventTemplate,
-      params: RequestParams = {},
-    ) =>
+    updateEventTemplate: (eventTemplateId: string, data: EventTemplate, params: RequestParams = {}) =>
       this.request<any, any>({
         path: `/api/event_templates/${eventTemplateId}`,
         method: "PUT",
@@ -735,11 +667,7 @@ export class Api<
      * @name UpdateMyParticipation
      * @request POST:/api/me/interval/{interval_id}/my_participation
      */
-    updateMyParticipation: (
-      intervalId: number,
-      data: MyParticipationInput,
-      params: RequestParams = {},
-    ) =>
+    updateMyParticipation: (intervalId: number, data: MyParticipationInput, params: RequestParams = {}) =>
       this.request<AppEvent[], any>({
         path: `/api/me/interval/${intervalId}/my_participation`,
         method: "POST",
@@ -756,7 +684,7 @@ export class Api<
      * @request GET:/api/me/participation/interval/{interval_id}
      */
     myParticipation: (intervalId: number, params: RequestParams = {}) =>
-      this.request<null | CollectiveInvolvement, any>({
+      this.request<null | ProjectInvolvement, any>({
         path: `/api/me/participation/interval/${intervalId}`,
         method: "GET",
         format: "json",
@@ -813,11 +741,7 @@ export class Api<
      * @name UpdatePerson
      * @request PUT:/api/people/{person_id}
      */
-    updatePerson: (
-      personId: string,
-      data: Person,
-      params: RequestParams = {},
-    ) =>
+    updatePerson: (personId: string, data: Person, params: RequestParams = {}) =>
       this.request<AppEvent[], any>({
         path: `/api/people/${personId}`,
         method: "PUT",
@@ -863,11 +787,7 @@ export class Api<
      * @name DeleteEoi
      * @request DELETE:/api/public/project/{project_id}/eoi/{auth_token}
      */
-    deleteEoi: (
-      authToken: string,
-      projectId: number,
-      params: RequestParams = {},
-    ) =>
+    deleteEoi: (authToken: string, projectId: number, params: RequestParams = {}) =>
       this.request<any, any>({
         path: `/api/public/project/${projectId}/eoi/${authToken}`,
         method: "DELETE",
@@ -881,11 +801,7 @@ export class Api<
      * @name GetEoiByAuthToken
      * @request GET:/api/public/project/{project_id}/interest/by_auth_token/{auth_token}
      */
-    getEoiByAuthToken: (
-      authToken: string,
-      projectId: number,
-      params: RequestParams = {},
-    ) =>
+    getEoiByAuthToken: (authToken: string, projectId: number, params: RequestParams = {}) =>
       this.request<ExpressionOfInterest, any>({
         path: `/api/public/project/${projectId}/interest/by_auth_token/${authToken}`,
         method: "GET",
@@ -899,12 +815,7 @@ export class Api<
      * @name UpdateEoi
      * @request PUT:/api/public/projects/{project_id}/eoi/{auth_token}
      */
-    updateEoi: (
-      authToken: string,
-      projectId: number,
-      data: ExpressionOfInterest,
-      params: RequestParams = {},
-    ) =>
+    updateEoi: (authToken: string, projectId: number, data: ExpressionOfInterest, params: RequestParams = {}) =>
       this.request<any, EoiError>({
         path: `/api/public/projects/${projectId}/eoi/${authToken}`,
         method: "PUT",

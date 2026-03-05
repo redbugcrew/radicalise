@@ -7,7 +7,7 @@ use crate::{
     },
     intervals::repo::{IntervalType, find_interval, get_interval_type},
     me::repo::{self},
-    my_project::involvements_repo::{CollectiveInvolvementRecord, upsert_collective_involvement},
+    my_project::involvements_repo::{ProjectInvolvementRecord, upsert_collective_involvement},
     shared::entities::{
         CrewId, CrewInvolvement, IntervalId, InvolvementStatus, OptOutType, ParticipationIntention,
         PersonId,
@@ -63,7 +63,7 @@ pub async fn update_my_involvements(
     }
 
     upsert_collective_involvement(
-        CollectiveInvolvementRecord {
+        ProjectInvolvementRecord {
             id: -1, // ID will be auto-generated
             person_id: person_id.id,
             collective_id: input.collective_id,

@@ -1,6 +1,6 @@
 import { Container, Group, Stack, Title, Text, Card } from "@mantine/core";
 import { useAppSelector } from "../../store";
-import type { CapacityPlanning, CollectiveInvolvement, Interval, Person } from "../../api/Api";
+import type { CapacityPlanning, ProjectInvolvement, Interval, Person } from "../../api/Api";
 import CapacityScoreIcon from "../../components/CapacityScoreIcon";
 import DateText from "../../components/DateText";
 import { oneForPerson } from "../../store/involvements";
@@ -40,30 +40,30 @@ function CapacityPlanningSection({ capacity_planning, capacity_score }: { capaci
   );
 }
 
-function ExitingInfo({ person, collective_involvement }: { person: Person; collective_involvement: CollectiveInvolvement }) {
+function ExitingInfo({ person, project_involvement: project_involvement }: { person: Person; project_involvement: ProjectInvolvement }) {
   return (
     <Card withBorder style={{ borderColor: "var(--mantine-color-red-6)" }}>
       <Title order={2} size="h3" mb="md">
         {person.display_name} is exiting the collective.
       </Title>
       <Text size="md" c="dimmed" style={{ whiteSpace: "pre-line" }}>
-        {collective_involvement.intention_context || "No exit reason provided."}
+        {project_involvement.intention_context || "No exit reason provided."}
       </Text>
     </Card>
   );
 }
 
-function HiatusInfo({ person, collective_involvement }: { person: Person; collective_involvement: CollectiveInvolvement }) {
+function HiatusInfo({ person, project_involvement }: { person: Person; project_involvement: ProjectInvolvement }) {
   return (
     <Card withBorder style={{ borderColor: "var(--mantine-color-blue-5)" }}>
       <Title order={2} size="h3">
         {person.display_name} is on hiatus from the collective.
       </Title>
       <Text>
-        Until <DateText date={collective_involvement.opt_out_planned_return_date} />
+        Until <DateText date={project_involvement.opt_out_planned_return_date} />
       </Text>
       <Text size="md" c="dimmed" style={{ whiteSpace: "pre-line" }} mt={"md"}>
-        {collective_involvement.intention_context || "No exit reason provided."}
+        {project_involvement.intention_context || "No exit reason provided."}
       </Text>
     </Card>
   );
@@ -80,13 +80,13 @@ export default function PersonForInterval({ personIdNum, interval }: PersonForIn
   return (
     <WithIntervalInvolvements interval={interval}>
       {({ involvements, key }) => {
-        const myInvolvement = involvements ? oneForPerson(involvements.collective_involvements, personIdNum) : null;
+        const myInvolvement = involvements ? oneForPerson(involvements.project_involvements, personIdNum) : null;
 
         return (
           <Container key={key}>
             <Stack>
-              {myInvolvement?.status == "Exiting" && <ExitingInfo person={person} collective_involvement={myInvolvement} />}
-              {myInvolvement?.status == "OnHiatus" && <HiatusInfo person={person} collective_involvement={myInvolvement} />}
+              {myInvolvement?.status == "Exiting" && <ExitingInfo person={person} project_involvement={myInvolvement} />}
+              {myInvolvement?.status == "OnHiatus" && <HiatusInfo person={person} project_involvement={myInvolvement} />}
               {person.about && (
                 <Text size="md" style={{ whiteSpace: "pre-line" }}>
                   {person.about}

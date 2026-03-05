@@ -230,7 +230,7 @@ pub struct CapacityPlanning {
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Clone, Debug)]
-pub struct CollectiveInvolvement {
+pub struct ProjectInvolvement {
     pub id: i64,
     pub person_id: i64,
     pub project_id: i64,

@@ -6,13 +6,13 @@ use crate::{
         mark_implicit_involvements_processed,
     },
     my_project::involvements_repo::{
-        delete_implicit_collective_involvements, find_all_collective_involvements,
+        delete_implicit_project_involvements, find_all_project_involvements,
         insert_collective_involvement_if_missing,
     },
     shared::entities::OptOutType,
 };
 
-use super::entities::{CollectiveInvolvement, Interval, ProjectId};
+use super::entities::{Interval, ProjectId, ProjectInvolvement};
 
 pub async fn check_intervals_tasks(
     collective_id: ProjectId,
@@ -51,16 +51,16 @@ pub async fn add_interval_implicit_involvements(
             None => return Ok(()),
         };
 
-    let previous_collective_involvements =
-        find_all_collective_involvements(collective_id.clone(), previous_interval.typed_id(), pool)
+    let previous_project_involvements =
+        find_all_project_involvements(collective_id.clone(), previous_interval.typed_id(), pool)
             .await?;
 
     if recompute {
-        delete_implicit_collective_involvements(collective_id.clone(), interval.typed_id(), pool)
+        delete_implicit_project_involvements(collective_id.clone(), interval.typed_id(), pool)
             .await?;
     }
 
-    for previous_involvement in previous_collective_involvements {
+    for previous_involvement in previous_project_involvements {
         match previous_involvement.opt_out_type {
             Some(OptOutType::Exit) => continue,
             _ => {}
@@ -71,7 +71,7 @@ pub async fn add_interval_implicit_involvements(
             None => previous_involvement.implicit_counter + 1,
         };
 
-        let new_involvement = CollectiveInvolvement {
+        let new_involvement = ProjectInvolvement {
             id: -1, // -1 indicates a new record
             person_id: previous_involvement.person_id.clone(),
             project_id: previous_involvement.project_id,

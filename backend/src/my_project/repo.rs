@@ -8,13 +8,13 @@ use crate::{
     entry_pathways::repo::find_all_entry_pathways_for_project,
     event_templates::repo::find_all_event_templates,
     intervals::repo::{find_current_interval, find_next_interval},
-    my_project::involvements_repo::find_all_collective_involvements,
+    my_project::involvements_repo::find_all_project_involvements,
     people::repo::find_all_people,
     shared::{
         default_project_id,
         entities::{
-            CalendarEvent, CollectiveInvolvement, CrewInvolvement, CrewWithLinks, EntryPathway,
-            EventTemplate, Interval, IntervalId, Person, Project, ProjectId,
+            CalendarEvent, CrewInvolvement, CrewWithLinks, EntryPathway, EventTemplate, Interval,
+            IntervalId, Person, Project, ProjectId, ProjectInvolvement,
         },
         links_repo::{find_all_links_for_owner, update_links_for_owner},
     },
@@ -23,7 +23,7 @@ use crate::{
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct IntervalInvolvementData {
     pub interval_id: i64,
-    pub collective_involvements: Vec<CollectiveInvolvement>,
+    pub project_involvements: Vec<ProjectInvolvement>,
     pub crew_involvements: Vec<CrewInvolvement>,
 }
 
@@ -124,13 +124,13 @@ async fn find_interval_involvement_data(
     interval_id: IntervalId,
     pool: &SqlitePool,
 ) -> Result<IntervalInvolvementData, sqlx::Error> {
-    let collective_involvements =
-        find_all_collective_involvements(default_project_id(), interval_id.clone(), pool).await?;
+    let project_involvements =
+        find_all_project_involvements(default_project_id(), interval_id.clone(), pool).await?;
     let crew_involvements = find_all_crew_involvements(interval_id.clone(), pool).await?;
 
     Ok(IntervalInvolvementData {
         interval_id: interval_id.id,
-        collective_involvements,
+        project_involvements,
         crew_involvements,
     })
 }

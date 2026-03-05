@@ -6,7 +6,7 @@ use crate::{
     intervals::repo::{find_current_interval, find_next_interval},
     my_project::involvements_repo::find_collective_involvement,
     shared::entities::{
-        CollectiveInvolvement, CrewId, CrewInvolvement, IntervalId, Person, PersonId, ProjectId,
+        ProjectInvolvement, CrewId, CrewInvolvement, IntervalId, Person, PersonId, ProjectId,
         UserId,
     },
 };
@@ -15,7 +15,7 @@ use crate::{
 pub struct PersonIntervalInvolvementData {
     pub interval_id: i64,
     pub person_id: i64,
-    pub collective_involvement: Option<CollectiveInvolvement>,
+    pub collective_involvement: Option<ProjectInvolvement>,
     pub crew_involvements: Vec<CrewInvolvement>,
 }
 

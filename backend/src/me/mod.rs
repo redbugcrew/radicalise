@@ -13,7 +13,7 @@ use crate::{
     realtime::RealtimeState,
     shared::{
         default_project_id,
-        entities::{CollectiveInvolvement, IntervalId, UserId},
+        entities::{ProjectInvolvement, IntervalId, UserId},
         events::AppEvent,
     },
 };
@@ -60,7 +60,7 @@ async fn get_my_state(
         ("interval_id" = i64, Path, description = "Interval ID")
     ),
     responses(
-        (status = 200, description = "Fetched my participation successfully", body = Option<CollectiveInvolvement>),
+        (status = 200, description = "Fetched my participation successfully", body = Option<ProjectInvolvement>),
         (status = NOT_FOUND, description = "Not found", body = ())
     ),
 )]
