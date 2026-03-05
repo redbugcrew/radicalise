@@ -166,15 +166,15 @@ pub async fn find_all_circle_involvements(
     Ok(records.into_iter().map(Into::into).collect())
 }
 
-pub async fn upsert_project_involvement(
+pub async fn upsert_circle_involvement(
     involvement: CircleInvolvementRecord,
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
     let result = sqlx::query!(
-        "INSERT INTO project_involvements (person_id, project_id, interval_id, status, private_capacity_planning, wellbeing, focus, capacity_score, capacity, participation_intention, opt_out_type, opt_out_planned_return_date,
+        "INSERT INTO circle_involvements (person_id, circle_id, interval_id, status, private_capacity_planning, wellbeing, focus, capacity_score, capacity, participation_intention, opt_out_type, opt_out_planned_return_date,
         intention_context)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(person_id, project_id, interval_id) DO UPDATE SET
+        ON CONFLICT(person_id, circle_id, interval_id) DO UPDATE SET
             status = excluded.status,
             private_capacity_planning = excluded.private_capacity_planning,
             wellbeing = excluded.wellbeing,
@@ -186,7 +186,7 @@ pub async fn upsert_project_involvement(
             opt_out_planned_return_date = excluded.opt_out_planned_return_date,
             intention_context = excluded.intention_context",
         involvement.person_id,
-        involvement.project_id,
+        involvement.circle_id,
         involvement.interval_id,
         involvement.status,
         involvement.private_capacity_planning,
