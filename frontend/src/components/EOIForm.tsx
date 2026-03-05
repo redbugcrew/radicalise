@@ -14,7 +14,7 @@ export default function EOIForm({ onSubmit, collective, eoi, actionName }: EOIFo
     mode: "controlled",
     initialValues: eoi || {
       id: -1, // Placeholder ID, will be set by the backend
-      collective_id: collective.id,
+      project_id: collective.id,
       name: "",
       interest: "",
       context: "",
@@ -40,6 +40,7 @@ export default function EOIForm({ onSubmit, collective, eoi, actionName }: EOIFo
           <TextInput label="Name" placeholder="How would you like us to refer to you?" {...form.getInputProps("name")} />
 
           <Textarea label="Interest" description={`What interests you about participating in ${noun_name}?`} placeholder="Your message" rows={6} {...form.getInputProps("interest")} />
+
           <Textarea
             label="Context"
             description={`What areas that the ${noun_name} is involved in are you already familiar with, and which ones are ones you're interested in learning more about?`}

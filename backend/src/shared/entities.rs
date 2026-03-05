@@ -287,7 +287,7 @@ pub struct CrewWithLinks {
     pub id: i64,
     pub name: String,
     pub description: Option<String>,
-    pub collective_id: i64,
+    pub project_id: i64,
     pub links: Option<Vec<Link>>,
 }
 
@@ -295,7 +295,7 @@ pub struct CrewWithLinks {
 #[allow(dead_code)]
 pub struct EntryPathway {
     pub id: i64,
-    pub collective_id: i64,
+    pub project_id: i64,
     pub name: String,
     pub interest: Option<String>,
     pub context: Option<String>,
@@ -308,7 +308,7 @@ pub struct EntryPathway {
 #[allow(dead_code)]
 pub struct ExpressionOfInterest {
     pub id: i64,
-    pub collective_id: i64,
+    pub project_id: i64,
     pub name: String,
     pub email: String,
     pub interest: Option<String>,

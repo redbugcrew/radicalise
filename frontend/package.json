@@ -13,6 +13,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "check-build": "tsc -b --noEmit",
+    "ts:watch": "tsc --watch --noEmit",
     "lint": "eslint .",
     "preview": "vite preview",
     "swagger": "npx swagger-typescript-api generate --path http://localhost:8200/api-docs/openapi.json --output src/api --http-client fetch --clean"

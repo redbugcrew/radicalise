@@ -22,7 +22,7 @@ pub async fn find_all_crews_with_links(
             id: crew.id,
             name: crew.name,
             description: crew.description,
-            collective_id: crew.project_id,
+            project_id: crew.project_id,
             links: Some(links_hash.get(&crew.id).cloned().unwrap_or_else(Vec::new)),
         })
         .collect();
@@ -73,7 +73,7 @@ pub async fn update_crew_with_links(
             id: crew.id,
             name: crew.name,
             description: crew.description,
-            project_id: crew.collective_id,
+            project_id: crew.project_id,
         },
         pool,
     )
@@ -85,7 +85,7 @@ pub async fn update_crew_with_links(
         id: crew_result.id,
         name: crew_result.name,
         description: crew_result.description,
-        collective_id: crew_result.project_id,
+        project_id: crew_result.project_id,
         links,
     })
 }

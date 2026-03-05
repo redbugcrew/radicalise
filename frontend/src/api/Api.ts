@@ -138,8 +138,6 @@ export interface CollectiveInvolvement {
   /** @format int64 */
   capacity_score?: number | null;
   /** @format int64 */
-  collective_id: number;
-  /** @format int64 */
   id: number;
   /** @format int64 */
   implicit_counter: number;
@@ -152,6 +150,8 @@ export interface CollectiveInvolvement {
   /** @format int64 */
   person_id: number;
   private_capacity_planning: boolean;
+  /** @format int64 */
+  project_id: number;
   status: InvolvementStatus;
 }
 
@@ -180,13 +180,13 @@ export interface CrewInvolvement {
 }
 
 export interface CrewWithLinks {
-  /** @format int64 */
-  collective_id: number;
   description?: string | null;
   /** @format int64 */
   id: number;
   links?: any[] | null;
   name: string;
+  /** @format int64 */
+  project_id: number;
 }
 
 export type CrewsEvent = {
@@ -194,8 +194,6 @@ export type CrewsEvent = {
 };
 
 export interface EntryPathway {
-  /** @format int64 */
-  collective_id: number;
   conflict_experience?: string | null;
   context?: string | null;
   /** @format int64 */
@@ -203,6 +201,8 @@ export interface EntryPathway {
   interest?: string | null;
   name: string;
   participant_connections?: string | null;
+  /** @format int64 */
+  project_id: number;
   referral?: string | null;
 }
 
@@ -224,8 +224,6 @@ export type EventTemplatesEvent = {
 };
 
 export interface ExpressionOfInterest {
-  /** @format int64 */
-  collective_id: number;
   conflict_experience?: string | null;
   context?: string | null;
   email: string;
@@ -234,6 +232,8 @@ export interface ExpressionOfInterest {
   interest?: string | null;
   name: string;
   participant_connections?: string | null;
+  /** @format int64 */
+  project_id: number;
   referral?: string | null;
 }
 

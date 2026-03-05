@@ -49,17 +49,16 @@ pub async fn create_eoi(
 ) -> impl IntoResponse {
     println!("Creating EOI for details: {:?}", submission);
 
-    let collective = match find_collective(CollectiveId::new(submission.collective_id), &pool).await
-    {
+    let collective = match find_collective(CollectiveId::new(submission.project_id), &pool).await {
         Ok(result) => result,
         Err(_) => {
-            eprintln!("Collective not found for ID: {}", submission.collective_id);
+            eprintln!("Collective not found for ID: {}", submission.project_id);
             return (StatusCode::BAD_REQUEST, Json(EoiError::CollectiveNotFound)).into_response();
         }
     };
 
     let current_interval = match crate::intervals::repo::find_current_interval(
-        CollectiveId::new(submission.collective_id),
+        CollectiveId::new(submission.project_id),
         &pool,
     )
     .await
@@ -68,7 +67,7 @@ pub async fn create_eoi(
         Err(e) => {
             eprintln!(
                 "Failed to find current interval for collective ID {}: {}",
-                submission.collective_id, e
+                submission.project_id, e
             );
             return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
         }
@@ -147,7 +146,7 @@ pub async fn update_eoi(
 
     let record_to_write = ExpressionOfInterest {
         id: eoi.id,
-        collective_id: eoi.collective_id,
+        project_id: eoi.project_id,
         name: submission.name,
         email: submission.email,
         interest: submission.interest,
