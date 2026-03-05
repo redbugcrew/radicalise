@@ -135,6 +135,20 @@ const router = createBrowserRouter([
     children: buildAuthRoutes(),
   },
   {
+    path: "collective/:projectSlug",
+    element: <PublicWithProject />,
+    children: [
+      {
+        path: "interest",
+        element: <CreateEoi />,
+      },
+      {
+        path: "interest/:authToken",
+        element: <ManageMyEoi />,
+      },
+    ],
+  },
+  {
     path: "project/:projectSlug",
     element: <PublicWithProject />,
     children: [
