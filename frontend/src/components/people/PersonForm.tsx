@@ -28,7 +28,7 @@ export default function PersonForm({ person, onSubmit }: PersonFormProps) {
         <Stack gap="md">
           <TextInput label="Display name" placeholder="Your name in this app" key="display_name" {...form.getInputProps("display_name")} />
           <AvatarSelect label="Avatar" key="avatar" {...form.getInputProps("avatar_id")} />
-          <Textarea label="About me" rows={5} placeholder="Anything you'd like to share about yourself with the collective" key="about" {...form.getInputProps("about")} />
+          <Textarea label="About me" rows={5} placeholder="Anything you'd like to share about yourself with the project" key="about" {...form.getInputProps("about")} />
         </Stack>
         <Button type="submit">Submit</Button>
       </Stack>

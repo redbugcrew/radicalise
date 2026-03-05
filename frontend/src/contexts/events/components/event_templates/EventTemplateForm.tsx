@@ -31,7 +31,7 @@ export default function EventTemplateForm({ value, onSubmit }: EventTemplateForm
         <Stack gap="md">
           <TextInput
             label="Name"
-            description="The name of the template. This is usually how you refer to this type of event. As in, we're going to have a SOMETHING this weekend. It needs to be unique within your collective, so if you have multiple types of meetings, be more specific."
+            description="The name of the template. This is usually how you refer to this type of event. As in, we're going to have a SOMETHING this weekend. It needs to be unique within your project, so if you have multiple types of meetings, be more specific."
             placeholder="e.g. Training, Meeting, Action, Party, Assembly, etc"
             withAsterisk
             {...form.getInputProps("name")}

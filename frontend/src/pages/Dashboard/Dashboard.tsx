@@ -147,9 +147,9 @@ function MyEvents() {
 export default function Dashboard() {
   const intervals = useAppSelector((state) => state.intervals);
   const myData = useAppSelector((state) => state.me);
-  const collective = useAppSelector((state) => state.project);
+  const project = useAppSelector((state) => state.project);
 
-  if (!myData || !collective) {
+  if (!myData || !project) {
     return <Text>Error: Data not found.</Text>;
   }
 
@@ -177,7 +177,7 @@ export default function Dashboard() {
         {myData.current_interval && <MyCrews personId={myData.person_id} myInvolvements={myData.current_interval.crew_involvements} />}
         <Stack gap="md">
           <Title order={2}>Resources</Title>
-          <LinksStack links={collective.links} />
+          <LinksStack links={project.links} />
         </Stack>
       </Stack>
     </Container>

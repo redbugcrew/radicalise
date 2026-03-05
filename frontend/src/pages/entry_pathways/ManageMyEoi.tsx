@@ -3,12 +3,12 @@ import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { getApi } from "../../api";
 import type { EoiError, ExpressionOfInterest } from "../../api/Api";
-import { ProjectContext } from "../PublicWithCollective";
+import { ProjectContext } from "../PublicWithProject";
 import { EOIForm } from "../../components";
 
 export default function ManageMyEoi() {
   const { authToken } = useParams<"authToken">();
-  const collective = useContext(ProjectContext);
+  const project = useContext(ProjectContext);
   const [eoi, setEoi] = useState<ExpressionOfInterest | null | undefined>(undefined);
   const [error, setError] = useState<EoiError | null>(null);
   const [action, setAction] = useState<"updated" | null>(null);
@@ -21,7 +21,7 @@ export default function ManageMyEoi() {
     }
 
     getApi()
-      .api.getEoiByAuthToken(authToken, collective.id)
+      .api.getEoiByAuthToken(authToken, project.id)
       .then((response) => {
         if (response.status === 200) {
           console.log("EOI data:", response.data);
@@ -57,7 +57,7 @@ export default function ManageMyEoi() {
     }
 
     return getApi()
-      .api.updateEoi(authToken, collective.id, values)
+      .api.updateEoi(authToken, project.id, values)
       .then((_) => {
         setError(null);
         setAction("updated");
@@ -80,7 +80,7 @@ export default function ManageMyEoi() {
     }
 
     return getApi()
-      .api.deleteEoi(authToken, collective.id)
+      .api.deleteEoi(authToken, project.id)
       .then(() => {
         navigate("../interest");
       })
@@ -96,7 +96,7 @@ export default function ManageMyEoi() {
         <Stack gap={0}>
           <Title order={1}>Manage Expression of Interest</Title>
           <Title order={2} c="dimmed">
-            {collective.name}
+            {project.name}
           </Title>
         </Stack>
 
@@ -104,7 +104,7 @@ export default function ManageMyEoi() {
           <Card withBorder style={{ borderColor: "var(--mantine-color-red-5)" }}>
             <Stack gap="md">
               <Title order={3}>Sorry, there was an error with your submission</Title>
-              <Text>Something is broken on our end. Please try again later, or contact the collective via other means.</Text>
+              <Text>Something is broken on our end. Please try again later, or contact the project via other means.</Text>
             </Stack>
           </Card>
         )}
@@ -129,7 +129,7 @@ export default function ManageMyEoi() {
         <Stack>
           <Title order={3}>Update your answers</Title>
           <Text>You can update your answers below, any changes here will override what you have already submitted.</Text>
-          <EOIForm onSubmit={handleSubmit} collective={collective} eoi={eoi} actionName="Update" />
+          <EOIForm onSubmit={handleSubmit} project={project} eoi={eoi} actionName="Update" />
         </Stack>
       </Stack>
     </Container>

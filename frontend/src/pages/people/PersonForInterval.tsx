@@ -44,7 +44,7 @@ function ExitingInfo({ person, project_involvement: project_involvement }: { per
   return (
     <Card withBorder style={{ borderColor: "var(--mantine-color-red-6)" }}>
       <Title order={2} size="h3" mb="md">
-        {person.display_name} is exiting the collective.
+        {person.display_name} is exiting the project.
       </Title>
       <Text size="md" c="dimmed" style={{ whiteSpace: "pre-line" }}>
         {project_involvement.intention_context || "No exit reason provided."}
@@ -57,7 +57,7 @@ function HiatusInfo({ person, project_involvement }: { person: Person; project_i
   return (
     <Card withBorder style={{ borderColor: "var(--mantine-color-blue-5)" }}>
       <Title order={2} size="h3">
-        {person.display_name} is on hiatus from the collective.
+        {person.display_name} is on hiatus from the project.
       </Title>
       <Text>
         Until <DateText date={project_involvement.opt_out_planned_return_date} />

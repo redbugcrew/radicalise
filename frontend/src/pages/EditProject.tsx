@@ -1,17 +1,17 @@
 import { Container, Title } from "@mantine/core";
 import { handleAppEvents, useAppSelector } from "../store";
-import { CollectiveForm } from "../components";
+import { ProjectForm } from "../components";
 import type { Project } from "../api/Api";
 import { getApi } from "../api";
 import { useNavigate } from "react-router-dom";
 import { crewsArrayFromObjectMap } from "../store/crews";
 
-export default function EditCollective() {
-  const collective = useAppSelector((state) => state.project);
+export default function EditProject() {
+  const project = useAppSelector((state) => state.project);
   const crews = useAppSelector((state) => crewsArrayFromObjectMap(state.crews));
   const navigate = useNavigate();
 
-  if (!collective) return <Container>Error: Collective not found</Container>;
+  if (!project) return <Container>Error: Project not found</Container>;
 
   const onSubmit = (values: Project) => {
     getApi()
@@ -31,11 +31,11 @@ export default function EditCollective() {
 
   return (
     <Container>
-      <Title order={1}>Edit Collective</Title>
+      <Title order={1}>Edit Project</Title>
       <Title order={2} size="h4" mb="lg">
-        {collective.name}
+        {project.name}
       </Title>
-      <CollectiveForm collective={collective} crews={crews} onSubmit={onSubmit} />
+      <ProjectForm project={project} crews={crews} onSubmit={onSubmit} />
     </Container>
   );
 }

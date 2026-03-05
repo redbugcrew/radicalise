@@ -10,12 +10,12 @@ import { findPreviousInterval } from "../store/intervals";
 
 export default function MyParticipation() {
   const { allIntervals, currentInterval } = useAppSelector((state) => state.intervals);
-  const collective = useAppSelector((state) => state.project);
+  const project = useAppSelector((state) => state.project);
   const personId = useAppSelector((state) => state.me?.person_id);
 
   const navigate = useNavigate();
 
-  if (!collective) return <Text>Error: Collective not found.</Text>;
+  if (!project) return <Text>Error: Project not found.</Text>;
   if (!personId) return <Text>Error: Person ID not found.</Text>;
 
   const { intervalId } = useParams();
@@ -52,7 +52,7 @@ export default function MyParticipation() {
 
   const onSubmit = (values: MyParticipationFormData) => {
     const inputData: MyParticipationInput = {
-      project_id: collective.id,
+      project_id: project.id,
       ...involvement,
       ...values,
       capacity_score: values.capacity_score ? parseInt(values.capacity_score) : null,

@@ -7,7 +7,7 @@ import { IconCheck } from "@tabler/icons-react";
 import CapacityScoreIcon from "../CapacityScoreIcon";
 
 export default function CapacityStep({ form, readOnly }: StepProps) {
-  const collective_noun_name = useAppSelector((state) => state.project?.noun_name || "the collective");
+  const project_noun_name = useAppSelector((state) => state.project?.noun_name || "the project");
 
   return (
     <Stack gap="md">
@@ -61,7 +61,7 @@ export default function CapacityStep({ form, readOnly }: StepProps) {
       />
       <Select
         label={form.values.private_capacity_planning ? "Capacity (Shared with group)" : "Capacity"}
-        description={`Given the context of your life (above), how would you describe your capacity to participate in ${collective_noun_name} this interval?`}
+        description={`Given the context of your life (above), how would you describe your capacity to participate in ${project_noun_name} this interval?`}
         placeholder="Pick value"
         disabled={readOnly}
         data={[
