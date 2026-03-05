@@ -1,25 +1,27 @@
+use std::any::Any;
+
 use sqlx::SqlitePool;
 
 use crate::{
+    circles::repo::find_all_circles,
     intervals::repo::{
         find_intervals_needing_implicit_involvements, find_previous_interval,
         mark_implicit_involvements_processed,
     },
     my_project::involvements_repo::{
-        delete_implicit_project_involvements, find_all_project_involvements,
+        delete_implicit_project_involvements, find_all_circle_involvements,
         insert_project_involvement_if_missing,
     },
-    shared::entities::OptOutType,
+    shared::entities::{CircleId, OptOutType},
 };
 
-use super::entities::{Interval, ProjectId, ProjectInvolvement};
+use super::entities::{CircleInvolvement, Interval, ProjectId};
 
 pub async fn check_intervals_tasks(
     project_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
-    let intervals =
-        find_intervals_needing_implicit_involvements(project_id.clone(), pool).await?;
+    let intervals = find_intervals_needing_implicit_involvements(project_id.clone(), pool).await?;
 
     for interval in intervals {
         println!(
@@ -45,19 +47,51 @@ pub async fn add_interval_implicit_involvements(
     recompute: bool,
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
+    let circles = find_all_circles(project_id.clone(), pool).await?;
+
+    for circle in circles {
+        if let Err(e) = add_interval_circle_implicit_involvements(
+            interval,
+            project_id.clone(),
+            circle.typed_id(),
+            recompute,
+            pool,
+        )
+        .await
+        {
+            eprintln!(
+                "Error adding implicit involvements for interval {}, circle {}: {:?}",
+                interval.id, circle.id, e
+            );
+        }
+    }
+
+    Ok(())
+}
+
+async fn add_interval_circle_implicit_involvements(
+    interval: &Interval,
+    project_id: ProjectId,
+    circle_id: CircleId,
+    recompute: bool,
+    pool: &SqlitePool,
+) -> Result<(), sqlx::Error> {
     let previous_interval =
         match find_previous_interval(project_id.clone(), interval.typed_id(), pool).await? {
             Some(prev) => prev,
             None => return Ok(()),
         };
 
-    let previous_project_involvements =
-        find_all_project_involvements(project_id.clone(), previous_interval.typed_id(), pool)
-            .await?;
+    let previous_project_involvements = find_all_circle_involvements(
+        project_id.clone(),
+        circle_id,
+        previous_interval.typed_id(),
+        pool,
+    )
+    .await?;
 
     if recompute {
-        delete_implicit_project_involvements(project_id.clone(), interval.typed_id(), pool)
-            .await?;
+        delete_implicit_project_involvements(project_id.clone(), interval.typed_id(), pool).await?;
     }
 
     for previous_involvement in previous_project_involvements {
@@ -71,10 +105,11 @@ pub async fn add_interval_implicit_involvements(
             None => previous_involvement.implicit_counter + 1,
         };
 
-        let new_involvement = ProjectInvolvement {
+        let new_involvement = CircleInvolvement {
             id: -1, // -1 indicates a new record
             person_id: previous_involvement.person_id.clone(),
             project_id: previous_involvement.project_id,
+            circle_id: previous_involvement.circle_id,
             interval_id: interval.id,
             status: previous_involvement.status,
             private_capacity_planning: false,

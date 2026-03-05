@@ -1,6 +1,7 @@
 import { useDispatch, useSelector, useStore } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import projectReducer, { projectLoaded, projectUpdated } from "./project";
+import circlesReducer, { circlesLoaded } from "./circles";
 import peopleReducer, { peopleLoaded, personUpdated } from "./people";
 import intervalsReducer, { intervalsLoaded, intervalCreated } from "./intervals";
 import involvementsReducer, { involvementsLoaded, intervalDataChanged } from "./involvements";
@@ -16,6 +17,7 @@ import type { AppEvent, CalendarEventAttendancesEvent, CalendarEventsEvent, Proj
 const store = configureStore({
   reducer: {
     project: projectReducer,
+    circles: circlesReducer,
     people: peopleReducer,
     intervals: intervalsReducer,
     involvements: involvementsReducer,
@@ -44,6 +46,7 @@ async function loadProjectData(store: AppStore, api: ReturnType<typeof getApi>):
   return api.api
     .getProjectState()
     .then((response) => {
+      store.dispatch(circlesLoaded(response.data.circles));
       store.dispatch(peopleLoaded(response.data.people));
       store.dispatch(crewsLoaded(response.data.crews));
       store.dispatch(intervalsLoaded({ allIntervals: response.data.intervals, currentInterval: response.data.current_interval }));

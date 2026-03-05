@@ -1,15 +1,16 @@
 use sqlx::SqlitePool;
 
 use crate::shared::entities::{
-    IntervalId, InvolvementStatus, OptOutType, ParticipationIntention, PersonId, ProjectId,
-    ProjectInvolvement,
+    CircleId, CircleInvolvement, IntervalId, InvolvementStatus, OptOutType, ParticipationIntention,
+    PersonId, ProjectId,
 };
 
 #[derive(Debug, Clone)]
-pub struct ProjectInvolvementRecord {
+pub struct CircleInvolvementRecord {
     pub id: i64,
     pub person_id: i64,
     pub project_id: i64,
+    pub circle_id: i64,
     pub interval_id: i64,
     pub status: InvolvementStatus,
     pub private_capacity_planning: bool,
@@ -24,12 +25,13 @@ pub struct ProjectInvolvementRecord {
     pub implicit_counter: i64,
 }
 
-impl From<ProjectInvolvementRecord> for ProjectInvolvement {
-    fn from(record: ProjectInvolvementRecord) -> Self {
-        ProjectInvolvement {
+impl From<CircleInvolvementRecord> for CircleInvolvement {
+    fn from(record: CircleInvolvementRecord) -> Self {
+        CircleInvolvement {
             id: record.id,
             person_id: record.person_id,
             project_id: record.project_id,
+            circle_id: record.circle_id,
             interval_id: record.interval_id,
             status: record.status,
             private_capacity_planning: record.private_capacity_planning,
@@ -48,12 +50,13 @@ impl From<ProjectInvolvementRecord> for ProjectInvolvement {
     }
 }
 
-impl From<ProjectInvolvement> for ProjectInvolvementRecord {
-    fn from(involvement: ProjectInvolvement) -> Self {
-        ProjectInvolvementRecord {
+impl From<CircleInvolvement> for CircleInvolvementRecord {
+    fn from(involvement: CircleInvolvement) -> Self {
+        CircleInvolvementRecord {
             id: involvement.id,
             person_id: involvement.person_id,
             project_id: involvement.project_id,
+            circle_id: involvement.circle_id,
             interval_id: involvement.interval_id,
             status: involvement.status,
             private_capacity_planning: involvement.private_capacity_planning,
@@ -79,18 +82,20 @@ impl From<ProjectInvolvement> for ProjectInvolvementRecord {
     }
 }
 
-pub async fn find_project_involvement(
+pub async fn find_circle_involvement(
     project_id: ProjectId,
+    circle_id: CircleId,
     person_id: PersonId,
     interval_id: IntervalId,
     pool: &SqlitePool,
-) -> Result<Option<ProjectInvolvement>, sqlx::Error> {
-    let record: Option<ProjectInvolvementRecord> = sqlx::query_as!(
-        ProjectInvolvementRecord,
+) -> Result<Option<CircleInvolvement>, sqlx::Error> {
+    let record: Option<CircleInvolvementRecord> = sqlx::query_as!(
+        CircleInvolvementRecord,
         "SELECT
-            id,
+            circle_involvements.id AS id,
             person_id,
-            project_id AS project_id,
+            circles.project_id AS \"project_id: i64\",
+            circle_id,
             interval_id,
             status as \"status: InvolvementStatus\",
             private_capacity_planning,
@@ -102,12 +107,15 @@ pub async fn find_project_involvement(
             opt_out_type as \"opt_out_type: OptOutType\", opt_out_planned_return_date,
             intention_context,
             implicit_counter
-        FROM project_involvements
+        FROM circle_involvements
+        INNER JOIN circles ON circle_involvements.circle_id = circles.id
         WHERE
-            project_id = ? AND
+            circles.project_id = ? AND
+            circle_involvements.id = ? AND
             person_id = ? AND
             interval_id = ?",
         project_id.id,
+        circle_id.id,
         person_id.id,
         interval_id.id,
     )
@@ -117,17 +125,19 @@ pub async fn find_project_involvement(
     Ok(record.map(Into::into))
 }
 
-pub async fn find_all_project_involvements(
+pub async fn find_all_circle_involvements(
     project_id: ProjectId,
+    circle_id: CircleId,
     interval_id: IntervalId,
     pool: &SqlitePool,
-) -> Result<Vec<ProjectInvolvement>, sqlx::Error> {
+) -> Result<Vec<CircleInvolvement>, sqlx::Error> {
     let records = sqlx::query_as!(
-        ProjectInvolvementRecord,
+        CircleInvolvementRecord,
         "SELECT
-            id,
+            circle_involvements.id AS id,
             person_id,
-            project_id AS project_id,
+            circles.project_id AS \"project_id: i64\",
+            circle_id,
             interval_id,
             status as \"status: InvolvementStatus\",
             private_capacity_planning,
@@ -140,11 +150,14 @@ pub async fn find_all_project_involvements(
             opt_out_planned_return_date,
             intention_context,
             implicit_counter
-        FROM project_involvements
+        FROM circle_involvements
+        INNER JOIN circles ON circle_involvements.circle_id = circles.id
         WHERE
             project_id = ? AND
+            circle_involvements.id = ? AND
             interval_id = ?",
         project_id.id,
+        circle_id.id,
         interval_id.id,
     )
     .fetch_all(pool)
@@ -154,7 +167,7 @@ pub async fn find_all_project_involvements(
 }
 
 pub async fn upsert_project_involvement(
-    involvement: ProjectInvolvementRecord,
+    involvement: CircleInvolvementRecord,
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
     let result = sqlx::query!(
@@ -197,7 +210,7 @@ pub async fn upsert_project_involvement(
 }
 
 pub async fn insert_project_involvement_if_missing(
-    involvement: ProjectInvolvementRecord,
+    involvement: CircleInvolvementRecord,
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(

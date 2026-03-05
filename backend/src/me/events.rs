@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
-use crate::{me::repo::PersonIntervalInvolvementData, shared::entities::ProjectInvolvement};
+use crate::{me::repo::PersonIntervalInvolvementData, shared::entities::CircleInvolvement};
 
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
 pub enum MeEvent {
@@ -18,8 +18,8 @@ pub fn strip_private_data(data: &PersonIntervalInvolvementData) -> PersonInterva
 }
 
 fn strip_private_data_from_project_involvement(
-    involvement: &ProjectInvolvement,
-) -> ProjectInvolvement {
+    involvement: &CircleInvolvement,
+) -> CircleInvolvement {
     match involvement.private_capacity_planning {
         true => {
             let mut result = involvement.clone();

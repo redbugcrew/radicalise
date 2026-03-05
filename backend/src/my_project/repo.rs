@@ -4,17 +4,18 @@ use utoipa::ToSchema;
 
 use crate::{
     calendar_events::repo::list_calendar_events_with_attendances,
+    circles::repo::find_all_circles,
     crews::repo::find_all_crews_with_links,
     entry_pathways::repo::find_all_entry_pathways_for_project,
     event_templates::repo::find_all_event_templates,
     intervals::repo::{find_current_interval, find_next_interval},
-    my_project::involvements_repo::find_all_project_involvements,
+    my_project::involvements_repo::find_all_circle_involvements,
     people::repo::find_all_people,
     shared::{
-        default_project_id,
+        default_circle_id, default_project_id,
         entities::{
-            CalendarEvent, CrewInvolvement, CrewWithLinks, EntryPathway, EventTemplate, Interval,
-            IntervalId, Person, Project, ProjectId, ProjectInvolvement,
+            CalendarEvent, Circle, CircleInvolvement, CrewInvolvement, CrewWithLinks, EntryPathway,
+            EventTemplate, Interval, IntervalId, Person, Project, ProjectId,
         },
         links_repo::{find_all_links_for_owner, update_links_for_owner},
     },
@@ -23,7 +24,7 @@ use crate::{
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct IntervalInvolvementData {
     pub interval_id: i64,
-    pub project_involvements: Vec<ProjectInvolvement>,
+    pub project_involvements: Vec<CircleInvolvement>,
     pub crew_involvements: Vec<CrewInvolvement>,
 }
 
@@ -36,6 +37,7 @@ pub struct InvolvementData {
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct InitialData {
     pub project: Project,
+    pub circles: Vec<Circle>,
     pub people: Vec<Person>,
     pub crews: Vec<CrewWithLinks>,
     pub intervals: Vec<Interval>,
@@ -124,8 +126,13 @@ async fn find_interval_involvement_data(
     interval_id: IntervalId,
     pool: &SqlitePool,
 ) -> Result<IntervalInvolvementData, sqlx::Error> {
-    let project_involvements =
-        find_all_project_involvements(default_project_id(), interval_id.clone(), pool).await?;
+    let project_involvements = find_all_circle_involvements(
+        default_project_id(),
+        default_circle_id(),
+        interval_id.clone(),
+        pool,
+    )
+    .await?;
     let crew_involvements = find_all_crew_involvements(interval_id.clone(), pool).await?;
 
     Ok(IntervalInvolvementData {
@@ -139,6 +146,8 @@ pub async fn find_initial_data_for_project(
     project: Project,
     pool: &SqlitePool,
 ) -> Result<InitialData, sqlx::Error> {
+    let circles = find_all_circles(project.typed_id(), pool).await?;
+
     let people = find_all_people(project.typed_id(), pool).await?;
 
     let crews = find_all_crews_with_links(project.typed_id(), pool).await?;
@@ -170,6 +179,7 @@ pub async fn find_initial_data_for_project(
 
     Ok(InitialData {
         project,
+        circles,
         people,
         crews,
         event_templates,

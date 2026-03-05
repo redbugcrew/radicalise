@@ -4,10 +4,10 @@ use utoipa::ToSchema;
 
 use crate::{
     intervals::repo::{find_current_interval, find_next_interval},
-    my_project::involvements_repo::find_project_involvement,
+    my_project::involvements_repo::find_circle_involvement,
     shared::entities::{
-        CrewId, CrewInvolvement, IntervalId, Person, PersonId, ProjectId, ProjectInvolvement,
-        UserId,
+        CircleId, CircleInvolvement, CrewId, CrewInvolvement, IntervalId, Person, PersonId,
+        ProjectId, UserId,
     },
 };
 
@@ -15,7 +15,7 @@ use crate::{
 pub struct PersonIntervalInvolvementData {
     pub interval_id: i64,
     pub person_id: i64,
-    pub project_involvement: Option<ProjectInvolvement>,
+    pub project_involvement: Option<CircleInvolvement>,
     pub crew_involvements: Vec<CrewInvolvement>,
 }
 
@@ -29,12 +29,19 @@ pub struct MyInitialData {
 
 pub async fn find_interval_data_for_person(
     project_id: ProjectId,
+    circle_id: CircleId,
     person_id: PersonId,
     interval_id: IntervalId,
     pool: &SqlitePool,
 ) -> Result<PersonIntervalInvolvementData, sqlx::Error> {
-    let involvement =
-        find_project_involvement(project_id, person_id.clone(), interval_id.clone(), pool).await?;
+    let involvement = find_circle_involvement(
+        project_id,
+        circle_id,
+        person_id.clone(),
+        interval_id.clone(),
+        pool,
+    )
+    .await?;
 
     let crew_involvements =
         find_my_crew_involvements(person_id.clone(), interval_id.clone(), pool).await?;
@@ -49,6 +56,7 @@ pub async fn find_interval_data_for_person(
 
 pub async fn find_initial_data_for_user(
     project_id: ProjectId,
+    circle_id: CircleId,
     user_id: UserId,
     pool: &SqlitePool,
 ) -> Result<MyInitialData, sqlx::Error> {
@@ -60,6 +68,7 @@ pub async fn find_initial_data_for_user(
 
     let current_interval_data = find_interval_data_for_person(
         project_id.clone(),
+        circle_id.clone(),
         person_id.clone(),
         current_interval.typed_id(),
         pool,
@@ -70,6 +79,7 @@ pub async fn find_initial_data_for_user(
         Some(
             find_interval_data_for_person(
                 project_id.clone(),
+                circle_id.clone(),
                 person_id.clone(),
                 interval.typed_id(),
                 pool,

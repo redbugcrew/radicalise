@@ -6,12 +6,12 @@ use crate::{
     auth::auth_backend::AuthSession,
     my_project::{
         events::ProjectEvent,
-        involvements_repo::find_all_project_involvements,
+        involvements_repo::find_all_circle_involvements,
         repo::{InitialData, IntervalInvolvementData},
     },
     realtime::RealtimeState,
     shared::{
-        default_project_id,
+        default_circle_id, default_project_id,
         entities::{IntervalId, Project},
         events::AppEvent,
         regular_tasks::check_intervals_tasks,
@@ -74,8 +74,13 @@ async fn get_involvements(
 ) -> impl IntoResponse {
     let interval_id = IntervalId::new(interval_id);
 
-    let project_involvements_result =
-        find_all_project_involvements(default_project_id(), interval_id.clone(), &pool).await;
+    let project_involvements_result = find_all_circle_involvements(
+        default_project_id(),
+        default_circle_id(),
+        interval_id.clone(),
+        &pool,
+    )
+    .await;
     let crew_involvements_result =
         repo::find_all_crew_involvements(interval_id.clone(), &pool).await;
 
