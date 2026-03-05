@@ -1,8 +1,8 @@
 use sqlx::SqlitePool;
 
 use crate::shared::entities::{
-    ProjectId, CollectiveInvolvement, IntervalId, InvolvementStatus, OptOutType,
-    ParticipationIntention, PersonId,
+    CollectiveInvolvement, IntervalId, InvolvementStatus, OptOutType, ParticipationIntention,
+    PersonId, ProjectId,
 };
 
 #[derive(Debug, Clone)]
@@ -102,7 +102,7 @@ pub async fn find_collective_involvement(
             opt_out_type as \"opt_out_type: OptOutType\", opt_out_planned_return_date,
             intention_context,
             implicit_counter
-        FROM collective_involvements
+        FROM project_involvements
         WHERE
             project_id = ? AND
             person_id = ? AND
@@ -140,7 +140,7 @@ pub async fn find_all_collective_involvements(
             opt_out_planned_return_date,
             intention_context,
             implicit_counter
-        FROM collective_involvements
+        FROM project_involvements
         WHERE
             project_id = ? AND
             interval_id = ?",
@@ -158,7 +158,7 @@ pub async fn upsert_collective_involvement(
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
     let result = sqlx::query!(
-        "INSERT INTO collective_involvements (person_id, project_id, interval_id, status, private_capacity_planning, wellbeing, focus, capacity_score, capacity, participation_intention, opt_out_type, opt_out_planned_return_date,
+        "INSERT INTO project_involvements (person_id, project_id, interval_id, status, private_capacity_planning, wellbeing, focus, capacity_score, capacity, participation_intention, opt_out_type, opt_out_planned_return_date,
         intention_context)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(person_id, project_id, interval_id) DO UPDATE SET
@@ -201,7 +201,7 @@ pub async fn insert_collective_involvement_if_missing(
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(
-        "INSERT INTO collective_involvements (person_id, project_id, interval_id, status, private_capacity_planning, wellbeing, focus, capacity_score, capacity, participation_intention, opt_out_type, opt_out_planned_return_date,
+        "INSERT INTO project_involvements (person_id, project_id, interval_id, status, private_capacity_planning, wellbeing, focus, capacity_score, capacity, participation_intention, opt_out_type, opt_out_planned_return_date,
         intention_context, implicit_counter)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(person_id, project_id, interval_id) DO NOTHING",
@@ -232,7 +232,7 @@ pub async fn delete_implicit_collective_involvements(
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(
-        "DELETE FROM collective_involvements
+        "DELETE FROM project_involvements
         WHERE
             interval_id = ? AND
             project_id = ? AND
@@ -251,7 +251,7 @@ pub async fn set_implicit_counter_to_zero(
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(
-        "UPDATE collective_involvements
+        "UPDATE project_involvements
         SET implicit_counter = 0
         WHERE
             project_id = ?",

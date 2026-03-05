@@ -10,4 +10,6 @@ ALTER TABLE people RENAME COLUMN collective_id TO project_id;
 ALTER TABLE intervals RENAME COLUMN collective_id TO project_id;
 ALTER TABLE crews RENAME COLUMN collective_id TO project_id;
 
+ALTER TABLE collective_involvements RENAME TO project_involvements;
+
 UPDATE links SET owner_type = "projects" WHERE owner_type = "collectives";
