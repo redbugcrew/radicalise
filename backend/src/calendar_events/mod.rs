@@ -10,11 +10,11 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 use crate::{
     auth::auth_backend::AuthSession,
     calendar_events::repo::list_calendar_events_person_attending,
-    my_collective::repo::find_collective,
+    my_project::repo::find_project,
     people::repo::find_person_by_calendar_token,
     realtime::RealtimeState,
     shared::{
-        default_collective_id,
+        default_project_id,
         entities::{CalendarEvent, CalendarEventId},
         events::AppEvent,
     },
@@ -52,7 +52,7 @@ async fn create_calendar_event(
     match repo::insert_calendar_event_with_links(
         &data,
         data.event_template_id,
-        default_collective_id(),
+        default_project_id(),
         &pool,
     )
     .await
@@ -95,7 +95,7 @@ async fn update_calendar_event(
         CalendarEventId::new(event_id),
         &data,
         data.event_template_id,
-        default_collective_id(),
+        default_project_id(),
         &pool,
     )
     .await
@@ -133,10 +133,10 @@ pub async fn get_calendar_ics(
         calendar_token
     );
 
-    let collective = match find_collective(default_collective_id(), &pool).await {
-        Ok(collective) => collective,
+    let project = match find_project(default_project_id(), &pool).await {
+        Ok(project) => project,
         Err(err) => {
-            eprintln!("Error looking up collective: {}", err);
+            eprintln!("Error looking up project: {}", err);
             return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
         }
     };
@@ -149,23 +149,20 @@ pub async fn get_calendar_ics(
         }
     };
 
-    let events = match list_calendar_events_person_attending(
-        collective.typed_id(),
-        person.typed_id(),
-        &pool,
-    )
-    .await
-    {
-        Ok(events) => events,
-        Err(err) => {
-            eprintln!("Error listing calendar events for person: {}", err);
-            return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
-        }
-    };
+    let events =
+        match list_calendar_events_person_attending(project.typed_id(), person.typed_id(), &pool)
+            .await
+        {
+            Ok(events) => events,
+            Err(err) => {
+                eprintln!("Error listing calendar events for person: {}", err);
+                return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
+            }
+        };
 
     let calendar_name = format!(
         "{} - {}",
-        collective.name.unwrap_or("Radicalize".to_string()),
+        project.name.unwrap_or("Radicalize".to_string()),
         person.display_name
     );
 

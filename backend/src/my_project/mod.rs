@@ -4,15 +4,15 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     auth::auth_backend::AuthSession,
-    my_collective::{
-        events::CollectiveEvent,
-        involvements_repo::find_all_collective_involvements,
+    my_project::{
+        events::ProjectEvent,
+        involvements_repo::find_all_project_involvements,
         repo::{InitialData, IntervalInvolvementData},
     },
     realtime::RealtimeState,
     shared::{
-        default_collective_id,
-        entities::{Collective, IntervalId},
+        default_project_id,
+        entities::{IntervalId, Project},
         events::AppEvent,
         regular_tasks::check_intervals_tasks,
     },
@@ -24,38 +24,35 @@ pub mod repo;
 
 pub fn router() -> OpenApiRouter {
     OpenApiRouter::new()
-        .routes(routes!(get_collective_state))
+        .routes(routes!(get_project_state))
         .routes(routes!(get_involvements))
-        .routes(routes!(update_collective))
+        .routes(routes!(update_project))
 }
 
 #[utoipa::path(get, path = "/state", responses(
-        (status = 200, description = "Collective found successfully", body = InitialData),
-        (status = NOT_FOUND, description = "Collective was not found", body = ()),
+        (status = 200, description = "Project found successfully", body = InitialData),
+        (status = NOT_FOUND, description = "Project was not found", body = ()),
         (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
     ),)]
-async fn get_collective_state(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse {
-    let collective = match repo::find_collective_with_links(default_collective_id(), &pool).await {
-        Ok(collective) => collective,
+async fn get_project_state(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse {
+    let project = match repo::find_project_with_links(default_project_id(), &pool).await {
+        Ok(project) => project,
         Err(e) => {
-            eprintln!("Error fetching collective: {:?}", e);
+            eprintln!("Error fetching project: {:?}", e);
             return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
         }
     };
 
     // Run automated tasks
-    if check_intervals_tasks(collective.typed_id(), &pool)
+    if check_intervals_tasks(project.typed_id(), &pool)
         .await
         .is_err()
     {
-        eprintln!(
-            "Error checking next interval for collective: {:?}",
-            collective
-        );
+        eprintln!("Error checking next interval for project: {:?}", project);
         return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
     }
 
-    let initial_data_result = repo::find_initial_data_for_collective(collective, &pool).await;
+    let initial_data_result = repo::find_initial_data_for_project(project, &pool).await;
     match initial_data_result {
         Ok(initial_data) => (StatusCode::OK, Json(initial_data)).into_response(),
         Err(e) => {
@@ -77,20 +74,20 @@ async fn get_involvements(
 ) -> impl IntoResponse {
     let interval_id = IntervalId::new(interval_id);
 
-    let collective_involvements_result =
-        find_all_collective_involvements(default_collective_id(), interval_id.clone(), &pool).await;
+    let project_involvements_result =
+        find_all_project_involvements(default_project_id(), interval_id.clone(), &pool).await;
     let crew_involvements_result =
         repo::find_all_crew_involvements(interval_id.clone(), &pool).await;
 
-    if collective_involvements_result.is_err() || crew_involvements_result.is_err() {
+    if project_involvements_result.is_err() || crew_involvements_result.is_err() {
         return (StatusCode::NOT_FOUND, ()).into_response();
     }
-    let collective_involvements = collective_involvements_result.unwrap();
+    let project_involvements = project_involvements_result.unwrap();
     let crew_involvements = crew_involvements_result.unwrap();
 
     let result = IntervalInvolvementData {
         interval_id: interval_id.id,
-        collective_involvements,
+        project_involvements,
         crew_involvements,
     };
 
@@ -98,23 +95,23 @@ async fn get_involvements(
 }
 
 #[utoipa::path(put, path = "/",
-    request_body(content = Collective, content_type = "application/json"),
+    request_body(content = Project, content_type = "application/json"),
     responses(
         (status = 200, body = Vec<AppEvent>),
         (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
     ),
 )]
-pub async fn update_collective(
+pub async fn update_project(
     auth_session: AuthSession,
     Extension(pool): Extension<SqlitePool>,
     Extension(realtime_state): Extension<RealtimeState>,
-    Json(input): Json<Collective>,
+    Json(input): Json<Project>,
 ) -> impl IntoResponse {
-    println!("Updating collective: {:?}", input);
+    println!("Updating project: {:?}", input);
 
-    match repo::update_collective_with_links(input, default_collective_id(), &pool).await {
+    match repo::update_project_with_links(input, default_project_id(), &pool).await {
         Ok(response) => {
-            let event = AppEvent::CollectiveEvent(CollectiveEvent::CollectiveUpdated(response));
+            let event = AppEvent::ProjectEvent(ProjectEvent::ProjectUpdated(response));
             realtime_state
                 .broadcast_app_event(Some(auth_session), event.clone())
                 .await;

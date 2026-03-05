@@ -1,7 +1,7 @@
 import { Stepper, Group, Button, Box } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useState } from "react";
-import type { CollectiveInvolvement, Interval } from "../../api/Api";
+import type { ProjectInvolvement, Interval } from "../../api/Api";
 import { IconLock } from "@tabler/icons-react";
 import { useAppSelector } from "../../store";
 import { forPerson, getMatchingInvolvementInterval } from "../../store/involvements";
@@ -14,7 +14,7 @@ export type { MyParticipationFormData } from "./shared";
 interface ParticipationFormProps {
   personId: number;
   readOnly?: boolean;
-  involvement?: CollectiveInvolvement | null;
+  involvement?: ProjectInvolvement | null;
   interval: Interval;
   previousIntervalId?: number | undefined;
   onSubmit: (data: MyParticipationFormData) => void;

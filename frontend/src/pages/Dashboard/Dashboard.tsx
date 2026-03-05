@@ -1,7 +1,7 @@
 import { Button, Card, Container, Title, Stack, Text, Badge, Group, Collapse } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import { useAppSelector } from "../../store";
-import { AttendanceIntention, type CalendarEvent, type CollectiveInvolvement, type CrewInvolvement, type Interval, type PersonIntervalInvolvementData } from "../../api/Api";
+import { AttendanceIntention, type CalendarEvent, type ProjectInvolvement, type CrewInvolvement, type Interval, type PersonIntervalInvolvementData } from "../../api/Api";
 import DateText from "../../components/DateText";
 import classes from "./Dashboard.module.css";
 import { CrewsList, LinksStack } from "../../components";
@@ -19,7 +19,7 @@ interface MyIntervalPartipationCardProps {
   current: boolean;
 }
 
-function ParticipationBadge({ involvement }: { involvement: CollectiveInvolvement | null }) {
+function ParticipationBadge({ involvement }: { involvement: ProjectInvolvement | null }) {
   if (!involvement) return <Badge color="gray">No intention</Badge>;
 
   const { participation_intention, opt_out_type } = involvement;
@@ -43,10 +43,10 @@ function ParticipationBadge({ involvement }: { involvement: CollectiveInvolvemen
 
 function MyIntervalPartipationCard({ interval, data, current = true }: MyIntervalPartipationCardProps) {
   const navigate = useNavigate();
-  const { collective_involvement } = data;
+  const { project_involvement } = data;
 
   return (
-    <Card withBorder className={collective_involvement ? "" : classes.unplanned}>
+    <Card withBorder className={project_involvement ? "" : classes.unplanned}>
       <Group justify="space-between" align="flex-start">
         <Stack gap={0}>
           <Title order={2} size="md">
@@ -56,7 +56,7 @@ function MyIntervalPartipationCard({ interval, data, current = true }: MyInterva
             <DateText date={interval.start_date} /> - <DateText date={interval.end_date} />
           </Text>
         </Stack>
-        <ParticipationBadge involvement={collective_involvement || null} />
+        <ParticipationBadge involvement={project_involvement || null} />
       </Group>
 
       <Button variant={current ? "outline" : "filled"} mt="md" radius="md" onClick={() => navigate(`/my_participation/${interval.id}`)}>
@@ -147,9 +147,9 @@ function MyEvents() {
 export default function Dashboard() {
   const intervals = useAppSelector((state) => state.intervals);
   const myData = useAppSelector((state) => state.me);
-  const collective = useAppSelector((state) => state.collective);
+  const project = useAppSelector((state) => state.project);
 
-  if (!myData || !collective) {
+  if (!myData || !project) {
     return <Text>Error: Data not found.</Text>;
   }
 
@@ -177,7 +177,7 @@ export default function Dashboard() {
         {myData.current_interval && <MyCrews personId={myData.person_id} myInvolvements={myData.current_interval.crew_involvements} />}
         <Stack gap="md">
           <Title order={2}>Resources</Title>
-          <LinksStack links={collective.links} />
+          <LinksStack links={project.links} />
         </Stack>
       </Stack>
     </Container>

@@ -12,7 +12,7 @@ import { getSocketUrl } from "../../api";
 
 export default function Layout() {
   const [opened, { toggle }] = useDisclosure();
-  const collective = useAppSelector((state) => state.collective);
+  const project = useAppSelector((state) => state.project);
   const person_id = useAppSelector((state) => state.me?.person_id);
   const person = useAppSelector((state) => state.people[person_id || -1]);
 
@@ -36,7 +36,7 @@ export default function Layout() {
       <AppShell.Header>
         <Group h="100%" px="md">
           <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-          <Anchor href="/">{collective ? collective.name : "Radicalise!"}</Anchor>
+          <Anchor href="/">{project ? project.name : "Radicalise!"}</Anchor>
         </Group>
       </AppShell.Header>
       <AppShell.Navbar p={0}>
@@ -48,7 +48,7 @@ export default function Layout() {
           <NavLink label="People" href="people" leftSection={<IconUsers size={18} />} onClick={toggle} />
           <NavLink label="Crews" href="crews" leftSection={<IconUsersGroup size={18} />} onClick={toggle} />
           <NavLink label="Events" href="events" leftSection={<IconCalendar size={18} />} onClick={toggle} />
-          {collective?.feature_eoi && <NavLink label="Entry" href="entry_pathways" leftSection={<IconUsers size={18} />} onClick={toggle} />}
+          {project?.feature_eoi && <NavLink label="Entry" href="entry_pathways" leftSection={<IconUsers size={18} />} onClick={toggle} />}
         </AppShell.Section>
         <AppShell.Section className={classes.settings_section}>
           <h3 className={classes.section_title}>Settings</h3>
@@ -58,11 +58,11 @@ export default function Layout() {
 
         <AppShell.Section className={classes.footer_section}>
           <NavLink c="dimmed" label={"v" + packageJson.version} href={packageJson.homepage + "/releases/tag/v" + packageJson.version} leftSection={<IconBrandGithub size={18} />} onClick={toggle} />
-          <NavLink c="dimmed" label="Collective settings" href="/collective/edit" leftSection={<IconSettings size={18} />} onClick={toggle} />
+          <NavLink c="dimmed" label="Project settings" href="/project/edit" leftSection={<IconSettings size={18} />} onClick={toggle} />
         </AppShell.Section>
       </AppShell.Navbar>
       <AppShell.Main>
-        <Container p={0}>{collective && <Outlet />}</Container>
+        <Container p={0}>{project && <Outlet />}</Container>
       </AppShell.Main>
     </AppShell>
   );

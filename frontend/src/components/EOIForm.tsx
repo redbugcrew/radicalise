@@ -1,20 +1,20 @@
 import { Button, Card, Stack, TextInput, Textarea, Title, Text, List, LoadingOverlay } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import type { Collective, ExpressionOfInterest } from "../api/Api";
+import type { Project, ExpressionOfInterest } from "../api/Api";
 
 interface EOIFormProps {
-  collective: Collective;
+  project: Project;
   eoi?: ExpressionOfInterest;
   actionName?: String;
   onSubmit: (values: ExpressionOfInterest) => Promise<void>;
 }
 
-export default function EOIForm({ onSubmit, collective, eoi, actionName }: EOIFormProps) {
+export default function EOIForm({ onSubmit, project, eoi, actionName }: EOIFormProps) {
   const form = useForm<ExpressionOfInterest>({
     mode: "controlled",
     initialValues: eoi || {
       id: -1, // Placeholder ID, will be set by the backend
-      collective_id: collective.id,
+      project_id: project.id,
       name: "",
       interest: "",
       context: "",
@@ -29,8 +29,8 @@ export default function EOIForm({ onSubmit, collective, eoi, actionName }: EOIFo
     },
   });
 
-  const noun_name = collective.noun_name ?? "the collective";
-  const name = collective.name ?? "collective";
+  const noun_name = project.noun_name ?? "the project";
+  const name = project.name ?? "project";
 
   return (
     <form onSubmit={form.onSubmit(onSubmit)}>
@@ -40,6 +40,7 @@ export default function EOIForm({ onSubmit, collective, eoi, actionName }: EOIFo
           <TextInput label="Name" placeholder="How would you like us to refer to you?" {...form.getInputProps("name")} />
 
           <Textarea label="Interest" description={`What interests you about participating in ${noun_name}?`} placeholder="Your message" rows={6} {...form.getInputProps("interest")} />
+
           <Textarea
             label="Context"
             description={`What areas that the ${noun_name} is involved in are you already familiar with, and which ones are ones you're interested in learning more about?`}
@@ -78,7 +79,7 @@ export default function EOIForm({ onSubmit, collective, eoi, actionName }: EOIFo
               </List.Item>
               <List.Item>
                 <Text>
-                  <strong>Other fields:</strong> Displayed to all current and future participants in the collective so that they can opt-in to following up on your interest.
+                  <strong>Other fields:</strong> Displayed to all current and future participants in the project so that they can opt-in to following up on your interest.
                 </Text>
               </List.Item>
             </List>
@@ -91,7 +92,7 @@ export default function EOIForm({ onSubmit, collective, eoi, actionName }: EOIFo
               </List.Item>
               <List.Item>
                 <Text>
-                  <strong>You're invited:</strong> If you are invited to participate in the collective, your expression of interest will be deleted.
+                  <strong>You're invited:</strong> If you are invited to participate in the project, your expression of interest will be deleted.
                 </Text>
               </List.Item>
               <List.Item>

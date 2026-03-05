@@ -14,7 +14,7 @@ type ParticipationStepProps = StepProps & {
 export function ParticipationStep({ form, readOnly, interval }: ParticipationStepProps) {
   const [intention, setIntention] = useState<ParticipationIntention | null>(form.values.participation_intention);
   const [optOutType, setOptOutType] = useState<OptOutType | null>(form.values.opt_out_type);
-  const collective_noun_name = useAppSelector((state) => state.collective?.noun_name || "the collective");
+  const project_noun_name = useAppSelector((state) => state.project?.noun_name || "the project");
 
   form.watch("participation_intention", ({ value }) => {
     setIntention(value);
@@ -33,7 +33,7 @@ export function ParticipationStep({ form, readOnly, interval }: ParticipationSte
       <Stack gap="md">
         <Select
           label="Participation intention"
-          description={`Would you like to participate in ${collective_noun_name} this interval?`}
+          description={`Would you like to participate in ${project_noun_name} this interval?`}
           placeholder="Pick value"
           disabled={readOnly}
           data={[
@@ -75,7 +75,7 @@ export function ParticipationStep({ form, readOnly, interval }: ParticipationSte
                 disabled={readOnly}
                 label={optOutType === "Hiatus" ? "Hiatus context" : "Exit context"}
                 rows={4}
-                description={optOutType === "Hiatus" ? "Any context you would like to share about why you are taking a hiatus." : "Any context you would like to share about why you are exiting the collective."}
+                description={optOutType === "Hiatus" ? "Any context you would like to share about why you are taking a hiatus." : "Any context you would like to share about why you are exiting the project."}
                 key={form.key("intention_context")}
                 {...form.getInputProps("intention_context")}
               />

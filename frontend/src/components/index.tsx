@@ -12,7 +12,7 @@ export { default as IntervalsTable } from "./intervals/IntervalsTable";
 export { default as IntervalForm } from "./intervals/IntervalForm";
 export { default as ComboTextArea } from "./forms/ComboTextArea";
 export { default as LinksInput } from "./links/LinksInput/LinksInput";
-export { default as CollectiveForm } from "./CollectiveForm";
+export { default as ProjectForm } from "./ProjectForm";
 export { default as LinksStack } from "./links/LinksDisplay/LinksStack";
 export { default as EOIForm } from "./EOIForm";
 export { default as Markdown } from "./Markdown";

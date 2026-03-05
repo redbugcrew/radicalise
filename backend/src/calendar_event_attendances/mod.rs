@@ -51,7 +51,7 @@ async fn create_calendar_event_attendance(
 
     let person = match find_person_by_user_id(
         user_id.clone(),
-        crate::shared::default_collective_id(),
+        crate::shared::default_project_id(),
         &pool,
     )
     .await

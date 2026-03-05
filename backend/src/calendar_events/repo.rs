@@ -6,7 +6,7 @@ use crate::{
     },
     shared::{
         entities::{
-            CalendarEvent, CalendarEventId, CollectiveId, EventResponseExpectation, Link, PersonId,
+            CalendarEvent, CalendarEventId, EventResponseExpectation, Link, PersonId, ProjectId,
         },
         links_repo::{find_all_links_for_owner_type, hash_links_by_owner, update_links_for_owner},
     },
@@ -15,13 +15,13 @@ use crate::{
 pub async fn insert_calendar_event_with_links(
     data: &CalendarEvent,
     event_template_id: i64,
-    collective_id: CollectiveId,
+    project_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<CalendarEvent, sqlx::Error> {
     let rec = sqlx::query!(
         "
         INSERT INTO calendar_events (
-                event_template_id, name, start_at, end_at, collective_id,
+                event_template_id, name, start_at, end_at, project_id,
                 location, summary, description
             )
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -31,7 +31,7 @@ pub async fn insert_calendar_event_with_links(
         data.name,
         data.start_at,
         data.end_at,
-        collective_id.id,
+        project_id.id,
         data.location,
         data.summary,
         data.description
@@ -57,14 +57,14 @@ pub async fn update_calendar_event_with_links(
     event_id: CalendarEventId,
     data: &CalendarEvent,
     event_template_id: i64,
-    collective_id: CollectiveId,
+    project_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<CalendarEvent, sqlx::Error> {
     sqlx::query!(
         "
         UPDATE calendar_events
         SET event_template_id = ?, name = ?, start_at = ?, end_at = ?, location = ?, summary = ?, description = ?
-        WHERE id = ? AND collective_id = ?
+        WHERE id = ? AND project_id = ?
         ",
         event_template_id,
         data.name,
@@ -74,7 +74,7 @@ pub async fn update_calendar_event_with_links(
         data.summary,
         data.description,
         event_id.id,
-        collective_id.id
+        project_id.id
     )
     .execute(pool)
     .await?;
@@ -123,10 +123,10 @@ impl CalendarEventRow {
 }
 
 pub async fn list_calendar_events_with_attendances(
-    collective_id: CollectiveId,
+    project_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Vec<CalendarEvent>, sqlx::Error> {
-    let without_attendances = list_calendar_events(collective_id.clone(), pool).await?;
+    let without_attendances = list_calendar_events(project_id.clone(), pool).await?;
     let attendances = attendances_for_calendar_events(&without_attendances, pool).await?;
     let attendances_hash = hash_attendances_by_event(attendances);
 
@@ -142,10 +142,10 @@ pub async fn list_calendar_events_with_attendances(
 }
 
 pub async fn list_calendar_events(
-    collective_id: CollectiveId,
+    project_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Vec<CalendarEvent>, sqlx::Error> {
-    let rows = list_calendar_event_rows(collective_id, pool).await?;
+    let rows = list_calendar_event_rows(project_id, pool).await?;
 
     let links = find_all_links_for_owner_type("calendar_event".to_string(), pool).await?;
     let links_hash = hash_links_by_owner(links);
@@ -163,11 +163,11 @@ pub async fn list_calendar_events(
 }
 
 pub async fn list_calendar_events_person_attending(
-    collective_id: CollectiveId,
+    project_id: ProjectId,
     person_id: PersonId,
     pool: &SqlitePool,
 ) -> Result<Vec<CalendarEvent>, sqlx::Error> {
-    let rows = list_calendar_event_rows_person_attending(collective_id, person_id, pool).await?;
+    let rows = list_calendar_event_rows_person_attending(project_id, person_id, pool).await?;
 
     let calendar_events: Vec<CalendarEvent> = rows
         .into_iter()
@@ -178,7 +178,7 @@ pub async fn list_calendar_events_person_attending(
 }
 
 async fn list_calendar_event_rows_person_attending(
-    collective_id: CollectiveId,
+    project_id: ProjectId,
     person_id: PersonId,
     pool: &SqlitePool,
 ) -> Result<Vec<CalendarEventRow>, sqlx::Error> {
@@ -199,12 +199,12 @@ async fn list_calendar_event_rows_person_attending(
          INNER JOIN event_templates AS t ON e.event_template_id = t.id
          INNER JOIN calendar_event_attendances AS a ON e.id = a.calendar_event_id
          WHERE
-            e.collective_id = ? AND
+            e.project_id = ? AND
             a.person_id = ? AND
             (a.intention = 'Going' OR a.intention = 'Uncertain')
          ORDER BY e.start_at ASC
          "#,
-        collective_id.id,
+        project_id.id,
         person_id.id,
     )
     .fetch_all(pool)
@@ -214,7 +214,7 @@ async fn list_calendar_event_rows_person_attending(
 }
 
 async fn list_calendar_event_rows(
-    collective_id: CollectiveId,
+    project_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Vec<CalendarEventRow>, sqlx::Error> {
     let rows = sqlx::query_as!(
@@ -232,10 +232,10 @@ async fn list_calendar_event_rows(
             t.response_expectation AS "response_expectation: EventResponseExpectation"
          FROM calendar_events AS e
          INNER JOIN event_templates AS t ON e.event_template_id = t.id
-         WHERE e.collective_id = ?
+         WHERE e.project_id = ?
          ORDER BY e.start_at ASC
          "#,
-        collective_id.id,
+        project_id.id,
     )
     .fetch_all(pool)
     .await?;

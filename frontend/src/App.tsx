@@ -15,11 +15,11 @@ import {
   EditCrew,
   Intervals,
   NewInterval,
-  EditCollective,
+  EditProject,
   EntryPathways,
   DisplayEntryPathway,
   ManageMyEoi,
-  PublicWithCollective,
+  PublicWithProject,
   Dev,
 } from "./pages";
 import { buildRoutes as buildAuthRoutes } from "./contexts/auth";
@@ -53,8 +53,8 @@ const router = createBrowserRouter([
         element: <Dashboard />,
       },
       {
-        path: "collective/edit",
-        element: <EditCollective />,
+        path: "project/edit",
+        element: <EditProject />,
       },
       {
         path: "people",
@@ -135,8 +135,22 @@ const router = createBrowserRouter([
     children: buildAuthRoutes(),
   },
   {
-    path: "collective/:collectiveSlug",
-    element: <PublicWithCollective />,
+    path: "collective/:projectSlug",
+    element: <PublicWithProject />,
+    children: [
+      {
+        path: "interest",
+        element: <CreateEoi />,
+      },
+      {
+        path: "interest/:authToken",
+        element: <ManageMyEoi />,
+      },
+    ],
+  },
+  {
+    path: "project/:projectSlug",
+    element: <PublicWithProject />,
     children: [
       {
         path: "interest",

@@ -1,6 +1,6 @@
 use sqlx::SqlitePool;
 
-use crate::shared::entities::{CollectiveId, EntryPathway, ExpressionOfInterest};
+use crate::shared::entities::{EntryPathway, ExpressionOfInterest, ProjectId};
 
 pub async fn create_eoi(
     record: ExpressionOfInterest,
@@ -8,9 +8,9 @@ pub async fn create_eoi(
     pool: &SqlitePool,
 ) -> Result<EntryPathway, sqlx::Error> {
     let result = sqlx::query!(
-        "INSERT INTO entry_pathways (collective_id, name, email, interest, context, referral, conflict_experience, participant_connections, auth_token)
+        "INSERT INTO entry_pathways (project_id, name, email, interest, context, referral, conflict_experience, participant_connections, auth_token)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        record.collective_id,
+        record.project_id,
         record.name,
         record.email,
         record.interest,
@@ -52,13 +52,13 @@ pub async fn update_eoi(
 pub async fn delete_eoi_record(
     pool: &SqlitePool,
     auth_token: String,
-    collective_id: CollectiveId,
+    project_id: ProjectId,
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(
         "DELETE FROM entry_pathways
-        WHERE auth_token = ? AND collective_id = ?",
+        WHERE auth_token = ? AND project_id = ?",
         auth_token,
-        collective_id.id
+        project_id.id
     )
     .execute(pool)
     .await?;
@@ -69,7 +69,7 @@ pub async fn delete_eoi_record(
 pub async fn find_entry_pathway(id: i64, pool: &SqlitePool) -> Result<EntryPathway, sqlx::Error> {
     let entry_pathway = sqlx::query_as!(
         EntryPathway,
-        "SELECT id, collective_id, name, interest, context, referral, conflict_experience, participant_connections
+        "SELECT id, project_id, name, interest, context, referral, conflict_experience, participant_connections
         FROM entry_pathways
         WHERE id = ?",
         id
@@ -81,30 +81,30 @@ pub async fn find_entry_pathway(id: i64, pool: &SqlitePool) -> Result<EntryPathw
 }
 
 pub async fn find_eoi_by_auth_token(
-    collective_id: CollectiveId,
+    project_id: ProjectId,
     auth_token: &str,
     pool: &SqlitePool,
 ) -> Result<Option<ExpressionOfInterest>, sqlx::Error> {
     sqlx::query_as!(
         ExpressionOfInterest,
-        "SELECT id, collective_id, name, interest, context, referral, email, conflict_experience, participant_connections
+        "SELECT id, project_id, name, interest, context, referral, email, conflict_experience, participant_connections
         FROM entry_pathways
-        WHERE auth_token = ? AND collective_id = ?",
+        WHERE auth_token = ? AND project_id = ?",
         auth_token,
-        collective_id.id
+        project_id.id
     )
     .fetch_optional(pool)
     .await
 }
 
-pub async fn find_all_entry_pathways_for_collective(
-    collective_id: CollectiveId,
+pub async fn find_all_entry_pathways_for_project(
+    project_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Vec<EntryPathway>, sqlx::Error> {
     let eois = sqlx::query_as!(
         EntryPathway,
-        "SELECT id, collective_id, name, interest, context, referral, conflict_experience, participant_connections FROM entry_pathways WHERE collective_id = ?",
-        collective_id.id
+        "SELECT id, project_id, name, interest, context, referral, conflict_experience, participant_connections FROM entry_pathways WHERE project_id = ?",
+        project_id.id
     )
     .fetch_all(pool)
     .await?;

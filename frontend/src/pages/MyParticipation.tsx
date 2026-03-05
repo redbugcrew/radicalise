@@ -5,17 +5,17 @@ import { useNavigate, useParams } from "react-router-dom";
 import DateText from "../components/DateText";
 import { useEffect, useState } from "react";
 import { getApi } from "../api";
-import type { CollectiveInvolvement, MyParticipationInput } from "../api/Api";
+import type { ProjectInvolvement, MyParticipationInput } from "../api/Api";
 import { findPreviousInterval } from "../store/intervals";
 
 export default function MyParticipation() {
   const { allIntervals, currentInterval } = useAppSelector((state) => state.intervals);
-  const collective = useAppSelector((state) => state.collective);
+  const project = useAppSelector((state) => state.project);
   const personId = useAppSelector((state) => state.me?.person_id);
 
   const navigate = useNavigate();
 
-  if (!collective) return <Text>Error: Collective not found.</Text>;
+  if (!project) return <Text>Error: Project not found.</Text>;
   if (!personId) return <Text>Error: Person ID not found.</Text>;
 
   const { intervalId } = useParams();
@@ -34,7 +34,7 @@ export default function MyParticipation() {
 
   const readOnly = intervalIdNumber < currentInterval.id;
 
-  const [involvement, setInvolvement] = useState<CollectiveInvolvement | null>(null);
+  const [involvement, setInvolvement] = useState<ProjectInvolvement | null>(null);
   useEffect(() => {
     api.api
       .myParticipation(interval.id)
@@ -52,7 +52,7 @@ export default function MyParticipation() {
 
   const onSubmit = (values: MyParticipationFormData) => {
     const inputData: MyParticipationInput = {
-      collective_id: collective.id,
+      project_id: project.id,
       ...involvement,
       ...values,
       capacity_score: values.capacity_score ? parseInt(values.capacity_score) : null,

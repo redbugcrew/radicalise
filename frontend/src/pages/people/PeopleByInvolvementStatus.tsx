@@ -1,6 +1,6 @@
 import { Tabs } from "@mantine/core";
 import { PeopleTable } from "../../components";
-import { InvolvementStatus, type CollectiveInvolvement, type CrewInvolvement } from "../../api/Api";
+import { InvolvementStatus, type ProjectInvolvement, type CrewInvolvement } from "../../api/Api";
 import { useAppSelector } from "../../store";
 import { capitalCase } from "change-case";
 import { useEffect, useState } from "react";
@@ -9,7 +9,7 @@ import type { PeopleTableRow } from "../../components/people/PeopleTable";
 import type { CrewsState } from "../../store/crews";
 import { hashByPerson, hashByStatus, type HashById } from "../../utilities/hashing";
 
-function peopleForInvolvements(involvements: CollectiveInvolvement[], allCrewInvolvements: HashById<CrewInvolvement>, allPeople: PeopleState, allCrews: CrewsState): PeopleTableRow[] {
+function peopleForInvolvements(involvements: ProjectInvolvement[], allCrewInvolvements: HashById<CrewInvolvement>, allPeople: PeopleState, allCrews: CrewsState): PeopleTableRow[] {
   return involvements.map((involvement) => {
     const person = allPeople[involvement.person_id];
     const crewInvolvements = allCrewInvolvements.get(person.id) || [];
@@ -27,7 +27,7 @@ function peopleForInvolvements(involvements: CollectiveInvolvement[], allCrewInv
 }
 
 interface PeopleByInvolvementStatusProps {
-  involvements: CollectiveInvolvement[];
+  involvements: ProjectInvolvement[];
   crewEnrolments?: CrewInvolvement[];
   tableKey?: React.Key;
   intervalId?: number | null;

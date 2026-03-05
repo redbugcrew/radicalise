@@ -4,7 +4,7 @@ import { Anchor, EntryPathwaysTable } from "../../components";
 
 export default function EntryPathways() {
   const entryPathways = useAppSelector((state) => state.entryPathways);
-  const collectiveSlug = useAppSelector((state) => state.collective?.slug);
+  const projectSlug = useAppSelector((state) => state.project?.slug);
 
   return (
     <Container>
@@ -14,9 +14,9 @@ export default function EntryPathways() {
           <EntryPathwaysTable entryPathways={entryPathways} />
         </Stack>
         <Stack gap={0}>
-          {collectiveSlug && (
+          {projectSlug && (
             <Text c="dimmed">
-              These are created using the <Anchor href={`/collective/${collectiveSlug}/interest`}>expression of interest form</Anchor>.
+              These are created using the <Anchor href={`/project/${projectSlug}/interest`}>expression of interest form</Anchor>.
             </Text>
           )}
         </Stack>

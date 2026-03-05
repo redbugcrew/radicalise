@@ -1,6 +1,6 @@
 import { useDispatch, useSelector, useStore } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
-import collectiveReducer, { collectiveLoaded, collectiveUpdated } from "./collective";
+import projectReducer, { projectLoaded, projectUpdated } from "./project";
 import peopleReducer, { peopleLoaded, personUpdated } from "./people";
 import intervalsReducer, { intervalsLoaded, intervalCreated } from "./intervals";
 import involvementsReducer, { involvementsLoaded, intervalDataChanged } from "./involvements";
@@ -11,11 +11,11 @@ import eventsReducer, { eventsLoaded, eventUpdated, singleAttendanceUpdate } fro
 import meReducer, { meLoaded } from "./me";
 import { getApi } from "../api";
 import { redirect } from "react-router-dom";
-import type { AppEvent, CalendarEventAttendancesEvent, CalendarEventsEvent, CollectiveEvent, CrewsEvent, EntryPathwayEvent, EventTemplatesEvent, IntervalsEvent, MeEvent, PeopleEvent } from "../api/Api";
+import type { AppEvent, CalendarEventAttendancesEvent, CalendarEventsEvent, ProjectEvent, CrewsEvent, EntryPathwayEvent, EventTemplatesEvent, IntervalsEvent, MeEvent, PeopleEvent } from "../api/Api";
 
 const store = configureStore({
   reducer: {
-    collective: collectiveReducer,
+    project: projectReducer,
     people: peopleReducer,
     intervals: intervalsReducer,
     involvements: involvementsReducer,
@@ -40,16 +40,16 @@ export const useAppStore = useStore.withTypes<AppStore>();
 //   payload: data,
 // });
 
-async function loadCollectiveData(store: AppStore, api: ReturnType<typeof getApi>): Promise<Response | null> {
+async function loadProjectData(store: AppStore, api: ReturnType<typeof getApi>): Promise<Response | null> {
   return api.api
-    .getCollectiveState()
+    .getProjectState()
     .then((response) => {
       store.dispatch(peopleLoaded(response.data.people));
       store.dispatch(crewsLoaded(response.data.crews));
       store.dispatch(intervalsLoaded({ allIntervals: response.data.intervals, currentInterval: response.data.current_interval }));
       store.dispatch(involvementsLoaded(response.data.involvements));
       store.dispatch(entryPathwaysLoaded(response.data.entry_pathways));
-      store.dispatch(collectiveLoaded(response.data.collective));
+      store.dispatch(projectLoaded(response.data.project));
       store.dispatch(eventTemplatesLoaded(response.data.event_templates));
       store.dispatch(eventsLoaded(response.data.calendar_events));
 
@@ -87,11 +87,11 @@ async function loadMeData(store: AppStore, api: ReturnType<typeof getApi>): Prom
 export async function loadInitialData(store: AppStore) {
   const api = getApi();
 
-  const dataHasLoaded = store.getState().collective;
+  const dataHasLoaded = store.getState().project;
 
   if (!dataHasLoaded) {
     console.log("Loading initial data from API...");
-    return loadMeData(store, api).then(() => loadCollectiveData(store, api));
+    return loadMeData(store, api).then(() => loadProjectData(store, api));
   }
   return null;
 }
@@ -114,9 +114,9 @@ export async function handleCrewsEvent(event: CrewsEvent) {
   }
 }
 
-export async function handleCollectiveEvent(event: CollectiveEvent) {
-  if (event.CollectiveUpdated) {
-    store.dispatch(collectiveUpdated(event.CollectiveUpdated));
+export async function handleProjectEvent(event: ProjectEvent) {
+  if (event.ProjectUpdated) {
+    store.dispatch(projectUpdated(event.ProjectUpdated));
   }
 }
 
@@ -159,8 +159,8 @@ export async function handleAppEvent(event: AppEvent) {
     handleIntervalsEvent(event.IntervalsEvent);
   } else if ("CrewsEvent" in event && event.CrewsEvent) {
     handleCrewsEvent(event.CrewsEvent);
-  } else if ("CollectiveEvent" in event && event.CollectiveEvent) {
-    handleCollectiveEvent(event.CollectiveEvent);
+  } else if ("ProjectEvent" in event && event.ProjectEvent) {
+    handleProjectEvent(event.ProjectEvent);
   } else if ("PeopleEvent" in event && event.PeopleEvent) {
     handlePeopleEvent(event.PeopleEvent);
   } else if ("EntryPathwayEvent" in event && event.EntryPathwayEvent) {

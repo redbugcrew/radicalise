@@ -3,18 +3,18 @@ use std::str::FromStr;
 use utoipa::ToSchema;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct CollectiveId {
+pub struct ProjectId {
     pub id: i64,
 }
 
-impl CollectiveId {
+impl ProjectId {
     pub fn new(id: i64) -> Self {
-        CollectiveId { id }
+        ProjectId { id }
     }
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
-pub struct Collective {
+pub struct Project {
     pub id: i64,
     pub name: Option<String>,
     pub noun_name: Option<String>,
@@ -26,9 +26,9 @@ pub struct Collective {
     pub eoi_managing_crew_id: Option<i64>,
 }
 
-impl Collective {
-    pub fn typed_id(&self) -> CollectiveId {
-        CollectiveId { id: self.id }
+impl Project {
+    pub fn typed_id(&self) -> ProjectId {
+        ProjectId { id: self.id }
     }
 }
 
@@ -57,7 +57,7 @@ impl PersonId {
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
 pub struct Person {
     pub id: i64,
-    pub collective_id: i64,
+    pub project_id: i64,
     pub display_name: String,
     pub about: Option<String>,
     pub avatar_id: Option<i64>,
@@ -230,10 +230,10 @@ pub struct CapacityPlanning {
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Clone, Debug)]
-pub struct CollectiveInvolvement {
+pub struct ProjectInvolvement {
     pub id: i64,
     pub person_id: i64,
-    pub collective_id: i64,
+    pub project_id: i64,
     pub interval_id: i64,
     pub status: InvolvementStatus,
     pub private_capacity_planning: bool,
@@ -251,7 +251,7 @@ pub struct Crew {
     pub id: i64,
     pub name: String,
     pub description: Option<String>,
-    pub collective_id: i64,
+    pub project_id: i64,
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
@@ -287,7 +287,7 @@ pub struct CrewWithLinks {
     pub id: i64,
     pub name: String,
     pub description: Option<String>,
-    pub collective_id: i64,
+    pub project_id: i64,
     pub links: Option<Vec<Link>>,
 }
 
@@ -295,7 +295,7 @@ pub struct CrewWithLinks {
 #[allow(dead_code)]
 pub struct EntryPathway {
     pub id: i64,
-    pub collective_id: i64,
+    pub project_id: i64,
     pub name: String,
     pub interest: Option<String>,
     pub context: Option<String>,
@@ -308,7 +308,7 @@ pub struct EntryPathway {
 #[allow(dead_code)]
 pub struct ExpressionOfInterest {
     pub id: i64,
-    pub collective_id: i64,
+    pub project_id: i64,
     pub name: String,
     pub email: String,
     pub interest: Option<String>,

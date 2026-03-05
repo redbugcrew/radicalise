@@ -5,21 +5,21 @@ use crate::{
         find_intervals_needing_implicit_involvements, find_previous_interval,
         mark_implicit_involvements_processed,
     },
-    my_collective::involvements_repo::{
-        delete_implicit_collective_involvements, find_all_collective_involvements,
-        insert_collective_involvement_if_missing,
+    my_project::involvements_repo::{
+        delete_implicit_project_involvements, find_all_project_involvements,
+        insert_project_involvement_if_missing,
     },
     shared::entities::OptOutType,
 };
 
-use super::entities::{CollectiveId, CollectiveInvolvement, Interval};
+use super::entities::{Interval, ProjectId, ProjectInvolvement};
 
 pub async fn check_intervals_tasks(
-    collective_id: CollectiveId,
+    project_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
     let intervals =
-        find_intervals_needing_implicit_involvements(collective_id.clone(), pool).await?;
+        find_intervals_needing_implicit_involvements(project_id.clone(), pool).await?;
 
     for interval in intervals {
         println!(
@@ -27,7 +27,7 @@ pub async fn check_intervals_tasks(
             interval.id
         );
         if let Err(e) =
-            add_interval_implicit_involvements(&interval, collective_id.clone(), false, pool).await
+            add_interval_implicit_involvements(&interval, project_id.clone(), false, pool).await
         {
             eprintln!(
                 "Error adding implicit involvements for interval {}: {:?}",
@@ -41,26 +41,26 @@ pub async fn check_intervals_tasks(
 
 pub async fn add_interval_implicit_involvements(
     interval: &Interval,
-    collective_id: CollectiveId,
+    project_id: ProjectId,
     recompute: bool,
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
     let previous_interval =
-        match find_previous_interval(collective_id.clone(), interval.typed_id(), pool).await? {
+        match find_previous_interval(project_id.clone(), interval.typed_id(), pool).await? {
             Some(prev) => prev,
             None => return Ok(()),
         };
 
-    let previous_collective_involvements =
-        find_all_collective_involvements(collective_id.clone(), previous_interval.typed_id(), pool)
+    let previous_project_involvements =
+        find_all_project_involvements(project_id.clone(), previous_interval.typed_id(), pool)
             .await?;
 
     if recompute {
-        delete_implicit_collective_involvements(collective_id.clone(), interval.typed_id(), pool)
+        delete_implicit_project_involvements(project_id.clone(), interval.typed_id(), pool)
             .await?;
     }
 
-    for previous_involvement in previous_collective_involvements {
+    for previous_involvement in previous_project_involvements {
         match previous_involvement.opt_out_type {
             Some(OptOutType::Exit) => continue,
             _ => {}
@@ -71,10 +71,10 @@ pub async fn add_interval_implicit_involvements(
             None => previous_involvement.implicit_counter + 1,
         };
 
-        let new_involvement = CollectiveInvolvement {
+        let new_involvement = ProjectInvolvement {
             id: -1, // -1 indicates a new record
             person_id: previous_involvement.person_id.clone(),
-            collective_id: previous_involvement.collective_id,
+            project_id: previous_involvement.project_id,
             interval_id: interval.id,
             status: previous_involvement.status,
             private_capacity_planning: false,
@@ -86,7 +86,7 @@ pub async fn add_interval_implicit_involvements(
             intention_context: None,
             implicit_counter: new_counter,
         };
-        let result = insert_collective_involvement_if_missing(new_involvement.into(), pool).await;
+        let result = insert_project_involvement_if_missing(new_involvement.into(), pool).await;
         if result.is_err() {
             eprintln!(
                 "Error inserting implicit involvement for person_id: {} in interval {}: {:?}",

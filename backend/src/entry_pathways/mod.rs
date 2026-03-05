@@ -7,14 +7,12 @@ use uuid::Uuid;
 
 use crate::{
     entry_pathways::repo::find_eoi_by_auth_token,
-    my_collective::repo::find_collective,
+    my_project::repo::find_project,
     people::repo::find_crew_involved_emails,
     realtime::RealtimeState,
     shared::{
         db_helpers::is_constraint_violation,
-        entities::{
-            Collective, CollectiveId, CrewId, EntryPathway, ExpressionOfInterest, Interval,
-        },
+        entities::{CrewId, EntryPathway, ExpressionOfInterest, Interval, Project, ProjectId},
         events::AppEvent,
     },
 };
@@ -25,7 +23,7 @@ pub mod repo;
 
 #[derive(ToSchema, Debug, Serialize)]
 enum EoiError {
-    CollectiveNotFound,
+    ProjectNotFound,
     EoiNotFound,
     EoiFeatureDisabled,
     EmailAlreadyExists,
@@ -49,17 +47,16 @@ pub async fn create_eoi(
 ) -> impl IntoResponse {
     println!("Creating EOI for details: {:?}", submission);
 
-    let collective = match find_collective(CollectiveId::new(submission.collective_id), &pool).await
-    {
+    let project = match find_project(ProjectId::new(submission.project_id), &pool).await {
         Ok(result) => result,
         Err(_) => {
-            eprintln!("Collective not found for ID: {}", submission.collective_id);
-            return (StatusCode::BAD_REQUEST, Json(EoiError::CollectiveNotFound)).into_response();
+            eprintln!("Project not found for ID: {}", submission.project_id);
+            return (StatusCode::BAD_REQUEST, Json(EoiError::ProjectNotFound)).into_response();
         }
     };
 
     let current_interval = match crate::intervals::repo::find_current_interval(
-        CollectiveId::new(submission.collective_id),
+        ProjectId::new(submission.project_id),
         &pool,
     )
     .await
@@ -67,14 +64,14 @@ pub async fn create_eoi(
         Ok(interval) => interval,
         Err(e) => {
             eprintln!(
-                "Failed to find current interval for collective ID {}: {}",
-                submission.collective_id, e
+                "Failed to find current interval for project ID {}: {}",
+                submission.project_id, e
             );
             return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
         }
     };
 
-    if !collective.feature_eoi {
+    if !project.feature_eoi {
         return (StatusCode::BAD_REQUEST, Json(EoiError::EoiFeatureDisabled)).into_response();
     }
 
@@ -85,7 +82,7 @@ pub async fn create_eoi(
         Ok(entry_pathway) => {
             broadcast_entry_pathway_updated(&entry_pathway, &realtime_state).await;
 
-            if let Some(slug) = collective.slug.clone() {
+            if let Some(slug) = project.slug.clone() {
                 let email = emails::manage_your_eoi_email(email, slug, auth_token);
                 let result = resend.emails.send(email).await;
                 match result {
@@ -94,8 +91,7 @@ pub async fn create_eoi(
                 }
             }
 
-            match send_notification_of_new_eoi(&collective, &current_interval, &resend, &pool).await
-            {
+            match send_notification_of_new_eoi(&project, &current_interval, &resend, &pool).await {
                 Ok(_) => println!("Notification email for new EOI sent successfully."),
                 Err(e) => eprintln!("Failed to send notification email for new EOI: {}", e),
             }
@@ -117,10 +113,10 @@ pub async fn create_eoi(
 
 #[utoipa::path(
     put,
-    path = "/collective/{collective_id}/eoi/{auth_token}",
+    path = "/projects/{project_id}/eoi/{auth_token}",
     params(
         ("auth_token" = String, Path, description = "Authentication token for the entry pathway"),
-        ("collective_id" = i64, Path, description = "Collective ID for the entry pathway")
+        ("project_id" = i64, Path, description = "Project ID for the entry pathway")
     ),
     responses(
         (status = 200, body = ()),
@@ -132,14 +128,12 @@ pub async fn create_eoi(
 pub async fn update_eoi(
     Extension(pool): Extension<SqlitePool>,
     Extension(realtime_state): Extension<RealtimeState>,
-    Path((collective_id, auth_token)): Path<(i64, String)>,
+    Path((project_id, auth_token)): Path<(i64, String)>,
     Json(submission): Json<ExpressionOfInterest>,
 ) -> impl IntoResponse {
     println!("Updating EOI for details: {:?}", submission);
 
-    let eoi = match find_eoi_by_auth_token(CollectiveId::new(collective_id), &auth_token, &pool)
-        .await
-    {
+    let eoi = match find_eoi_by_auth_token(ProjectId::new(project_id), &auth_token, &pool).await {
         Ok(Some(result)) => result,
         Ok(None) => return (StatusCode::BAD_REQUEST, Json(EoiError::EoiNotFound)).into_response(),
         Err(_) => return (StatusCode::BAD_REQUEST, Json(EoiError::EoiNotFound)).into_response(),
@@ -147,7 +141,7 @@ pub async fn update_eoi(
 
     let record_to_write = ExpressionOfInterest {
         id: eoi.id,
-        collective_id: eoi.collective_id,
+        project_id: eoi.project_id,
         name: submission.name,
         email: submission.email,
         interest: submission.interest,
@@ -177,10 +171,10 @@ pub async fn update_eoi(
 
 #[utoipa::path(
     delete,
-    path = "/collective/{collective_id}/eoi/{auth_token}",
+    path = "/project/{project_id}/eoi/{auth_token}",
     params(
         ("auth_token" = String, Path, description = "Authentication token for the entry pathway"),
-        ("collective_id" = i64, Path, description = "Collective ID for the entry pathway")
+        ("project_id" = i64, Path, description = "Project ID for the entry pathway")
     ),
     responses(
         (status = 200, body = ()),
@@ -189,13 +183,13 @@ pub async fn update_eoi(
 )]
 pub async fn delete_eoi(
     Extension(pool): Extension<SqlitePool>,
-    Path((collective_id, auth_token)): Path<(i64, String)>,
+    Path((project_id, auth_token)): Path<(i64, String)>,
 ) -> impl IntoResponse {
     println!(
-        "Deleting EOI for collective ID: {}, auth token: {}",
-        collective_id, auth_token
+        "Deleting EOI for project ID: {}, auth token: {}",
+        project_id, auth_token
     );
-    match repo::delete_eoi_record(&pool, auth_token, CollectiveId::new(collective_id)).await {
+    match repo::delete_eoi_record(&pool, auth_token, ProjectId::new(project_id)).await {
         Ok(_) => {
             return (StatusCode::OK, ());
         }
@@ -208,10 +202,10 @@ pub async fn delete_eoi(
 
 #[utoipa::path(
     get,
-    path = "/collective/{collective_id}/interest/by_auth_token/{auth_token}",
+    path = "/project/{project_id}/interest/by_auth_token/{auth_token}",
     params(
         ("auth_token" = String, Path, description = "Authentication token for the entry pathway"),
-        ("collective_id" = i64, Path, description = "Collective ID for the entry pathway")
+        ("project_id" = i64, Path, description = "Project ID for the entry pathway")
     ),
     responses(
         (status = OK, body = ExpressionOfInterest),
@@ -220,10 +214,10 @@ pub async fn delete_eoi(
     ),
 )]
 pub async fn get_eoi_by_auth_token(
-    Path((collective_id, auth_token)): Path<(i64, String)>,
+    Path((project_id, auth_token)): Path<(i64, String)>,
     Extension(pool): Extension<SqlitePool>,
 ) -> impl IntoResponse {
-    let result = find_eoi_by_auth_token(CollectiveId::new(collective_id), &auth_token, &pool).await;
+    let result = find_eoi_by_auth_token(ProjectId::new(project_id), &auth_token, &pool).await;
     match result {
         Ok(Some(eoi)) => {
             return (StatusCode::OK, Json(eoi)).into_response();
@@ -250,16 +244,16 @@ async fn broadcast_entry_pathway_updated(
 }
 
 async fn send_notification_of_new_eoi(
-    collective: &Collective,
+    project: &Project,
     current_interval: &Interval,
     resend: &Resend,
     pool: &SqlitePool,
 ) -> Result<(), anyhow::Error> {
-    match collective.eoi_managing_crew_id {
+    match project.eoi_managing_crew_id {
         None => {
             println!(
-                "No EOI managing crew set for collective ID {}, skipping notification email.",
-                collective.id
+                "No EOI managing crew set for project ID {}, skipping notification email.",
+                project.id
             );
             return Ok(());
         }
@@ -270,14 +264,13 @@ async fn send_notification_of_new_eoi(
 
             if emails.is_empty() {
                 println!(
-                    "No people found in crew ID {} for collective ID {}, skipping notification email.",
-                    crew_id, collective.id
+                    "No people found in crew ID {} for project ID {}, skipping notification email.",
+                    crew_id, project.id
                 );
                 return Ok(());
             }
 
-            let email =
-                emails::eoi_received_notification_email(emails, collective.noun_name.clone());
+            let email = emails::eoi_received_notification_email(emails, project.noun_name.clone());
 
             resend.emails.send(email).await?;
 

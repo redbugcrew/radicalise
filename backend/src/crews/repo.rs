@@ -3,15 +3,15 @@ use std::collections::HashMap;
 use sqlx::SqlitePool;
 
 use crate::shared::{
-    entities::{CollectiveId, Crew, CrewId, CrewInvolvement, CrewWithLinks, IntervalId},
+    entities::{Crew, CrewId, CrewInvolvement, CrewWithLinks, IntervalId, ProjectId},
     links_repo::{find_all_links_for_owner_type, hash_links_by_owner, update_links_for_owner},
 };
 
 pub async fn find_all_crews_with_links(
-    collective_id: CollectiveId,
+    project_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Vec<CrewWithLinks>, sqlx::Error> {
-    let crews = find_all_crews(collective_id, pool).await?;
+    let crews = find_all_crews(project_id, pool).await?;
 
     let links = find_all_links_for_owner_type("crews".to_string(), pool).await?;
     let links_hash = hash_links_by_owner(links);
@@ -22,7 +22,7 @@ pub async fn find_all_crews_with_links(
             id: crew.id,
             name: crew.name,
             description: crew.description,
-            collective_id: crew.collective_id,
+            project_id: crew.project_id,
             links: Some(links_hash.get(&crew.id).cloned().unwrap_or_else(Vec::new)),
         })
         .collect();
@@ -31,30 +31,30 @@ pub async fn find_all_crews_with_links(
 }
 
 pub async fn find_all_crews(
-    collective_id: CollectiveId,
+    project_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Vec<Crew>, sqlx::Error> {
     sqlx::query_as!(
         Crew,
-        "SELECT id, name, description, collective_id FROM crews WHERE collective_id = ?",
-        collective_id.id
+        "SELECT id, name, description, project_id FROM crews WHERE project_id = ?",
+        project_id.id
     )
     .fetch_all(pool)
     .await
 }
 
 pub async fn update_crew(
-    collective_id: CollectiveId,
+    project_id: ProjectId,
     crew: Crew,
     pool: &SqlitePool,
 ) -> Result<Crew, sqlx::Error> {
     sqlx::query_as!(
         Crew,
-        "UPDATE crews SET name = ?, description = ? WHERE id = ? AND collective_id = ? ",
+        "UPDATE crews SET name = ?, description = ? WHERE id = ? AND project_id = ? ",
         crew.name,
         crew.description,
         crew.id,
-        collective_id.id
+        project_id.id
     )
     .execute(pool)
     .await?;
@@ -63,17 +63,17 @@ pub async fn update_crew(
 }
 
 pub async fn update_crew_with_links(
-    collective_id: CollectiveId,
+    project_id: ProjectId,
     crew: CrewWithLinks,
     pool: &SqlitePool,
 ) -> Result<CrewWithLinks, sqlx::Error> {
     let crew_result = update_crew(
-        collective_id,
+        project_id,
         Crew {
             id: crew.id,
             name: crew.name,
             description: crew.description,
-            collective_id: crew.collective_id,
+            project_id: crew.project_id,
         },
         pool,
     )
@@ -85,7 +85,7 @@ pub async fn update_crew_with_links(
         id: crew_result.id,
         name: crew_result.name,
         description: crew_result.description,
-        collective_id: crew_result.collective_id,
+        project_id: crew_result.project_id,
         links,
     })
 }

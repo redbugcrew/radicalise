@@ -6,7 +6,7 @@ pub enum AppEvent {
     MeEvent(crate::me::events::MeEvent),
     IntervalsEvent(crate::intervals::events::IntervalsEvent),
     CrewsEvent(crate::crews::events::CrewsEvent),
-    CollectiveEvent(crate::my_collective::events::CollectiveEvent),
+    ProjectEvent(crate::my_project::events::ProjectEvent),
     PeopleEvent(crate::people::events::PeopleEvent),
     EntryPathwayEvent(crate::entry_pathways::events::EntryPathwayEvent),
     EventTemplatesEvent(crate::event_templates::events::EventTemplatesEvent),

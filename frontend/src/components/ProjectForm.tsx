@@ -1,16 +1,16 @@
 import { useForm } from "@mantine/form";
 import { Button, Fieldset, Select, Stack, Switch, Textarea, TextInput } from "@mantine/core";
-import type { Collective, CrewWithLinks, Link } from "../api/Api";
+import type { Project, CrewWithLinks, Link } from "../api/Api";
 import LinksInput, { linksValidator } from "./links/LinksInput/LinksInput";
 
-interface CollectiveFormProps {
-  collective: Collective;
+interface ProjectFormProps {
+  project: Project;
   crews: CrewWithLinks[];
 
-  onSubmit: (values: Collective) => void;
+  onSubmit: (values: Project) => void;
 }
 
-interface CollectiveFormValues {
+interface ProjectFormValues {
   description?: string | null;
   eoi_description?: string | null;
   eoi_managing_crew_id: string | null;
@@ -22,7 +22,7 @@ interface CollectiveFormValues {
   slug?: string | null;
 }
 
-function convertCollectiveToFormValues(input: Collective): CollectiveFormValues {
+function convertProjectToFormValues(input: Project): ProjectFormValues {
   const crew_id = input.eoi_managing_crew_id !== null && input.eoi_managing_crew_id !== undefined ? input.eoi_managing_crew_id.toString() : null;
 
   return {
@@ -31,7 +31,7 @@ function convertCollectiveToFormValues(input: Collective): CollectiveFormValues 
   };
 }
 
-function convertFormValuesToCollective(input: CollectiveFormValues): Collective {
+function convertFormValuesToProject(input: ProjectFormValues): Project {
   const crew_id = input.eoi_managing_crew_id !== null && input.eoi_managing_crew_id !== undefined ? parseInt(input.eoi_managing_crew_id.toString(), 10) : null;
 
   return {
@@ -40,10 +40,10 @@ function convertFormValuesToCollective(input: CollectiveFormValues): Collective 
   } as any;
 }
 
-export default function CollectiveForm({ collective, crews, onSubmit }: CollectiveFormProps) {
-  const form = useForm<CollectiveFormValues>({
+export default function ProjectForm({ project, crews, onSubmit }: ProjectFormProps) {
+  const form = useForm<ProjectFormValues>({
     mode: "controlled",
-    initialValues: { ...convertCollectiveToFormValues(collective) },
+    initialValues: { ...convertProjectToFormValues(project) },
     validate: {
       name: (value) => (value ? null : "Name is required"),
       noun_name: (value) => (value ? null : "Noun name is required"),
@@ -54,9 +54,9 @@ export default function CollectiveForm({ collective, crews, onSubmit }: Collecti
 
   let crewOptionsData = [{ value: "", label: "None" }].concat(crews.map((crew) => ({ value: crew.id.toString(), label: crew.name || "Unnamed Crew" })));
 
-  const internalOnSubmit = (values: CollectiveFormValues) => {
-    const collective = convertFormValuesToCollective(values);
-    onSubmit(collective);
+  const internalOnSubmit = (values: ProjectFormValues) => {
+    const project = convertFormValuesToProject(values);
+    onSubmit(project);
   };
 
   return (

@@ -35,7 +35,7 @@ mod entry_pathways;
 mod event_templates;
 mod intervals;
 mod me;
-mod my_collective;
+mod my_project;
 mod people;
 mod public;
 mod realtime;

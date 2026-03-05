@@ -33,7 +33,7 @@ export enum EventResponseExpectation {
 }
 
 export enum EoiError {
-  CollectiveNotFound = "CollectiveNotFound",
+  ProjectNotFound = "ProjectNotFound",
   EoiNotFound = "EoiNotFound",
   EoiFeatureDisabled = "EoiFeatureDisabled",
   EmailAlreadyExists = "EmailAlreadyExists",
@@ -56,7 +56,7 @@ export type AppEvent =
       CrewsEvent: CrewsEvent;
     }
   | {
-      CollectiveEvent: CollectiveEvent;
+      ProjectEvent: ProjectEvent;
     }
   | {
       PeopleEvent: PeopleEvent;
@@ -115,46 +115,6 @@ export interface CapacityPlanning {
   wellbeing?: string | null;
 }
 
-export interface Collective {
-  description?: string | null;
-  eoi_description?: string | null;
-  /** @format int64 */
-  eoi_managing_crew_id?: number | null;
-  feature_eoi: boolean;
-  /** @format int64 */
-  id: number;
-  links: Link[];
-  name?: string | null;
-  noun_name?: string | null;
-  slug?: string | null;
-}
-
-export type CollectiveEvent = {
-  CollectiveUpdated: Collective;
-};
-
-export interface CollectiveInvolvement {
-  capacity_planning?: null | CapacityPlanning;
-  /** @format int64 */
-  capacity_score?: number | null;
-  /** @format int64 */
-  collective_id: number;
-  /** @format int64 */
-  id: number;
-  /** @format int64 */
-  implicit_counter: number;
-  intention_context?: string | null;
-  /** @format int64 */
-  interval_id: number;
-  opt_out_planned_return_date?: string | null;
-  opt_out_type?: null | OptOutType;
-  participation_intention?: null | ParticipationIntention;
-  /** @format int64 */
-  person_id: number;
-  private_capacity_planning: boolean;
-  status: InvolvementStatus;
-}
-
 export interface CreateAttendanceRequest {
   /** @format int64 */
   calendar_event_id: number;
@@ -180,13 +140,13 @@ export interface CrewInvolvement {
 }
 
 export interface CrewWithLinks {
-  /** @format int64 */
-  collective_id: number;
   description?: string | null;
   /** @format int64 */
   id: number;
   links?: any[] | null;
   name: string;
+  /** @format int64 */
+  project_id: number;
 }
 
 export type CrewsEvent = {
@@ -194,8 +154,6 @@ export type CrewsEvent = {
 };
 
 export interface EntryPathway {
-  /** @format int64 */
-  collective_id: number;
   conflict_experience?: string | null;
   context?: string | null;
   /** @format int64 */
@@ -203,6 +161,8 @@ export interface EntryPathway {
   interest?: string | null;
   name: string;
   participant_connections?: string | null;
+  /** @format int64 */
+  project_id: number;
   referral?: string | null;
 }
 
@@ -224,8 +184,6 @@ export type EventTemplatesEvent = {
 };
 
 export interface ExpressionOfInterest {
-  /** @format int64 */
-  collective_id: number;
   conflict_experience?: string | null;
   context?: string | null;
   email: string;
@@ -234,6 +192,8 @@ export interface ExpressionOfInterest {
   interest?: string | null;
   name: string;
   participant_connections?: string | null;
+  /** @format int64 */
+  project_id: number;
   referral?: string | null;
 }
 
@@ -243,7 +203,6 @@ export interface ForgotPasswordRequest {
 
 export interface InitialData {
   calendar_events: CalendarEvent[];
-  collective: Collective;
   crews: CrewWithLinks[];
   current_interval: Interval;
   entry_pathways: EntryPathway[];
@@ -251,6 +210,7 @@ export interface InitialData {
   intervals: Interval[];
   involvements: InvolvementData;
   people: Person[];
+  project: Project;
 }
 
 export interface Interval {
@@ -261,10 +221,10 @@ export interface Interval {
 }
 
 export interface IntervalInvolvementData {
-  collective_involvements: CollectiveInvolvement[];
   crew_involvements: CrewInvolvement[];
   /** @format int64 */
   interval_id: number;
+  project_involvements: ProjectInvolvement[];
 }
 
 export type IntervalsEvent = {
@@ -303,8 +263,6 @@ export interface MyParticipationInput {
   capacity?: string | null;
   /** @format int64 */
   capacity_score?: number | null;
-  /** @format int64 */
-  collective_id: number;
   crew_involvements?: any[] | null;
   focus?: string | null;
   intention_context?: string | null;
@@ -312,6 +270,8 @@ export interface MyParticipationInput {
   opt_out_type?: null | OptOutType;
   participation_intention?: null | ParticipationIntention;
   private_capacity_planning: boolean;
+  /** @format int64 */
+  project_id: number;
   wellbeing?: string | null;
 }
 
@@ -323,20 +283,60 @@ export interface Person {
   about?: string | null;
   /** @format int64 */
   avatar_id?: number | null;
-  /** @format int64 */
-  collective_id: number;
   display_name: string;
   /** @format int64 */
   id: number;
+  /** @format int64 */
+  project_id: number;
 }
 
 export interface PersonIntervalInvolvementData {
-  collective_involvement?: null | CollectiveInvolvement;
   crew_involvements: CrewInvolvement[];
   /** @format int64 */
   interval_id: number;
   /** @format int64 */
   person_id: number;
+  project_involvement?: null | ProjectInvolvement;
+}
+
+export interface Project {
+  description?: string | null;
+  eoi_description?: string | null;
+  /** @format int64 */
+  eoi_managing_crew_id?: number | null;
+  feature_eoi: boolean;
+  /** @format int64 */
+  id: number;
+  links: Link[];
+  name?: string | null;
+  noun_name?: string | null;
+  slug?: string | null;
+}
+
+export type ProjectEvent = {
+  ProjectUpdated: Project;
+};
+
+export interface ProjectInvolvement {
+  capacity_planning?: null | CapacityPlanning;
+  /** @format int64 */
+  capacity_score?: number | null;
+  /** @format int64 */
+  id: number;
+  /** @format int64 */
+  implicit_counter: number;
+  intention_context?: string | null;
+  /** @format int64 */
+  interval_id: number;
+  opt_out_planned_return_date?: string | null;
+  opt_out_type?: null | OptOutType;
+  participation_intention?: null | ParticipationIntention;
+  /** @format int64 */
+  person_id: number;
+  private_capacity_planning: boolean;
+  /** @format int64 */
+  project_id: number;
+  status: InvolvementStatus;
 }
 
 export interface ResetPasswordRequest {
@@ -521,7 +521,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 1.3.12
+ * @version 1.3.16
  * @license
  */
 export class Api<
@@ -756,7 +756,7 @@ export class Api<
      * @request GET:/api/me/participation/interval/{interval_id}
      */
     myParticipation: (intervalId: number, params: RequestParams = {}) =>
-      this.request<null | CollectiveInvolvement, any>({
+      this.request<null | ProjectInvolvement, any>({
         path: `/api/me/participation/interval/${intervalId}`,
         method: "GET",
         format: "json",
@@ -766,12 +766,12 @@ export class Api<
     /**
      * No description
      *
-     * @name UpdateCollective
-     * @request PUT:/api/my_collective
+     * @name UpdateProject
+     * @request PUT:/api/my_project
      */
-    updateCollective: (data: Collective, params: RequestParams = {}) =>
+    updateProject: (data: Project, params: RequestParams = {}) =>
       this.request<AppEvent[], any>({
-        path: `/api/my_collective`,
+        path: `/api/my_project`,
         method: "PUT",
         body: data,
         type: ContentType.Json,
@@ -783,11 +783,11 @@ export class Api<
      * No description
      *
      * @name GetInvolvements
-     * @request GET:/api/my_collective/interval/{interval_id}/involvements
+     * @request GET:/api/my_project/interval/{interval_id}/involvements
      */
     getInvolvements: (intervalId: number, params: RequestParams = {}) =>
       this.request<IntervalInvolvementData, any>({
-        path: `/api/my_collective/interval/${intervalId}/involvements`,
+        path: `/api/my_project/interval/${intervalId}/involvements`,
         method: "GET",
         format: "json",
         ...params,
@@ -796,12 +796,12 @@ export class Api<
     /**
      * No description
      *
-     * @name GetCollectiveState
-     * @request GET:/api/my_collective/state
+     * @name GetProjectState
+     * @request GET:/api/my_project/state
      */
-    getCollectiveState: (params: RequestParams = {}) =>
+    getProjectState: (params: RequestParams = {}) =>
       this.request<InitialData, any>({
-        path: `/api/my_collective/state`,
+        path: `/api/my_project/state`,
         method: "GET",
         format: "json",
         ...params,
@@ -830,32 +830,13 @@ export class Api<
     /**
      * No description
      *
-     * @name GetCollectiveBySlug
-     * @request GET:/api/public/collective/by_slug/{collective_slug}
+     * @name CreateEoi
+     * @request POST:/api/public/eoi
      */
-    getCollectiveBySlug: (collectiveSlug: string, params: RequestParams = {}) =>
-      this.request<Collective, any>({
-        path: `/api/public/collective/by_slug/${collectiveSlug}`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name UpdateEoi
-     * @request PUT:/api/public/collective/{collective_id}/eoi/{auth_token}
-     */
-    updateEoi: (
-      authToken: string,
-      collectiveId: number,
-      data: ExpressionOfInterest,
-      params: RequestParams = {},
-    ) =>
+    createEoi: (data: ExpressionOfInterest, params: RequestParams = {}) =>
       this.request<any, EoiError>({
-        path: `/api/public/collective/${collectiveId}/eoi/${authToken}`,
-        method: "PUT",
+        path: `/api/public/eoi`,
+        method: "POST",
         body: data,
         type: ContentType.Json,
         format: "json",
@@ -865,16 +846,30 @@ export class Api<
     /**
      * No description
      *
+     * @name GetProjectBySlug
+     * @request GET:/api/public/project/by_slug/{project_slug}
+     */
+    getProjectBySlug: (projectSlug: string, params: RequestParams = {}) =>
+      this.request<Project, any>({
+        path: `/api/public/project/by_slug/${projectSlug}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name DeleteEoi
-     * @request DELETE:/api/public/collective/{collective_id}/eoi/{auth_token}
+     * @request DELETE:/api/public/project/{project_id}/eoi/{auth_token}
      */
     deleteEoi: (
       authToken: string,
-      collectiveId: number,
+      projectId: number,
       params: RequestParams = {},
     ) =>
       this.request<any, any>({
-        path: `/api/public/collective/${collectiveId}/eoi/${authToken}`,
+        path: `/api/public/project/${projectId}/eoi/${authToken}`,
         method: "DELETE",
         format: "json",
         ...params,
@@ -884,15 +879,15 @@ export class Api<
      * No description
      *
      * @name GetEoiByAuthToken
-     * @request GET:/api/public/collective/{collective_id}/interest/by_auth_token/{auth_token}
+     * @request GET:/api/public/project/{project_id}/interest/by_auth_token/{auth_token}
      */
     getEoiByAuthToken: (
       authToken: string,
-      collectiveId: number,
+      projectId: number,
       params: RequestParams = {},
     ) =>
       this.request<ExpressionOfInterest, any>({
-        path: `/api/public/collective/${collectiveId}/interest/by_auth_token/${authToken}`,
+        path: `/api/public/project/${projectId}/interest/by_auth_token/${authToken}`,
         method: "GET",
         format: "json",
         ...params,
@@ -901,13 +896,18 @@ export class Api<
     /**
      * No description
      *
-     * @name CreateEoi
-     * @request POST:/api/public/eoi
+     * @name UpdateEoi
+     * @request PUT:/api/public/projects/{project_id}/eoi/{auth_token}
      */
-    createEoi: (data: ExpressionOfInterest, params: RequestParams = {}) =>
+    updateEoi: (
+      authToken: string,
+      projectId: number,
+      data: ExpressionOfInterest,
+      params: RequestParams = {},
+    ) =>
       this.request<any, EoiError>({
-        path: `/api/public/eoi`,
-        method: "POST",
+        path: `/api/public/projects/${projectId}/eoi/${authToken}`,
+        method: "PUT",
         body: data,
         type: ContentType.Json,
         format: "json",
