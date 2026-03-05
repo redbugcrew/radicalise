@@ -27,7 +27,8 @@ CREATE TABLE circle_involvements (
 
   FOREIGN KEY (person_id) REFERENCES people(id),
   FOREIGN KEY (circle_id) REFERENCES circles(id),
-  FOREIGN KEY (interval_id) REFERENCES intervals(id)
+  FOREIGN KEY (interval_id) REFERENCES intervals(id),
+  CONSTRAINT "circle_involvements_unique" UNIQUE("circle_id","person_id","interval_id")
 );
 
 INSERT INTO circle_involvements (id, person_id, circle_id, interval_id, status, wellbeing, focus, capacity, participation_intention, opt_out_type, opt_out_planned_return_date, capacity_score, private_capacity_planning, intention_context, implicit_counter)
