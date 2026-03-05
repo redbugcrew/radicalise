@@ -1,0 +1,32 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id, start_date, end_date\n        FROM intervals\n        WHERE\n            project_id = ? AND\n            start_date <= date('now') AND (end_date IS NULL OR end_date >= date('now'))\n        ORDER BY id ASC\n        LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer"
+      },
+      {
+        "name": "start_date",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "end_date",
+        "ordinal": 2,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "86c87bf2078a7e9f32526098b065f50b116ad043a5383b0832462aabb2d2d822"
+}

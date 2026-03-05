@@ -1,0 +1,68 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id, project_id, name, interest, context, referral, email, conflict_experience, participant_connections\n        FROM entry_pathways\n        WHERE auth_token = ? AND project_id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer"
+      },
+      {
+        "name": "project_id",
+        "ordinal": 1,
+        "type_info": "Integer"
+      },
+      {
+        "name": "name",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "interest",
+        "ordinal": 3,
+        "type_info": "Text"
+      },
+      {
+        "name": "context",
+        "ordinal": 4,
+        "type_info": "Text"
+      },
+      {
+        "name": "referral",
+        "ordinal": 5,
+        "type_info": "Text"
+      },
+      {
+        "name": "email",
+        "ordinal": 6,
+        "type_info": "Text"
+      },
+      {
+        "name": "conflict_experience",
+        "ordinal": 7,
+        "type_info": "Text"
+      },
+      {
+        "name": "participant_connections",
+        "ordinal": 8,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "3dfc28ca5f81419345821b4b1bab87adf859d8db54e2babf817e98caf692fbf7"
+}

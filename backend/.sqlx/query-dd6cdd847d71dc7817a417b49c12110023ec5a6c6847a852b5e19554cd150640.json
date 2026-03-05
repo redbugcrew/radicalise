@@ -1,0 +1,32 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id, start_date, end_date FROM intervals WHERE project_id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer"
+      },
+      {
+        "name": "start_date",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "end_date",
+        "ordinal": 2,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "dd6cdd847d71dc7817a417b49c12110023ec5a6c6847a852b5e19554cd150640"
+}

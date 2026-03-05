@@ -1,0 +1,62 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id, name, noun_name, description, slug, feature_eoi, eoi_description, eoi_managing_crew_id\n        FROM projects WHERE id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer"
+      },
+      {
+        "name": "name",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "noun_name",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "description",
+        "ordinal": 3,
+        "type_info": "Text"
+      },
+      {
+        "name": "slug",
+        "ordinal": 4,
+        "type_info": "Text"
+      },
+      {
+        "name": "feature_eoi",
+        "ordinal": 5,
+        "type_info": "Bool"
+      },
+      {
+        "name": "eoi_description",
+        "ordinal": 6,
+        "type_info": "Text"
+      },
+      {
+        "name": "eoi_managing_crew_id",
+        "ordinal": 7,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      true,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "75ae8be60e5410dd8764396586828e9b5839045f179893b656e1470a2e9f98b8"
+}

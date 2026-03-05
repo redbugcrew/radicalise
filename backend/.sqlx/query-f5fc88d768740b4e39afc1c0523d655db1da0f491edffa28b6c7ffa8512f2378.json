@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO entry_pathways (project_id, name, email, interest, context, referral, conflict_experience, participant_connections, auth_token)\n        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 9
+    },
+    "nullable": []
+  },
+  "hash": "f5fc88d768740b4e39afc1c0523d655db1da0f491edffa28b6c7ffa8512f2378"
+}

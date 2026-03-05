@@ -1,0 +1,38 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        SELECT id, name, summary, response_expectation as \"response_expectation: EventResponseExpectation\"\n        FROM event_templates\n        WHERE project_id = ?\n        ORDER BY name\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer"
+      },
+      {
+        "name": "name",
+        "ordinal": 1,
+        "type_info": "Text"
+      },
+      {
+        "name": "summary",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "response_expectation: EventResponseExpectation",
+        "ordinal": 3,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "6c978205e00a21ed77e46446040c298b224b3d79f1308d383547378b0609a5ee"
+}

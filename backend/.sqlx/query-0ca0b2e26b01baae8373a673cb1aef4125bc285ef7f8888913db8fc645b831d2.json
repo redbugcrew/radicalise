@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE project_involvements\n        SET implicit_counter = 0\n        WHERE\n            project_id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "0ca0b2e26b01baae8373a673cb1aef4125bc285ef7f8888913db8fc645b831d2"
+}

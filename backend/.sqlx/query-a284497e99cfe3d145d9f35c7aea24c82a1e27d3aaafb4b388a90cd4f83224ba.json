@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM entry_pathways\n        WHERE auth_token = ? AND project_id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "a284497e99cfe3d145d9f35c7aea24c82a1e27d3aaafb4b388a90cd4f83224ba"
+}

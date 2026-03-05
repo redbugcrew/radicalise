@@ -1,0 +1,26 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        INSERT INTO event_templates (name, project_id, summary, response_expectation)\n        VALUES (?, ?, ?, ?)\n        RETURNING id, name\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer"
+      },
+      {
+        "name": "name",
+        "ordinal": 1,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "a17e1c1be275eea2c22c1ede6936835970fc37b4abee4bd64acd95a2b6d2c18f"
+}

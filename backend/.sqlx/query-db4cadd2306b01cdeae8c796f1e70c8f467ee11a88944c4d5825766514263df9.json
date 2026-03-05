@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM project_involvements\n        WHERE\n            interval_id = ? AND\n            project_id = ? AND\n            participation_intention IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "db4cadd2306b01cdeae8c796f1e70c8f467ee11a88944c4d5825766514263df9"
+}
