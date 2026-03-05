@@ -78,7 +78,7 @@ const involvementsSlice = createSlice({
 
       interval_keys.forEach((key) => {
         if (state && state[key] && state[key].interval_id === payload.interval_id) {
-          state[key].project_involvements = upsertCircleInvolvement(state[key].project_involvements, involvement);
+          state[key].circle_involvements = upsertCircleInvolvement(state[key].circle_involvements, involvement);
           state[key].crew_involvements = updateCrewInvolvementForPerson(state[key].crew_involvements, forPerson(payload.crew_involvements, person_id), person_id);
         }
       });

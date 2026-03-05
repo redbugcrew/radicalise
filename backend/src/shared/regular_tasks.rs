@@ -1,5 +1,3 @@
-use std::any::Any;
-
 use sqlx::SqlitePool;
 
 use crate::{
@@ -9,8 +7,8 @@ use crate::{
         mark_implicit_involvements_processed,
     },
     my_project::involvements_repo::{
-        delete_implicit_project_involvements, find_all_circle_involvements,
-        insert_project_involvement_if_missing,
+        delete_implicit_circle_involvements, find_all_circle_involvements,
+        insert_circle_involvement_if_missing,
     },
     shared::entities::{CircleId, OptOutType},
 };
@@ -82,19 +80,19 @@ async fn add_interval_circle_implicit_involvements(
             None => return Ok(()),
         };
 
-    let previous_project_involvements = find_all_circle_involvements(
+    let previous_circle_involvements = find_all_circle_involvements(
         project_id.clone(),
-        circle_id,
+        circle_id.clone(),
         previous_interval.typed_id(),
         pool,
     )
     .await?;
 
     if recompute {
-        delete_implicit_project_involvements(project_id.clone(), interval.typed_id(), pool).await?;
+        delete_implicit_circle_involvements(circle_id.clone(), interval.typed_id(), pool).await?;
     }
 
-    for previous_involvement in previous_project_involvements {
+    for previous_involvement in previous_circle_involvements {
         match previous_involvement.opt_out_type {
             Some(OptOutType::Exit) => continue,
             _ => {}
@@ -121,7 +119,7 @@ async fn add_interval_circle_implicit_involvements(
             intention_context: None,
             implicit_counter: new_counter,
         };
-        let result = insert_project_involvement_if_missing(new_involvement.into(), pool).await;
+        let result = insert_circle_involvement_if_missing(new_involvement.into(), pool).await;
         if result.is_err() {
             eprintln!(
                 "Error inserting implicit involvement for person_id: {} in interval {}: {:?}",

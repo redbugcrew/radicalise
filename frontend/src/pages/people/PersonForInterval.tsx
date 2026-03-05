@@ -80,7 +80,7 @@ export default function PersonForInterval({ personIdNum, interval }: PersonForIn
   return (
     <WithIntervalInvolvements interval={interval}>
       {({ involvements, key }) => {
-        const myInvolvement = involvements ? oneForPerson(involvements.project_involvements, personIdNum) : null;
+        const myInvolvement = involvements ? oneForPerson(involvements.circle_involvements, personIdNum) : null;
 
         return (
           <Container key={key}>

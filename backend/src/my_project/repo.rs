@@ -24,7 +24,7 @@ use crate::{
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct IntervalInvolvementData {
     pub interval_id: i64,
-    pub project_involvements: Vec<CircleInvolvement>,
+    pub circle_involvements: Vec<CircleInvolvement>,
     pub crew_involvements: Vec<CrewInvolvement>,
 }
 
@@ -126,7 +126,7 @@ async fn find_interval_involvement_data(
     interval_id: IntervalId,
     pool: &SqlitePool,
 ) -> Result<IntervalInvolvementData, sqlx::Error> {
-    let project_involvements = find_all_circle_involvements(
+    let circle_involvements = find_all_circle_involvements(
         default_project_id(),
         default_circle_id(),
         interval_id.clone(),
@@ -137,7 +137,7 @@ async fn find_interval_involvement_data(
 
     Ok(IntervalInvolvementData {
         interval_id: interval_id.id,
-        project_involvements,
+        circle_involvements,
         crew_involvements,
     })
 }

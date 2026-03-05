@@ -74,7 +74,7 @@ async fn get_involvements(
 ) -> impl IntoResponse {
     let interval_id = IntervalId::new(interval_id);
 
-    let project_involvements_result = find_all_circle_involvements(
+    let circle_involvements_result = find_all_circle_involvements(
         default_project_id(),
         default_circle_id(),
         interval_id.clone(),
@@ -84,15 +84,15 @@ async fn get_involvements(
     let crew_involvements_result =
         repo::find_all_crew_involvements(interval_id.clone(), &pool).await;
 
-    if project_involvements_result.is_err() || crew_involvements_result.is_err() {
+    if circle_involvements_result.is_err() || crew_involvements_result.is_err() {
         return (StatusCode::NOT_FOUND, ()).into_response();
     }
-    let project_involvements = project_involvements_result.unwrap();
+    let circle_involvements = circle_involvements_result.unwrap();
     let crew_involvements = crew_involvements_result.unwrap();
 
     let result = IntervalInvolvementData {
         interval_id: interval_id.id,
-        project_involvements,
+        circle_involvements,
         crew_involvements,
     };
 
