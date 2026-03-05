@@ -1,7 +1,7 @@
 import { Button, Card, Container, Title, Stack, Text, Badge, Group, Collapse } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import { useAppSelector } from "../../store";
-import { AttendanceIntention, type CalendarEvent, type ProjectInvolvement, type CrewInvolvement, type Interval, type PersonIntervalInvolvementData } from "../../api/Api";
+import { AttendanceIntention, type CalendarEvent, type CircleInvolvement, type CrewInvolvement, type Interval, type PersonIntervalInvolvementData } from "../../api/Api";
 import DateText from "../../components/DateText";
 import classes from "./Dashboard.module.css";
 import { CrewsList, LinksStack } from "../../components";
@@ -19,7 +19,7 @@ interface MyIntervalPartipationCardProps {
   current: boolean;
 }
 
-function ParticipationBadge({ involvement }: { involvement: ProjectInvolvement | null }) {
+function ParticipationBadge({ involvement }: { involvement: CircleInvolvement | null }) {
   if (!involvement) return <Badge color="gray">No intention</Badge>;
 
   const { participation_intention, opt_out_type } = involvement;

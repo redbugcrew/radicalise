@@ -1,12 +1,12 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { ProjectInvolvement, InvolvementData, IntervalInvolvementData, CrewInvolvement, Person, PersonIntervalInvolvementData } from "../api/Api";
+import type { CircleInvolvement, InvolvementData, IntervalInvolvementData, CrewInvolvement, Person, PersonIntervalInvolvementData } from "../api/Api";
 import { type WritableDraft } from "immer";
 import type { PeopleObjectMap } from "./people";
 import { compareStrings } from "../utilities/comparison";
 
 export type InvolvementsState = InvolvementData;
 
-function upsertProjectInvolvement(involvements: ProjectInvolvement[], newInvolvement: ProjectInvolvement): ProjectInvolvement[] {
+function upsertCircleInvolvement(involvements: CircleInvolvement[], newInvolvement: CircleInvolvement): CircleInvolvement[] {
   const existingIndex = involvements.findIndex((inv) => inv.id === newInvolvement.id);
   if (existingIndex !== -1) {
     // Update existing involvement
@@ -78,7 +78,7 @@ const involvementsSlice = createSlice({
 
       interval_keys.forEach((key) => {
         if (state && state[key] && state[key].interval_id === payload.interval_id) {
-          state[key].project_involvements = upsertProjectInvolvement(state[key].project_involvements, involvement);
+          state[key].project_involvements = upsertCircleInvolvement(state[key].project_involvements, involvement);
           state[key].crew_involvements = updateCrewInvolvementForPerson(state[key].crew_involvements, forPerson(payload.crew_involvements, person_id), person_id);
         }
       });

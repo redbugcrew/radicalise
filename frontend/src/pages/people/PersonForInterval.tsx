@@ -1,6 +1,6 @@
 import { Container, Group, Stack, Title, Text, Card } from "@mantine/core";
 import { useAppSelector } from "../../store";
-import type { CapacityPlanning, ProjectInvolvement, Interval, Person } from "../../api/Api";
+import type { CapacityPlanning, CircleInvolvement, Interval, Person } from "../../api/Api";
 import CapacityScoreIcon from "../../components/CapacityScoreIcon";
 import DateText from "../../components/DateText";
 import { oneForPerson } from "../../store/involvements";
@@ -40,7 +40,7 @@ function CapacityPlanningSection({ capacity_planning, capacity_score }: { capaci
   );
 }
 
-function ExitingInfo({ person, project_involvement: project_involvement }: { person: Person; project_involvement: ProjectInvolvement }) {
+function ExitingInfo({ person, project_involvement: project_involvement }: { person: Person; project_involvement: CircleInvolvement }) {
   return (
     <Card withBorder style={{ borderColor: "var(--mantine-color-red-6)" }}>
       <Title order={2} size="h3" mb="md">
@@ -53,7 +53,7 @@ function ExitingInfo({ person, project_involvement: project_involvement }: { per
   );
 }
 
-function HiatusInfo({ person, project_involvement }: { person: Person; project_involvement: ProjectInvolvement }) {
+function HiatusInfo({ person, project_involvement }: { person: Person; project_involvement: CircleInvolvement }) {
   return (
     <Card withBorder style={{ borderColor: "var(--mantine-color-blue-5)" }}>
       <Title order={2} size="h3">

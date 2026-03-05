@@ -115,6 +115,37 @@ export interface CapacityPlanning {
   wellbeing?: string | null;
 }
 
+export interface Circle {
+  /** @format int64 */
+  id: number;
+  /** @format int64 */
+  project_id: number;
+}
+
+export interface CircleInvolvement {
+  capacity_planning?: null | CapacityPlanning;
+  /** @format int64 */
+  capacity_score?: number | null;
+  /** @format int64 */
+  circle_id: number;
+  /** @format int64 */
+  id: number;
+  /** @format int64 */
+  implicit_counter: number;
+  intention_context?: string | null;
+  /** @format int64 */
+  interval_id: number;
+  opt_out_planned_return_date?: string | null;
+  opt_out_type?: null | OptOutType;
+  participation_intention?: null | ParticipationIntention;
+  /** @format int64 */
+  person_id: number;
+  private_capacity_planning: boolean;
+  /** @format int64 */
+  project_id: number;
+  status: InvolvementStatus;
+}
+
 export interface CreateAttendanceRequest {
   /** @format int64 */
   calendar_event_id: number;
@@ -203,6 +234,7 @@ export interface ForgotPasswordRequest {
 
 export interface InitialData {
   calendar_events: CalendarEvent[];
+  circles: Circle[];
   crews: CrewWithLinks[];
   current_interval: Interval;
   entry_pathways: EntryPathway[];
@@ -224,7 +256,7 @@ export interface IntervalInvolvementData {
   crew_involvements: CrewInvolvement[];
   /** @format int64 */
   interval_id: number;
-  project_involvements: ProjectInvolvement[];
+  project_involvements: CircleInvolvement[];
 }
 
 export type IntervalsEvent = {
@@ -263,6 +295,8 @@ export interface MyParticipationInput {
   capacity?: string | null;
   /** @format int64 */
   capacity_score?: number | null;
+  /** @format int64 */
+  circle_id: number;
   crew_involvements?: any[] | null;
   focus?: string | null;
   intention_context?: string | null;
@@ -296,7 +330,7 @@ export interface PersonIntervalInvolvementData {
   interval_id: number;
   /** @format int64 */
   person_id: number;
-  project_involvement?: null | ProjectInvolvement;
+  project_involvement?: null | CircleInvolvement;
 }
 
 export interface Project {
@@ -316,28 +350,6 @@ export interface Project {
 export type ProjectEvent = {
   ProjectUpdated: Project;
 };
-
-export interface ProjectInvolvement {
-  capacity_planning?: null | CapacityPlanning;
-  /** @format int64 */
-  capacity_score?: number | null;
-  /** @format int64 */
-  id: number;
-  /** @format int64 */
-  implicit_counter: number;
-  intention_context?: string | null;
-  /** @format int64 */
-  interval_id: number;
-  opt_out_planned_return_date?: string | null;
-  opt_out_type?: null | OptOutType;
-  participation_intention?: null | ParticipationIntention;
-  /** @format int64 */
-  person_id: number;
-  private_capacity_planning: boolean;
-  /** @format int64 */
-  project_id: number;
-  status: InvolvementStatus;
-}
 
 export interface ResetPasswordRequest {
   password: string;
@@ -521,7 +533,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 1.3.16
+ * @version 1.3.17
  * @license
  */
 export class Api<
@@ -756,7 +768,7 @@ export class Api<
      * @request GET:/api/me/participation/interval/{interval_id}
      */
     myParticipation: (intervalId: number, params: RequestParams = {}) =>
-      this.request<null | ProjectInvolvement, any>({
+      this.request<null | CircleInvolvement, any>({
         path: `/api/me/participation/interval/${intervalId}`,
         method: "GET",
         format: "json",

@@ -7,7 +7,7 @@ use crate::{
     },
     intervals::repo::{IntervalType, find_interval, get_interval_type},
     me::repo::{self},
-    my_project::involvements_repo::{ProjectInvolvementRecord, upsert_project_involvement},
+    my_project::involvements_repo::{CircleInvolvementRecord, upsert_project_involvement},
     shared::entities::{
         CrewId, CrewInvolvement, IntervalId, InvolvementStatus, OptOutType, ParticipationIntention,
         PersonId,
@@ -17,6 +17,7 @@ use crate::{
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct MyParticipationInput {
     pub project_id: i64,
+    pub circle_id: i64,
     pub private_capacity_planning: bool,
     pub wellbeing: Option<String>,
     pub focus: Option<String>,
@@ -63,10 +64,11 @@ pub async fn update_my_involvements(
     }
 
     upsert_project_involvement(
-        ProjectInvolvementRecord {
+        CircleInvolvementRecord {
             id: -1, // ID will be auto-generated
             person_id: person_id.id,
             project_id: input.project_id,
+            circle_id: input.circle_id,
             interval_id: interval_id.id,
             status,
             private_capacity_planning: input.private_capacity_planning,
