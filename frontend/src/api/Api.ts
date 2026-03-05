@@ -33,7 +33,7 @@ export enum EventResponseExpectation {
 }
 
 export enum EoiError {
-  CollectiveNotFound = "CollectiveNotFound",
+  ProjectNotFound = "ProjectNotFound",
   EoiNotFound = "EoiNotFound",
   EoiFeatureDisabled = "EoiFeatureDisabled",
   EmailAlreadyExists = "EmailAlreadyExists",
@@ -844,18 +844,13 @@ export class Api<
     /**
      * No description
      *
-     * @name UpdateEoi
-     * @request PUT:/api/public/collective/{collective_id}/eoi/{auth_token}
+     * @name CreateEoi
+     * @request POST:/api/public/eoi
      */
-    updateEoi: (
-      authToken: string,
-      collectiveId: number,
-      data: ExpressionOfInterest,
-      params: RequestParams = {},
-    ) =>
+    createEoi: (data: ExpressionOfInterest, params: RequestParams = {}) =>
       this.request<any, EoiError>({
-        path: `/api/public/collective/${collectiveId}/eoi/${authToken}`,
-        method: "PUT",
+        path: `/api/public/eoi`,
+        method: "POST",
         body: data,
         type: ContentType.Json,
         format: "json",
@@ -866,15 +861,15 @@ export class Api<
      * No description
      *
      * @name DeleteEoi
-     * @request DELETE:/api/public/collective/{collective_id}/eoi/{auth_token}
+     * @request DELETE:/api/public/project/{project_id}/eoi/{auth_token}
      */
     deleteEoi: (
       authToken: string,
-      collectiveId: number,
+      projectId: number,
       params: RequestParams = {},
     ) =>
       this.request<any, any>({
-        path: `/api/public/collective/${collectiveId}/eoi/${authToken}`,
+        path: `/api/public/project/${projectId}/eoi/${authToken}`,
         method: "DELETE",
         format: "json",
         ...params,
@@ -884,15 +879,15 @@ export class Api<
      * No description
      *
      * @name GetEoiByAuthToken
-     * @request GET:/api/public/collective/{collective_id}/interest/by_auth_token/{auth_token}
+     * @request GET:/api/public/project/{project_id}/interest/by_auth_token/{auth_token}
      */
     getEoiByAuthToken: (
       authToken: string,
-      collectiveId: number,
+      projectId: number,
       params: RequestParams = {},
     ) =>
       this.request<ExpressionOfInterest, any>({
-        path: `/api/public/collective/${collectiveId}/interest/by_auth_token/${authToken}`,
+        path: `/api/public/project/${projectId}/interest/by_auth_token/${authToken}`,
         method: "GET",
         format: "json",
         ...params,
@@ -901,13 +896,18 @@ export class Api<
     /**
      * No description
      *
-     * @name CreateEoi
-     * @request POST:/api/public/eoi
+     * @name UpdateEoi
+     * @request PUT:/api/public/projects/{project_id}/eoi/{auth_token}
      */
-    createEoi: (data: ExpressionOfInterest, params: RequestParams = {}) =>
+    updateEoi: (
+      authToken: string,
+      projectId: number,
+      data: ExpressionOfInterest,
+      params: RequestParams = {},
+    ) =>
       this.request<any, EoiError>({
-        path: `/api/public/eoi`,
-        method: "POST",
+        path: `/api/public/projects/${projectId}/eoi/${authToken}`,
+        method: "PUT",
         body: data,
         type: ContentType.Json,
         format: "json",
