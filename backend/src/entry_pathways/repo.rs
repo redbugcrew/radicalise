@@ -1,6 +1,6 @@
 use sqlx::SqlitePool;
 
-use crate::shared::entities::{ProjectId, EntryPathway, ExpressionOfInterest};
+use crate::shared::entities::{EntryPathway, ExpressionOfInterest, ProjectId};
 
 pub async fn create_eoi(
     record: ExpressionOfInterest,
@@ -97,7 +97,7 @@ pub async fn find_eoi_by_auth_token(
     .await
 }
 
-pub async fn find_all_entry_pathways_for_collective(
+pub async fn find_all_entry_pathways_for_project(
     collective_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Vec<EntryPathway>, sqlx::Error> {

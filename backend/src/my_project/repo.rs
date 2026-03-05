@@ -5,7 +5,7 @@ use utoipa::ToSchema;
 use crate::{
     calendar_events::repo::list_calendar_events_with_attendances,
     crews::repo::find_all_crews_with_links,
-    entry_pathways::repo::find_all_entry_pathways_for_collective,
+    entry_pathways::repo::find_all_entry_pathways_for_project,
     event_templates::repo::find_all_event_templates,
     intervals::repo::{find_current_interval, find_next_interval},
     my_project::involvements_repo::find_all_collective_involvements,
@@ -35,7 +35,7 @@ pub struct InvolvementData {
 
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct InitialData {
-    pub collective: Project,
+    pub project: Project,
     pub people: Vec<Person>,
     pub crews: Vec<CrewWithLinks>,
     pub intervals: Vec<Interval>,
@@ -46,14 +46,14 @@ pub struct InitialData {
     pub calendar_events: Vec<CalendarEvent>,
 }
 
-pub async fn find_collective(
-    collective_id: ProjectId,
+pub async fn find_project(
+    project_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Project, sqlx::Error> {
     sqlx::query!(
         "SELECT id, name, noun_name, description, slug, feature_eoi, eoi_description, eoi_managing_crew_id
         FROM projects WHERE id = ?",
-        collective_id.id
+        project_id.id
     )
     .fetch_one(pool)
     .await
@@ -70,14 +70,14 @@ pub async fn find_collective(
     })
 }
 
-pub async fn find_collective_by_slug(
-    collective_slug: String,
+pub async fn find_project_by_slug(
+    project_slug: String,
     pool: &SqlitePool,
 ) -> Result<Project, sqlx::Error> {
     sqlx::query!(
         "SELECT id, name, noun_name, description, slug, feature_eoi, eoi_description, eoi_managing_crew_id
         FROM projects WHERE slug = ?",
-        collective_slug
+        project_slug
     )
     .fetch_one(pool)
     .await
@@ -94,17 +94,14 @@ pub async fn find_collective_by_slug(
     })
 }
 
-pub async fn find_collective_with_links(
-    collective_id: ProjectId,
+pub async fn find_project_with_links(
+    project_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Project, sqlx::Error> {
-    let collective = find_collective(collective_id.clone(), pool).await?;
-    let links = find_all_links_for_owner(collective_id.id, "collectives".to_string(), pool).await?;
+    let project = find_project(project_id.clone(), pool).await?;
+    let links = find_all_links_for_owner(project_id.id, "collectives".to_string(), pool).await?;
 
-    Ok(Project {
-        links,
-        ..collective
-    })
+    Ok(Project { links, ..project })
 }
 
 pub async fn find_all_crew_involvements(
@@ -138,26 +135,26 @@ async fn find_interval_involvement_data(
     })
 }
 
-pub async fn find_initial_data_for_collective(
-    collective: Project,
+pub async fn find_initial_data_for_project(
+    project: Project,
     pool: &SqlitePool,
 ) -> Result<InitialData, sqlx::Error> {
-    let people = find_all_people(collective.typed_id(), pool).await?;
+    let people = find_all_people(project.typed_id(), pool).await?;
 
-    let crews = find_all_crews_with_links(collective.typed_id(), pool).await?;
+    let crews = find_all_crews_with_links(project.typed_id(), pool).await?;
 
     let intervals = sqlx::query_as!(
         Interval,
         "SELECT id, start_date, end_date FROM intervals WHERE project_id = ?",
-        collective.id
+        project.id
     )
     .fetch_all(pool)
     .await?;
 
-    let current_interval = find_current_interval(collective.typed_id(), pool).await?;
+    let current_interval = find_current_interval(project.typed_id(), pool).await?;
     let current_interval_id = current_interval.typed_id().clone();
     let next_interval =
-        find_next_interval(collective.typed_id(), current_interval_id.clone(), pool).await?;
+        find_next_interval(project.typed_id(), current_interval_id.clone(), pool).await?;
 
     let current_interval_data =
         find_interval_involvement_data(current_interval_id.clone(), pool).await?;
@@ -167,14 +164,12 @@ pub async fn find_initial_data_for_collective(
         None
     };
 
-    let entry_pathways =
-        find_all_entry_pathways_for_collective(collective.typed_id(), pool).await?;
-    let event_templates = find_all_event_templates(collective.typed_id(), pool).await?;
-    let calendar_events =
-        list_calendar_events_with_attendances(collective.typed_id(), pool).await?;
+    let entry_pathways = find_all_entry_pathways_for_project(project.typed_id(), pool).await?;
+    let event_templates = find_all_event_templates(project.typed_id(), pool).await?;
+    let calendar_events = list_calendar_events_with_attendances(project.typed_id(), pool).await?;
 
     Ok(InitialData {
-        collective,
+        project,
         people,
         crews,
         event_templates,
@@ -189,9 +184,9 @@ pub async fn find_initial_data_for_collective(
     })
 }
 
-pub async fn update_collective(
+pub async fn update_project(
     input: Project,
-    collective_id: ProjectId,
+    project_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Project, sqlx::Error> {
     sqlx::query!(
@@ -207,7 +202,7 @@ pub async fn update_collective(
         input.feature_eoi,
         input.eoi_description,
         input.eoi_managing_crew_id,
-        collective_id.id
+        project_id.id
     )
     .execute(pool)
     .await?;
@@ -217,20 +212,20 @@ pub async fn update_collective(
 
 pub async fn update_project_with_links(
     input: Project,
-    collective_id: ProjectId,
+    project_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Project, sqlx::Error> {
-    let collective = update_collective(input, collective_id, pool).await?;
+    let project = update_project(input, project_id, pool).await?;
     let links = update_links_for_owner(
-        collective.id,
+        project.id,
         "collectives".to_string(),
-        Some(collective.links),
+        Some(project.links),
         pool,
     )
     .await?;
 
     Ok(Project {
         links: links.unwrap_or_default(),
-        ..collective
+        ..project
     })
 }

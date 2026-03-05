@@ -229,7 +229,6 @@ export interface ForgotPasswordRequest {
 
 export interface InitialData {
   calendar_events: CalendarEvent[];
-  collective: Project;
   crews: CrewWithLinks[];
   current_interval: Interval;
   entry_pathways: EntryPathway[];
@@ -237,6 +236,7 @@ export interface InitialData {
   intervals: Interval[];
   involvements: InvolvementData;
   people: Person[];
+  project: Project;
 }
 
 export interface Interval {

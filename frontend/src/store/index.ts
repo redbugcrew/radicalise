@@ -49,7 +49,7 @@ async function loadProjectData(store: AppStore, api: ReturnType<typeof getApi>):
       store.dispatch(intervalsLoaded({ allIntervals: response.data.intervals, currentInterval: response.data.current_interval }));
       store.dispatch(involvementsLoaded(response.data.involvements));
       store.dispatch(entryPathwaysLoaded(response.data.entry_pathways));
-      store.dispatch(projectLoaded(response.data.collective));
+      store.dispatch(projectLoaded(response.data.project));
       store.dispatch(eventTemplatesLoaded(response.data.event_templates));
       store.dispatch(eventsLoaded(response.data.calendar_events));
 

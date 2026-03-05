@@ -7,7 +7,7 @@ use uuid::Uuid;
 
 use crate::{
     entry_pathways::repo::find_eoi_by_auth_token,
-    my_project::repo::find_collective,
+    my_project::repo::find_project,
     people::repo::find_crew_involved_emails,
     realtime::RealtimeState,
     shared::{
@@ -47,7 +47,7 @@ pub async fn create_eoi(
 ) -> impl IntoResponse {
     println!("Creating EOI for details: {:?}", submission);
 
-    let collective = match find_collective(ProjectId::new(submission.project_id), &pool).await {
+    let collective = match find_project(ProjectId::new(submission.project_id), &pool).await {
         Ok(result) => result,
         Err(_) => {
             eprintln!("Collective not found for ID: {}", submission.project_id);

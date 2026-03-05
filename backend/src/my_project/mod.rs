@@ -35,7 +35,7 @@ pub fn router() -> OpenApiRouter {
         (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
     ),)]
 async fn get_project_state(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse {
-    let project = match repo::find_collective_with_links(default_project_id(), &pool).await {
+    let project = match repo::find_project_with_links(default_project_id(), &pool).await {
         Ok(project) => project,
         Err(e) => {
             eprintln!("Error fetching collective: {:?}", e);
@@ -52,7 +52,7 @@ async fn get_project_state(Extension(pool): Extension<SqlitePool>) -> impl IntoR
         return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
     }
 
-    let initial_data_result = repo::find_initial_data_for_collective(project, &pool).await;
+    let initial_data_result = repo::find_initial_data_for_project(project, &pool).await;
     match initial_data_result {
         Ok(initial_data) => (StatusCode::OK, Json(initial_data)).into_response(),
         Err(e) => {
