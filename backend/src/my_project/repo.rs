@@ -99,7 +99,7 @@ pub async fn find_project_with_links(
     pool: &SqlitePool,
 ) -> Result<Project, sqlx::Error> {
     let project = find_project(project_id.clone(), pool).await?;
-    let links = find_all_links_for_owner(project_id.id, "collectives".to_string(), pool).await?;
+    let links = find_all_links_for_owner(project_id.id, "projects".to_string(), pool).await?;
 
     Ok(Project { links, ..project })
 }
@@ -218,7 +218,7 @@ pub async fn update_project_with_links(
     let project = update_project(input, project_id, pool).await?;
     let links = update_links_for_owner(
         project.id,
-        "collectives".to_string(),
+        "projects".to_string(),
         Some(project.links),
         pool,
     )
