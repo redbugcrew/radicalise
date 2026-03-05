@@ -6,6 +6,6 @@ pub mod events;
 pub mod links_repo;
 pub mod regular_tasks;
 
-pub fn default_collective_id() -> entities::CollectiveId {
-    entities::CollectiveId { id: COLLECTIVE_ID }
+pub fn default_collective_id() -> entities::ProjectId {
+    entities::ProjectId { id: COLLECTIVE_ID }
 }

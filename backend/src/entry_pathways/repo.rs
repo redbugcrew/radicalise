@@ -1,6 +1,6 @@
 use sqlx::SqlitePool;
 
-use crate::shared::entities::{CollectiveId, EntryPathway, ExpressionOfInterest};
+use crate::shared::entities::{ProjectId, EntryPathway, ExpressionOfInterest};
 
 pub async fn create_eoi(
     record: ExpressionOfInterest,
@@ -52,7 +52,7 @@ pub async fn update_eoi(
 pub async fn delete_eoi_record(
     pool: &SqlitePool,
     auth_token: String,
-    collective_id: CollectiveId,
+    collective_id: ProjectId,
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(
         "DELETE FROM entry_pathways
@@ -81,7 +81,7 @@ pub async fn find_entry_pathway(id: i64, pool: &SqlitePool) -> Result<EntryPathw
 }
 
 pub async fn find_eoi_by_auth_token(
-    collective_id: CollectiveId,
+    collective_id: ProjectId,
     auth_token: &str,
     pool: &SqlitePool,
 ) -> Result<Option<ExpressionOfInterest>, sqlx::Error> {
@@ -98,7 +98,7 @@ pub async fn find_eoi_by_auth_token(
 }
 
 pub async fn find_all_entry_pathways_for_collective(
-    collective_id: CollectiveId,
+    collective_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Vec<EntryPathway>, sqlx::Error> {
     let eois = sqlx::query_as!(

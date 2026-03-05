@@ -1,7 +1,7 @@
 use sqlx::SqlitePool;
 
 use crate::shared::{
-    entities::{CollectiveId, EventResponseExpectation, EventTemplate},
+    entities::{ProjectId, EventResponseExpectation, EventTemplate},
     links_repo::{find_all_links_for_owner_type, hash_links_by_owner, update_links_for_owner},
 };
 
@@ -14,7 +14,7 @@ struct EventTemplateRow {
 
 pub async fn insert_event_template_with_links(
     data: &EventTemplate,
-    collective_id: CollectiveId,
+    collective_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<EventTemplate, sqlx::Error> {
     let rec = sqlx::query!(
@@ -50,7 +50,7 @@ pub async fn insert_event_template_with_links(
 
 pub async fn update_event_template_with_links(
     data: &EventTemplate,
-    collective_id: CollectiveId,
+    collective_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<EventTemplate, sqlx::Error> {
     let rec = sqlx::query!(
@@ -84,7 +84,7 @@ pub async fn update_event_template_with_links(
 }
 
 pub async fn find_all_event_templates(
-    collective_id: CollectiveId,
+    collective_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Vec<EventTemplate>, sqlx::Error> {
     let rows = find_all_event_template_rows(collective_id, pool).await?;
@@ -107,7 +107,7 @@ pub async fn find_all_event_templates(
 }
 
 async fn find_all_event_template_rows(
-    collective_id: CollectiveId,
+    collective_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Vec<EventTemplateRow>, sqlx::Error> {
     let rows = sqlx::query_as!(

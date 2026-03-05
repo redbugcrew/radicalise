@@ -3,13 +3,13 @@ use std::str::FromStr;
 use utoipa::ToSchema;
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct CollectiveId {
+pub struct ProjectId {
     pub id: i64,
 }
 
-impl CollectiveId {
+impl ProjectId {
     pub fn new(id: i64) -> Self {
-        CollectiveId { id }
+        ProjectId { id }
     }
 }
 
@@ -27,8 +27,8 @@ pub struct Collective {
 }
 
 impl Collective {
-    pub fn typed_id(&self) -> CollectiveId {
-        CollectiveId { id: self.id }
+    pub fn typed_id(&self) -> ProjectId {
+        ProjectId { id: self.id }
     }
 }
 

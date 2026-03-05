@@ -1,10 +1,10 @@
 use sqlx::SqlitePool;
 
-use crate::shared::entities::{CollectiveId, CrewId, IntervalId, Person, PersonId, UserId};
+use crate::shared::entities::{ProjectId, CrewId, IntervalId, Person, PersonId, UserId};
 
 pub async fn update_person(
     input: Person,
-    collective_id: CollectiveId,
+    collective_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Person, sqlx::Error> {
     sqlx::query_as!(
@@ -27,7 +27,7 @@ pub async fn update_person(
 
 pub async fn find_person_by_id(
     person_id: PersonId,
-    collective_id: CollectiveId,
+    collective_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Person, sqlx::Error> {
     sqlx::query_as!(
@@ -47,7 +47,7 @@ pub async fn find_person_by_id(
 
 pub async fn find_person_by_user_id(
     user_id: UserId,
-    collective_id: CollectiveId,
+    collective_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Person, sqlx::Error> {
     sqlx::query_as!(
@@ -86,7 +86,7 @@ pub async fn find_person_by_calendar_token(
 }
 
 pub async fn find_all_people(
-    collective_id: CollectiveId,
+    collective_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Vec<Person>, sqlx::Error> {
     sqlx::query_as!(

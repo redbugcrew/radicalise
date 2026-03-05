@@ -6,7 +6,7 @@ use crate::{
     },
     shared::{
         entities::{
-            CalendarEvent, CalendarEventId, CollectiveId, EventResponseExpectation, Link, PersonId,
+            CalendarEvent, CalendarEventId, ProjectId, EventResponseExpectation, Link, PersonId,
         },
         links_repo::{find_all_links_for_owner_type, hash_links_by_owner, update_links_for_owner},
     },
@@ -15,7 +15,7 @@ use crate::{
 pub async fn insert_calendar_event_with_links(
     data: &CalendarEvent,
     event_template_id: i64,
-    collective_id: CollectiveId,
+    collective_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<CalendarEvent, sqlx::Error> {
     let rec = sqlx::query!(
@@ -57,7 +57,7 @@ pub async fn update_calendar_event_with_links(
     event_id: CalendarEventId,
     data: &CalendarEvent,
     event_template_id: i64,
-    collective_id: CollectiveId,
+    collective_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<CalendarEvent, sqlx::Error> {
     sqlx::query!(
@@ -123,7 +123,7 @@ impl CalendarEventRow {
 }
 
 pub async fn list_calendar_events_with_attendances(
-    collective_id: CollectiveId,
+    collective_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Vec<CalendarEvent>, sqlx::Error> {
     let without_attendances = list_calendar_events(collective_id.clone(), pool).await?;
@@ -142,7 +142,7 @@ pub async fn list_calendar_events_with_attendances(
 }
 
 pub async fn list_calendar_events(
-    collective_id: CollectiveId,
+    collective_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Vec<CalendarEvent>, sqlx::Error> {
     let rows = list_calendar_event_rows(collective_id, pool).await?;
@@ -163,7 +163,7 @@ pub async fn list_calendar_events(
 }
 
 pub async fn list_calendar_events_person_attending(
-    collective_id: CollectiveId,
+    collective_id: ProjectId,
     person_id: PersonId,
     pool: &SqlitePool,
 ) -> Result<Vec<CalendarEvent>, sqlx::Error> {
@@ -178,7 +178,7 @@ pub async fn list_calendar_events_person_attending(
 }
 
 async fn list_calendar_event_rows_person_attending(
-    collective_id: CollectiveId,
+    collective_id: ProjectId,
     person_id: PersonId,
     pool: &SqlitePool,
 ) -> Result<Vec<CalendarEventRow>, sqlx::Error> {
@@ -214,7 +214,7 @@ async fn list_calendar_event_rows_person_attending(
 }
 
 async fn list_calendar_event_rows(
-    collective_id: CollectiveId,
+    collective_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Vec<CalendarEventRow>, sqlx::Error> {
     let rows = sqlx::query_as!(

@@ -12,10 +12,10 @@ use crate::{
     shared::entities::OptOutType,
 };
 
-use super::entities::{CollectiveId, CollectiveInvolvement, Interval};
+use super::entities::{ProjectId, CollectiveInvolvement, Interval};
 
 pub async fn check_intervals_tasks(
-    collective_id: CollectiveId,
+    collective_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
     let intervals =
@@ -41,7 +41,7 @@ pub async fn check_intervals_tasks(
 
 pub async fn add_interval_implicit_involvements(
     interval: &Interval,
-    collective_id: CollectiveId,
+    collective_id: ProjectId,
     recompute: bool,
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {

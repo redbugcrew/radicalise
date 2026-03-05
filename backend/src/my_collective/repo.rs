@@ -13,7 +13,7 @@ use crate::{
     shared::{
         default_collective_id,
         entities::{
-            CalendarEvent, Collective, CollectiveId, CollectiveInvolvement, CrewInvolvement,
+            CalendarEvent, Collective, ProjectId, CollectiveInvolvement, CrewInvolvement,
             CrewWithLinks, EntryPathway, EventTemplate, Interval, IntervalId, Person,
         },
         links_repo::{find_all_links_for_owner, update_links_for_owner},
@@ -47,7 +47,7 @@ pub struct InitialData {
 }
 
 pub async fn find_collective(
-    collective_id: CollectiveId,
+    collective_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Collective, sqlx::Error> {
     sqlx::query!(
@@ -95,7 +95,7 @@ pub async fn find_collective_by_slug(
 }
 
 pub async fn find_collective_with_links(
-    collective_id: CollectiveId,
+    collective_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Collective, sqlx::Error> {
     let collective = find_collective(collective_id.clone(), pool).await?;
@@ -192,7 +192,7 @@ pub async fn find_initial_data_for_collective(
 
 pub async fn update_collective(
     input: Collective,
-    collective_id: CollectiveId,
+    collective_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Collective, sqlx::Error> {
     sqlx::query!(
@@ -218,7 +218,7 @@ pub async fn update_collective(
 
 pub async fn update_collective_with_links(
     input: Collective,
-    collective_id: CollectiveId,
+    collective_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Collective, sqlx::Error> {
     let collective = update_collective(input, collective_id, pool).await?;

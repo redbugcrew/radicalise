@@ -3,12 +3,12 @@ use std::collections::HashMap;
 use sqlx::SqlitePool;
 
 use crate::shared::{
-    entities::{CollectiveId, Crew, CrewId, CrewInvolvement, CrewWithLinks, IntervalId},
+    entities::{Crew, CrewId, CrewInvolvement, CrewWithLinks, IntervalId, ProjectId},
     links_repo::{find_all_links_for_owner_type, hash_links_by_owner, update_links_for_owner},
 };
 
 pub async fn find_all_crews_with_links(
-    collective_id: CollectiveId,
+    collective_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Vec<CrewWithLinks>, sqlx::Error> {
     let crews = find_all_crews(collective_id, pool).await?;
@@ -31,7 +31,7 @@ pub async fn find_all_crews_with_links(
 }
 
 pub async fn find_all_crews(
-    collective_id: CollectiveId,
+    collective_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Vec<Crew>, sqlx::Error> {
     sqlx::query_as!(
@@ -44,7 +44,7 @@ pub async fn find_all_crews(
 }
 
 pub async fn update_crew(
-    collective_id: CollectiveId,
+    collective_id: ProjectId,
     crew: Crew,
     pool: &SqlitePool,
 ) -> Result<Crew, sqlx::Error> {
@@ -63,7 +63,7 @@ pub async fn update_crew(
 }
 
 pub async fn update_crew_with_links(
-    collective_id: CollectiveId,
+    collective_id: ProjectId,
     crew: CrewWithLinks,
     pool: &SqlitePool,
 ) -> Result<CrewWithLinks, sqlx::Error> {

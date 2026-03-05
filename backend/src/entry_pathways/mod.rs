@@ -13,7 +13,7 @@ use crate::{
     shared::{
         db_helpers::is_constraint_violation,
         entities::{
-            Collective, CollectiveId, CrewId, EntryPathway, ExpressionOfInterest, Interval,
+            Collective, ProjectId, CrewId, EntryPathway, ExpressionOfInterest, Interval,
         },
         events::AppEvent,
     },
@@ -49,7 +49,7 @@ pub async fn create_eoi(
 ) -> impl IntoResponse {
     println!("Creating EOI for details: {:?}", submission);
 
-    let collective = match find_collective(CollectiveId::new(submission.project_id), &pool).await {
+    let collective = match find_collective(ProjectId::new(submission.project_id), &pool).await {
         Ok(result) => result,
         Err(_) => {
             eprintln!("Collective not found for ID: {}", submission.project_id);
@@ -58,7 +58,7 @@ pub async fn create_eoi(
     };
 
     let current_interval = match crate::intervals::repo::find_current_interval(
-        CollectiveId::new(submission.project_id),
+        ProjectId::new(submission.project_id),
         &pool,
     )
     .await
@@ -136,7 +136,7 @@ pub async fn update_eoi(
 ) -> impl IntoResponse {
     println!("Updating EOI for details: {:?}", submission);
 
-    let eoi = match find_eoi_by_auth_token(CollectiveId::new(collective_id), &auth_token, &pool)
+    let eoi = match find_eoi_by_auth_token(ProjectId::new(collective_id), &auth_token, &pool)
         .await
     {
         Ok(Some(result)) => result,
@@ -194,7 +194,7 @@ pub async fn delete_eoi(
         "Deleting EOI for collective ID: {}, auth token: {}",
         collective_id, auth_token
     );
-    match repo::delete_eoi_record(&pool, auth_token, CollectiveId::new(collective_id)).await {
+    match repo::delete_eoi_record(&pool, auth_token, ProjectId::new(collective_id)).await {
         Ok(_) => {
             return (StatusCode::OK, ());
         }
@@ -222,7 +222,7 @@ pub async fn get_eoi_by_auth_token(
     Path((collective_id, auth_token)): Path<(i64, String)>,
     Extension(pool): Extension<SqlitePool>,
 ) -> impl IntoResponse {
-    let result = find_eoi_by_auth_token(CollectiveId::new(collective_id), &auth_token, &pool).await;
+    let result = find_eoi_by_auth_token(ProjectId::new(collective_id), &auth_token, &pool).await;
     match result {
         Ok(Some(eoi)) => {
             return (StatusCode::OK, Json(eoi)).into_response();

@@ -6,7 +6,7 @@ use crate::{
     intervals::repo::{find_current_interval, find_next_interval},
     my_collective::involvements_repo::find_collective_involvement,
     shared::entities::{
-        CollectiveId, CollectiveInvolvement, CrewId, CrewInvolvement, IntervalId, Person, PersonId,
+        CollectiveInvolvement, CrewId, CrewInvolvement, IntervalId, Person, PersonId, ProjectId,
         UserId,
     },
 };
@@ -28,7 +28,7 @@ pub struct MyInitialData {
 }
 
 pub async fn find_interval_data_for_person(
-    collective_id: CollectiveId,
+    collective_id: ProjectId,
     person_id: PersonId,
     interval_id: IntervalId,
     pool: &SqlitePool,
@@ -49,7 +49,7 @@ pub async fn find_interval_data_for_person(
 }
 
 pub async fn find_initial_data_for_user(
-    collective_id: CollectiveId,
+    collective_id: ProjectId,
     user_id: UserId,
     pool: &SqlitePool,
 ) -> Result<MyInitialData, sqlx::Error> {
@@ -210,7 +210,7 @@ pub async fn upsert_crew_involvements(
 }
 
 pub async fn find_person_for_user(
-    collective_id: CollectiveId,
+    collective_id: ProjectId,
     user_id: UserId,
     pool: &SqlitePool,
 ) -> Result<Person, sqlx::Error> {
@@ -260,7 +260,7 @@ pub async fn create_calendar_token_for_user(
 }
 
 pub async fn find_person_id_for_user(
-    collective_id: CollectiveId,
+    collective_id: ProjectId,
     user_id: UserId,
     pool: &SqlitePool,
 ) -> Result<PersonId, sqlx::Error> {
