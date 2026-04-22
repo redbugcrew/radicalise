@@ -1,6 +1,6 @@
 import { Anchor, AppShell, Burger, Container, Group } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { IconBrandGithub, IconHome2, IconSettings, IconUsers, IconUsersGroup, IconCalendarMonth, IconCalendar, IconCalendarCog } from "@tabler/icons-react";
+import { IconBrandGithub, IconHome2, IconSettings, IconUsers, IconUsersGroup, IconCalendarMonth, IconCalendar, IconCalendarCog, IconCirclesFilled } from "@tabler/icons-react";
 import { Outlet } from "react-router-dom";
 import { NavLink, PersonBadge } from "../../components";
 import { handleOwnedAppEvent, useAppSelector } from "../../store";
@@ -58,7 +58,8 @@ export default function Layout() {
 
         <AppShell.Section className={classes.footer_section}>
           <NavLink c="dimmed" label={"v" + packageJson.version} href={packageJson.homepage + "/releases/tag/v" + packageJson.version} leftSection={<IconBrandGithub size={18} />} onClick={toggle} />
-          <NavLink c="dimmed" label="Project settings" href="/project/edit" leftSection={<IconSettings size={18} />} onClick={toggle} />
+          <NavLink c="dimmed" label="Project settings" href="/project_settings/edit" leftSection={<IconSettings size={18} />} onClick={toggle} />
+          <NavLink c="dimmed" label="Circles" href="/project_settings/circles" leftSection={<IconCirclesFilled size={18} />} onClick={toggle} />
         </AppShell.Section>
       </AppShell.Navbar>
       <AppShell.Main>
