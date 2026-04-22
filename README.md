@@ -44,3 +44,11 @@ These changes should be automatically run when you re-start the app, but if not,
 The backend publishes a description of its API using the OpenAPI specification. THis can be browsed and tested using the Swagger UI tool, which is served by the backend by the `/swagger-ui`. In local development mode that would be found at http://localhost:8200/swagger-ui
 
 The frontend uses client code to access the API that is auto-generated. To update this code, have the back end running, then run `npm run swagger` in the front end directory.
+
+### Running front-end and backend together for developing
+
+The easiest way to run both frontend and backend when developing is to use the mprocs utility.
+
+Install mprocs using `cargo install mprocs`
+
+Then, run `mprocs` and it should open both front and backend.
