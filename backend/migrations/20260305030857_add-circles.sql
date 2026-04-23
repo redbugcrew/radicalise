@@ -2,11 +2,13 @@
 CREATE TABLE circles (
     id NUMBER PRIMARY KEY NOT NULL,
     project_id NUMBER NOT NULL,
+    name TEXT NOT NULL,
+    slug TEXT NOT NULL,
 
     FOREIGN KEY (project_id) REFERENCES projects(id)
 );
 
-INSERT INTO circles (id, project_id) VALUES (1, 1);
+INSERT INTO circles (id, project_id, name, slug) VALUES (1, 1, 'Participants', 'participants');
 
 CREATE TABLE circle_involvements (
   "id"	INTEGER NOT NULL,
