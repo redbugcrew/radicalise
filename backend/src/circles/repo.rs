@@ -8,7 +8,7 @@ pub async fn find_all_circles(
 ) -> Result<Vec<Circle>, sqlx::Error> {
     sqlx::query_as!(
         Circle,
-        "SELECT id as \"id: i64\", project_id as \"project_id: i64\"
+        "SELECT id as \"id: i64\", project_id as \"project_id: i64\", name, slug
         FROM circles
         WHERE project_id = ?",
         project_id.id

@@ -251,6 +251,8 @@ pub struct CircleInvolvement {
 pub struct Circle {
     pub id: i64,
     pub project_id: i64,
+    pub name: String,
+    pub slug: String,
 }
 
 impl Circle {
