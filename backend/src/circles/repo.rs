@@ -1,6 +1,6 @@
 use sqlx::SqlitePool;
 
-use crate::shared::entities::{Circle, ProjectId};
+use crate::shared::entities::{Circle, CircleId, ProjectId};
 
 pub async fn find_all_circles(
     project_id: ProjectId,
@@ -10,7 +10,8 @@ pub async fn find_all_circles(
         Circle,
         "SELECT id as \"id: i64\", project_id as \"project_id: i64\", name, slug
         FROM circles
-        WHERE project_id = ?",
+        WHERE project_id = ?
+        ORDER BY id ASC",
         project_id.id
     )
     .fetch_all(pool)
@@ -33,6 +34,29 @@ pub async fn insert_circle(
 
     Ok(Circle {
         id: rec.last_insert_rowid(),
+        ..circle.clone()
+    })
+}
+
+pub async fn update_circle(
+    circle_id: CircleId,
+    circle: &Circle,
+    project_id: ProjectId,
+    pool: &SqlitePool,
+) -> Result<Circle, sqlx::Error> {
+    sqlx::query!(
+        "UPDATE circles SET name = ?, slug = ? WHERE id = ? AND project_id = ?",
+        circle.name,
+        circle.slug,
+        circle_id.id,
+        project_id.id
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(Circle {
+        id: circle_id.id,
+        project_id: project_id.id,
         ..circle.clone()
     })
 }

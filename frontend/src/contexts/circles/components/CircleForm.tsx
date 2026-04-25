@@ -6,17 +6,23 @@ import { DisplayActionResult, useOnSubmitWithResult, type ActionPromiseResult } 
 interface CircleFormProps {
   onSubmit: (data: Circle) => Promise<ActionPromiseResult>;
   submitText?: string;
+  value?: Circle;
 }
 
-export default function CircleForm({ onSubmit, submitText }: CircleFormProps) {
+const defaultCircle: Circle = {
+  id: -1,
+  project_id: -1,
+  name: "",
+  slug: "",
+};
+
+export default function CircleForm({ onSubmit, submitText, value }: CircleFormProps) {
   const [actionResult, onSubmitWithResult] = useOnSubmitWithResult<Circle>(onSubmit);
 
   const form = useForm<Circle>({
     initialValues: {
-      id: -1, // This will be ignored by the backend when creating a new circle, but is required for type compatibility
-      project_id: -1, // This will also be ignored.
-      name: "",
-      slug: "",
+      ...defaultCircle,
+      ...value,
     },
     validate: {
       name: (value) => (value.trim() === "" ? "Name is required" : null),

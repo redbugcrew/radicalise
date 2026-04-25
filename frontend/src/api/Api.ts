@@ -657,9 +657,29 @@ export class Api<
      * @request POST:/api/circles
      */
     createCircle: (data: Circle, params: RequestParams = {}) =>
-      this.request<AppEvent[], any>({
+      this.request<AppEvent[], string>({
         path: `/api/circles`,
         method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdateCircle
+     * @request PUT:/api/circles/{circle_id}
+     */
+    updateCircle: (
+      circleId: string,
+      data: Circle,
+      params: RequestParams = {},
+    ) =>
+      this.request<AppEvent[], string>({
+        path: `/api/circles/${circleId}`,
+        method: "PUT",
         body: data,
         type: ContentType.Json,
         format: "json",
