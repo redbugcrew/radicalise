@@ -4,11 +4,12 @@ import { getApi } from "../../../api";
 import type { Circle } from "../../../api/Api";
 import { handleAppEvents } from "../../../store";
 import { useNavigate } from "react-router-dom";
+import { actionFailure, type ActionPromiseResult } from "../../../components/ActionResult";
 
 export default function NewCircle() {
   const navigate = useNavigate();
 
-  const handleSubmit = async (data: Circle): Promise<void> => {
+  const handleSubmit = async (data: Circle): Promise<ActionPromiseResult> => {
     return getApi()
       .api.createCircle(data)
       .then((response) => {
@@ -16,7 +17,7 @@ export default function NewCircle() {
         navigate("/circles");
       })
       .catch((error) => {
-        console.error("Error creating event template:", error);
+        return actionFailure(error);
       });
   };
 

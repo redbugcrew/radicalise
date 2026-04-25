@@ -1,13 +1,16 @@
 import { Button, Stack, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import type { Circle } from "../../../api/Api";
+import { DisplayActionResult, useOnSubmitWithResult, type ActionPromiseResult } from "../../../components/ActionResult";
 
 interface CircleFormProps {
-  onSubmit: (data: Circle) => Promise<void>;
+  onSubmit: (data: Circle) => Promise<ActionPromiseResult>;
   submitText?: string;
 }
 
 export default function CircleForm({ onSubmit, submitText }: CircleFormProps) {
+  const [actionResult, onSubmitWithResult] = useOnSubmitWithResult<Circle>(onSubmit);
+
   const form = useForm<Circle>({
     initialValues: {
       id: -1, // This will be ignored by the backend when creating a new circle, but is required for type compatibility
@@ -27,13 +30,15 @@ export default function CircleForm({ onSubmit, submitText }: CircleFormProps) {
   });
 
   return (
-    <form onSubmit={form.onSubmit(onSubmit, (errors) => console.log("Form submission errors:", errors))}>
+    <form onSubmit={form.onSubmit(onSubmitWithResult, (errors) => console.log("Form submission errors:", errors))}>
       <Stack gap="lg">
         <Stack gap="md">
           <TextInput label="Name" description="How will people refer to this circle?" placeholder="Participants, Collaborators, etc" withAsterisk {...form.getInputProps("name")} />
 
           <TextInput label="Slug" description="How will this circle be identified in URLs and APIs? " placeholder="participants, collaborators, etc" withAsterisk {...form.getInputProps("slug")} />
         </Stack>
+
+        <DisplayActionResult result={actionResult} />
 
         <Button type="submit" loading={form.submitting}>
           {submitText || "Submit"}
