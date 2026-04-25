@@ -14,7 +14,7 @@ export default function NewCircle() {
       .api.createCircle(data)
       .then((response) => {
         handleAppEvents(response.data);
-        navigate("/circles");
+        navigate("..");
       })
       .catch((error) => {
         return actionFailure(error);
