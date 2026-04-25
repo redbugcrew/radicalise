@@ -118,8 +118,10 @@ export interface CapacityPlanning {
 export interface Circle {
   /** @format int64 */
   id: number;
+  name: string;
   /** @format int64 */
   project_id: number;
+  slug: string;
 }
 
 export interface CircleInvolvement {

@@ -1,8 +1,12 @@
 import { ActionIcon, Group, Stack, Title } from "@mantine/core";
 import { Anchor } from "../../../components";
 import { IconPlus } from "@tabler/icons-react";
+import { useAppSelector } from "../../../store";
+import CirclesTable from "../components/CirclesTable";
 
 export default function Circles() {
+  const circles = useAppSelector((state) => state.circles);
+
   return (
     <Stack>
       <Group justify="space-between">
@@ -13,6 +17,8 @@ export default function Circles() {
           </ActionIcon>
         </Anchor>
       </Group>
+
+      <CirclesTable circles={circles} />
     </Stack>
   );
 }
