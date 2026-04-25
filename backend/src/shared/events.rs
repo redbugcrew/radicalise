@@ -14,6 +14,7 @@ pub enum AppEvent {
     CalendarEventAttendancesEvent(
         crate::calendar_event_attendances::events::CalendarEventAttendancesEvent,
     ),
+    CirclesEvent(crate::circles::events::CirclesEvent),
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]

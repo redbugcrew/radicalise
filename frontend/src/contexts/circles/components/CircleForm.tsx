@@ -1,19 +1,17 @@
 import { Button, Stack, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
-
-interface CircleFormData {
-  name: string;
-  slug: string;
-}
+import type { Circle } from "../../../api/Api";
 
 interface CircleFormProps {
-  onSubmit: (data: CircleFormData) => Promise<void>;
+  onSubmit: (data: Circle) => Promise<void>;
   submitText?: string;
 }
 
 export default function CircleForm({ onSubmit, submitText }: CircleFormProps) {
-  const form = useForm<CircleFormData>({
+  const form = useForm<Circle>({
     initialValues: {
+      id: -1, // This will be ignored by the backend when creating a new circle, but is required for type compatibility
+      project_id: -1, // This will also be ignored.
       name: "",
       slug: "",
     },

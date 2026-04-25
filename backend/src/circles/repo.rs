@@ -16,3 +16,23 @@ pub async fn find_all_circles(
     .fetch_all(pool)
     .await
 }
+
+pub async fn insert_circle(
+    circle: &Circle,
+    project_id: ProjectId,
+    pool: &SqlitePool,
+) -> Result<Circle, sqlx::Error> {
+    let rec = sqlx::query!(
+        "INSERT INTO circles (project_id, name, slug) VALUES (?, ?, ?)",
+        project_id.id,
+        circle.name,
+        circle.slug
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(Circle {
+        id: rec.last_insert_rowid(),
+        ..circle.clone()
+    })
+}

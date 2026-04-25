@@ -72,6 +72,9 @@ export type AppEvent =
     }
   | {
       CalendarEventAttendancesEvent: CalendarEventAttendancesEvent;
+    }
+  | {
+      CirclesEvent: CirclesEvent;
     };
 
 export interface CalendarEvent {
@@ -147,6 +150,10 @@ export interface CircleInvolvement {
   project_id: number;
   status: InvolvementStatus;
 }
+
+export type CirclesEvent = {
+  CircleUpdated: Circle;
+};
 
 export interface CreateAttendanceRequest {
   /** @format int64 */
@@ -637,6 +644,22 @@ export class Api<
       this.request<AppEvent[], any>({
         path: `/api/calendar_events/${eventId}`,
         method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CreateCircle
+     * @request POST:/api/circles
+     */
+    createCircle: (data: Circle, params: RequestParams = {}) =>
+      this.request<AppEvent[], any>({
+        path: `/api/circles`,
+        method: "POST",
         body: data,
         type: ContentType.Json,
         format: "json",
