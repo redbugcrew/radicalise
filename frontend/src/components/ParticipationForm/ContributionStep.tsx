@@ -1,5 +1,5 @@
 import { Stack, Title, Text } from "@mantine/core";
-import { useForm } from "@mantine/form";
+import { type FormErrors, type UseFormReturnType } from "@mantine/form";
 import { EventResponseExpectation, type CrewInvolvement, type Interval } from "../../api/Api";
 import { useAppSelector } from "../../store";
 import { CrewParticipationsInput } from "../";
@@ -13,7 +13,7 @@ interface ContributionStepProps {
   interval: Interval;
   crewInvolvements: CrewInvolvement[];
   previousInvolvements?: CrewInvolvement[] | undefined | null;
-  form: ReturnType<typeof useForm<MyParticipationFormData>>;
+  form: UseFormReturnType<MyParticipationFormData, MyParticipationFormData, (values: MyParticipationFormData) => FormErrors>;
   readOnly?: boolean;
 }
 

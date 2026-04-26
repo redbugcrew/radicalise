@@ -1,4 +1,4 @@
-import type { useForm } from "@mantine/form";
+import type { FormErrors, UseFormReturnType } from "@mantine/form";
 import type { CrewInvolvement, OptOutType, ParticipationIntention } from "../../api/Api";
 
 export interface MyParticipationFormData {
@@ -15,6 +15,6 @@ export interface MyParticipationFormData {
 }
 
 export type StepProps = {
-  form: ReturnType<typeof useForm<MyParticipationFormData>>;
+  form: UseFormReturnType<MyParticipationFormData, MyParticipationFormData, (values: MyParticipationFormData) => FormErrors>;
   readOnly?: boolean;
 };

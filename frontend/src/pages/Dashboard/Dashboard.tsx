@@ -134,7 +134,7 @@ function MyEvents() {
       </Group>
       <Stack gap={0}>
         {calendarToken && (
-          <Collapse in={opened}>
+          <Collapse expanded={opened}>
             <SubscribeDetails calendarToken={calendarToken} />
           </Collapse>
         )}
