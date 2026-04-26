@@ -12,4 +12,10 @@ export default defineConfig({
       "@tabler/icons-react": "@tabler/icons-react/dist/esm/icons/index.mjs",
     },
   },
+  legacy: {
+    // react-use-websocket uses exports.default (CJS) which Vite 8 no longer
+    // treats as a default export under the new consistent CJS interop.
+    // Remove once https://github.com/robtaussig/react-use-websocket/pull/282 is released.
+    inconsistentCjsInterop: true,
+  },
 });
