@@ -9,6 +9,8 @@ import useWebSocket from "react-use-websocket";
 
 import classes from "./Layout.module.css";
 import { getSocketUrl } from "../../api";
+import { useDispatch } from "react-redux";
+import { getActiveCircle } from "../../store/circles";
 
 export default function Layout() {
   const [opened, { toggle }] = useDisclosure();
@@ -16,7 +18,10 @@ export default function Layout() {
   const project = useAppSelector((state) => state.project);
   const person_id = useAppSelector((state) => state.me?.person_id);
   const person = useAppSelector((state) => state.people[person_id || -1]);
-  const rootCircles = useAppSelector((state) => state.circles || []);
+  const circles = useAppSelector((state) => state.circles || []);
+  const dispatch = useDispatch();
+
+  const activeCircle = getActiveCircle(circles);
 
   const {} = useWebSocket(getSocketUrl(), {
     share: true,
@@ -33,6 +38,11 @@ export default function Layout() {
     heartbeat: false,
   });
 
+  const changeActiveCircle = (circleId: number) => {
+    toggleCircleSelector();
+    dispatch({ type: "circles/setActiveCircle", payload: circleId });
+  };
+
   return (
     <AppShell header={{ height: 60 }} navbar={{ width: 300, breakpoint: "sm", collapsed: { mobile: !opened } }} padding="md">
       <AppShell.Header>
@@ -47,12 +57,12 @@ export default function Layout() {
         </Group>
       </AppShell.Header>
       <AppShell.Navbar p={0}>
-        {rootCircles.length > 1 && (
+        {circles.rootCircles.length > 1 && (
           <AppShell.Section className={classes.circle_section}>
-            <NavLink label="Participants" href="#" ta="center" onClick={toggleCircleSelector} visibleFrom={selectingCircle ? "sm" : undefined} />
+            <NavLink label={activeCircle ? activeCircle.name : "No circle"} href="#" ta="center" onClick={toggleCircleSelector} visibleFrom={selectingCircle ? "sm" : undefined} />
             {selectingCircle && (
               <div className={classes.circle_selector_container}>
-                <CircleSelector circles={rootCircles} selectedCircleId={rootCircles[0].id} onChange={(circleId) => toggleCircleSelector()} />
+                <CircleSelector circles={circles.rootCircles} selectedCircleId={circles.activeCircleId} onChange={changeActiveCircle} />
               </div>
             )}
           </AppShell.Section>

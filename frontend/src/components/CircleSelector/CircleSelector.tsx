@@ -2,7 +2,7 @@ import type { Circle } from "../../api/Api";
 
 interface CircleSelectorProps {
   circles: Circle[];
-  selectedCircleId?: number;
+  selectedCircleId?: number | null;
   onChange: (circleId: number) => void;
 }
 
@@ -20,7 +20,8 @@ export default function CircleSelector({ circles, selectedCircleId, onChange }: 
             aria-selected={isSelected}
             style={{ zIndex: circles.length - index }}
             href="#"
-            onClick={() => {
+            onClick={(event) => {
+              event.preventDefault();
               onChange(circle.id);
               return false;
             }}

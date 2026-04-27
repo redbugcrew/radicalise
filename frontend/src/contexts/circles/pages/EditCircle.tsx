@@ -8,7 +8,7 @@ import { actionFailure, type ActionPromiseResult } from "../../../components/Act
 
 export default function EditCircle() {
   const { circleSlug } = useParams<"circleSlug">();
-  const circle = useAppSelector((state) => state.circles?.find((c) => c.slug === circleSlug));
+  const circle = useAppSelector((state) => state.circles.rootCircles?.find((c) => c.slug === circleSlug));
   const navigate = useNavigate();
 
   if (!circleSlug || !circle) {

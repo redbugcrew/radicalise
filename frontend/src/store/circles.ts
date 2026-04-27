@@ -1,31 +1,73 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { Circle } from "../api/Api";
 
-export type CirclesState = Circle[] | null;
+export interface CirclesState {
+  activeCircleId: number | null;
+  rootCircles: Circle[];
+}
 
 const circlesSlice = createSlice({
   name: "circles",
-  initialState: null as CirclesState,
+  initialState: {
+    activeCircleId: null,
+    rootCircles: [],
+  } as CirclesState,
   reducers: {
-    circlesLoaded: (_state: CirclesState, action: PayloadAction<Circle[]>) => action.payload,
-    circleUpdated: (state: CirclesState, action: PayloadAction<Circle>) => {
-      if (!state) return state;
+    circlesLoaded: (state: CirclesState, action: PayloadAction<Circle[]>) => {
+      const circles = action.payload;
+      let result = {
+        ...state,
+        rootCircles: circles,
+      };
+      if (result.activeCircleId === null && circles.length > 0) result.activeCircleId = circles[0].id;
 
-      const index = state.findIndex((circle) => circle.id === action.payload.id);
-      if (index !== -1) {
-        // Update existing circle
-        const newState = [...state];
-        newState[index] = action.payload;
-        return newState;
-      } else {
-        // Circle not found, add it to the list
-        return [...state, action.payload];
+      return result;
+    },
+    circleUpdated: (state: CirclesState, action: PayloadAction<Circle>) => {
+      const circle = action.payload;
+      const circles = upsertCircleInList(state.rootCircles, circle);
+
+      let result = {
+        ...state,
+        rootCircles: circles,
+      };
+      if (result.activeCircleId === null) result.activeCircleId = circle.id;
+      return result;
+    },
+    setActiveCircle: (state: CirclesState, action: PayloadAction<number>) => {
+      const newActiveCircleId = action.payload;
+
+      if (!state.rootCircles.some((c) => c.id === newActiveCircleId)) {
+        console.warn(`Attempted to set active circle to ${newActiveCircleId}, but it was not found in rootCircles`);
+        return state;
       }
+
+      return {
+        ...state,
+        activeCircleId: newActiveCircleId,
+      };
     },
   },
 });
 
-export const { circlesLoaded, circleUpdated } = circlesSlice.actions;
+export function getActiveCircle(state: CirclesState): Circle | null {
+  return state.rootCircles?.find((c) => c.id === state.activeCircleId) || null;
+}
+
+function upsertCircleInList(circles: Circle[], circle: Circle): Circle[] {
+  const index = circles.findIndex((c) => c.id === circle.id);
+
+  if (index !== -1) {
+    const result = [...circles];
+    result[index] = circle;
+    return result;
+  } else {
+    // Circle not found, add it to the list
+    return [...circles, circle];
+  }
+}
+
+export const { circlesLoaded, circleUpdated, setActiveCircle } = circlesSlice.actions;
 
 // Export the slice reducer as the default export
 export default circlesSlice.reducer;
