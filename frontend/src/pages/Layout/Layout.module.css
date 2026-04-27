@@ -1,5 +1,20 @@
-.user_section {
-  padding: var(--mantine-spacing-md) 0;
+.circle_section {
+  /* padding: var(--mantine-spacing-md) 0; */
+  height: 42px;
+}
+
+.circle_selector_container {
+  position: absolute;
+  top: 0px;
+  left: 100%;
+  width: calc(100vw - 300px);
+  height: 44px;
+  /* background-color: var(--mantine-color-dark-7); */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.main_container {
+  position: relative;
 }
 
 .settings_section {

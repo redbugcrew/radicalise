@@ -1,0 +1,37 @@
+.button_group {
+  align-items: stretch;
+  gap: 0;
+}
+
+.circle_button {
+  --circle-button-radius: 20px;
+  --circle-button-padding-x: var(--mantine-spacing-lg);
+
+  border-radius: var(--circle-button-radius);
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  display: inline-block;
+  padding: 0 var(--circle-button-padding-x) 0 calc(var(--circle-button-padding-x) + var(--circle-button-radius));
+  height: 100%;
+  display: flex;
+  background: linear-gradient(90deg, var(--mantine-color-dark-8), var(--mantine-color-dark-6));
+  flex-direction: column;
+  justify-content: center;
+  margin-left: calc(0px - var(--circle-button-radius));
+  text-decoration: none;
+  color: var(--mantine-color-dark-0);
+}
+
+.circle_button[aria-selected="true"] {
+  background: var(--mantine-primary-color-filled);
+  color: white;
+}
+
+.circle_button:first-child {
+  padding-left: var(--circle-button-padding-x);
+  margin-left: 0;
+}
+
+.button_text {
+  font-weight: 700;
+}

@@ -1,8 +1,8 @@
-import { Anchor, AppShell, Burger, Container, Group } from "@mantine/core";
+import { Anchor, AppShell, Burger, Container, Group, Stack } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconBrandGithub, IconHome2, IconSettings, IconUsers, IconUsersGroup, IconCalendarMonth, IconCalendar, IconCalendarCog, IconCirclesFilled } from "@tabler/icons-react";
 import { Outlet } from "react-router-dom";
-import { NavLink, PersonBadge } from "../../components";
+import { CircleSelector, NavLink, PersonBadge } from "../../components";
 import { handleOwnedAppEvent, useAppSelector } from "../../store";
 import packageJson from "../../../package.json";
 import useWebSocket from "react-use-websocket";
@@ -12,9 +12,11 @@ import { getSocketUrl } from "../../api";
 
 export default function Layout() {
   const [opened, { toggle }] = useDisclosure();
+  const [selectingCircle, { toggle: toggleCircleSelector }] = useDisclosure();
   const project = useAppSelector((state) => state.project);
   const person_id = useAppSelector((state) => state.me?.person_id);
   const person = useAppSelector((state) => state.people[person_id || -1]);
+  const rootCircles = useAppSelector((state) => state.circles || []);
 
   const {} = useWebSocket(getSocketUrl(), {
     share: true,
@@ -45,9 +47,16 @@ export default function Layout() {
         </Group>
       </AppShell.Header>
       <AppShell.Navbar p={0}>
-        {/* <AppShell.Section className={classes.user_section}>
-          <NavLink label={<PersonBadge person={person} variant="transparent" />} href={`/people/${person.id}`} onClick={toggle} />
-        </AppShell.Section> */}
+        {rootCircles.length > 1 && (
+          <AppShell.Section className={classes.circle_section}>
+            <NavLink label="Participants" href="#" ta="center" onClick={toggleCircleSelector} />
+            {selectingCircle && (
+              <Group className={classes.circle_selector_container} justify="stretch" align="stretch">
+                <CircleSelector circles={rootCircles} selectedCircleId={rootCircles[0].id} onChange={(circleId) => toggleCircleSelector()} />
+              </Group>
+            )}
+          </AppShell.Section>
+        )}
         <AppShell.Section className={classes.menu_section}>
           <NavLink label="Dashboard" href="dashboard" leftSection={<IconHome2 size={18} />} onClick={toggle} />
           <NavLink label="People" href="people" leftSection={<IconUsers size={18} />} onClick={toggle} />
