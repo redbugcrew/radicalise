@@ -34,15 +34,20 @@ export default function Layout() {
   return (
     <AppShell header={{ height: 60 }} navbar={{ width: 300, breakpoint: "sm", collapsed: { mobile: !opened } }} padding="md">
       <AppShell.Header>
-        <Group h="100%" px="md">
-          <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-          <Anchor href="/">{project ? project.name : "Radicalise!"}</Anchor>
+        <Group h="100%" px="md" justify="space-between">
+          <Group>
+            <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
+            <Anchor href="/">{project ? project.name : "Radicalise!"}</Anchor>
+          </Group>
+          <Anchor href={`/people/${person.id}`} onClick={toggle}>
+            <PersonBadge person={person} variant="transparent" noText />
+          </Anchor>
         </Group>
       </AppShell.Header>
       <AppShell.Navbar p={0}>
-        <AppShell.Section className={classes.user_section}>
+        {/* <AppShell.Section className={classes.user_section}>
           <NavLink label={<PersonBadge person={person} variant="transparent" />} href={`/people/${person.id}`} onClick={toggle} />
-        </AppShell.Section>
+        </AppShell.Section> */}
         <AppShell.Section className={classes.menu_section}>
           <NavLink label="Dashboard" href="dashboard" leftSection={<IconHome2 size={18} />} onClick={toggle} />
           <NavLink label="People" href="people" leftSection={<IconUsers size={18} />} onClick={toggle} />
