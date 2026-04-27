@@ -1,4 +1,3 @@
-import { Group } from "@mantine/core";
 import type { Circle } from "../../api/Api";
 
 interface CircleSelectorProps {
@@ -11,7 +10,7 @@ import classes from "./CircleSelector.module.css";
 
 export default function CircleSelector({ circles, selectedCircleId, onChange }: CircleSelectorProps) {
   return (
-    <Group justify="flex-start" align="stretch" className={classes.button_group} gap={0}>
+    <div className={classes.button_group}>
       {circles.map((circle, index) => {
         const isSelected = circle.id === selectedCircleId;
         return (
@@ -30,6 +29,6 @@ export default function CircleSelector({ circles, selectedCircleId, onChange }: 
           </a>
         );
       })}
-    </Group>
+    </div>
   );
 }

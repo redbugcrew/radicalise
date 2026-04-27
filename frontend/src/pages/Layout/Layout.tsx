@@ -49,11 +49,11 @@ export default function Layout() {
       <AppShell.Navbar p={0}>
         {rootCircles.length > 1 && (
           <AppShell.Section className={classes.circle_section}>
-            <NavLink label="Participants" href="#" ta="center" onClick={toggleCircleSelector} />
+            <NavLink label="Participants" href="#" ta="center" onClick={toggleCircleSelector} visibleFrom={selectingCircle ? "sm" : undefined} />
             {selectingCircle && (
-              <Group className={classes.circle_selector_container} justify="stretch" align="stretch">
+              <div className={classes.circle_selector_container}>
                 <CircleSelector circles={rootCircles} selectedCircleId={rootCircles[0].id} onChange={(circleId) => toggleCircleSelector()} />
-              </Group>
+              </div>
             )}
           </AppShell.Section>
         )}

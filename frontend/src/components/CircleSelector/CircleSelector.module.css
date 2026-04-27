@@ -1,6 +1,16 @@
 .button_group {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
   align-items: stretch;
   gap: 0;
+  height: 100%;
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    flex-direction: column;
+    height: auto;
+    width: 100%;
+  }
 }
 
 .circle_button {
@@ -20,6 +30,13 @@
   margin-left: calc(0px - var(--circle-button-radius));
   text-decoration: none;
   color: var(--mantine-color-dark-0);
+  flex-shrink: 0;
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    padding-top: var(--mantine-spacing-sm);
+    padding-bottom: var(--mantine-spacing-sm);
+    font-size: var(--mantine-font-size-sm);
+  }
 }
 
 .circle_button[aria-selected="true"] {

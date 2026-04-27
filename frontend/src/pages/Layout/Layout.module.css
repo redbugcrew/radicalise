@@ -1,6 +1,10 @@
 .circle_section {
   /* padding: var(--mantine-spacing-md) 0; */
   height: 42px;
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    height: auto;
+  }
 }
 
 .circle_selector_container {
@@ -11,6 +15,18 @@
   height: 44px;
   /* background-color: var(--mantine-color-dark-7); */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    position: static;
+    display: block;
+    min-height: 44px;
+    height: auto;
+    width: 100%;
+  }
 }
 
 .main_container {
