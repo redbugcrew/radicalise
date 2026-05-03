@@ -1,0 +1,54 @@
+.button_group {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: stretch;
+  gap: 0;
+  height: 100%;
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    flex-direction: column;
+    height: auto;
+    width: 100%;
+  }
+}
+
+.circle_button {
+  --circle-button-radius: 20px;
+  --circle-button-padding-x: var(--mantine-spacing-lg);
+
+  border-radius: var(--circle-button-radius);
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  display: inline-block;
+  padding: 0 var(--circle-button-padding-x) 0 calc(var(--circle-button-padding-x) + var(--circle-button-radius));
+  height: 100%;
+  display: flex;
+  background: linear-gradient(90deg, var(--mantine-color-dark-8), var(--mantine-color-dark-6));
+  flex-direction: column;
+  justify-content: center;
+  margin-left: calc(0px - var(--circle-button-radius));
+  text-decoration: none;
+  color: var(--mantine-color-dark-0);
+  flex-shrink: 0;
+
+  @media (max-width: $mantine-breakpoint-sm) {
+    padding-top: var(--mantine-spacing-sm);
+    padding-bottom: var(--mantine-spacing-sm);
+    font-size: var(--mantine-font-size-sm);
+  }
+}
+
+.circle_button[aria-selected="true"] {
+  background: var(--mantine-primary-color-filled);
+  color: white;
+}
+
+.circle_button:first-child {
+  padding-left: var(--circle-button-padding-x);
+  margin-left: 0;
+}
+
+.button_text {
+  font-weight: 700;
+}

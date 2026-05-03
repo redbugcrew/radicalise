@@ -5,7 +5,7 @@ import { useAppSelector } from "../../../store";
 import CirclesTable from "../components/CirclesTable";
 
 export default function Circles() {
-  const circles = useAppSelector((state) => state.circles);
+  const circles = useAppSelector((state) => state.circles.rootCircles || []);
 
   return (
     <Stack>
