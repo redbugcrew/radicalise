@@ -14,7 +14,10 @@ export default function Person() {
   const selectedInterval = useSelectedInterval();
   const person = useAppSelector((state) => state.people[personIdNum || -1]);
   const meId = useAppSelector((state) => state.me?.person_id);
+  const circleId = useAppSelector((state) => state.circles.activeCircleId);
   const canEdit = meId === person.id;
+
+  if (circleId == null) return null;
 
   return (
     <Stack>
@@ -30,7 +33,7 @@ export default function Person() {
       </Group>
 
       <IntervalSelector intervals={intervals.allIntervals} selectedInterval={selectedInterval} currentInterval={intervals.currentInterval} />
-      {personIdNum !== undefined && selectedInterval && <PersonForInterval personIdNum={personIdNum} interval={selectedInterval} />}
+      {personIdNum !== undefined && selectedInterval && <PersonForInterval personIdNum={personIdNum} interval={selectedInterval} circleId={circleId} />}
     </Stack>
   );
 }
