@@ -3,7 +3,6 @@ use sqlx::{QueryBuilder, Sqlite, SqlitePool};
 use utoipa::ToSchema;
 
 use crate::{
-    intervals::repo::{find_current_interval, find_next_interval},
     my_project::involvements_repo::find_circle_involvement,
     shared::{
         default_circle_id,
@@ -27,8 +26,6 @@ pub struct PersonIntervalCircleInvolvementData {
 pub struct MyInitialData {
     pub person_id: i64,
     pub calendar_token: Option<String>,
-    pub current_interval: Option<PersonIntervalCircleInvolvementData>,
-    pub next_interval: Option<PersonIntervalCircleInvolvementData>,
 }
 
 pub async fn find_interval_data_for_person(
@@ -65,39 +62,11 @@ pub async fn find_interval_data_for_person(
 
 pub async fn find_initial_data_for_user(
     project_id: ProjectId,
-    circle_id: CircleId,
     user_id: UserId,
     pool: &SqlitePool,
 ) -> Result<MyInitialData, sqlx::Error> {
-    let current_interval = find_current_interval(project_id.clone(), pool).await?;
-    let next_interval =
-        find_next_interval(project_id.clone(), current_interval.typed_id(), pool).await?;
     let person = find_person_for_user(project_id.clone(), user_id.clone(), pool).await?;
     let person_id = person.typed_id();
-
-    let current_interval_data = find_interval_data_for_person(
-        project_id.clone(),
-        circle_id.clone(),
-        person_id.clone(),
-        current_interval.typed_id(),
-        pool,
-    )
-    .await?;
-
-    let next_interval_data = if let Some(interval) = next_interval {
-        Some(
-            find_interval_data_for_person(
-                project_id.clone(),
-                circle_id.clone(),
-                person_id.clone(),
-                interval.typed_id(),
-                pool,
-            )
-            .await?,
-        )
-    } else {
-        None
-    };
 
     let calendar_token =
         if let Some(token) = find_calendar_token_for_user(user_id.clone(), pool).await? {
@@ -109,8 +78,6 @@ pub async fn find_initial_data_for_user(
     Ok(MyInitialData {
         person_id: person_id.id,
         calendar_token,
-        current_interval: Some(current_interval_data),
-        next_interval: next_interval_data,
     })
 }
 

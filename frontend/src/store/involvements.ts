@@ -52,6 +52,16 @@ export function myCircleInvolvement(state: InvolvementsState, circleId: number, 
   return forPerson(circleState.circle_involvements || [], personId)[0] || null;
 }
 
+export function myCrewInvolvements(state: InvolvementsState, circleId: number, personId: number, key: keyof InvolvementsState): CrewInvolvement[] | null {
+  const intervalState = state[key];
+  if (!intervalState) return null;
+
+  const circleState = intervalState.circles[circleId];
+  if (!circleState) return null;
+
+  return forPerson(circleState.crew_involvements || [], personId);
+}
+
 export function currentCircleStateOrDefault(state: InvolvementsState, circleId: number): CircleInvolvementData | null {
   const intervalState = state.current_interval;
   if (!intervalState) return null;

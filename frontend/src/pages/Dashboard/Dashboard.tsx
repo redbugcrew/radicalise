@@ -12,7 +12,7 @@ import { IconCalendar } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
 import CopyIconButton from "../../components/CopyIconButton";
 import { getApiUrl } from "../../api";
-import { currentCircleStateOrDefault, myCircleInvolvement } from "../../store/involvements";
+import { currentCircleStateOrDefault, myCircleInvolvement, myCrewInvolvements } from "../../store/involvements";
 import { intervalById } from "../../store/intervals";
 
 function ParticipationBadge({ involvement }: { involvement: CircleInvolvement | null }) {
@@ -166,6 +166,8 @@ export default function Dashboard() {
   const myNextCircle = myCircleInvolvement(involvements, circleId, personId, "next_interval");
   const nextInterval = myNextCircle ? intervalById(intervals, myNextCircle.interval_id) : null;
 
+  const myCurrentCrewInvolvements = myCrewInvolvements(involvements, circleId, personId, "current_interval");
+
   return (
     <Container>
       <Title order={1} mb="md">
@@ -177,7 +179,7 @@ export default function Dashboard() {
           {myNextCircle && nextInterval && <MyIntervalPartipationCard interval={nextInterval} circleInvolvement={myNextCircle} current={false} />}
         </Stack>
         <MyEvents />
-        {myData.current_interval && <MyCrews personId={myData.person_id} circleId={circleId} myInvolvements={myData.current_interval.crew_involvements} />}
+        {myCurrentCrewInvolvements && <MyCrews personId={myData.person_id} circleId={circleId} myInvolvements={myCurrentCrewInvolvements} />}
         <Stack gap="md">
           <Title order={2}>Resources</Title>
           <LinksStack links={project.links} />

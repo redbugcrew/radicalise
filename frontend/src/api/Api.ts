@@ -302,8 +302,6 @@ export type MeEvent = {
 
 export interface MyInitialData {
   calendar_token?: string | null;
-  current_interval?: null | PersonIntervalCircleInvolvementData;
-  next_interval?: null | PersonIntervalCircleInvolvementData;
   /** @format int64 */
   person_id: number;
 }

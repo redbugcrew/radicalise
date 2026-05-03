@@ -40,13 +40,9 @@ async fn get_my_state(
 ) -> impl IntoResponse {
     match auth_session.user {
         Some(user) => {
-            let result = repo::find_initial_data_for_user(
-                default_project_id(),
-                default_circle_id(),
-                UserId::new(user.id),
-                &pool,
-            )
-            .await;
+            let result =
+                repo::find_initial_data_for_user(default_project_id(), UserId::new(user.id), &pool)
+                    .await;
 
             match result {
                 Ok(initial_data) => (StatusCode::OK, Json(initial_data)).into_response(),
