@@ -5,16 +5,20 @@ use utoipa::ToSchema;
 use crate::{
     intervals::repo::{find_current_interval, find_next_interval},
     my_project::involvements_repo::find_circle_involvement,
-    shared::entities::{
-        CircleId, CircleInvolvement, CrewId, CrewInvolvement, IntervalId, Person, PersonId,
-        ProjectId, UserId,
+    shared::{
+        default_circle_id,
+        entities::{
+            CircleId, CircleInvolvement, CrewId, CrewInvolvement, IntervalId, Person, PersonId,
+            ProjectId, UserId,
+        },
     },
 };
 
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
-pub struct PersonIntervalInvolvementData {
+pub struct PersonIntervalCircleInvolvementData {
     pub interval_id: i64,
     pub person_id: i64,
+    pub circle_id: i64,
     pub project_involvement: Option<CircleInvolvement>,
     pub crew_involvements: Vec<CrewInvolvement>,
 }
@@ -23,8 +27,8 @@ pub struct PersonIntervalInvolvementData {
 pub struct MyInitialData {
     pub person_id: i64,
     pub calendar_token: Option<String>,
-    pub current_interval: Option<PersonIntervalInvolvementData>,
-    pub next_interval: Option<PersonIntervalInvolvementData>,
+    pub current_interval: Option<PersonIntervalCircleInvolvementData>,
+    pub next_interval: Option<PersonIntervalCircleInvolvementData>,
 }
 
 pub async fn find_interval_data_for_person(
@@ -33,22 +37,27 @@ pub async fn find_interval_data_for_person(
     person_id: PersonId,
     interval_id: IntervalId,
     pool: &SqlitePool,
-) -> Result<PersonIntervalInvolvementData, sqlx::Error> {
+) -> Result<PersonIntervalCircleInvolvementData, sqlx::Error> {
     let involvement = find_circle_involvement(
         project_id,
-        circle_id,
+        circle_id.clone(),
         person_id.clone(),
         interval_id.clone(),
         pool,
     )
     .await?;
 
-    let crew_involvements =
-        find_my_crew_involvements(person_id.clone(), interval_id.clone(), pool).await?;
+    // For now, if this is the default circle, find crew involvements, otherwise return an empty list
+    let crew_involvements = if circle_id == default_circle_id() {
+        find_my_crew_involvements(person_id.clone(), interval_id.clone(), pool).await?
+    } else {
+        Vec::new()
+    };
 
-    Ok(PersonIntervalInvolvementData {
+    Ok(PersonIntervalCircleInvolvementData {
         interval_id: interval_id.id,
         person_id: person_id.id,
+        circle_id: circle_id.id,
         project_involvement: involvement,
         crew_involvements,
     })

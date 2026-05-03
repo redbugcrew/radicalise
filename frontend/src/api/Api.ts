@@ -295,13 +295,13 @@ export interface LoginResponse {
 }
 
 export type MeEvent = {
-  IntervalDataChanged: PersonIntervalInvolvementData;
+  IntervalDataChanged: PersonIntervalCircleInvolvementData;
 };
 
 export interface MyInitialData {
   calendar_token?: string | null;
-  current_interval?: null | PersonIntervalInvolvementData;
-  next_interval?: null | PersonIntervalInvolvementData;
+  current_interval?: null | PersonIntervalCircleInvolvementData;
+  next_interval?: null | PersonIntervalCircleInvolvementData;
   /** @format int64 */
   person_id: number;
 }
@@ -339,7 +339,9 @@ export interface Person {
   project_id: number;
 }
 
-export interface PersonIntervalInvolvementData {
+export interface PersonIntervalCircleInvolvementData {
+  /** @format int64 */
+  circle_id: number;
   crew_involvements: CrewInvolvement[];
   /** @format int64 */
   interval_id: number;
@@ -371,12 +373,19 @@ export interface ResetPasswordRequest {
   token: string;
 }
 
-import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, ResponseType } from "axios";
+import type {
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosResponse,
+  HeadersDefaults,
+  ResponseType,
+} from "axios";
 import axios from "axios";
 
 export type QueryParamsType = Record<string | number, any>;
 
-export interface FullRequestParams extends Omit<AxiosRequestConfig, "data" | "params" | "url" | "responseType"> {
+export interface FullRequestParams
+  extends Omit<AxiosRequestConfig, "data" | "params" | "url" | "responseType"> {
   /** set parameter to `true` for call `securityWorker` for this request */
   secure?: boolean;
   /** request path */
@@ -391,10 +400,16 @@ export interface FullRequestParams extends Omit<AxiosRequestConfig, "data" | "pa
   body?: unknown;
 }
 
-export type RequestParams = Omit<FullRequestParams, "body" | "method" | "query" | "path">;
+export type RequestParams = Omit<
+  FullRequestParams,
+  "body" | "method" | "query" | "path"
+>;
 
-export interface ApiConfig<SecurityDataType = unknown> extends Omit<AxiosRequestConfig, "data" | "cancelToken"> {
-  securityWorker?: (securityData: SecurityDataType | null) => Promise<AxiosRequestConfig | void> | AxiosRequestConfig | void;
+export interface ApiConfig<SecurityDataType = unknown>
+  extends Omit<AxiosRequestConfig, "data" | "cancelToken"> {
+  securityWorker?: (
+    securityData: SecurityDataType | null,
+  ) => Promise<AxiosRequestConfig | void> | AxiosRequestConfig | void;
   secure?: boolean;
   format?: ResponseType;
 }
@@ -414,7 +429,12 @@ export class HttpClient<SecurityDataType = unknown> {
   private secure?: boolean;
   private format?: ResponseType;
 
-  constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
+  constructor({
+    securityWorker,
+    secure,
+    format,
+    ...axiosConfig
+  }: ApiConfig<SecurityDataType> = {}) {
     this.instance = axios.create({
       ...axiosConfig,
       baseURL: axiosConfig.baseURL || "",
@@ -428,7 +448,10 @@ export class HttpClient<SecurityDataType = unknown> {
     this.securityData = data;
   };
 
-  protected mergeRequestParams(params1: AxiosRequestConfig, params2?: AxiosRequestConfig): AxiosRequestConfig {
+  protected mergeRequestParams(
+    params1: AxiosRequestConfig,
+    params2?: AxiosRequestConfig,
+  ): AxiosRequestConfig {
     const method = params1.method || (params2 && params2.method);
 
     return {
@@ -436,7 +459,11 @@ export class HttpClient<SecurityDataType = unknown> {
       ...params1,
       ...(params2 || {}),
       headers: {
-        ...((method && this.instance.defaults.headers[method.toLowerCase() as keyof HeadersDefaults]) || {}),
+        ...((method &&
+          this.instance.defaults.headers[
+            method.toLowerCase() as keyof HeadersDefaults
+          ]) ||
+          {}),
         ...(params1.headers || {}),
         ...((params2 && params2.headers) || {}),
       },
@@ -457,27 +484,53 @@ export class HttpClient<SecurityDataType = unknown> {
     }
     return Object.keys(input || {}).reduce((formData, key) => {
       const property = input[key];
-      const propertyContent: any[] = property instanceof Array ? property : [property];
+      const propertyContent: any[] =
+        property instanceof Array ? property : [property];
 
       for (const formItem of propertyContent) {
         const isFileType = formItem instanceof Blob || formItem instanceof File;
-        formData.append(key, isFileType ? formItem : this.stringifyFormItem(formItem));
+        formData.append(
+          key,
+          isFileType ? formItem : this.stringifyFormItem(formItem),
+        );
       }
 
       return formData;
     }, new FormData());
   }
 
-  public request = async <T = any, _E = any>({ secure, path, type, query, format, body, ...params }: FullRequestParams): Promise<AxiosResponse<T>> => {
-    const secureParams = ((typeof secure === "boolean" ? secure : this.secure) && this.securityWorker && (await this.securityWorker(this.securityData))) || {};
+  public request = async <T = any, _E = any>({
+    secure,
+    path,
+    type,
+    query,
+    format,
+    body,
+    ...params
+  }: FullRequestParams): Promise<AxiosResponse<T>> => {
+    const secureParams =
+      ((typeof secure === "boolean" ? secure : this.secure) &&
+        this.securityWorker &&
+        (await this.securityWorker(this.securityData))) ||
+      {};
     const requestParams = this.mergeRequestParams(params, secureParams);
     const responseFormat = format || this.format || undefined;
 
-    if (type === ContentType.FormData && body && body !== null && typeof body === "object") {
+    if (
+      type === ContentType.FormData &&
+      body &&
+      body !== null &&
+      typeof body === "object"
+    ) {
       body = this.createFormData(body as Record<string, unknown>);
     }
 
-    if (type === ContentType.Text && body && body !== null && typeof body !== "string") {
+    if (
+      type === ContentType.Text &&
+      body &&
+      body !== null &&
+      typeof body !== "string"
+    ) {
       body = JSON.stringify(body);
     }
 
@@ -500,7 +553,9 @@ export class HttpClient<SecurityDataType = unknown> {
  * @version 1.3.18
  * @license
  */
-export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
+export class Api<
+  SecurityDataType extends unknown,
+> extends HttpClient<SecurityDataType> {
   api = {
     /**
      * No description
@@ -554,7 +609,10 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name CreateCalendarEventAttendance
      * @request POST:/api/calendar_event_attendances
      */
-    createCalendarEventAttendance: (data: CreateAttendanceRequest, params: RequestParams = {}) =>
+    createCalendarEventAttendance: (
+      data: CreateAttendanceRequest,
+      params: RequestParams = {},
+    ) =>
       this.request<AppEvent[], any>({
         path: `/api/calendar_event_attendances`,
         method: "POST",
@@ -586,7 +644,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name UpdateCalendarEvent
      * @request PUT:/api/calendar_events/{event_id}
      */
-    updateCalendarEvent: (eventId: string, data: CalendarEvent, params: RequestParams = {}) =>
+    updateCalendarEvent: (
+      eventId: string,
+      data: CalendarEvent,
+      params: RequestParams = {},
+    ) =>
       this.request<AppEvent[], any>({
         path: `/api/calendar_events/${eventId}`,
         method: "PUT",
@@ -618,7 +680,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name UpdateCircle
      * @request PUT:/api/circles/{circle_id}
      */
-    updateCircle: (circleId: string, data: Circle, params: RequestParams = {}) =>
+    updateCircle: (
+      circleId: string,
+      data: Circle,
+      params: RequestParams = {},
+    ) =>
       this.request<AppEvent[], string>({
         path: `/api/circles/${circleId}`,
         method: "PUT",
@@ -634,7 +700,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name UpdateCrew
      * @request PUT:/api/crews/{crew_id}
      */
-    updateCrew: (crewId: string, data: CrewWithLinks, params: RequestParams = {}) =>
+    updateCrew: (
+      crewId: string,
+      data: CrewWithLinks,
+      params: RequestParams = {},
+    ) =>
       this.request<AppEvent[], any>({
         path: `/api/crews/${crewId}`,
         method: "PUT",
@@ -680,7 +750,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name UpdateEventTemplate
      * @request PUT:/api/event_templates/{event_template_id}
      */
-    updateEventTemplate: (eventTemplateId: string, data: EventTemplate, params: RequestParams = {}) =>
+    updateEventTemplate: (
+      eventTemplateId: string,
+      data: EventTemplate,
+      params: RequestParams = {},
+    ) =>
       this.request<any, any>({
         path: `/api/event_templates/${eventTemplateId}`,
         method: "PUT",
@@ -726,7 +800,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name UpdateMyParticipation
      * @request POST:/api/me/interval/{interval_id}/my_participation
      */
-    updateMyParticipation: (intervalId: number, data: MyParticipationInput, params: RequestParams = {}) =>
+    updateMyParticipation: (
+      intervalId: number,
+      data: MyParticipationInput,
+      params: RequestParams = {},
+    ) =>
       this.request<AppEvent[], any>({
         path: `/api/me/interval/${intervalId}/my_participation`,
         method: "POST",
@@ -800,7 +878,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name UpdatePerson
      * @request PUT:/api/people/{person_id}
      */
-    updatePerson: (personId: string, data: Person, params: RequestParams = {}) =>
+    updatePerson: (
+      personId: string,
+      data: Person,
+      params: RequestParams = {},
+    ) =>
       this.request<AppEvent[], any>({
         path: `/api/people/${personId}`,
         method: "PUT",
@@ -846,7 +928,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name DeleteEoi
      * @request DELETE:/api/public/project/{project_id}/eoi/{auth_token}
      */
-    deleteEoi: (authToken: string, projectId: number, params: RequestParams = {}) =>
+    deleteEoi: (
+      authToken: string,
+      projectId: number,
+      params: RequestParams = {},
+    ) =>
       this.request<any, any>({
         path: `/api/public/project/${projectId}/eoi/${authToken}`,
         method: "DELETE",
@@ -860,7 +946,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name GetEoiByAuthToken
      * @request GET:/api/public/project/{project_id}/interest/by_auth_token/{auth_token}
      */
-    getEoiByAuthToken: (authToken: string, projectId: number, params: RequestParams = {}) =>
+    getEoiByAuthToken: (
+      authToken: string,
+      projectId: number,
+      params: RequestParams = {},
+    ) =>
       this.request<ExpressionOfInterest, any>({
         path: `/api/public/project/${projectId}/interest/by_auth_token/${authToken}`,
         method: "GET",
@@ -874,7 +964,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name UpdateEoi
      * @request PUT:/api/public/projects/{project_id}/eoi/{auth_token}
      */
-    updateEoi: (authToken: string, projectId: number, data: ExpressionOfInterest, params: RequestParams = {}) =>
+    updateEoi: (
+      authToken: string,
+      projectId: number,
+      data: ExpressionOfInterest,
+      params: RequestParams = {},
+    ) =>
       this.request<any, EoiError>({
         path: `/api/public/projects/${projectId}/eoi/${authToken}`,
         method: "PUT",

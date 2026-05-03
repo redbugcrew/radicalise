@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { CircleInvolvement, IntervalInvolvementData, CrewInvolvement, Person, PersonIntervalInvolvementData, CircleInvolvementData, InvolvementData } from "../api/Api";
+import type { CircleInvolvement, IntervalInvolvementData, CrewInvolvement, Person, PersonIntervalCircleInvolvementData, CircleInvolvementData, InvolvementData } from "../api/Api";
 import { type WritableDraft } from "immer";
 import type { PeopleObjectMap } from "./people";
 import { compareStrings } from "../utilities/comparison";
@@ -10,7 +10,7 @@ export interface CircleInvolvementDataMap {
 
 export interface IntervalInvolvementState {
   interval_id: number;
-  involvements_for_circles: CircleInvolvementDataMap;
+  circles: CircleInvolvementDataMap;
 }
 
 export interface InvolvementsState {
@@ -18,15 +18,18 @@ export interface InvolvementsState {
   next_interval?: null | IntervalInvolvementState;
 }
 
-function upsertCircleInvolvement(involvements: CircleInvolvement[], newInvolvement: CircleInvolvement): CircleInvolvement[] {
-  const existingIndex = involvements.findIndex((inv) => inv.id === newInvolvement.id);
-  if (existingIndex !== -1) {
-    // Update existing involvement
-    return involvements.map((inv, index) => (index === existingIndex ? newInvolvement : inv));
-  } else {
-    // Add new involvement
-    return [...involvements, newInvolvement];
-  }
+function upsertInvolvementsForPerson(state: CircleInvolvementData, personId: number, newInvolvement: CircleInvolvement, crew_involvements: CrewInvolvement[]): CircleInvolvementData {
+  const existingCircleInvolvements = state.circle_involvements || [];
+  const newCircleInvolvements = existingCircleInvolvements.filter((involvement) => involvement.id !== newInvolvement.id).concat(newInvolvement);
+
+  const existingCrewInvolvements = state.crew_involvements || [];
+  const newCrewInvolvements = updateCrewInvolvementForPerson(existingCrewInvolvements, crew_involvements, personId);
+
+  return {
+    ...state,
+    circle_involvements: newCircleInvolvements,
+    crew_involvements: newCrewInvolvements,
+  };
 }
 
 export function getMatchingInvolvementInterval(involvements: InvolvementsState, intervalId: number): IntervalInvolvementData | null {
@@ -76,7 +79,7 @@ function mapCirclesData(data: IntervalInvolvementData): IntervalInvolvementState
   });
   return {
     interval_id: data.interval_id,
-    involvements_for_circles: circleInvolvementsByCircle,
+    circles: circleInvolvementsByCircle,
   };
 }
 
@@ -95,7 +98,7 @@ const involvementsSlice = createSlice({
         next_interval,
       };
     },
-    intervalDataChanged: (state: InvolvementsState, action: PayloadAction<PersonIntervalInvolvementData>) => {
+    intervalDataChanged: (state: InvolvementsState, action: PayloadAction<PersonIntervalCircleInvolvementData>) => {
       let payload = action.payload;
 
       if (!state || !payload) return state;
@@ -106,10 +109,12 @@ const involvementsSlice = createSlice({
 
       const interval_keys: (keyof InvolvementsState)[] = ["current_interval", "next_interval"];
 
-      interval_keys.forEach((key) => {
-        if (state && state[key] && state[key].interval_id === payload.interval_id) {
-          state[key].circle_involvements = upsertCircleInvolvement(state[key].circle_involvements, involvement);
-          state[key].crew_involvements = updateCrewInvolvementForPerson(state[key].crew_involvements, forPerson(payload.crew_involvements, person_id), person_id);
+      interval_keys.forEach((interval_key) => {
+        if (state && state[interval_key] && state[interval_key].interval_id === payload.interval_id) {
+          const intervalState: IntervalInvolvementState = state[interval_key];
+          const circleId = payload.circle_id;
+
+          intervalState.circles[circleId] = upsertInvolvementsForPerson(intervalState.circles[circleId], person_id, involvement, payload.crew_involvements);
         }
       });
 

@@ -133,6 +133,8 @@ async fn update_my_participation(
             }
             let person_id = person_id.unwrap();
             let interval_id = IntervalId::new(interval_id);
+            let project_id = default_project_id();
+            let circle_id = default_circle_id();
 
             let update_result =
                 update_my_involvements(person_id.clone(), interval_id.clone(), input, &pool).await;
@@ -144,8 +146,8 @@ async fn update_my_participation(
 
             // Fetch the updated involvement to return
             let output_result = repo::find_interval_data_for_person(
-                default_project_id(),
-                default_circle_id(),
+                project_id,
+                circle_id,
                 person_id,
                 interval_id,
                 &pool,
