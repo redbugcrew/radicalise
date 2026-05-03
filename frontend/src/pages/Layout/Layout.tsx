@@ -1,6 +1,6 @@
-import { Anchor, AppShell, Burger, Container, Group, Stack } from "@mantine/core";
+import { Anchor, AppShell, Box, Burger, Container, Group, Text } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
-import { IconBrandGithub, IconHome2, IconSettings, IconUsers, IconUsersGroup, IconCalendarMonth, IconCalendar, IconCalendarCog, IconCirclesFilled } from "@tabler/icons-react";
+import { IconBrandGithub, IconHome2, IconSettings, IconUsers, IconUsersGroup, IconCalendarMonth, IconCalendar, IconCalendarCog, IconCirclesFilled, IconChevronDown, IconChevronRight } from "@tabler/icons-react";
 import { Outlet } from "react-router-dom";
 import { CircleSelector, NavLink, PersonBadge } from "../../components";
 import { handleOwnedAppEvent, useAppSelector } from "../../store";
@@ -59,7 +59,25 @@ export default function Layout() {
       <AppShell.Navbar p={0}>
         {circles.rootCircles.length > 1 && (
           <AppShell.Section className={classes.circle_section}>
-            <NavLink label={activeCircle ? activeCircle.name : "No circle"} href="#" ta="center" onClick={toggleCircleSelector} visibleFrom={selectingCircle ? "sm" : undefined} />
+            <NavLink
+              label={<Text fw={600}>{activeCircle ? activeCircle.name : "No circle"}</Text>}
+              href="#"
+              ta="center"
+              onClick={toggleCircleSelector}
+              visibleFrom={selectingCircle ? "sm" : undefined}
+              rightSection={
+                <>
+                  <Box hiddenFrom="sm">
+                    <IconChevronDown size={18} />
+                  </Box>
+                  <Box visibleFrom="sm">
+                    <IconChevronRight size={18} />
+                  </Box>
+                </>
+              }
+              c="blue"
+              classNames={{ root: classes.circle_selector_trigger }}
+            />
             {selectingCircle && (
               <div className={classes.circle_selector_container}>
                 <CircleSelector circles={circles.rootCircles} selectedCircleId={circles.activeCircleId} onChange={changeActiveCircle} />

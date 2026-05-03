@@ -1,6 +1,15 @@
+a.circle_selector_trigger {
+  height: 44px;
+}
+
+a.circle_selector_trigger:hover {
+  background-color: var(--mantine-primary-color-filled);
+  color: white !important;
+}
+
 .circle_section {
   /* padding: var(--mantine-spacing-md) 0; */
-  height: 42px;
+  height: 44px;
 
   @media (max-width: $mantine-breakpoint-sm) {
     height: auto;
