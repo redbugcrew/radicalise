@@ -1,7 +1,7 @@
 import { Button, Card, Container, Title, Stack, Text, Badge, Group, Collapse } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import { useAppSelector } from "../../store";
-import { AttendanceIntention, type CalendarEvent, type CircleInvolvement, type CrewInvolvement, type Interval, type PersonIntervalInvolvementData } from "../../api/Api";
+import { AttendanceIntention, type CalendarEvent, type CircleInvolvement, type CrewInvolvement, type Interval } from "../../api/Api";
 import DateText from "../../components/DateText";
 import classes from "./Dashboard.module.css";
 import { CrewsList, LinksStack } from "../../components";
@@ -12,12 +12,8 @@ import { IconCalendar } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
 import CopyIconButton from "../../components/CopyIconButton";
 import { getApiUrl } from "../../api";
-
-interface MyIntervalPartipationCardProps {
-  interval: Interval;
-  data: PersonIntervalInvolvementData;
-  current: boolean;
-}
+import { currentCircleStateOrDefault, myCircleInvolvement } from "../../store/involvements";
+import { intervalById } from "../../store/intervals";
 
 function ParticipationBadge({ involvement }: { involvement: CircleInvolvement | null }) {
   if (!involvement) return <Badge color="gray">No intention</Badge>;
@@ -41,12 +37,17 @@ function ParticipationBadge({ involvement }: { involvement: CircleInvolvement | 
   }
 }
 
-function MyIntervalPartipationCard({ interval, data, current = true }: MyIntervalPartipationCardProps) {
+interface MyIntervalPartipationCardProps {
+  interval: Interval;
+  circleInvolvement: CircleInvolvement | null;
+  current: boolean;
+}
+
+function MyIntervalPartipationCard({ interval, circleInvolvement, current = true }: MyIntervalPartipationCardProps) {
   const navigate = useNavigate();
-  const { project_involvement } = data;
 
   return (
-    <Card withBorder className={project_involvement ? "" : classes.unplanned}>
+    <Card withBorder className={circleInvolvement ? "" : classes.unplanned}>
       <Group justify="space-between" align="flex-start">
         <Stack gap={0}>
           <Title order={2} size="md">
@@ -56,7 +57,7 @@ function MyIntervalPartipationCard({ interval, data, current = true }: MyInterva
             <DateText date={interval.start_date} /> - <DateText date={interval.end_date} />
           </Text>
         </Stack>
-        <ParticipationBadge involvement={project_involvement || null} />
+        <ParticipationBadge involvement={circleInvolvement || null} />
       </Group>
 
       <Button variant={current ? "outline" : "filled"} mt="md" radius="md" onClick={() => navigate(`/my_participation/${interval.id}`)}>
@@ -66,10 +67,13 @@ function MyIntervalPartipationCard({ interval, data, current = true }: MyInterva
   );
 }
 
-function MyCrews({ personId, myInvolvements }: { personId: number; myInvolvements: CrewInvolvement[] }) {
+function MyCrews({ personId, circleId, myInvolvements }: { personId: number; circleId: number; myInvolvements: CrewInvolvement[] }) {
   const people = useAppSelector((state) => state.people);
   const crews = useAppSelector((state) => state.crews);
-  const allInvolvements = useAppSelector((state) => state.involvements.current_interval?.crew_involvements || []);
+  const circleState = useAppSelector((state) => currentCircleStateOrDefault(state.involvements, circleId));
+
+  if (!circleState) return null;
+  const allInvolvements = circleState.crew_involvements || [];
 
   const myCrews = myInvolvements
     .map((involvement) => crews[involvement.crew_id])
@@ -148,20 +152,19 @@ export default function Dashboard() {
   const intervals = useAppSelector((state) => state.intervals);
   const myData = useAppSelector((state) => state.me);
   const project = useAppSelector((state) => state.project);
+  const circleId = useAppSelector((state) => state.circles.activeCircleId || null);
+  const involvements = useAppSelector((state) => state.involvements);
 
-  if (!myData || !project) {
+  if (!myData || !project || !circleId) {
     return <Text>Error: Data not found.</Text>;
   }
 
-  const intervalForId = (id: number | undefined): Interval | null => {
-    if (typeof id !== "undefined") {
-      return intervals.allIntervals.find((interval) => interval.id === id) || null;
-    }
-    return null;
-  };
+  const personId = myData.person_id;
+  const myCurrentCircle = myCircleInvolvement(involvements, circleId, personId, "current_interval");
+  const currentInterval = myCurrentCircle ? intervalById(intervals, myCurrentCircle.interval_id) : null;
 
-  const current_interval = intervalForId(myData.current_interval?.interval_id);
-  const next_interval = intervalForId(myData.next_interval?.interval_id);
+  const myNextCircle = myCircleInvolvement(involvements, circleId, personId, "next_interval");
+  const nextInterval = myNextCircle ? intervalById(intervals, myNextCircle.interval_id) : null;
 
   return (
     <Container>
@@ -170,11 +173,11 @@ export default function Dashboard() {
       </Title>
       <Stack gap="lg">
         <Stack gap="md">
-          {current_interval && myData.current_interval && <MyIntervalPartipationCard interval={current_interval} data={myData.current_interval} current={true} />}
-          {next_interval && myData.next_interval && <MyIntervalPartipationCard interval={next_interval} data={myData.next_interval} current={false} />}
+          {myCurrentCircle && currentInterval && <MyIntervalPartipationCard interval={currentInterval} circleInvolvement={myCurrentCircle} current={true} />}
+          {myNextCircle && nextInterval && <MyIntervalPartipationCard interval={nextInterval} circleInvolvement={myNextCircle} current={false} />}
         </Stack>
         <MyEvents />
-        {myData.current_interval && <MyCrews personId={myData.person_id} myInvolvements={myData.current_interval.crew_involvements} />}
+        {myData.current_interval && <MyCrews personId={myData.person_id} circleId={circleId} myInvolvements={myData.current_interval.crew_involvements} />}
         <Stack gap="md">
           <Title order={2}>Resources</Title>
           <LinksStack links={project.links} />
@@ -189,7 +192,7 @@ function myUpcomingEvents(events: CalendarEvent[], personId: number | null | und
   return events.filter((event) => {
     const attendances = event.attendances || [];
     const intentions = [AttendanceIntention.Going, AttendanceIntention.Uncertain];
-    const isParticipant = attendances.some((attendance) => attendance.person_id === personId && intentions.includes(attendance.intention));
+    const isParticipant = attendances.some((attendance) => attendance.person_id === personId && attendance.intention && intentions.includes(attendance.intention));
     const isFutureEvent = isFutureOrStillInProgress(event);
     return isParticipant && isFutureEvent;
   });

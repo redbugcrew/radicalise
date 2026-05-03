@@ -42,6 +42,31 @@ export function getMatchingInvolvementInterval(involvements: InvolvementsState, 
   return null;
 }
 
+export function myCircleInvolvement(state: InvolvementsState, circleId: number, personId: number, key: keyof InvolvementsState): CircleInvolvement | null {
+  const intervalState = state[key];
+  if (!intervalState) return null;
+
+  const circleState = intervalState.circles[circleId];
+  if (!circleState) return null;
+
+  return forPerson(circleState.circle_involvements || [], personId)[0] || null;
+}
+
+export function currentCircleStateOrDefault(state: InvolvementsState, circleId: number): CircleInvolvementData | null {
+  const intervalState = state.current_interval;
+  if (!intervalState) return null;
+
+  const result = intervalState?.circles[circleId] || null;
+  if (result) return result;
+
+  return {
+    circle_id: circleId,
+    circle_involvements: [],
+    crew_involvements: [],
+    interval_id: intervalState.interval_id,
+  };
+}
+
 export function forCrew(involvements: CrewInvolvement[], crewId: number): CrewInvolvement[] {
   return involvements.filter((involvement) => involvement.crew_id === crewId);
 }
