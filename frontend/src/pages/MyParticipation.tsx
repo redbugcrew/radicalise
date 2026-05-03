@@ -91,6 +91,7 @@ export default function MyParticipation() {
         key={involvement?.id || `fresh-${interval.id}`}
         onSubmit={onSubmit}
         interval={interval}
+        circleId={circle.id}
         previousIntervalId={previousInterval?.id}
       />
     </Container>
