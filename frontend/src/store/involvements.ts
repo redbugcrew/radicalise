@@ -1,10 +1,22 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { CircleInvolvement, InvolvementData, IntervalInvolvementData, CrewInvolvement, Person, PersonIntervalInvolvementData } from "../api/Api";
+import type { CircleInvolvement, IntervalInvolvementData, CrewInvolvement, Person, PersonIntervalInvolvementData, CircleInvolvementData, InvolvementData } from "../api/Api";
 import { type WritableDraft } from "immer";
 import type { PeopleObjectMap } from "./people";
 import { compareStrings } from "../utilities/comparison";
 
-export type InvolvementsState = InvolvementData;
+export interface CircleInvolvementDataMap {
+  [key: number]: CircleInvolvementData;
+}
+
+export interface IntervalInvolvementState {
+  interval_id: number;
+  involvements_for_circles: CircleInvolvementDataMap;
+}
+
+export interface InvolvementsState {
+  current_interval?: null | IntervalInvolvementState;
+  next_interval?: null | IntervalInvolvementState;
+}
 
 function upsertCircleInvolvement(involvements: CircleInvolvement[], newInvolvement: CircleInvolvement): CircleInvolvement[] {
   const existingIndex = involvements.findIndex((inv) => inv.id === newInvolvement.id);
@@ -57,6 +69,17 @@ function updateCrewInvolvementForPerson(crewInvolvements: WritableDraft<CrewInvo
   return withoutPerson.concat(personInvolvements);
 }
 
+function mapCirclesData(data: IntervalInvolvementData): IntervalInvolvementState {
+  const circleInvolvementsByCircle: CircleInvolvementDataMap = {};
+  data.involvements_for_circles.forEach((circleData) => {
+    circleInvolvementsByCircle[circleData.circle_id] = circleData;
+  });
+  return {
+    interval_id: data.interval_id,
+    involvements_for_circles: circleInvolvementsByCircle,
+  };
+}
+
 const involvementsSlice = createSlice({
   name: "involvements",
   initialState: {
@@ -64,7 +87,14 @@ const involvementsSlice = createSlice({
     next_interval: null,
   } as InvolvementsState,
   reducers: {
-    involvementsLoaded: (_state: InvolvementsState, action: PayloadAction<InvolvementsState>) => action.payload,
+    involvementsLoaded: (_state: InvolvementsState, action: PayloadAction<InvolvementData>) => {
+      const current_interval = action.payload.current_interval ? mapCirclesData(action.payload.current_interval) : null;
+      const next_interval = action.payload.next_interval ? mapCirclesData(action.payload.next_interval) : null;
+      return {
+        current_interval,
+        next_interval,
+      };
+    },
     intervalDataChanged: (state: InvolvementsState, action: PayloadAction<PersonIntervalInvolvementData>) => {
       let payload = action.payload;
 

@@ -18,6 +18,22 @@ pub async fn find_all_circles(
     .await
 }
 
+pub async fn find_all_circles_ids(
+    project_id: ProjectId,
+    pool: &SqlitePool,
+) -> Result<Vec<CircleId>, sqlx::Error> {
+    sqlx::query_as!(
+        CircleId,
+        "SELECT id as \"id: i64\"
+        FROM circles
+        WHERE project_id = ?
+        ORDER BY id ASC",
+        project_id.id
+    )
+    .fetch_all(pool)
+    .await
+}
+
 pub async fn insert_circle(
     circle: &Circle,
     project_id: ProjectId,
