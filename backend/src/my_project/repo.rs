@@ -24,6 +24,7 @@ use crate::{
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct CircleInvolvementData {
     pub circle_id: i64,
+    pub interval_id: i64,
     pub circle_involvements: Vec<CircleInvolvement>,
     pub crew_involvements: Vec<CrewInvolvement>,
 }
@@ -273,6 +274,7 @@ pub async fn find_interval_involvement_data_for_circle(
 
     Ok(CircleInvolvementData {
         circle_id: circle_id.id,
+        interval_id: interval_id.id,
         circle_involvements,
         crew_involvements,
     })

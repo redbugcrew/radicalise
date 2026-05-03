@@ -32,7 +32,7 @@ function upsertInvolvementsForPerson(state: CircleInvolvementData, personId: num
   };
 }
 
-export function getMatchingInvolvementInterval(involvements: InvolvementsState, intervalId: number): IntervalInvolvementData | null {
+export function getMatchingInvolvementInterval(involvements: InvolvementsState, intervalId: number): IntervalInvolvementState | null {
   if (involvements.current_interval && involvements.current_interval.interval_id === intervalId) {
     return involvements.current_interval;
   }
@@ -72,7 +72,7 @@ function updateCrewInvolvementForPerson(crewInvolvements: WritableDraft<CrewInvo
   return withoutPerson.concat(personInvolvements);
 }
 
-function mapCirclesData(data: IntervalInvolvementData): IntervalInvolvementState {
+export function mapCirclesData(data: IntervalInvolvementData): IntervalInvolvementState {
   const circleInvolvementsByCircle: CircleInvolvementDataMap = {};
   data.involvements_for_circles.forEach((circleData) => {
     circleInvolvementsByCircle[circleData.circle_id] = circleData;

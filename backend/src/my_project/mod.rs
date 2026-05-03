@@ -62,7 +62,7 @@ async fn get_project_state(Extension(pool): Extension<SqlitePool>) -> impl IntoR
 }
 
 #[utoipa::path(get, path = "/interval/{interval_id}/involvements", responses(
-        (status = 200, description = "Fetched Involvements successfully", body = IntervalInvolvementData),
+        (status = 200, description = "Fetched Involvements successfully", body = CircleInvolvementData),
         (status = NOT_FOUND, description = "Not found", body = ())
     ), params(
             ("interval_id" = i64, Path, description = "Interval ID")
