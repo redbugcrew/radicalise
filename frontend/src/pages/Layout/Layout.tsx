@@ -64,7 +64,6 @@ export default function Layout() {
               href="#"
               ta="center"
               onClick={toggleCircleSelector}
-              visibleFrom={selectingCircle ? "sm" : undefined}
               rightSection={
                 <>
                   <Box hiddenFrom="sm">
