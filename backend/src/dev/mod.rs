@@ -3,11 +3,10 @@ use sqlx::SqlitePool;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
+    circles::repo::find_all_circles,
     intervals::repo::find_all_intervals,
     my_project::involvements_repo::set_implicit_counter_to_zero,
-    shared::{
-        default_circle_id, default_project_id, regular_tasks::add_interval_implicit_involvements,
-    },
+    shared::{default_project_id, regular_tasks::add_interval_implicit_involvements},
 };
 
 pub fn router() -> OpenApiRouter {
@@ -29,9 +28,15 @@ async fn recompute_implicit_involvements(
         .await
         .unwrap();
 
-    set_implicit_counter_to_zero(default_circle_id(), &pool)
-        .await
-        .unwrap();
+    let circles = find_all_circles(default_project_id(), &pool).await.unwrap();
+
+    for circle in &circles {
+        println!("Recomputing implicit involvements for circle {}", circle.id);
+
+        set_implicit_counter_to_zero(circle.typed_id(), &pool)
+            .await
+            .unwrap();
+    }
 
     for interval in intervals {
         println!(
