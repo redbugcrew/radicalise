@@ -297,7 +297,7 @@ export interface LoginResponse {
 }
 
 export type MeEvent = {
-  IntervalDataChanged: PersonIntervalCircleInvolvementData;
+  IntervalDataChanged: PersonIntervalInvolvementData;
 };
 
 export interface MyInitialData {
@@ -339,15 +339,10 @@ export interface Person {
   project_id: number;
 }
 
-export interface PersonIntervalCircleInvolvementData {
-  /** @format int64 */
-  circle_id: number;
-  crew_involvements: CrewInvolvement[];
-  /** @format int64 */
-  interval_id: number;
+export interface PersonIntervalInvolvementData {
+  data: IntervalInvolvementData;
   /** @format int64 */
   person_id: number;
-  project_involvement?: null | CircleInvolvement;
 }
 
 export interface Project {

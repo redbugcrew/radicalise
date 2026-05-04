@@ -130,7 +130,6 @@ async fn update_my_participation(
             let person_id = person_id.unwrap();
             let interval_id = IntervalId::new(interval_id);
             let project_id = default_project_id();
-            let circle_id = default_circle_id();
 
             let update_result =
                 update_my_involvements(person_id.clone(), interval_id.clone(), input, &pool).await;
@@ -141,14 +140,9 @@ async fn update_my_participation(
             }
 
             // Fetch the updated involvement to return
-            let output_result = repo::find_interval_data_for_person(
-                project_id,
-                circle_id,
-                person_id,
-                interval_id,
-                &pool,
-            )
-            .await;
+            let output_result =
+                repo::find_interval_data_for_person(project_id, person_id, interval_id, &pool)
+                    .await;
             match output_result {
                 Ok(interval_data) => {
                     let public_interval_data = strip_private_data(&interval_data);

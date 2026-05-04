@@ -9,24 +9,27 @@ use crate::{
     entry_pathways::repo::find_all_entry_pathways_for_project,
     event_templates::repo::find_all_event_templates,
     intervals::repo::{find_current_interval, find_next_interval},
-    my_project::involvements_repo::find_all_circle_involvements,
+    my_project::involvements_repo::{
+        find_all_circle_involvements, find_all_circle_involvements_for_person,
+    },
     people::repo::find_all_people,
     shared::{
         entities::{
             CalendarEvent, Circle, CircleId, CircleInvolvement, CrewInvolvement, CrewWithLinks,
-            EntryPathway, EventTemplate, Interval, IntervalId, Person, Project, ProjectId,
+            EntryPathway, EventTemplate, Interval, IntervalId, Person, PersonId, Project,
+            ProjectId,
         },
         links_repo::{find_all_links_for_owner, update_links_for_owner},
     },
 };
 
-#[derive(Serialize, Deserialize, ToSchema)]
+#[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
 pub struct CircleInvolvementData {
     pub circle_id: i64,
     pub interval_id: i64,
     pub circle_involvements: Vec<CircleInvolvement>,
 }
-#[derive(Serialize, Deserialize, ToSchema)]
+#[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
 pub struct IntervalInvolvementData {
     pub interval_id: i64,
     pub crew_involvements: Vec<CrewInvolvement>,
@@ -132,10 +135,36 @@ pub async fn find_interval_involvement_data(
     project_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<IntervalInvolvementData, sqlx::Error> {
-    let circles_ids = find_all_circles_ids(project_id.clone(), &pool).await?;
+    let circle_ids = find_all_circles_ids(project_id.clone(), &pool).await?;
 
     let circle_involvements_result = find_interval_involvement_data_for_circles(
-        circles_ids,
+        circle_ids,
+        interval_id.clone(),
+        project_id,
+        &pool,
+    )
+    .await?;
+
+    let result = IntervalInvolvementData {
+        interval_id: interval_id.id,
+        involvements_for_circles: circle_involvements_result,
+        crew_involvements: find_all_crew_involvements(interval_id, pool).await?,
+    };
+
+    Ok(result)
+}
+
+pub async fn find_interval_involvement_data_for_person(
+    person_id: PersonId,
+    interval_id: IntervalId,
+    project_id: ProjectId,
+    pool: &SqlitePool,
+) -> Result<IntervalInvolvementData, sqlx::Error> {
+    let circle_ids = find_all_circles_ids(project_id.clone(), &pool).await?;
+
+    let circle_involvements_result = find_interval_involvement_data_for_circles_and_person(
+        person_id,
+        circle_ids,
         interval_id.clone(),
         project_id,
         &pool,
@@ -271,6 +300,29 @@ pub async fn find_interval_involvement_data_for_circle(
     })
 }
 
+async fn find_interval_involvement_data_for_circle_and_person(
+    person_id: PersonId,
+    circle_id: CircleId,
+    interval_id: IntervalId,
+    project_id: ProjectId,
+    pool: &SqlitePool,
+) -> Result<CircleInvolvementData, sqlx::Error> {
+    let circle_involvements = find_all_circle_involvements_for_person(
+        person_id.clone(),
+        project_id.clone(),
+        circle_id.clone(),
+        interval_id.clone(),
+        pool,
+    )
+    .await?;
+
+    Ok(CircleInvolvementData {
+        circle_id: circle_id.id,
+        interval_id: interval_id.id,
+        circle_involvements,
+    })
+}
+
 pub async fn find_interval_involvement_data_for_circles(
     circle_ids: Vec<CircleId>,
     interval_id: IntervalId,
@@ -280,6 +332,28 @@ pub async fn find_interval_involvement_data_for_circles(
     let mut results = Vec::new();
     for circle_id in circle_ids {
         let data = find_interval_involvement_data_for_circle(
+            circle_id.clone(),
+            interval_id.clone(),
+            project_id.clone(),
+            pool,
+        )
+        .await?;
+        results.push(data);
+    }
+    Ok(results)
+}
+
+pub async fn find_interval_involvement_data_for_circles_and_person(
+    person_id: PersonId,
+    circle_ids: Vec<CircleId>,
+    interval_id: IntervalId,
+    project_id: ProjectId,
+    pool: &SqlitePool,
+) -> Result<Vec<CircleInvolvementData>, sqlx::Error> {
+    let mut results = Vec::new();
+    for circle_id in circle_ids {
+        let data = find_interval_involvement_data_for_circle_and_person(
+            person_id.clone(),
             circle_id.clone(),
             interval_id.clone(),
             project_id.clone(),

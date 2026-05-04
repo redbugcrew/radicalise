@@ -3,23 +3,14 @@ use sqlx::{QueryBuilder, Sqlite, SqlitePool};
 use utoipa::ToSchema;
 
 use crate::{
-    my_project::involvements_repo::find_circle_involvement,
-    shared::{
-        default_circle_id,
-        entities::{
-            CircleId, CircleInvolvement, CrewId, CrewInvolvement, IntervalId, Person, PersonId,
-            ProjectId, UserId,
-        },
-    },
+    my_project::repo::{IntervalInvolvementData, find_interval_involvement_data_for_person},
+    shared::entities::{CrewId, CrewInvolvement, IntervalId, Person, PersonId, ProjectId, UserId},
 };
 
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
-pub struct PersonIntervalCircleInvolvementData {
-    pub interval_id: i64,
+pub struct PersonIntervalInvolvementData {
     pub person_id: i64,
-    pub circle_id: i64,
-    pub project_involvement: Option<CircleInvolvement>,
-    pub crew_involvements: Vec<CrewInvolvement>,
+    pub data: IntervalInvolvementData,
 }
 
 #[derive(Serialize, Deserialize, ToSchema)]
@@ -30,33 +21,21 @@ pub struct MyInitialData {
 
 pub async fn find_interval_data_for_person(
     project_id: ProjectId,
-    circle_id: CircleId,
     person_id: PersonId,
     interval_id: IntervalId,
     pool: &SqlitePool,
-) -> Result<PersonIntervalCircleInvolvementData, sqlx::Error> {
-    let involvement = find_circle_involvement(
-        project_id,
-        circle_id.clone(),
+) -> Result<PersonIntervalInvolvementData, sqlx::Error> {
+    let result = find_interval_involvement_data_for_person(
         person_id.clone(),
         interval_id.clone(),
+        project_id.clone(),
         pool,
     )
     .await?;
 
-    // For now, if this is the default circle, find crew involvements, otherwise return an empty list
-    let crew_involvements = if circle_id == default_circle_id() {
-        find_my_crew_involvements(person_id.clone(), interval_id.clone(), pool).await?
-    } else {
-        Vec::new()
-    };
-
-    Ok(PersonIntervalCircleInvolvementData {
-        interval_id: interval_id.id,
+    Ok(PersonIntervalInvolvementData {
         person_id: person_id.id,
-        circle_id: circle_id.id,
-        project_involvement: involvement,
-        crew_involvements,
+        data: result,
     })
 }
 

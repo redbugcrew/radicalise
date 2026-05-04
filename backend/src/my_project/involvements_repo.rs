@@ -166,6 +166,50 @@ pub async fn find_all_circle_involvements(
     Ok(records.into_iter().map(Into::into).collect())
 }
 
+pub async fn find_all_circle_involvements_for_person(
+    person_id: PersonId,
+    project_id: ProjectId,
+    circle_id: CircleId,
+    interval_id: IntervalId,
+    pool: &SqlitePool,
+) -> Result<Vec<CircleInvolvement>, sqlx::Error> {
+    let records = sqlx::query_as!(
+        CircleInvolvementRecord,
+        "SELECT
+            circle_involvements.id AS id,
+            person_id,
+            circles.project_id AS \"project_id: i64\",
+            circle_id,
+            interval_id,
+            status as \"status: InvolvementStatus\",
+            private_capacity_planning,
+            wellbeing,
+            focus,
+            capacity_score,
+            capacity,
+            participation_intention as \"participation_intention: ParticipationIntention\",
+            opt_out_type as \"opt_out_type: OptOutType\",
+            opt_out_planned_return_date,
+            intention_context,
+            implicit_counter
+        FROM circle_involvements
+        INNER JOIN circles ON circle_involvements.circle_id = circles.id
+        WHERE
+            person_id = ? AND
+            project_id = ? AND
+            circles.id = ? AND
+            interval_id = ?",
+        person_id.id,
+        project_id.id,
+        circle_id.id,
+        interval_id.id,
+    )
+    .fetch_all(pool)
+    .await?;
+
+    Ok(records.into_iter().map(Into::into).collect())
+}
+
 pub async fn upsert_circle_involvement(
     involvement: CircleInvolvementRecord,
     pool: &SqlitePool,
