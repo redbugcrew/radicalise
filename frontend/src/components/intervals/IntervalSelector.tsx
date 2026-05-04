@@ -2,7 +2,7 @@ import { Group, ActionIcon, Text, Stack, Button } from "@mantine/core";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import type { Interval } from "../../api/Api";
 import DateText from "./../DateText";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface IntervalSelectorProps {
   intervals: Interval[];
@@ -17,11 +17,13 @@ interface IntervalNavigationButtonProps {
 
 function IntervalNavigationButton({ variant, to }: IntervalNavigationButtonProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const IconComponent = variant === "previous" ? IconChevronLeft : IconChevronRight;
   const disabled = !to;
   const label = variant === "previous" ? "Previous Interval" : "Next Interval";
   const onClick = () => {
     navigate({
+      search: location.search,
       hash: to ? `#interval${to.id}` : "",
     });
   };

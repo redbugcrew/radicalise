@@ -72,15 +72,17 @@ function HiatusInfo({ person, project_involvement }: { person: Person; project_i
 interface PersonForIntervalProps {
   personIdNum: number;
   interval: Interval;
+  circleId: number;
 }
 
-export default function PersonForInterval({ personIdNum, interval }: PersonForIntervalProps) {
+export default function PersonForInterval({ personIdNum, interval, circleId }: PersonForIntervalProps) {
   const person = useAppSelector((state) => state.people[personIdNum || -1]);
 
   return (
     <WithIntervalInvolvements interval={interval}>
       {({ involvements, key }) => {
-        const myInvolvement = involvements ? oneForPerson(involvements.circle_involvements, personIdNum) : null;
+        const circleInvolvements = involvements?.circles[circleId]?.circle_involvements || [];
+        const myInvolvement = oneForPerson(circleInvolvements, personIdNum);
 
         return (
           <Container key={key}>

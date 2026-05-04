@@ -28,12 +28,12 @@ function peopleForInvolvements(involvements: CircleInvolvement[], allCrewInvolve
 
 interface PeopleByInvolvementStatusProps {
   involvements: CircleInvolvement[];
-  crewEnrolments?: CrewInvolvement[];
+  crewInvolvements?: CrewInvolvement[];
   tableKey?: React.Key;
   intervalId?: number | null;
 }
 
-export default function PeopleByInvolvementStatus({ involvements, crewEnrolments, tableKey, intervalId }: PeopleByInvolvementStatusProps) {
+export default function PeopleByInvolvementStatus({ involvements, crewInvolvements, tableKey, intervalId }: PeopleByInvolvementStatusProps) {
   const states = [InvolvementStatus.Participating];
   involvements.forEach((involvement) => {
     if (states.indexOf(involvement.status) === -1) {
@@ -54,7 +54,7 @@ export default function PeopleByInvolvementStatus({ involvements, crewEnrolments
   }, [involvements]);
 
   const hashedInvolvements = hashByStatus(involvements);
-  const hashedCrewEnrolments = hashByPerson(crewEnrolments);
+  const hashedCrewInvolvements = hashByPerson(crewInvolvements);
 
   const allPeople = useAppSelector((state) => state.people);
   const allCrews = useAppSelector((state) => state.crews);
@@ -71,7 +71,7 @@ export default function PeopleByInvolvementStatus({ involvements, crewEnrolments
 
       {states.map((state) => (
         <Tabs.Panel value={state} key={`${state}-${tableKey}`} pt="md">
-          <PeopleTable key={tableKey} people={peopleForInvolvements(hashedInvolvements.get(state) || [], hashedCrewEnrolments, allPeople, allCrews)} intervalId={intervalId} />
+          <PeopleTable key={tableKey} people={peopleForInvolvements(hashedInvolvements.get(state) || [], hashedCrewInvolvements, allPeople, allCrews)} intervalId={intervalId} />
         </Tabs.Panel>
       ))}
     </Tabs>

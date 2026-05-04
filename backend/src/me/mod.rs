@@ -40,13 +40,9 @@ async fn get_my_state(
 ) -> impl IntoResponse {
     match auth_session.user {
         Some(user) => {
-            let result = repo::find_initial_data_for_user(
-                default_project_id(),
-                default_circle_id(),
-                UserId::new(user.id),
-                &pool,
-            )
-            .await;
+            let result =
+                repo::find_initial_data_for_user(default_project_id(), UserId::new(user.id), &pool)
+                    .await;
 
             match result {
                 Ok(initial_data) => (StatusCode::OK, Json(initial_data)).into_response(),
@@ -133,6 +129,8 @@ async fn update_my_participation(
             }
             let person_id = person_id.unwrap();
             let interval_id = IntervalId::new(interval_id);
+            let project_id = default_project_id();
+            let circle_id = default_circle_id();
 
             let update_result =
                 update_my_involvements(person_id.clone(), interval_id.clone(), input, &pool).await;
@@ -144,8 +142,8 @@ async fn update_my_participation(
 
             // Fetch the updated involvement to return
             let output_result = repo::find_interval_data_for_person(
-                default_project_id(),
-                default_circle_id(),
+                project_id,
+                circle_id,
                 person_id,
                 interval_id,
                 &pool,

@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { CircleInvolvement, Interval } from "../../api/Api";
 import { IconLock } from "@tabler/icons-react";
 import { useAppSelector } from "../../store";
-import { forPerson, getMatchingInvolvementInterval } from "../../store/involvements";
+import { forPerson, intervalKeyForId, myCrewInvolvements } from "../../store/involvements";
 import type { MyParticipationFormData } from "./shared";
 import CapacityStep from "./CapacityStep";
 import { ParticipationStep } from "./ParticipationStep";
@@ -22,12 +22,16 @@ interface ParticipationFormProps {
 
 export default function ParticipationForm({ personId, interval, previousIntervalId, readOnly = false, involvement = null, onSubmit }: ParticipationFormProps) {
   const involvements = useAppSelector((state) => state.involvements);
-  const involvementInterval = getMatchingInvolvementInterval(involvements, interval.id);
-  const crewInvolvements = involvementInterval?.crew_involvements || [];
   const [step, setStep] = useState(0);
   const [additionalParticipationActive, setAdditionalParticipationActive] = useState(involvement?.participation_intention === "OptIn");
 
-  const previousInvolvements = typeof previousIntervalId === "number" ? getMatchingInvolvementInterval(involvements, previousIntervalId)?.crew_involvements : null;
+  const intervalKey = intervalKeyForId(involvements, interval.id);
+  const previousIntervalKey = typeof previousIntervalId === "number" ? intervalKeyForId(involvements, previousIntervalId) : null;
+
+  if (intervalKey === null) return <div>Invalid interval</div>;
+
+  const crewInvolvements = myCrewInvolvements(involvements, personId, intervalKey) || [];
+  const previousCrewInvolvements = previousIntervalKey !== null ? myCrewInvolvements(involvements, personId, previousIntervalKey) : null;
 
   const minStep = 0;
   const maxStep = additionalParticipationActive ? 2 : 1;
@@ -111,7 +115,7 @@ export default function ParticipationForm({ personId, interval, previousInterval
         </Stepper.Step>
         <Stepper.Step label="Contribution" disabled={!additionalParticipationActive} allowStepSelect={additionalParticipationActive} icon={additionalParticipationActive ? null : <IconLock size={24} />}>
           <Box mt="lg">
-            <ContributionStep form={form} readOnly={readOnly} personId={personId} interval={interval} crewInvolvements={crewInvolvements} previousInvolvements={previousInvolvements} />
+            <ContributionStep form={form} readOnly={readOnly} personId={personId} interval={interval} crewInvolvements={crewInvolvements} previousInvolvements={previousCrewInvolvements} />
           </Box>
         </Stepper.Step>
 

@@ -14,14 +14,15 @@
 }
 
 .circle_button {
-  --circle-button-radius: 20px;
+  --circle-button-radius: 25px;
   --circle-button-padding-x: var(--mantine-spacing-lg);
+  --circle-button-padding-y: var(--mantine-spacing-xs);
 
   border-radius: var(--circle-button-radius);
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
   display: inline-block;
-  padding: 0 var(--circle-button-padding-x) 0 calc(var(--circle-button-padding-x) + var(--circle-button-radius));
+  padding: var(--circle-button-padding-y) var(--circle-button-padding-x) var(--circle-button-padding-y) calc(var(--circle-button-padding-x) + var(--circle-button-radius));
   height: 100%;
   display: flex;
   background: linear-gradient(90deg, var(--mantine-color-dark-8), var(--mantine-color-dark-6));

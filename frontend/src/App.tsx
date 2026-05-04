@@ -81,20 +81,26 @@ const router = createBrowserRouter([
       },
       {
         path: "people",
-        element: <People />,
+        children: [
+          {
+            path: "",
+            element: <People />,
+          },
+          {
+            path: "new",
+            element: <NewPerson />,
+          },
+          {
+            path: ":personId/edit",
+            element: <EditPerson />,
+          },
+          {
+            path: ":personId",
+            element: <Person />,
+          },
+        ],
       },
-      {
-        path: "people/new",
-        element: <NewPerson />,
-      },
-      {
-        path: "people/:personId/edit",
-        element: <EditPerson />,
-      },
-      {
-        path: "people/:personId",
-        element: <Person />,
-      },
+
       {
         path: "crews",
         element: <Crews />,

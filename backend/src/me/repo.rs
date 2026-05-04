@@ -3,18 +3,21 @@ use sqlx::{QueryBuilder, Sqlite, SqlitePool};
 use utoipa::ToSchema;
 
 use crate::{
-    intervals::repo::{find_current_interval, find_next_interval},
     my_project::involvements_repo::find_circle_involvement,
-    shared::entities::{
-        CircleId, CircleInvolvement, CrewId, CrewInvolvement, IntervalId, Person, PersonId,
-        ProjectId, UserId,
+    shared::{
+        default_circle_id,
+        entities::{
+            CircleId, CircleInvolvement, CrewId, CrewInvolvement, IntervalId, Person, PersonId,
+            ProjectId, UserId,
+        },
     },
 };
 
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
-pub struct PersonIntervalInvolvementData {
+pub struct PersonIntervalCircleInvolvementData {
     pub interval_id: i64,
     pub person_id: i64,
+    pub circle_id: i64,
     pub project_involvement: Option<CircleInvolvement>,
     pub crew_involvements: Vec<CrewInvolvement>,
 }
@@ -23,8 +26,6 @@ pub struct PersonIntervalInvolvementData {
 pub struct MyInitialData {
     pub person_id: i64,
     pub calendar_token: Option<String>,
-    pub current_interval: Option<PersonIntervalInvolvementData>,
-    pub next_interval: Option<PersonIntervalInvolvementData>,
 }
 
 pub async fn find_interval_data_for_person(
@@ -33,22 +34,27 @@ pub async fn find_interval_data_for_person(
     person_id: PersonId,
     interval_id: IntervalId,
     pool: &SqlitePool,
-) -> Result<PersonIntervalInvolvementData, sqlx::Error> {
+) -> Result<PersonIntervalCircleInvolvementData, sqlx::Error> {
     let involvement = find_circle_involvement(
         project_id,
-        circle_id,
+        circle_id.clone(),
         person_id.clone(),
         interval_id.clone(),
         pool,
     )
     .await?;
 
-    let crew_involvements =
-        find_my_crew_involvements(person_id.clone(), interval_id.clone(), pool).await?;
+    // For now, if this is the default circle, find crew involvements, otherwise return an empty list
+    let crew_involvements = if circle_id == default_circle_id() {
+        find_my_crew_involvements(person_id.clone(), interval_id.clone(), pool).await?
+    } else {
+        Vec::new()
+    };
 
-    Ok(PersonIntervalInvolvementData {
+    Ok(PersonIntervalCircleInvolvementData {
         interval_id: interval_id.id,
         person_id: person_id.id,
+        circle_id: circle_id.id,
         project_involvement: involvement,
         crew_involvements,
     })
@@ -56,39 +62,11 @@ pub async fn find_interval_data_for_person(
 
 pub async fn find_initial_data_for_user(
     project_id: ProjectId,
-    circle_id: CircleId,
     user_id: UserId,
     pool: &SqlitePool,
 ) -> Result<MyInitialData, sqlx::Error> {
-    let current_interval = find_current_interval(project_id.clone(), pool).await?;
-    let next_interval =
-        find_next_interval(project_id.clone(), current_interval.typed_id(), pool).await?;
     let person = find_person_for_user(project_id.clone(), user_id.clone(), pool).await?;
     let person_id = person.typed_id();
-
-    let current_interval_data = find_interval_data_for_person(
-        project_id.clone(),
-        circle_id.clone(),
-        person_id.clone(),
-        current_interval.typed_id(),
-        pool,
-    )
-    .await?;
-
-    let next_interval_data = if let Some(interval) = next_interval {
-        Some(
-            find_interval_data_for_person(
-                project_id.clone(),
-                circle_id.clone(),
-                person_id.clone(),
-                interval.typed_id(),
-                pool,
-            )
-            .await?,
-        )
-    } else {
-        None
-    };
 
     let calendar_token =
         if let Some(token) = find_calendar_token_for_user(user_id.clone(), pool).await? {
@@ -100,8 +78,6 @@ pub async fn find_initial_data_for_user(
     Ok(MyInitialData {
         person_id: person_id.id,
         calendar_token,
-        current_interval: Some(current_interval_data),
-        next_interval: next_interval_data,
     })
 }
 

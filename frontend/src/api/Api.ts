@@ -78,14 +78,14 @@ export type AppEvent =
     };
 
 export interface CalendarEvent {
-  attendances?: any[] | null;
+  attendances?: CalendarEventAttendance[] | null;
   description: string;
   end_at?: string | null;
   /** @format int64 */
   event_template_id: number;
   /** @format int64 */
   id: number;
-  links?: any[] | null;
+  links?: Link[] | null;
   location: string;
   name: string;
   response_expectation: EventResponseExpectation;
@@ -151,6 +151,14 @@ export interface CircleInvolvement {
   status: InvolvementStatus;
 }
 
+export interface CircleInvolvementData {
+  /** @format int64 */
+  circle_id: number;
+  circle_involvements: CircleInvolvement[];
+  /** @format int64 */
+  interval_id: number;
+}
+
 export type CirclesEvent = {
   CircleUpdated: Circle;
 };
@@ -183,7 +191,7 @@ export interface CrewWithLinks {
   description?: string | null;
   /** @format int64 */
   id: number;
-  links?: any[] | null;
+  links?: Link[] | null;
   name: string;
   /** @format int64 */
   project_id: number;
@@ -213,7 +221,7 @@ export type EntryPathwayEvent = {
 export interface EventTemplate {
   /** @format int64 */
   id: number;
-  links?: any[] | null;
+  links?: Link[] | null;
   name: string;
   response_expectation: EventResponseExpectation;
   summary: string;
@@ -262,10 +270,10 @@ export interface Interval {
 }
 
 export interface IntervalInvolvementData {
-  circle_involvements: CircleInvolvement[];
   crew_involvements: CrewInvolvement[];
   /** @format int64 */
   interval_id: number;
+  involvements_for_circles: CircleInvolvementData[];
 }
 
 export type IntervalsEvent = {
@@ -289,13 +297,11 @@ export interface LoginResponse {
 }
 
 export type MeEvent = {
-  IntervalDataChanged: PersonIntervalInvolvementData;
+  IntervalDataChanged: PersonIntervalCircleInvolvementData;
 };
 
 export interface MyInitialData {
   calendar_token?: string | null;
-  current_interval?: null | PersonIntervalInvolvementData;
-  next_interval?: null | PersonIntervalInvolvementData;
   /** @format int64 */
   person_id: number;
 }
@@ -306,7 +312,7 @@ export interface MyParticipationInput {
   capacity_score?: number | null;
   /** @format int64 */
   circle_id: number;
-  crew_involvements?: any[] | null;
+  crew_involvements?: CrewInvolvement[] | null;
   focus?: string | null;
   intention_context?: string | null;
   opt_out_planned_return_date?: string | null;
@@ -333,7 +339,9 @@ export interface Person {
   project_id: number;
 }
 
-export interface PersonIntervalInvolvementData {
+export interface PersonIntervalCircleInvolvementData {
+  /** @format int64 */
+  circle_id: number;
   crew_involvements: CrewInvolvement[];
   /** @format int64 */
   interval_id: number;
@@ -542,7 +550,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 1.3.17
+ * @version 1.3.18
  * @license
  */
 export class Api<

@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
-import { type Interval, type IntervalInvolvementData } from "../../api/Api";
+import { type Interval } from "../../api/Api";
 import { useAppSelector } from "../../store";
-import type { InvolvementsState } from "../../store/involvements";
+import { mapCirclesData, type IntervalInvolvementState, type InvolvementsState } from "../../store/involvements";
 import { getApi } from "../../api";
 import { useLocation } from "react-router-dom";
 
 interface WithIntervalInvolvementsChildProps {
   interval: Interval;
-  involvements: IntervalInvolvementData | null;
+  involvements: IntervalInvolvementState | null;
   key: string;
   isCurrentInterval: boolean;
 }
@@ -46,7 +46,7 @@ export default function WithIntervalInvolvements({ children }: WithIntervalInvol
   const involvementState: InvolvementsState = useAppSelector((state) => state.involvements);
   const [cacheKey, setCacheKey] = useState<number>(0);
 
-  const [involvements, setInvolvements] = useState<IntervalInvolvementData | null>(null);
+  const [intervalState, setIntervalState] = useState<IntervalInvolvementState | null>(null);
 
   console.log("path interval id:", pathIntervalId);
   console.log("selected interval:", selectedInterval);
@@ -61,11 +61,10 @@ export default function WithIntervalInvolvements({ children }: WithIntervalInvol
 
   useEffect(() => {
     if (involvementState.current_interval?.interval_id === selectedInterval.id) {
-      console.log("using current interval");
-      setInvolvements(involvementState.current_interval || null);
+      setIntervalState(involvementState.current_interval);
     } else if (involvementState.next_interval?.interval_id === selectedInterval.id) {
       console.log("using next interval");
-      setInvolvements(involvementState.next_interval || null);
+      setIntervalState(involvementState.next_interval);
     } else {
       console.log("fetching interval involvements from API");
       const api = getApi();
@@ -73,15 +72,16 @@ export default function WithIntervalInvolvements({ children }: WithIntervalInvol
       api.api
         .getInvolvements(selectedInterval.id)
         .then((response) => {
-          setInvolvements(response.data);
+          setIntervalState(mapCirclesData(response.data));
         })
         .catch((error) => {
           console.error("Error fetching involvements:", error);
-          setInvolvements(null);
+          setIntervalState(null);
         });
     }
+
     incrementCacheKey();
   }, [pathIntervalId, currentInterval, involvementState]);
 
-  return children({ interval: selectedInterval, involvements, key: tableKey, isCurrentInterval: selectedInterval.id === currentInterval?.id });
+  return children({ interval: selectedInterval, involvements: intervalState, key: tableKey, isCurrentInterval: selectedInterval.id === currentInterval?.id });
 }
