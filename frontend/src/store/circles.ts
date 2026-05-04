@@ -2,14 +2,12 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { Circle } from "../api/Api";
 
 export interface CirclesState {
-  activeCircleId: number | null;
   rootCircles: Circle[];
 }
 
 const circlesSlice = createSlice({
   name: "circles",
   initialState: {
-    activeCircleId: null,
     rootCircles: [],
   } as CirclesState,
   reducers: {
@@ -19,7 +17,6 @@ const circlesSlice = createSlice({
         ...state,
         rootCircles: circles,
       };
-      if (result.activeCircleId === null && circles.length > 0) result.activeCircleId = circles[0].id;
 
       return result;
     },
@@ -31,7 +28,6 @@ const circlesSlice = createSlice({
         ...state,
         rootCircles: circles,
       };
-      if (result.activeCircleId === null) result.activeCircleId = circle.id;
       return result;
     },
     setActiveCircle: (state: CirclesState, action: PayloadAction<number>) => {
@@ -50,10 +46,6 @@ const circlesSlice = createSlice({
   },
 });
 
-export function getActiveCircle(state: CirclesState): Circle | null {
-  return state.rootCircles?.find((c) => c.id === state.activeCircleId) || null;
-}
-
 function upsertCircleInList(circles: Circle[], circle: Circle): Circle[] {
   const index = circles.findIndex((c) => c.id === circle.id);
 
@@ -67,7 +59,7 @@ function upsertCircleInList(circles: Circle[], circle: Circle): Circle[] {
   }
 }
 
-export const { circlesLoaded, circleUpdated, setActiveCircle } = circlesSlice.actions;
+export const { circlesLoaded, circleUpdated } = circlesSlice.actions;
 
 // Export the slice reducer as the default export
 export default circlesSlice.reducer;

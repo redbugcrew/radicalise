@@ -1,5 +1,4 @@
 import { type Interval } from "../../api/Api";
-import { useAppSelector } from "../../store";
 import WithIntervalInvolvements from "../intervals/WithIntervalInvolvements";
 import PeopleByCircle from "./PeopleByCircle";
 
@@ -8,10 +7,6 @@ interface PeopleForIntervalProps {
 }
 
 export default function PeopleForInterval({ interval }: PeopleForIntervalProps) {
-  const activeCircleId = useAppSelector((state) => state.circles.activeCircleId);
-
-  if (activeCircleId == null) return null;
-
   return (
     <WithIntervalInvolvements interval={interval}>
       {({ involvements, key, isCurrentInterval }) =>

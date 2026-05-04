@@ -3,7 +3,7 @@ import { useAppSelector } from "../../store";
 import type { CapacityPlanning, CircleInvolvement, Interval, Person } from "../../api/Api";
 import CapacityScoreIcon from "../../components/CapacityScoreIcon";
 import DateText from "../../components/DateText";
-import { oneForPerson } from "../../store/involvements";
+import { myCircleInvolvements } from "../../store/involvements";
 import WithIntervalInvolvements from "../intervals/WithIntervalInvolvements";
 
 function CapacityQuestion({ question, answer }: { question: string; answer: string | null | undefined }) {
@@ -69,35 +69,41 @@ function HiatusInfo({ person, project_involvement }: { person: Person; project_i
   );
 }
 
+function CircleInvolvementInfo({ involvement, person }: { involvement: CircleInvolvement; person: Person }) {
+  return (
+    <Stack>
+      {involvement?.status == "Exiting" && <ExitingInfo person={person} project_involvement={involvement} />}
+      {involvement?.status == "OnHiatus" && <HiatusInfo person={person} project_involvement={involvement} />}
+      {person.about && (
+        <Text size="md" style={{ whiteSpace: "pre-line" }}>
+          {person.about}
+        </Text>
+      )}
+
+      {!involvement?.private_capacity_planning && involvement?.capacity_planning && <CapacityPlanningSection capacity_planning={involvement.capacity_planning} capacity_score={involvement.capacity_score} />}
+    </Stack>
+  );
+}
+
 interface PersonForIntervalProps {
   personIdNum: number;
   interval: Interval;
-  circleId: number;
 }
 
-export default function PersonForInterval({ personIdNum, interval, circleId }: PersonForIntervalProps) {
+export default function PersonForInterval({ personIdNum, interval }: PersonForIntervalProps) {
   const person = useAppSelector((state) => state.people[personIdNum || -1]);
 
   return (
     <WithIntervalInvolvements interval={interval}>
       {({ involvements, key }) => {
-        const circleInvolvements = involvements?.circles[circleId]?.circle_involvements || [];
-        const myInvolvement = oneForPerson(circleInvolvements, personIdNum);
+        const circleInvolvements = myCircleInvolvements(involvements, personIdNum) || [];
 
         return (
           <Container key={key}>
             <Stack>
-              {myInvolvement?.status == "Exiting" && <ExitingInfo person={person} project_involvement={myInvolvement} />}
-              {myInvolvement?.status == "OnHiatus" && <HiatusInfo person={person} project_involvement={myInvolvement} />}
-              {person.about && (
-                <Text size="md" style={{ whiteSpace: "pre-line" }}>
-                  {person.about}
-                </Text>
-              )}
-
-              {!myInvolvement?.private_capacity_planning && myInvolvement?.capacity_planning && (
-                <CapacityPlanningSection capacity_planning={myInvolvement.capacity_planning} capacity_score={myInvolvement.capacity_score} />
-              )}
+              {circleInvolvements.map((involvement) => (
+                <CircleInvolvementInfo key={involvement.person_id} involvement={involvement} person={person} />
+              ))}
             </Stack>
           </Container>
         );

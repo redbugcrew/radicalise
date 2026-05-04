@@ -149,7 +149,7 @@ export default function Dashboard() {
   const intervals = useAppSelector((state) => state.intervals);
   const myData = useAppSelector((state) => state.me);
   const project = useAppSelector((state) => state.project);
-  const circleId = useAppSelector((state) => state.circles.activeCircleId || null);
+  const circleId = useAppSelector((state) => state.circles.rootCircles[0]?.id);
   const involvements = useAppSelector((state) => state.involvements);
 
   if (!myData || !project || !circleId) {
