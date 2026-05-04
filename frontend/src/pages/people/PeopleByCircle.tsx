@@ -1,18 +1,53 @@
+import { Stack, Text } from "@mantine/core";
 import type { CrewInvolvement } from "../../api/Api";
+import { useAppSelector } from "../../store";
 import type { CircleInvolvementDataMap } from "../../store/involvements";
 import PeopleByInvolvementStatus from "./PeopleByInvolvementStatus";
+import { CircleSelector } from "../../components";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface PeopleByCircleProps {
-  circles: CircleInvolvementDataMap;
+  involvementByCircle: CircleInvolvementDataMap;
   crewInvolvements: CrewInvolvement[];
   tableKey?: React.Key;
   intervalId?: number | null;
 }
 
-export default function PeopleByCircle({ circles, crewInvolvements, tableKey, intervalId }: PeopleByCircleProps) {
-  const circleId = parseInt(Object.keys(circles)[0]);
+export default function PeopleByCircle({ involvementByCircle, crewInvolvements, tableKey, intervalId }: PeopleByCircleProps) {
+  const circles = useAppSelector((state) => state.circles.rootCircles);
+  const navigate = useNavigate();
+  const { hash, search } = useLocation();
+  const searchParams = new URLSearchParams(search);
+  const circleSlug = searchParams.get("circle");
 
-  const circleInvolvements = circles[circleId]?.circle_involvements || [];
+  const defaultCircleId = circles[0]?.id ?? null;
+  const circleId = circleSlug ? (circles.find((c) => c.slug === circleSlug)?.id ?? null) : defaultCircleId;
 
-  return <PeopleByInvolvementStatus involvements={circleInvolvements} crewInvolvements={crewInvolvements} key={tableKey} tableKey={tableKey} intervalId={intervalId} />;
+  if (!circleId) {
+    return (
+      <Stack>
+        <Text>There is no circle called "{circleSlug}"</Text>
+      </Stack>
+    );
+  }
+
+  const circleInvolvements = involvementByCircle[circleId]?.circle_involvements || [];
+
+  const onChangeCircle = (newCircleId: number) => {
+    const circle = circles.find((c) => c.id === newCircleId);
+    if (circle) {
+      const newParams = new URLSearchParams(searchParams);
+      newParams.set("circle", circle.slug);
+      navigate({ search: newParams.toString(), hash });
+    } else {
+      console.warn(`Circle with id ${newCircleId} not found`);
+    }
+  };
+
+  return (
+    <Stack gap="lg">
+      <CircleSelector circles={circles} selectedCircleId={circleId} onChange={onChangeCircle} />
+      <PeopleByInvolvementStatus involvements={circleInvolvements} crewInvolvements={crewInvolvements} key={tableKey} tableKey={tableKey} intervalId={intervalId} />
+    </Stack>
+  );
 }

@@ -15,7 +15,9 @@ export default function PeopleForInterval({ interval }: PeopleForIntervalProps) 
   return (
     <WithIntervalInvolvements interval={interval}>
       {({ involvements, key, isCurrentInterval }) =>
-        involvements && <PeopleByCircle circles={involvements.circles} crewInvolvements={involvements.crew_involvements || []} key={key} tableKey={key} intervalId={isCurrentInterval ? undefined : interval?.id} />
+        involvements && (
+          <PeopleByCircle involvementByCircle={involvements.circles} crewInvolvements={involvements.crew_involvements || []} key={key} tableKey={key} intervalId={isCurrentInterval ? undefined : interval?.id} />
+        )
       }
     </WithIntervalInvolvements>
   );
