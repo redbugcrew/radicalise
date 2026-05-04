@@ -21,7 +21,7 @@ export enum OptOutType {
 }
 
 export enum InvolvementStatus {
-  Participating = "Participating",
+  Active = "Active",
   OnHiatus = "OnHiatus",
   Exiting = "Exiting",
 }

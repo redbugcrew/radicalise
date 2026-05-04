@@ -41,3 +41,5 @@ SELECT *
 FROM project_involvements
 WHERE project_id = 1
 ;
+
+UPDATE circle_involvements SET status = 'Active' WHERE status = 'Participating';

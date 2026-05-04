@@ -44,10 +44,13 @@ export default function PeopleByCircle({ involvementByCircle, crewInvolvements, 
     }
   };
 
+  const newKey = `${tableKey}-${circleId}`;
+  const canSelectCircle = circles.length > 1;
+
   return (
     <Stack gap="lg">
-      <CircleSelector circles={circles} selectedCircleId={circleId} onChange={onChangeCircle} />
-      <PeopleByInvolvementStatus involvements={circleInvolvements} crewInvolvements={crewInvolvements} key={tableKey} tableKey={tableKey} intervalId={intervalId} />
+      {canSelectCircle && <CircleSelector circles={circles} selectedCircleId={circleId} onChange={onChangeCircle} />}
+      <PeopleByInvolvementStatus involvements={circleInvolvements} crewInvolvements={crewInvolvements} key={newKey} tableKey={newKey} intervalId={intervalId} />
     </Stack>
   );
 }

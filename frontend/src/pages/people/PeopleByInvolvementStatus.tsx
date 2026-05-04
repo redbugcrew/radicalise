@@ -34,7 +34,7 @@ interface PeopleByInvolvementStatusProps {
 }
 
 export default function PeopleByInvolvementStatus({ involvements, crewInvolvements, tableKey, intervalId }: PeopleByInvolvementStatusProps) {
-  const states = [InvolvementStatus.Participating];
+  const states = [InvolvementStatus.Active];
   involvements.forEach((involvement) => {
     if (states.indexOf(involvement.status) === -1) {
       states.push(involvement.status);

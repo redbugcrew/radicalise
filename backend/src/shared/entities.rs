@@ -95,7 +95,7 @@ impl Interval {
 
 #[derive(Serialize, Deserialize, ToSchema, sqlx::Type, Clone, Debug)]
 pub enum InvolvementStatus {
-    Participating,
+    Active,
     OnHiatus,
     Exiting,
 }
@@ -105,7 +105,7 @@ impl FromStr for InvolvementStatus {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "Participating" => Ok(InvolvementStatus::Participating),
+            "Active" => Ok(InvolvementStatus::Active),
             "OnHiatus" => Ok(InvolvementStatus::OnHiatus),
             "Exiting" => Ok(InvolvementStatus::Exiting),
             _ => Err(()),

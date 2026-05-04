@@ -35,13 +35,13 @@ pub fn calculate_status(
     opt_out_type: Option<OptOutType>,
 ) -> InvolvementStatus {
     match participation_intention {
-        Some(ParticipationIntention::OptIn) => InvolvementStatus::Participating,
+        Some(ParticipationIntention::OptIn) => InvolvementStatus::Active,
         Some(ParticipationIntention::OptOut) => match opt_out_type {
             Some(OptOutType::Hiatus) => InvolvementStatus::OnHiatus,
             Some(OptOutType::Exit) => InvolvementStatus::Exiting,
             None => InvolvementStatus::OnHiatus, // Default to OnHiatus if no opt-out type is set
         },
-        None => InvolvementStatus::Participating, // We might revisit this later
+        None => InvolvementStatus::Active, // We might revisit this later
     }
 }
 
