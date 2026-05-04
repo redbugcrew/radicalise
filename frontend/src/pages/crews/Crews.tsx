@@ -7,16 +7,13 @@ import { useSelectedInterval } from "../intervals/WithIntervalInvolvements";
 export default function Crews() {
   const intervals = useAppSelector((state) => state.intervals);
   const selectedInterval = useSelectedInterval();
-  const circleId = useAppSelector((state) => state.circles.activeCircleId);
-
-  if (circleId == null) return null;
 
   return (
     <Stack>
       <Title order={1}>Crews</Title>
       <IntervalSelector intervals={intervals.allIntervals} selectedInterval={selectedInterval} currentInterval={intervals.currentInterval} />
 
-      {selectedInterval && <CrewsForInterval interval={selectedInterval} key={selectedInterval.id} circleId={circleId} />}
+      {selectedInterval && <CrewsForInterval interval={selectedInterval} key={selectedInterval.id} />}
     </Stack>
   );
 }

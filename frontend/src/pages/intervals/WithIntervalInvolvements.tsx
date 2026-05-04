@@ -1,21 +1,19 @@
 import { useEffect, useState } from "react";
-import { type CircleInvolvementData, type Interval } from "../../api/Api";
+import { type Interval } from "../../api/Api";
 import { useAppSelector } from "../../store";
 import { mapCirclesData, type IntervalInvolvementState, type InvolvementsState } from "../../store/involvements";
 import { getApi } from "../../api";
 import { useLocation } from "react-router-dom";
 
 interface WithIntervalInvolvementsChildProps {
-  circleId: number;
   interval: Interval;
-  involvements: CircleInvolvementData | null;
+  involvements: IntervalInvolvementState | null;
   key: string;
   isCurrentInterval: boolean;
 }
 
 interface WithIntervalInvolvementsProps {
   interval: Interval;
-  circleId: number;
   children: (props: WithIntervalInvolvementsChildProps) => React.ReactNode;
 }
 
@@ -40,7 +38,7 @@ export const useSelectedInterval = (): Interval | null => {
   return selectedInterval;
 };
 
-export default function WithIntervalInvolvements({ children, circleId }: WithIntervalInvolvementsProps) {
+export default function WithIntervalInvolvements({ children }: WithIntervalInvolvementsProps) {
   const pathIntervalId = useHashIntervalId();
   const currentInterval = useAppSelector((state) => state.intervals.currentInterval);
   const selectedInterval = useSelectedInterval();
@@ -83,9 +81,7 @@ export default function WithIntervalInvolvements({ children, circleId }: WithInt
     }
 
     incrementCacheKey();
-  }, [pathIntervalId, currentInterval, involvementState, circleId]);
+  }, [pathIntervalId, currentInterval, involvementState]);
 
-  const involvements = intervalState ? intervalState.circles[circleId] : null;
-
-  return children({ interval: selectedInterval, circleId, involvements, key: tableKey, isCurrentInterval: selectedInterval.id === currentInterval?.id });
+  return children({ interval: selectedInterval, involvements: intervalState, key: tableKey, isCurrentInterval: selectedInterval.id === currentInterval?.id });
 }

@@ -12,7 +12,7 @@ import { IconCalendar } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
 import CopyIconButton from "../../components/CopyIconButton";
 import { getApiUrl } from "../../api";
-import { currentCircleStateOrDefault, myCircleInvolvement, myCrewInvolvements } from "../../store/involvements";
+import { myCircleInvolvement, myCrewInvolvements } from "../../store/involvements";
 import { intervalById } from "../../store/intervals";
 
 function ParticipationBadge({ involvement }: { involvement: CircleInvolvement | null }) {
@@ -67,13 +67,10 @@ function MyIntervalPartipationCard({ interval, circleInvolvement, current = true
   );
 }
 
-function MyCrews({ personId, circleId, myInvolvements }: { personId: number; circleId: number; myInvolvements: CrewInvolvement[] }) {
+function MyCrews({ personId, myInvolvements }: { personId: number; myInvolvements: CrewInvolvement[] }) {
   const people = useAppSelector((state) => state.people);
   const crews = useAppSelector((state) => state.crews);
-  const circleState = useAppSelector((state) => currentCircleStateOrDefault(state.involvements, circleId));
-
-  if (!circleState) return null;
-  const allInvolvements = circleState.crew_involvements || [];
+  const allCrewInvolvements = useAppSelector((state) => state.involvements.current_interval?.crew_involvements || []);
 
   const myCrews = myInvolvements
     .map((involvement) => crews[involvement.crew_id])
@@ -85,7 +82,7 @@ function MyCrews({ personId, circleId, myInvolvements }: { personId: number; cir
   return (
     <Stack>
       <Title order={2}>My Crews</Title>
-      <CrewsList involvements={allInvolvements} people={people} crews={myCrews} highlightPersonId={personId} />
+      <CrewsList involvements={allCrewInvolvements} people={people} crews={myCrews} highlightPersonId={personId} />
     </Stack>
   );
 }
@@ -166,7 +163,7 @@ export default function Dashboard() {
   const myNextCircle = myCircleInvolvement(involvements, circleId, personId, "next_interval");
   const nextInterval = myNextCircle ? intervalById(intervals, myNextCircle.interval_id) : null;
 
-  const myCurrentCrewInvolvements = myCrewInvolvements(involvements, circleId, personId, "current_interval");
+  const myCurrentCrewInvolvements = myCrewInvolvements(involvements, personId, "current_interval");
 
   return (
     <Container>
@@ -179,7 +176,7 @@ export default function Dashboard() {
           {myNextCircle && nextInterval && <MyIntervalPartipationCard interval={nextInterval} circleInvolvement={myNextCircle} current={false} />}
         </Stack>
         <MyEvents />
-        {myCurrentCrewInvolvements && <MyCrews personId={myData.person_id} circleId={circleId} myInvolvements={myCurrentCrewInvolvements} />}
+        {myCurrentCrewInvolvements && <MyCrews personId={myData.person_id} myInvolvements={myCurrentCrewInvolvements} />}
         <Stack gap="md">
           <Title order={2}>Resources</Title>
           <LinksStack links={project.links} />

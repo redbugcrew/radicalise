@@ -16,12 +16,11 @@ interface ParticipationFormProps {
   readOnly?: boolean;
   involvement?: CircleInvolvement | null;
   interval: Interval;
-  circleId: number;
   previousIntervalId?: number | undefined;
   onSubmit: (data: MyParticipationFormData) => void;
 }
 
-export default function ParticipationForm({ personId, interval, circleId, previousIntervalId, readOnly = false, involvement = null, onSubmit }: ParticipationFormProps) {
+export default function ParticipationForm({ personId, interval, previousIntervalId, readOnly = false, involvement = null, onSubmit }: ParticipationFormProps) {
   const involvements = useAppSelector((state) => state.involvements);
   const [step, setStep] = useState(0);
   const [additionalParticipationActive, setAdditionalParticipationActive] = useState(involvement?.participation_intention === "OptIn");
@@ -31,8 +30,8 @@ export default function ParticipationForm({ personId, interval, circleId, previo
 
   if (intervalKey === null) return <div>Invalid interval</div>;
 
-  const crewInvolvements = myCrewInvolvements(involvements, circleId, personId, intervalKey) || [];
-  const previousCrewInvolvements = previousIntervalKey !== null ? myCrewInvolvements(involvements, circleId, personId, previousIntervalKey) : null;
+  const crewInvolvements = myCrewInvolvements(involvements, personId, intervalKey) || [];
+  const previousCrewInvolvements = previousIntervalKey !== null ? myCrewInvolvements(involvements, personId, previousIntervalKey) : null;
 
   const minStep = 0;
   const maxStep = additionalParticipationActive ? 2 : 1;

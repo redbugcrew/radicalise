@@ -12,7 +12,6 @@ use crate::{
     my_project::involvements_repo::find_all_circle_involvements,
     people::repo::find_all_people,
     shared::{
-        default_circle_id,
         entities::{
             CalendarEvent, Circle, CircleId, CircleInvolvement, CrewInvolvement, CrewWithLinks,
             EntryPathway, EventTemplate, Interval, IntervalId, Person, Project, ProjectId,
@@ -26,11 +25,11 @@ pub struct CircleInvolvementData {
     pub circle_id: i64,
     pub interval_id: i64,
     pub circle_involvements: Vec<CircleInvolvement>,
-    pub crew_involvements: Vec<CrewInvolvement>,
 }
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct IntervalInvolvementData {
     pub interval_id: i64,
+    pub crew_involvements: Vec<CrewInvolvement>,
     pub involvements_for_circles: Vec<CircleInvolvementData>,
 }
 
@@ -146,6 +145,7 @@ pub async fn find_interval_involvement_data(
     let result = IntervalInvolvementData {
         interval_id: interval_id.id,
         involvements_for_circles: circle_involvements_result,
+        crew_involvements: find_all_crew_involvements(interval_id, pool).await?,
     };
 
     Ok(result)
@@ -264,19 +264,10 @@ pub async fn find_interval_involvement_data_for_circle(
     )
     .await?;
 
-    // For new, crew involvements occur only on the default circle. If this circle id is not
-    // the default circle, this will be empty
-    let crew_involvements = if circle_id == default_circle_id() {
-        find_all_crew_involvements(interval_id.clone(), pool).await?
-    } else {
-        Vec::new()
-    };
-
     Ok(CircleInvolvementData {
         circle_id: circle_id.id,
         interval_id: interval_id.id,
         circle_involvements,
-        crew_involvements,
     })
 }
 

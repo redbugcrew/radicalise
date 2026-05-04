@@ -11,6 +11,7 @@ export interface CircleInvolvementDataMap {
 export interface IntervalInvolvementState {
   interval_id: number;
   circles: CircleInvolvementDataMap;
+  crew_involvements: CrewInvolvement[];
 }
 
 export interface InvolvementsState {
@@ -18,17 +19,16 @@ export interface InvolvementsState {
   next_interval?: null | IntervalInvolvementState;
 }
 
-function upsertInvolvementsForPerson(state: CircleInvolvementData, personId: number, newInvolvement: CircleInvolvement, crew_involvements: CrewInvolvement[]): CircleInvolvementData {
-  const existingCircleInvolvements = state.circle_involvements || [];
-  const newCircleInvolvements = existingCircleInvolvements.filter((involvement) => involvement.id !== newInvolvement.id).concat(newInvolvement);
-
-  const existingCrewInvolvements = state.crew_involvements || [];
-  const newCrewInvolvements = updateCrewInvolvementForPerson(existingCrewInvolvements, crew_involvements, personId);
+export function mapCirclesData(data: IntervalInvolvementData): IntervalInvolvementState {
+  const circleInvolvementsByCircle: CircleInvolvementDataMap = {};
+  data.involvements_for_circles.forEach((circleData) => {
+    circleInvolvementsByCircle[circleData.circle_id] = circleData;
+  });
 
   return {
-    ...state,
-    circle_involvements: newCircleInvolvements,
-    crew_involvements: newCrewInvolvements,
+    interval_id: data.interval_id,
+    circles: circleInvolvementsByCircle,
+    crew_involvements: data.crew_involvements,
   };
 }
 
@@ -52,18 +52,15 @@ export function myCircleInvolvement(state: InvolvementsState, circleId: number, 
   return forPerson(circleState.circle_involvements || [], personId)[0] || null;
 }
 
-export function myCrewInvolvements(state: InvolvementsState, circleId: number, personId: number, key: keyof InvolvementsState): CrewInvolvement[] | null {
-  return forPerson(allCrewInvolvements(state, circleId, key) || [], personId);
+export function myCrewInvolvements(state: InvolvementsState, personId: number, key: keyof InvolvementsState): CrewInvolvement[] | null {
+  return forPerson(allCrewInvolvements(state, key) || [], personId);
 }
 
-export function allCrewInvolvements(state: InvolvementsState, circleId: number, key: keyof InvolvementsState): CrewInvolvement[] | null {
+export function allCrewInvolvements(state: InvolvementsState, key: keyof InvolvementsState): CrewInvolvement[] | null {
   const intervalState = state[key];
   if (!intervalState) return null;
 
-  const circleState = intervalState.circles[circleId];
-  if (!circleState) return null;
-
-  return circleState.crew_involvements || [];
+  return intervalState.crew_involvements || [];
 }
 
 export function intervalKeyForId(state: InvolvementsState, intervalId: number): keyof InvolvementsState | null {
@@ -82,7 +79,6 @@ export function currentCircleStateOrDefault(state: InvolvementsState, circleId: 
   return {
     circle_id: circleId,
     circle_involvements: [],
-    crew_involvements: [],
     interval_id: intervalState.interval_id,
   };
 }
@@ -110,22 +106,6 @@ export function asPeopleAlphaSorted<T extends { person_id: number }>(involvement
     .map((involvement) => people[involvement.person_id])
     .filter(Boolean)
     .sort(compareStrings("display_name"));
-}
-
-function updateCrewInvolvementForPerson(crewInvolvements: WritableDraft<CrewInvolvement>[], personInvolvements: CrewInvolvement[], personId: number): WritableDraft<CrewInvolvement>[] {
-  const withoutPerson = crewInvolvements.filter((involvement) => involvement.person_id !== personId);
-  return withoutPerson.concat(personInvolvements);
-}
-
-export function mapCirclesData(data: IntervalInvolvementData): IntervalInvolvementState {
-  const circleInvolvementsByCircle: CircleInvolvementDataMap = {};
-  data.involvements_for_circles.forEach((circleData) => {
-    circleInvolvementsByCircle[circleData.circle_id] = circleData;
-  });
-  return {
-    interval_id: data.interval_id,
-    circles: circleInvolvementsByCircle,
-  };
 }
 
 const involvementsSlice = createSlice({
@@ -159,7 +139,8 @@ const involvementsSlice = createSlice({
           const intervalState: IntervalInvolvementState = state[interval_key];
           const circleId = payload.circle_id;
 
-          intervalState.circles[circleId] = upsertInvolvementsForPerson(intervalState.circles[circleId], person_id, involvement, payload.crew_involvements);
+          intervalState.circles[circleId] = upsertCircleInvolvement(intervalState.circles[circleId], involvement);
+          intervalState.crew_involvements = updateCrewInvolvementsForPerson(intervalState.crew_involvements, payload.crew_involvements, person_id);
         }
       });
 
@@ -167,6 +148,21 @@ const involvementsSlice = createSlice({
     },
   },
 });
+
+function upsertCircleInvolvement(state: CircleInvolvementData, newInvolvement: CircleInvolvement): CircleInvolvementData {
+  const existingCircleInvolvements = state.circle_involvements || [];
+  const newCircleInvolvements = existingCircleInvolvements.filter((involvement) => involvement.id !== newInvolvement.id).concat(newInvolvement);
+
+  return {
+    ...state,
+    circle_involvements: newCircleInvolvements,
+  };
+}
+
+function updateCrewInvolvementsForPerson(crewInvolvements: WritableDraft<CrewInvolvement>[], personInvolvements: CrewInvolvement[], personId: number): WritableDraft<CrewInvolvement>[] {
+  const withoutPerson = crewInvolvements.filter((involvement) => involvement.person_id !== personId);
+  return withoutPerson.concat(personInvolvements);
+}
 
 // `createSlice` automatically generated action creators with these names.
 // export them as named exports from this "slice" file

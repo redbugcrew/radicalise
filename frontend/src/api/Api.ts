@@ -155,7 +155,6 @@ export interface CircleInvolvementData {
   /** @format int64 */
   circle_id: number;
   circle_involvements: CircleInvolvement[];
-  crew_involvements: CrewInvolvement[];
   /** @format int64 */
   interval_id: number;
 }
@@ -271,6 +270,7 @@ export interface Interval {
 }
 
 export interface IntervalInvolvementData {
+  crew_involvements: CrewInvolvement[];
   /** @format int64 */
   interval_id: number;
   involvements_for_circles: CircleInvolvementData[];

@@ -79,9 +79,10 @@ export default function PersonForInterval({ personIdNum, interval, circleId }: P
   const person = useAppSelector((state) => state.people[personIdNum || -1]);
 
   return (
-    <WithIntervalInvolvements interval={interval} circleId={circleId}>
+    <WithIntervalInvolvements interval={interval}>
       {({ involvements, key }) => {
-        const myInvolvement = involvements ? oneForPerson(involvements.circle_involvements, personIdNum) : null;
+        const circleInvolvements = involvements?.circles[circleId]?.circle_involvements || [];
+        const myInvolvement = oneForPerson(circleInvolvements, personIdNum);
 
         return (
           <Container key={key}>
