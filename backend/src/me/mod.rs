@@ -12,8 +12,8 @@ use crate::{
     my_project::involvements_repo::find_circle_involvement,
     realtime::RealtimeState,
     shared::{
-        default_circle_id, default_project_id,
-        entities::{CircleInvolvement, IntervalId, UserId},
+        default_project_id,
+        entities::{CircleId, CircleInvolvement, IntervalId, UserId},
         events::AppEvent,
     },
 };
@@ -55,9 +55,10 @@ async fn get_my_state(
 
 #[utoipa::path(
     get,
-    path = "/participation/interval/{interval_id}",
+    path = "/participation/interval/{interval_id}/circle/{circle_id}",
     params(
-        ("interval_id" = i64, Path, description = "Interval ID")
+        ("interval_id" = i64, Path, description = "Interval ID"),
+        ("circle_id" = i64, Path, description = "Circle ID")
     ),
     responses(
         (status = 200, description = "Fetched my participation successfully", body = Option<CircleInvolvement>),
@@ -65,7 +66,7 @@ async fn get_my_state(
     ),
 )]
 async fn my_participation(
-    Path(interval_id): Path<i64>,
+    Path((interval_id, circle_id)): Path<(i64, i64)>,
     Extension(pool): Extension<SqlitePool>,
     auth_session: AuthSession,
 ) -> impl IntoResponse {
@@ -78,10 +79,16 @@ async fn my_participation(
             }
             let person_id = person_id.unwrap();
             let interval_id = IntervalId::new(interval_id);
+            let circle_id = CircleId::new(circle_id);
+
+            println!(
+                "Fetching my participation for person_id={:?}, interval_id={:?}, circle_id={:?}",
+                person_id, interval_id, circle_id
+            );
 
             let result = find_circle_involvement(
                 default_project_id(),
-                default_circle_id(),
+                circle_id,
                 person_id,
                 interval_id,
                 &pool,

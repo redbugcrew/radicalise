@@ -39,7 +39,7 @@ export default function MyParticipation() {
   const [involvement, setInvolvement] = useState<CircleInvolvement | null>(null);
   useEffect(() => {
     api.api
-      .myParticipation(interval.id)
+      .myParticipation(interval.id, circle.id)
       .then((response) => {
         setInvolvement(response.data);
       })

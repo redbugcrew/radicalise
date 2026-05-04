@@ -813,11 +813,15 @@ export class Api<
      * No description
      *
      * @name MyParticipation
-     * @request GET:/api/me/participation/interval/{interval_id}
+     * @request GET:/api/me/participation/interval/{interval_id}/circle/{circle_id}
      */
-    myParticipation: (intervalId: number, params: RequestParams = {}) =>
+    myParticipation: (
+      intervalId: number,
+      circleId: number,
+      params: RequestParams = {},
+    ) =>
       this.request<null | CircleInvolvement, any>({
-        path: `/api/me/participation/interval/${intervalId}`,
+        path: `/api/me/participation/interval/${intervalId}/circle/${circleId}`,
         method: "GET",
         format: "json",
         ...params,

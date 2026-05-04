@@ -111,7 +111,7 @@ pub async fn find_circle_involvement(
         INNER JOIN circles ON circle_involvements.circle_id = circles.id
         WHERE
             circles.project_id = ? AND
-            circle_involvements.id = ? AND
+            circles.id = ? AND
             person_id = ? AND
             interval_id = ?",
         project_id.id,
