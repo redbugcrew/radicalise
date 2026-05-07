@@ -4,6 +4,7 @@ import { Anchor } from "../../../components";
 import { useForm } from "@mantine/form";
 import { getApi } from "../../../api";
 import { useNavigate } from "react-router-dom";
+import { isValidEmail } from "../../../utilities/validators";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ export default function Login() {
     },
 
     validate: {
-      email: (value) => (/\S+@\S+\.\S+/.test(value) ? null : "Invalid email"),
+      email: (value) => (isValidEmail(value) ? null : "Invalid email"),
       password: (value) => (value.length >= 6 ? null : "Password must be at least 6 characters long"),
     },
   });

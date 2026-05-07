@@ -5,6 +5,7 @@ import { useForm } from "@mantine/form";
 import { getApi } from "../../../../api";
 import { Anchor } from "../../../../components";
 import { useState } from "react";
+import { isValidEmail } from "../../../../utilities/validators";
 
 type ForgotPasswordResult = "sent" | "error";
 
@@ -16,7 +17,7 @@ export default function ForgotPassword() {
     },
 
     validate: {
-      email: (value) => (/^\S+@\S+$/.test(value) ? null : "Invalid email"),
+      email: (value) => (isValidEmail(value) ? null : "Invalid email"),
     },
   });
 
