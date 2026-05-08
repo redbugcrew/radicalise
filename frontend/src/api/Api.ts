@@ -280,6 +280,14 @@ export type IntervalsEvent = {
   IntervalCreated: Interval;
 };
 
+export interface InvitePersonRequest {
+  /** @format int64 */
+  circle_id: number;
+  email: string;
+  message?: string | null;
+  name: string;
+}
+
 export interface InvolvementData {
   current_interval?: null | IntervalInvolvementData;
   next_interval?: null | IntervalInvolvementData;
@@ -867,6 +875,22 @@ export class Api<
       this.request<InitialData, any>({
         path: `/api/my_project/state`,
         method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name InvitePerson
+     * @request POST:/api/people/invite
+     */
+    invitePerson: (data: InvitePersonRequest, params: RequestParams = {}) =>
+      this.request<AppEvent[], any>({
+        path: `/api/people/invite`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),

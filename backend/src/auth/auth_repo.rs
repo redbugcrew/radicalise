@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct AuthUser {
     pub id: i64,
     pub email: Option<String>,
@@ -99,6 +99,20 @@ impl<'a> AuthRepo<'a> {
         } else {
             Ok(())
         }
+    }
+
+    pub async fn upsert_user(&self, email: String) -> Result<AuthUser, AuthRepoError> {
+        sqlx::query_as!(
+            AuthUser,
+            "INSERT INTO users (email)
+            VALUES (?)
+            ON CONFLICT(email) DO UPDATE SET email = excluded.email
+            RETURNING id, email, hashed_password",
+            email,
+        )
+        .fetch_one(self.pool)
+        .await
+        .map_err(log_and_return_db_error)
     }
 }
 
