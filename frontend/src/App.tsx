@@ -21,6 +21,7 @@ import {
   ManageMyEoi,
   PublicWithProject,
   Dev,
+  InvitePerson,
 } from "./pages";
 import { buildRoutes as buildAuthRoutes } from "./contexts/auth";
 import { theme } from "./theme";
@@ -31,7 +32,6 @@ import { EditEventTemplate, Events, EventTemplates, NewEventTemplate, NewEvent, 
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
 import { Circles, EditCircle, NewCircle } from "./contexts/circles";
-import InvitePerson from "./pages/people/Invite";
 
 function withStore(func: (store: AppStore) => any, store: AppStore): LoaderFunction<any> {
   const wrappedFunc: LoaderFunction<any> = async () => {
