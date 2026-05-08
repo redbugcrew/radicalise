@@ -6,9 +6,14 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     auth::{auth_backend::AuthSession, auth_repo::AuthRepo},
-    people::events::PeopleEvent,
+    people::{events::PeopleEvent, repo::insert_person},
     realtime::RealtimeState,
-    shared::{default_project_id, entities::Person, events::AppEvent},
+    repo_utilities::InsertRecordError,
+    shared::{
+        default_project_id,
+        entities::{Person, UserId},
+        events::AppEvent,
+    },
 };
 
 pub mod events;
@@ -87,7 +92,33 @@ pub async fn invite_person(
         }
     };
 
-    println!("Auth user: {:?}", auth_user);
+    println!("Auth user: {:?}", (auth_user.id, auth_user.email));
+
+    // Create the person
+    let person = match insert_person(
+        default_project_id(),
+        UserId::new(auth_user.id),
+        input.name.clone(),
+        &pool,
+    )
+    .await
+    {
+        Ok(person) => person,
+        Err(InsertRecordError::RecordAlreadyExists) => {
+            eprintln!("Person already exists for user ID {}", auth_user.id);
+            return (
+                StatusCode::BAD_REQUEST,
+                "This person already exists in the project",
+            )
+                .into_response();
+        }
+        Err(err) => {
+            eprintln!("Error creating person: {}", err);
+            return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
+        }
+    };
+
+    println!("Created person: {:?}", person);
 
     return (StatusCode::OK, Json(Vec::<AppEvent>::new())).into_response();
 }
