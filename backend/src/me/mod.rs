@@ -9,11 +9,11 @@ use crate::{
         my_involvement::{MyParticipationInput, update_my_involvements},
         repo::{MyInitialData, find_person_id_for_user},
     },
-    my_project::involvements_repo::find_project_involvement,
+    my_project::involvements_repo::find_circle_involvement,
     realtime::RealtimeState,
     shared::{
         default_project_id,
-        entities::{IntervalId, ProjectInvolvement, UserId},
+        entities::{CircleId, CircleInvolvement, IntervalId, UserId},
         events::AppEvent,
     },
 };
@@ -55,17 +55,18 @@ async fn get_my_state(
 
 #[utoipa::path(
     get,
-    path = "/participation/interval/{interval_id}",
+    path = "/participation/interval/{interval_id}/circle/{circle_id}",
     params(
-        ("interval_id" = i64, Path, description = "Interval ID")
+        ("interval_id" = i64, Path, description = "Interval ID"),
+        ("circle_id" = i64, Path, description = "Circle ID")
     ),
     responses(
-        (status = 200, description = "Fetched my participation successfully", body = Option<ProjectInvolvement>),
+        (status = 200, description = "Fetched my participation successfully", body = Option<CircleInvolvement>),
         (status = NOT_FOUND, description = "Not found", body = ())
     ),
 )]
 async fn my_participation(
-    Path(interval_id): Path<i64>,
+    Path((interval_id, circle_id)): Path<(i64, i64)>,
     Extension(pool): Extension<SqlitePool>,
     auth_session: AuthSession,
 ) -> impl IntoResponse {
@@ -78,9 +79,21 @@ async fn my_participation(
             }
             let person_id = person_id.unwrap();
             let interval_id = IntervalId::new(interval_id);
+            let circle_id = CircleId::new(circle_id);
 
-            let result =
-                find_project_involvement(default_project_id(), person_id, interval_id, &pool).await;
+            println!(
+                "Fetching my participation for person_id={:?}, interval_id={:?}, circle_id={:?}",
+                person_id, interval_id, circle_id
+            );
+
+            let result = find_circle_involvement(
+                default_project_id(),
+                circle_id,
+                person_id,
+                interval_id,
+                &pool,
+            )
+            .await;
 
             match result {
                 Ok(Some(data)) => (StatusCode::OK, Json(data)).into_response(),
@@ -123,6 +136,7 @@ async fn update_my_participation(
             }
             let person_id = person_id.unwrap();
             let interval_id = IntervalId::new(interval_id);
+            let project_id = default_project_id();
 
             let update_result =
                 update_my_involvements(person_id.clone(), interval_id.clone(), input, &pool).await;
@@ -133,13 +147,9 @@ async fn update_my_participation(
             }
 
             // Fetch the updated involvement to return
-            let output_result = repo::find_interval_data_for_person(
-                default_project_id(),
-                person_id,
-                interval_id,
-                &pool,
-            )
-            .await;
+            let output_result =
+                repo::find_interval_data_for_person(project_id, person_id, interval_id, &pool)
+                    .await;
             match output_result {
                 Ok(interval_data) => {
                     let public_interval_data = strip_private_data(&interval_data);

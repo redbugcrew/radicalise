@@ -7,7 +7,7 @@ use crate::{
     },
     intervals::repo::{IntervalType, find_interval, get_interval_type},
     me::repo::{self},
-    my_project::involvements_repo::{ProjectInvolvementRecord, upsert_project_involvement},
+    my_project::involvements_repo::{CircleInvolvementRecord, upsert_circle_involvement},
     shared::entities::{
         CrewId, CrewInvolvement, IntervalId, InvolvementStatus, OptOutType, ParticipationIntention,
         PersonId,
@@ -17,6 +17,7 @@ use crate::{
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct MyParticipationInput {
     pub project_id: i64,
+    pub circle_id: i64,
     pub private_capacity_planning: bool,
     pub wellbeing: Option<String>,
     pub focus: Option<String>,
@@ -34,13 +35,13 @@ pub fn calculate_status(
     opt_out_type: Option<OptOutType>,
 ) -> InvolvementStatus {
     match participation_intention {
-        Some(ParticipationIntention::OptIn) => InvolvementStatus::Participating,
+        Some(ParticipationIntention::OptIn) => InvolvementStatus::Active,
         Some(ParticipationIntention::OptOut) => match opt_out_type {
             Some(OptOutType::Hiatus) => InvolvementStatus::OnHiatus,
             Some(OptOutType::Exit) => InvolvementStatus::Exiting,
             None => InvolvementStatus::OnHiatus, // Default to OnHiatus if no opt-out type is set
         },
-        None => InvolvementStatus::Participating, // We might revisit this later
+        None => InvolvementStatus::Active, // We might revisit this later
     }
 }
 
@@ -62,11 +63,12 @@ pub async fn update_my_involvements(
         return Err(past_interval_error());
     }
 
-    upsert_project_involvement(
-        ProjectInvolvementRecord {
+    upsert_circle_involvement(
+        CircleInvolvementRecord {
             id: -1, // ID will be auto-generated
             person_id: person_id.id,
             project_id: input.project_id,
+            circle_id: input.circle_id,
             interval_id: interval_id.id,
             status,
             private_capacity_planning: input.private_capacity_planning,

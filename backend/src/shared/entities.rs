@@ -95,7 +95,7 @@ impl Interval {
 
 #[derive(Serialize, Deserialize, ToSchema, sqlx::Type, Clone, Debug)]
 pub enum InvolvementStatus {
-    Participating,
+    Active,
     OnHiatus,
     Exiting,
 }
@@ -105,7 +105,7 @@ impl FromStr for InvolvementStatus {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "Participating" => Ok(InvolvementStatus::Participating),
+            "Active" => Ok(InvolvementStatus::Active),
             "OnHiatus" => Ok(InvolvementStatus::OnHiatus),
             "Exiting" => Ok(InvolvementStatus::Exiting),
             _ => Err(()),
@@ -230,10 +230,11 @@ pub struct CapacityPlanning {
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Clone, Debug)]
-pub struct ProjectInvolvement {
+pub struct CircleInvolvement {
     pub id: i64,
     pub person_id: i64,
     pub project_id: i64,
+    pub circle_id: i64,
     pub interval_id: i64,
     pub status: InvolvementStatus,
     pub private_capacity_planning: bool,
@@ -244,6 +245,31 @@ pub struct ProjectInvolvement {
     pub opt_out_planned_return_date: Option<String>,
     pub intention_context: Option<String>,
     pub implicit_counter: i64,
+}
+
+#[derive(Serialize, Deserialize, ToSchema, Clone, Debug)]
+pub struct Circle {
+    pub id: i64,
+    pub project_id: i64,
+    pub name: String,
+    pub slug: String,
+}
+
+impl Circle {
+    pub fn typed_id(&self) -> CircleId {
+        CircleId::new(self.id)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct CircleId {
+    pub id: i64,
+}
+
+impl CircleId {
+    pub fn new(id: i64) -> Self {
+        CircleId { id }
+    }
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Debug)]

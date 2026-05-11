@@ -16,7 +16,7 @@ export default function CrewForm({ crew, onSubmit }: CrewFormProps) {
     validate: {
       name: (value) => (value ? null : "Name is required"),
       description: (value) => (value ? null : "Description is required"),
-      links: optionalLinksValidator,
+      links: optionalLinksValidator as (value: unknown) => string | null,
     },
   });
 

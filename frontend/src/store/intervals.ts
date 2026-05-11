@@ -7,6 +7,10 @@ export type IntervalsState = {
   currentInterval: Interval | null;
 };
 
+export function intervalById(state: IntervalsState, id: number): Interval | null {
+  return state.allIntervals.find((interval) => interval.id === id) || null;
+}
+
 export function findPreviousInterval(intervals: Interval[], currentIntervalId: number): Interval | null {
   const currentIndex = intervals.findIndex((i) => i.id === currentIntervalId);
   if (currentIndex <= 0) return null;

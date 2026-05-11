@@ -1,6 +1,7 @@
 import { useDispatch, useSelector, useStore } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
 import projectReducer, { projectLoaded, projectUpdated } from "./project";
+import circlesReducer, { circlesLoaded, circleUpdated } from "./circles";
 import peopleReducer, { peopleLoaded, personUpdated } from "./people";
 import intervalsReducer, { intervalsLoaded, intervalCreated } from "./intervals";
 import involvementsReducer, { involvementsLoaded, intervalDataChanged } from "./involvements";
@@ -11,11 +12,12 @@ import eventsReducer, { eventsLoaded, eventUpdated, singleAttendanceUpdate } fro
 import meReducer, { meLoaded } from "./me";
 import { getApi } from "../api";
 import { redirect } from "react-router-dom";
-import type { AppEvent, CalendarEventAttendancesEvent, CalendarEventsEvent, ProjectEvent, CrewsEvent, EntryPathwayEvent, EventTemplatesEvent, IntervalsEvent, MeEvent, PeopleEvent } from "../api/Api";
+import type { AppEvent, CalendarEventAttendancesEvent, CalendarEventsEvent, ProjectEvent, CrewsEvent, EntryPathwayEvent, EventTemplatesEvent, IntervalsEvent, MeEvent, PeopleEvent, CirclesEvent } from "../api/Api";
 
 const store = configureStore({
   reducer: {
     project: projectReducer,
+    circles: circlesReducer,
     people: peopleReducer,
     intervals: intervalsReducer,
     involvements: involvementsReducer,
@@ -44,6 +46,7 @@ async function loadProjectData(store: AppStore, api: ReturnType<typeof getApi>):
   return api.api
     .getProjectState()
     .then((response) => {
+      store.dispatch(circlesLoaded(response.data.circles));
       store.dispatch(peopleLoaded(response.data.people));
       store.dispatch(crewsLoaded(response.data.crews));
       store.dispatch(intervalsLoaded({ allIntervals: response.data.intervals, currentInterval: response.data.current_interval }));
@@ -150,6 +153,12 @@ export async function handleCalendarEventAttendancesEvent(event: CalendarEventAt
   }
 }
 
+export async function handleCirclesEvent(event: CirclesEvent) {
+  if (event.CircleUpdated) {
+    store.dispatch(circleUpdated(event.CircleUpdated));
+  }
+}
+
 export async function handleAppEvent(event: AppEvent) {
   console.log("Handling AppEvent:", event);
 
@@ -171,6 +180,8 @@ export async function handleAppEvent(event: AppEvent) {
     handleEventsEvent(event.CalendarEventsEvent);
   } else if ("CalendarEventAttendancesEvent" in event && event.CalendarEventAttendancesEvent) {
     handleCalendarEventAttendancesEvent(event.CalendarEventAttendancesEvent);
+  } else if ("CirclesEvent" in event && event.CirclesEvent) {
+    handleCirclesEvent(event.CirclesEvent);
   } else {
     console.warn("Unknown event type:", event);
   }

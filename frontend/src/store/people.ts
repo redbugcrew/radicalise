@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { Person } from "../api/Api";
+
 export interface PeopleObjectMap {
   [key: number]: Person;
 }

@@ -6,8 +6,7 @@ use crate::{
     auth::auth_backend::AuthSession,
     my_project::{
         events::ProjectEvent,
-        involvements_repo::find_all_project_involvements,
-        repo::{InitialData, IntervalInvolvementData},
+        repo::{InitialData, IntervalInvolvementData, find_interval_involvement_data},
     },
     realtime::RealtimeState,
     shared::{
@@ -74,21 +73,18 @@ async fn get_involvements(
 ) -> impl IntoResponse {
     let interval_id = IntervalId::new(interval_id);
 
-    let project_involvements_result =
-        find_all_project_involvements(default_project_id(), interval_id.clone(), &pool).await;
-    let crew_involvements_result =
-        repo::find_all_crew_involvements(interval_id.clone(), &pool).await;
-
-    if project_involvements_result.is_err() || crew_involvements_result.is_err() {
-        return (StatusCode::NOT_FOUND, ()).into_response();
-    }
-    let project_involvements = project_involvements_result.unwrap();
-    let crew_involvements = crew_involvements_result.unwrap();
-
-    let result = IntervalInvolvementData {
-        interval_id: interval_id.id,
-        project_involvements,
-        crew_involvements,
+    let result = match find_interval_involvement_data(
+        interval_id.clone(),
+        default_project_id(),
+        &pool,
+    )
+    .await
+    {
+        Ok(data) => data,
+        Err(e) => {
+            eprintln!("Error fetching involvement data: {:?}", e);
+            return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
+        }
     };
 
     return (StatusCode::OK, Json(result)).into_response();

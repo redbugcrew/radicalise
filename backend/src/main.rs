@@ -28,6 +28,7 @@ mod api;
 mod auth;
 mod calendar_event_attendances;
 mod calendar_events;
+mod circles;
 mod crews;
 mod database;
 mod dev;

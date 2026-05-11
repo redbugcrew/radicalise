@@ -1,5 +1,5 @@
-.user_section {
-  padding: var(--mantine-spacing-md) 0;
+.main_container {
+  position: relative;
 }
 
 .settings_section {

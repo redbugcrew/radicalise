@@ -25,5 +25,9 @@
   "editor.wordWrapColumn": 180,
   "[rust]": {
     "editor.defaultFormatter": "rust-lang.rust-analyzer"
-  }
+  },
+  "files.associations": {
+    "*.module.css": "postcss"
+  },
+  "css.validate": false
 }

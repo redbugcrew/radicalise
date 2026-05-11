@@ -20,3 +20,4 @@ export { default as EntryPathwaysTable } from "./entry_pathways/EntryPathwaysTab
 export { default as DateText } from "./DateText";
 export { default as TimeRangeText } from "./TimeRangeText";
 export { default as NoData } from "./NoData";
+export { default as CircleSelector } from "./CircleSelector/CircleSelector";

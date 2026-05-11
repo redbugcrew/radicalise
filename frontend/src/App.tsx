@@ -30,6 +30,7 @@ import { EditEventTemplate, Events, EventTemplates, NewEventTemplate, NewEvent, 
 // All packages except `@mantine/hooks` require styles imports
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
+import { Circles, EditCircle, NewCircle } from "./contexts/circles";
 
 function withStore(func: (store: AppStore) => any, store: AppStore): LoaderFunction<any> {
   const wrappedFunc: LoaderFunction<any> = async () => {
@@ -53,25 +54,53 @@ const router = createBrowserRouter([
         element: <Dashboard />,
       },
       {
-        path: "project/edit",
-        element: <EditProject />,
+        path: "project_settings",
+        children: [
+          {
+            path: "edit",
+            element: <EditProject />,
+          },
+          {
+            path: "circles",
+            children: [
+              {
+                path: "",
+                element: <Circles />,
+              },
+              {
+                path: "new",
+                element: <NewCircle />,
+              },
+              {
+                path: ":circleSlug/edit",
+                element: <EditCircle />,
+              },
+            ],
+          },
+        ],
       },
       {
         path: "people",
-        element: <People />,
+        children: [
+          {
+            path: "",
+            element: <People />,
+          },
+          {
+            path: "new",
+            element: <NewPerson />,
+          },
+          {
+            path: ":personId/edit",
+            element: <EditPerson />,
+          },
+          {
+            path: ":personId",
+            element: <Person />,
+          },
+        ],
       },
-      {
-        path: "people/new",
-        element: <NewPerson />,
-      },
-      {
-        path: "people/:personId/edit",
-        element: <EditPerson />,
-      },
-      {
-        path: "people/:personId",
-        element: <Person />,
-      },
+
       {
         path: "crews",
         element: <Crews />,

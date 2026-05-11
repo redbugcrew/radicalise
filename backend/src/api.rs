@@ -14,6 +14,7 @@ pub fn private_api_router() -> OpenApiRouter {
             "/calendar_event_attendances",
             crate::calendar_event_attendances::router(),
         )
+        .nest("/circles", crate::circles::router())
 }
 
 pub fn public_api_router() -> OpenApiRouter {

@@ -47,7 +47,7 @@ export default function ProjectForm({ project, crews, onSubmit }: ProjectFormPro
     validate: {
       name: (value) => (value ? null : "Name is required"),
       noun_name: (value) => (value ? null : "Noun name is required"),
-      slug: (value) => (!value || /^[a-z0-9\-]+$/.test(value) ? null : "Slug may only inlcude lowercase letters, numbers, and hyphens fragement"),
+      slug: (value) => (!value || /^[a-z0-9\-]+$/.test(value) ? null : "Slug may only include lowercase letters, numbers, and hyphens"),
       links: linksValidator,
     },
   });
