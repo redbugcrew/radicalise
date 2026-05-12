@@ -1,8 +1,11 @@
 use sqlx::SqlitePool;
 
-use crate::shared::entities::{
-    CircleId, CircleInvolvement, IntervalId, InvolvementStatus, OptOutType, ParticipationIntention,
-    PersonId, ProjectId,
+use crate::{
+    repo_utilities::InsertRecordError,
+    shared::entities::{
+        CircleId, CircleInvolvement, IntervalId, InvolvementStatus, OptOutType,
+        ParticipationIntention, PersonId, ProjectId,
+    },
 };
 
 #[derive(Debug, Clone)]
@@ -253,15 +256,14 @@ pub async fn upsert_circle_involvement(
     }
 }
 
-pub async fn insert_circle_involvement_if_missing(
+pub async fn insert_circle_involvement(
     involvement: CircleInvolvementRecord,
     pool: &SqlitePool,
-) -> Result<(), sqlx::Error> {
-    sqlx::query!(
+) -> Result<CircleInvolvementRecord, InsertRecordError> {
+    let result = sqlx::query!(
         "INSERT INTO circle_involvements (person_id, circle_id, interval_id, status, private_capacity_planning, wellbeing, focus, capacity_score, capacity, participation_intention, opt_out_type, opt_out_planned_return_date,
         intention_context, implicit_counter)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(person_id, circle_id, interval_id) DO NOTHING",
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         involvement.person_id,
         involvement.circle_id,
         involvement.interval_id,
@@ -278,9 +280,28 @@ pub async fn insert_circle_involvement_if_missing(
         involvement.implicit_counter
     )
     .execute(pool)
-    .await?;
+    .await.map_err(InsertRecordError::from)?;
 
-    Ok(())
+    if result.rows_affected() == 0 {
+        return Err(InsertRecordError::DatabaseError);
+    } else {
+        let record = CircleInvolvementRecord {
+            id: result.last_insert_rowid(),
+            ..involvement
+        };
+        Ok(record)
+    }
+}
+
+pub async fn insert_circle_involvement_if_missing(
+    involvement: CircleInvolvementRecord,
+    pool: &SqlitePool,
+) -> Result<(), InsertRecordError> {
+    match insert_circle_involvement(involvement, pool).await {
+        Ok(_) => Ok(()),
+        Err(InsertRecordError::RecordAlreadyExists) => Ok(()), // Ignore if it already exists
+        Err(InsertRecordError::DatabaseError) => Err(InsertRecordError::DatabaseError),
+    }
 }
 
 pub async fn delete_implicit_circle_involvements(
