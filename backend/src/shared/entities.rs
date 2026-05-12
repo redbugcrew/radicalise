@@ -98,6 +98,7 @@ pub enum InvolvementStatus {
     Active,
     OnHiatus,
     Exiting,
+    Invited,
 }
 
 impl FromStr for InvolvementStatus {
@@ -108,6 +109,7 @@ impl FromStr for InvolvementStatus {
             "Active" => Ok(InvolvementStatus::Active),
             "OnHiatus" => Ok(InvolvementStatus::OnHiatus),
             "Exiting" => Ok(InvolvementStatus::Exiting),
+            "Invited" => Ok(InvolvementStatus::Invited),
             _ => Err(()),
         }
     }
@@ -245,6 +247,27 @@ pub struct CircleInvolvement {
     pub opt_out_planned_return_date: Option<String>,
     pub intention_context: Option<String>,
     pub implicit_counter: i64,
+}
+
+impl Default for CircleInvolvement {
+    fn default() -> Self {
+        CircleInvolvement {
+            id: 0,
+            person_id: 0,
+            project_id: 0,
+            circle_id: 0,
+            interval_id: 0,
+            status: InvolvementStatus::Active,
+            private_capacity_planning: false,
+            capacity_planning: None,
+            capacity_score: None,
+            participation_intention: None,
+            opt_out_type: None,
+            opt_out_planned_return_date: None,
+            intention_context: None,
+            implicit_counter: 0,
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Clone, Debug)]

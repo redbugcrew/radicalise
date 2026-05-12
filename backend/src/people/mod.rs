@@ -6,17 +6,25 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     auth::{auth_backend::AuthSession, auth_repo::AuthRepo},
-    people::{events::PeopleEvent, repo::insert_person},
+    circles::repo::find_circle_by_id,
+    intervals::repo::find_current_interval,
+    my_project::involvements_repo::insert_circle_involvement,
+    people::{
+        events::PeopleEvent,
+        invitatations_service::{InvitePersonError, InvitePersonRequest},
+        repo::insert_person,
+    },
     realtime::RealtimeState,
     repo_utilities::InsertRecordError,
     shared::{
         default_project_id,
-        entities::{Person, UserId},
+        entities::{CircleId, CircleInvolvement, InvolvementStatus, Person, UserId},
         events::AppEvent,
     },
 };
 
 pub mod events;
+mod invitatations_service;
 pub mod repo;
 
 pub fn router() -> OpenApiRouter {
@@ -58,67 +66,34 @@ pub async fn update_person(
     }
 }
 
-#[derive(Deserialize, ToSchema, Debug)]
-pub struct InvitePersonRequest {
-    name: String,
-    email: String,
-    circle_id: i64,
-    message: Option<String>,
-}
-
 #[utoipa::path(post, path = "/invite",
     request_body(content = InvitePersonRequest, content_type = "application/json"),
     responses(
         (status = 200, body = Vec<AppEvent>),
         (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
-        (status = BAD_REQUEST,  body = ()),
+        (status = BAD_REQUEST,  body = String),
     ),
 )]
 pub async fn invite_person(
     Extension(pool): Extension<SqlitePool>,
-    Extension(realtime_state): Extension<RealtimeState>,
-    auth_session: AuthSession,
+    // Extension(realtime_state): Extension<RealtimeState>,
+    // auth_session: AuthSession,
     Json(input): Json<InvitePersonRequest>,
 ) -> impl IntoResponse {
     println!("Inviting person: {:?}", input);
 
-    // Create user if they don't already exist
-    let auth_repo = AuthRepo::new(&pool);
-    let auth_user = match auth_repo.upsert_user(input.email.clone()).await {
-        Ok(user) => user,
-        Err(err) => {
-            eprintln!("Error creating user: {}", err);
-            return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
+    let result = invitatations_service::invite_person(&pool, &input, default_project_id()).await;
+
+    match result {
+        Ok(_) => (StatusCode::OK, Json(Vec::<AppEvent>::new())).into_response(),
+        Err(InvitePersonError::ContextInvalid) => {
+            (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response()
         }
-    };
-
-    println!("Auth user: {:?}", (auth_user.id, auth_user.email));
-
-    // Create the person
-    let person = match insert_person(
-        default_project_id(),
-        UserId::new(auth_user.id),
-        input.name.clone(),
-        &pool,
-    )
-    .await
-    {
-        Ok(person) => person,
-        Err(InsertRecordError::RecordAlreadyExists) => {
-            eprintln!("Person already exists for user ID {}", auth_user.id);
-            return (
-                StatusCode::BAD_REQUEST,
-                "This person already exists in the project",
-            )
-                .into_response();
+        Err(InvitePersonError::InputInvalid) => {
+            (StatusCode::BAD_REQUEST, "Invalid input").into_response()
         }
-        Err(err) => {
-            eprintln!("Error creating person: {}", err);
-            return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
+        Err(InvitePersonError::DatabaseError) => {
+            (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response()
         }
-    };
-
-    println!("Created person: {:?}", person);
-
-    return (StatusCode::OK, Json(Vec::<AppEvent>::new())).into_response();
+    }
 }
