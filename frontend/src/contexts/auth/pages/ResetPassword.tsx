@@ -1,8 +1,8 @@
-import { Button, Container, Paper, PasswordInput, Title } from "@mantine/core";
-import classes from "../Auth.module.css";
+import { Button, Container, PasswordInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { getApi } from "../../../api";
+import AuthLayout from "../components/AuthLayout";
 
 export default function ResetPassword() {
   const [searchParams, _setSearchParams] = useSearchParams();
@@ -42,19 +42,13 @@ export default function ResetPassword() {
   };
 
   return (
-    <Container size={420} my={40}>
+    <AuthLayout title="Reset your password">
       <form onSubmit={form.onSubmit(onSubmit)}>
-        <Title ta="center" className={classes.title}>
-          Reset your password
-        </Title>
-
-        <Paper withBorder shadow="sm" p={22} mt={30} radius="md">
-          <PasswordInput label="New password" placeholder="Your new password" required radius="md" key={form.key("password")} {...form.getInputProps("password")} />
-          <Button type="submit" fullWidth mt="xl" radius="md">
-            Submit
-          </Button>
-        </Paper>
+        <PasswordInput label="New password" placeholder="Your new password" required radius="md" key={form.key("password")} {...form.getInputProps("password")} />
+        <Button type="submit" fullWidth mt="xl" radius="md">
+          Submit
+        </Button>
       </form>
-    </Container>
+    </AuthLayout>
   );
 }

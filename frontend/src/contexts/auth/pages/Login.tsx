@@ -1,10 +1,10 @@
-import { Button, Container, Group, Paper, PasswordInput, TextInput, Title } from "@mantine/core";
-import classes from "../Auth.module.css";
+import { Button, Group, PasswordInput, TextInput } from "@mantine/core";
 import { Anchor } from "../../../components";
 import { useForm } from "@mantine/form";
 import { getApi } from "../../../api";
 import { useNavigate } from "react-router-dom";
 import { isValidEmail } from "../../../utilities/validators";
+import AuthLayout from "../components/AuthLayout";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -39,26 +39,19 @@ export default function Login() {
   };
 
   return (
-    <Container size={420} my={40}>
+    <AuthLayout title="Welcome back!">
       <form onSubmit={form.onSubmit(onSubmit)}>
-        {/* The form submission handler should be replaced with actual login logic */}
-        <Title ta="center" className={classes.title}>
-          Welcome back!
-        </Title>
-
-        <Paper withBorder shadow="sm" p={22} mt={30} radius="md">
-          <TextInput label="Email" placeholder="Your email" required radius="md" {...form.getInputProps("email")} />
-          <PasswordInput label="Password" placeholder="Your password" required mt="md" radius="md" {...form.getInputProps("password")} />
-          <Group justify="space-between" mt="lg">
-            <Anchor href="../forgot_password" size="sm">
-              Forgot password?
-            </Anchor>
-          </Group>
-          <Button fullWidth mt="xl" radius="md" type="submit">
-            Sign in
-          </Button>
-        </Paper>
+        <TextInput label="Email" placeholder="Your email" required radius="md" {...form.getInputProps("email")} />
+        <PasswordInput label="Password" placeholder="Your password" required mt="md" radius="md" {...form.getInputProps("password")} />
+        <Group justify="space-between" mt="lg">
+          <Anchor href="../forgot_password" size="sm">
+            Forgot password?
+          </Anchor>
+        </Group>
+        <Button fullWidth mt="xl" radius="md" type="submit">
+          Sign in
+        </Button>
       </form>
-    </Container>
+    </AuthLayout>
   );
 }

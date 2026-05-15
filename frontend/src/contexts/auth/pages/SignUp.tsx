@@ -1,9 +1,10 @@
-import { Container, Title } from "@mantine/core";
+import { Text } from "@mantine/core";
+import AuthLayout from "../components/AuthLayout";
 
 export default function SignUp() {
   return (
-    <Container size={420} my={40}>
-      <Title>Create your account</Title>
-    </Container>
+    <AuthLayout title="Create your account">
+      <Text>todo</Text>
+    </AuthLayout>
   );
 }
