@@ -11,7 +11,7 @@ use crate::{
     intervals::repo::find_current_interval,
     my_project::involvements_repo::insert_circle_involvement_if_missing,
     people::{
-        circle_invitations_repo::insert_circle_invitation,
+        circle_invitations_repo::{insert_circle_invitation, mark_circle_invitation_as_sent},
         emails::{InvitedToCircleEmailParams, invited_to_circle_email},
         repo::{find_or_insert_person, find_person_by_user_id},
     },
@@ -149,6 +149,11 @@ async fn invite_person_inner(
         eprintln!("Error sending invitation email: {:?}", err);
         InvitePersonError::EmailError
     })?;
+
+    // Mark the invitation as sent
+    mark_circle_invitation_as_sent(circle_invitation.id, pool)
+        .await
+        .map_err(|_| InvitePersonError::DatabaseError)?;
 
     Ok(())
 }

@@ -38,3 +38,20 @@ pub async fn insert_circle_invitation(
 
     Ok(result)
 }
+
+pub async fn mark_circle_invitation_as_sent(
+    invitation_id: i64,
+    pool: &SqlitePool,
+) -> Result<(), sqlx::Error> {
+    sqlx::query(
+        r#"
+        UPDATE circle_invitations
+        SET sent_at = CURRENT_TIMESTAMP
+        WHERE id = ?"#,
+    )
+    .bind(invitation_id)
+    .execute(pool)
+    .await?;
+
+    Ok(())
+}
