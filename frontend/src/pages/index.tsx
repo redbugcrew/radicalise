@@ -3,6 +3,7 @@ export { default as Person } from "./people/Person";
 export { default as Dashboard } from "./Dashboard/Dashboard";
 export { default as EditPerson } from "./people/EditPerson";
 export { default as InvitePerson } from "./invitations/InvitePerson";
+export { default as AcceptInvitation } from "./invitations/AcceptInvitation";
 export { default as Layout } from "./Layout/Layout";
 export { default as MyParticipation } from "./MyParticipation";
 export { default as Crews } from "./crews/Crews";

@@ -22,6 +22,7 @@ import {
   PublicWithProject,
   Dev,
   InvitePerson,
+  AcceptInvitation,
 } from "./pages";
 import { buildRoutes as buildAuthRoutes } from "./contexts/auth";
 import { theme } from "./theme";
@@ -194,6 +195,15 @@ const router = createBrowserRouter([
       {
         path: "interest/:authToken",
         element: <ManageMyEoi />,
+      },
+      {
+        path: "invitations",
+        children: [
+          {
+            path: "accept",
+            element: <AcceptInvitation />,
+          },
+        ],
       },
     ],
   },
