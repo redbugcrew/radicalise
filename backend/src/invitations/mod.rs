@@ -7,16 +7,17 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     auth::auth_backend::AuthSession,
+    circles::repo::find_circle_by_id,
     invitations::{
         circle_invitations_repo::find_circle_invitation_by_token,
         invitatations_service::{InvitePersonError, InvitePersonRequest},
     },
-    my_project::events::ProjectEvent,
+    my_project::{events::ProjectEvent, repo::find_project},
     people::events::PeopleEvent,
     realtime::RealtimeState,
     shared::{
         default_project_id,
-        entities::{CircleInvitation, Person, UserId},
+        entities::{Circle, CircleId, CircleInvitation, Person, Project, ProjectId, UserId},
         events::AppEvent,
     },
 };
@@ -104,9 +105,16 @@ pub async fn invite_person(
     (StatusCode::OK, Json(response)).into_response()
 }
 
+#[derive(Serialize, ToSchema)]
+pub struct CircleInvitationDetails {
+    pub invitation: CircleInvitation,
+    pub project: Project,
+    pub circle: Circle,
+}
+
 #[utoipa::path(get, path = "/invitation/{token}",
     responses(
-        (status = 200, body = CircleInvitation),
+        (status = 200, body = CircleInvitationDetails),
         (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
         (status = BAD_REQUEST,  body = String),
     ),
@@ -118,10 +126,28 @@ pub async fn get_invitation(
     Path(token): Path<String>,
     Extension(pool): Extension<SqlitePool>,
 ) -> impl IntoResponse {
-    let invitation_result = find_circle_invitation_by_token(token, &pool).await;
+    let invitation = match find_circle_invitation_by_token(token, &pool).await {
+        Ok(invitation) => invitation,
+        Err(_) => return (StatusCode::NOT_FOUND, ()).into_response(),
+    };
 
-    match invitation_result {
-        Ok(invitation) => (StatusCode::OK, Json(invitation)).into_response(),
-        Err(_) => (StatusCode::NOT_FOUND, ()).into_response(),
-    }
+    let circle = match find_circle_by_id(CircleId::new(invitation.circle_id), &pool).await {
+        Ok(circle) => circle,
+        Err(_) => return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
+    };
+
+    let project = match find_project(ProjectId::new(circle.project_id), &pool).await {
+        Ok(project) => project,
+        Err(_) => return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
+    };
+
+    (
+        StatusCode::OK,
+        Json(CircleInvitationDetails {
+            invitation,
+            project,
+            circle,
+        }),
+    )
+        .into_response()
 }

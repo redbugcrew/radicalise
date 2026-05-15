@@ -143,6 +143,12 @@ export interface CircleInvitation {
   sent_at?: string | null;
 }
 
+export interface CircleInvitationDetails {
+  circle: Circle;
+  invitation: CircleInvitation;
+  project: Project;
+}
+
 export interface CircleInvolvement {
   capacity_planning?: null | CapacityPlanning;
   /** @format int64 */
@@ -963,7 +969,7 @@ export class Api<
      * @request GET:/api/public/invitation/{token}
      */
     getInvitation: (token: string, params: RequestParams = {}) =>
-      this.request<CircleInvitation, string>({
+      this.request<CircleInvitationDetails, string>({
         path: `/api/public/invitation/${token}`,
         method: "GET",
         format: "json",

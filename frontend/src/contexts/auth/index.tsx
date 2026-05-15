@@ -1,8 +1,7 @@
 import ForgotPassword from "./pages/ForgotPassword/ForgotPassword";
 import Login from "./pages/Login";
+import SignUp from "./pages/SignUp";
 import ResetPassword from "./pages/ResetPassword";
-
-export { ForgotPassword, ResetPassword, Login };
 
 export function buildRoutes() {
   return [
@@ -17,6 +16,10 @@ export function buildRoutes() {
     {
       path: "reset_password",
       element: <ResetPassword />,
+    },
+    {
+      path: "signup",
+      element: <SignUp />,
     },
   ];
 }

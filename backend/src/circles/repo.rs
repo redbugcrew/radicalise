@@ -36,16 +36,14 @@ pub async fn find_all_circles_ids(
 
 pub async fn find_circle_by_id(
     circle_id: CircleId,
-    project_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Circle, sqlx::Error> {
     sqlx::query_as!(
         Circle,
         "SELECT id as \"id: i64\", project_id as \"project_id: i64\", name, slug
         FROM circles
-        WHERE id = ? AND project_id = ?",
-        circle_id.id,
-        project_id.id
+        WHERE id = ?",
+        circle_id.id
     )
     .fetch_one(pool)
     .await

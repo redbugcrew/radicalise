@@ -73,7 +73,7 @@ async fn invite_person_inner(
         .map_err(|_| InvitePersonError::ContextInvalid)?;
 
     // Find the circle
-    let circle = find_circle_by_id(CircleId::new(input.circle_id), project_id.clone(), &pool)
+    let circle = find_circle_by_id(CircleId::new(input.circle_id), &pool)
         .await
         .map_err(|_| InvitePersonError::ContextInvalid)?;
 
