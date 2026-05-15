@@ -295,6 +295,19 @@ impl CircleId {
     }
 }
 
+#[derive(Serialize, Deserialize, ToSchema, Clone, Debug, sqlx::FromRow)]
+pub struct CircleInvitation {
+    pub id: i64,
+    pub circle_id: i64,
+    pub person_id: i64,
+    pub invitee_email: String,
+    pub message: Option<String>,
+    pub invitation_token: String,
+    pub created_at: String,
+    pub sent_at: Option<String>,
+    pub expires_at: String,
+}
+
 #[derive(Serialize, Deserialize, ToSchema, Debug)]
 pub struct Crew {
     pub id: i64,

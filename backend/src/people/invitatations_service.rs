@@ -1,16 +1,22 @@
+use chrono::Duration;
 use serde::Deserialize;
 use sqlx::SqlitePool;
 use utoipa::ToSchema;
+use uuid::Uuid;
 
 use crate::{
     auth::auth_repo::AuthRepo,
     circles::repo::find_circle_by_id,
     intervals::repo::find_current_interval,
     my_project::involvements_repo::insert_circle_involvement_if_missing,
-    people::repo::find_or_insert_person,
+    people::{circle_invitations_repo::insert_circle_invitation, repo::find_or_insert_person},
     repo_utilities::InsertRecordError,
-    shared::entities::{CircleId, CircleInvolvement, InvolvementStatus, ProjectId, UserId},
+    shared::entities::{
+        CircleId, CircleInvolvement, InvolvementStatus, PersonId, ProjectId, UserId,
+    },
 };
+
+const INVITATION_EXPIRATION_DAYS: i64 = 30;
 
 #[derive(Deserialize, ToSchema, Debug)]
 pub struct InvitePersonRequest {
@@ -88,14 +94,29 @@ async fn invite_person_inner(
         status: InvolvementStatus::Invited,
         ..Default::default()
     };
-    let involvement_record = insert_circle_involvement_if_missing(new_involvement.into(), &pool)
+    let _involvement_record = insert_circle_involvement_if_missing(new_involvement.into(), &pool)
         .await
         .map_err(|err| match err {
             InsertRecordError::RecordAlreadyExists => InvitePersonError::InputInvalid,
             InsertRecordError::DatabaseError => InvitePersonError::DatabaseError,
         })?;
 
-    println!("Created circle involvement: {:?}", involvement_record);
+    // Create the circle invitation
+    let invitation_token = Uuid::new_v4().to_string();
+    let expires_at = (chrono::Utc::now() + Duration::days(INVITATION_EXPIRATION_DAYS)).to_rfc3339();
+    let circle_invitation = insert_circle_invitation(
+        CircleId::new(circle.id),
+        PersonId::new(person.id),
+        input.email.clone(),
+        input.message.clone(),
+        invitation_token,
+        expires_at,
+        pool,
+    )
+    .await
+    .map_err(|_| InvitePersonError::DatabaseError)?;
+
+    println!("Created circle invitation: {:?}", circle_invitation);
 
     Ok(())
 }

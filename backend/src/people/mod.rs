@@ -23,6 +23,7 @@ use crate::{
     },
 };
 
+mod circle_invitations_repo;
 pub mod events;
 mod invitatations_service;
 pub mod repo;
