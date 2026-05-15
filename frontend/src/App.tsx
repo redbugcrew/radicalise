@@ -2,6 +2,7 @@ import { Navigate, RouterProvider, createBrowserRouter, type LoaderFunction } fr
 import { Provider as ReduxProvider } from "react-redux";
 import store, { loadInitialData, type AppStore } from "./store";
 import { MantineProvider } from "@mantine/core";
+import { Notifications } from "@mantine/notifications";
 import {
   EditPerson,
   CreateEoi,
@@ -31,6 +32,7 @@ import { EditEventTemplate, Events, EventTemplates, NewEventTemplate, NewEvent, 
 // All packages except `@mantine/hooks` require styles imports
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
+import "@mantine/notifications/styles.css";
 import { Circles, EditCircle, NewCircle } from "./contexts/circles";
 
 function withStore(func: (store: AppStore) => any, store: AppStore): LoaderFunction<any> {
@@ -201,6 +203,7 @@ const router = createBrowserRouter([
 function App() {
   return (
     <MantineProvider defaultColorScheme="dark" theme={theme}>
+      <Notifications />
       <ReduxProvider store={store}>
         <RouterProvider router={router} />
       </ReduxProvider>

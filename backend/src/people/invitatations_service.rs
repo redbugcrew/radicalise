@@ -11,7 +11,7 @@ use crate::{
     intervals::repo::find_current_interval,
     my_project::involvements_repo::insert_circle_involvement_if_missing,
     people::{
-        circle_invitations_repo::{insert_circle_invitation, mark_circle_invitation_as_sent},
+        circle_invitations_repo::{mark_circle_invitation_as_sent, upsert_circle_invitation},
         emails::{InvitedToCircleEmailParams, invited_to_circle_email},
         repo::{find_or_insert_person, find_person_by_user_id},
     },
@@ -119,7 +119,7 @@ async fn invite_person_inner(
     // Create the circle invitation
     let invitation_token = Uuid::new_v4().to_string();
     let expires_at = (chrono::Utc::now() + Duration::days(INVITATION_EXPIRATION_DAYS)).to_rfc3339();
-    let circle_invitation = insert_circle_invitation(
+    let circle_invitation = upsert_circle_invitation(
         CircleId::new(circle.id),
         PersonId::new(person.id),
         input.email.clone(),

@@ -5,7 +5,7 @@ use crate::{
     shared::entities::{CircleId, CircleInvitation, PersonId},
 };
 
-pub async fn insert_circle_invitation(
+pub async fn upsert_circle_invitation(
     circle_id: CircleId,
     person_id: PersonId,
     invitee_email: String,
@@ -25,6 +25,10 @@ pub async fn insert_circle_invitation(
             expires_at
         )
         VALUES (?, ?, ?, ?, ?, ?)
+        ON CONFLICT(circle_id, person_id) DO UPDATE SET
+            invitee_email = excluded.invitee_email,
+            message = excluded.message,
+            expires_at = excluded.expires_at
         RETURNING *"#,
     )
     .bind(circle_id.id)

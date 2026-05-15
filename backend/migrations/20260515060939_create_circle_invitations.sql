@@ -12,5 +12,6 @@ CREATE TABLE circle_invitations (
     expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
     PRIMARY KEY (id AUTOINCREMENT),
     FOREIGN KEY (circle_id) REFERENCES circles(id) ON DELETE CASCADE,
-    FOREIGN KEY (person_id) REFERENCES people(id) ON DELETE CASCADE
+    FOREIGN KEY (person_id) REFERENCES people(id) ON DELETE CASCADE,
+    CONSTRAINT "circle_invitations_unique" UNIQUE("circle_id","person_id")
 );

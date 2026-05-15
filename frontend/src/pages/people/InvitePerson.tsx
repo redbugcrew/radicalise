@@ -4,15 +4,23 @@ import { useAppSelector } from "../../store";
 import type { InvitePersonRequest } from "../../api/Api";
 import { getApi } from "../../api";
 import { actionFailure } from "../../components/ActionResult";
+import { useNavigate } from "react-router-dom";
+import { notifications } from "@mantine/notifications";
 
 export default function InvitePerson() {
   const circles = useAppSelector((state) => state.circles.rootCircles);
+  const navigate = useNavigate();
 
   const onSubmit = (values: InvitePersonRequest) => {
     return getApi()
       .api.invitePerson(values)
       .then(() => {
-        // Handle success, e.g., show a notification or redirect
+        notifications.show({
+          title: "Invitation sent",
+          message: `${values.name} has been invited successfully.`,
+          color: "green",
+        });
+        navigate("/people");
       })
       .catch((error) => {
         return actionFailure(error);
