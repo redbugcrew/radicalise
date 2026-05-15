@@ -24,6 +24,7 @@ export enum InvolvementStatus {
   Active = "Active",
   OnHiatus = "OnHiatus",
   Exiting = "Exiting",
+  Invited = "Invited",
 }
 
 export enum EventResponseExpectation {
@@ -886,7 +887,7 @@ export class Api<
      * @request POST:/api/people/invite
      */
     invitePerson: (data: InvitePersonRequest, params: RequestParams = {}) =>
-      this.request<AppEvent[], any>({
+      this.request<AppEvent[], string>({
         path: `/api/people/invite`,
         method: "POST",
         body: data,
