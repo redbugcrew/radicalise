@@ -5,6 +5,22 @@ use crate::{
     shared::entities::{CircleId, CircleInvitation, PersonId},
 };
 
+pub async fn find_circle_invitation_by_token(
+    token: String,
+    pool: &SqlitePool,
+) -> Result<CircleInvitation, sqlx::Error> {
+    let invitation = sqlx::query_as::<_, CircleInvitation>(
+        r#"
+        SELECT * FROM circle_invitations
+        WHERE invitation_token = ?"#,
+    )
+    .bind(token)
+    .fetch_one(pool)
+    .await?;
+
+    Ok(invitation)
+}
+
 pub async fn upsert_circle_invitation(
     circle_id: CircleId,
     person_id: PersonId,

@@ -12,6 +12,7 @@ pub fn router() -> OpenApiRouter {
         .routes(routes!(crate::entry_pathways::delete_eoi))
         .routes(routes!(crate::entry_pathways::get_eoi_by_auth_token))
         .routes(routes!(crate::calendar_events::get_calendar_ics))
+        .routes(routes!(crate::invitations::get_invitation))
 }
 
 #[utoipa::path(get, path = "/project/by_slug/{project_slug}", responses(

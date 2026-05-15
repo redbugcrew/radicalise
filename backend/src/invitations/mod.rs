@@ -1,4 +1,4 @@
-use axum::{Extension, Json, http::StatusCode, response::IntoResponse};
+use axum::{Extension, Json, extract::Path, http::StatusCode, response::IntoResponse};
 use resend_rs::Resend;
 use serde::Serialize;
 use sqlx::SqlitePool;
@@ -7,13 +7,16 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     auth::auth_backend::AuthSession,
-    invitations::invitatations_service::{InvitePersonError, InvitePersonRequest},
+    invitations::{
+        circle_invitations_repo::find_circle_invitation_by_token,
+        invitatations_service::{InvitePersonError, InvitePersonRequest},
+    },
     my_project::events::ProjectEvent,
     people::events::PeopleEvent,
     realtime::RealtimeState,
     shared::{
         default_project_id,
-        entities::{Person, UserId},
+        entities::{CircleInvitation, Person, UserId},
         events::AppEvent,
     },
 };
@@ -32,7 +35,7 @@ struct InvitePersonResponse {
     person: Person,
 }
 
-#[utoipa::path(post, path = "/invite",
+#[utoipa::path(post, path = "/invitation/new",
     request_body(content = InvitePersonRequest, content_type = "application/json"),
     responses(
         (status = 200, body = InvitePersonResponse),
@@ -99,4 +102,26 @@ pub async fn invite_person(
         .await;
 
     (StatusCode::OK, Json(response)).into_response()
+}
+
+#[utoipa::path(get, path = "/invitation/{token}",
+    responses(
+        (status = 200, body = CircleInvitation),
+        (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
+        (status = BAD_REQUEST,  body = String),
+    ),
+    params(
+        ("token" = String, Path, description = "Invitation token")
+    )
+)]
+pub async fn get_invitation(
+    Path(token): Path<String>,
+    Extension(pool): Extension<SqlitePool>,
+) -> impl IntoResponse {
+    let invitation_result = find_circle_invitation_by_token(token, &pool).await;
+
+    match invitation_result {
+        Ok(invitation) => (StatusCode::OK, Json(invitation)).into_response(),
+        Err(_) => (StatusCode::NOT_FOUND, ()).into_response(),
+    }
 }

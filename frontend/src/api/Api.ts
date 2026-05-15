@@ -128,6 +128,21 @@ export interface Circle {
   slug: string;
 }
 
+export interface CircleInvitation {
+  /** @format int64 */
+  circle_id: number;
+  created_at: string;
+  expires_at: string;
+  /** @format int64 */
+  id: number;
+  invitation_token: string;
+  invitee_email: string;
+  message?: string | null;
+  /** @format int64 */
+  person_id: number;
+  sent_at?: string | null;
+}
+
 export interface CircleInvolvement {
   capacity_planning?: null | CapacityPlanning;
   /** @format int64 */
@@ -797,11 +812,11 @@ export class Api<
      * No description
      *
      * @name InvitePerson
-     * @request POST:/api/invitations/invite
+     * @request POST:/api/invitations/invitation/new
      */
     invitePerson: (data: InvitePersonRequest, params: RequestParams = {}) =>
       this.request<InvitePersonResponse, string>({
-        path: `/api/invitations/invite`,
+        path: `/api/invitations/invitation/new`,
         method: "POST",
         body: data,
         type: ContentType.Json,
@@ -937,6 +952,20 @@ export class Api<
         method: "POST",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GetInvitation
+     * @request GET:/api/public/invitation/{token}
+     */
+    getInvitation: (token: string, params: RequestParams = {}) =>
+      this.request<CircleInvitation, string>({
+        path: `/api/public/invitation/${token}`,
+        method: "GET",
         format: "json",
         ...params,
       }),

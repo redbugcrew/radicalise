@@ -197,7 +197,7 @@ const router = createBrowserRouter([
         element: <ManageMyEoi />,
       },
       {
-        path: "invitations",
+        path: "invitation",
         children: [
           {
             path: "accept",
