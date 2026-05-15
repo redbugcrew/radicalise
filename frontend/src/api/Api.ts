@@ -796,6 +796,22 @@ export class Api<
     /**
      * No description
      *
+     * @name InvitePerson
+     * @request POST:/api/invitations/invite
+     */
+    invitePerson: (data: InvitePersonRequest, params: RequestParams = {}) =>
+      this.request<InvitePersonResponse, string>({
+        path: `/api/invitations/invite`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name GetMyState
      * @request GET:/api/me
      */
@@ -885,22 +901,6 @@ export class Api<
       this.request<InitialData, any>({
         path: `/api/my_project/state`,
         method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name InvitePerson
-     * @request POST:/api/people/invite
-     */
-    invitePerson: (data: InvitePersonRequest, params: RequestParams = {}) =>
-      this.request<InvitePersonResponse, string>({
-        path: `/api/people/invite`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
         format: "json",
         ...params,
       }),

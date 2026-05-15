@@ -8,7 +8,6 @@ import {
   CreateEoi,
   Layout,
   Dashboard,
-  NewPerson,
   People,
   Person,
   MyParticipation,
@@ -90,14 +89,6 @@ const router = createBrowserRouter([
             element: <People />,
           },
           {
-            path: "new",
-            element: <NewPerson />,
-          },
-          {
-            path: "invite",
-            element: <InvitePerson />,
-          },
-          {
             path: ":personId/edit",
             element: <EditPerson />,
           },
@@ -107,7 +98,15 @@ const router = createBrowserRouter([
           },
         ],
       },
-
+      {
+        path: "invitations",
+        children: [
+          {
+            path: "new",
+            element: <InvitePerson />,
+          },
+        ],
+      },
       {
         path: "crews",
         element: <Crews />,

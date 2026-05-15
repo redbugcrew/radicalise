@@ -9,12 +9,12 @@ use crate::{
     auth::auth_repo::AuthRepo,
     circles::repo::find_circle_by_id,
     intervals::repo::find_current_interval,
-    my_project::involvements_repo::insert_circle_involvement_if_missing,
-    people::{
+    invitations::{
         circle_invitations_repo::{mark_circle_invitation_as_sent, upsert_circle_invitation},
         emails::{InvitedToCircleEmailParams, invited_to_circle_email},
-        repo::{find_or_insert_person, find_person_by_user_id},
     },
+    my_project::involvements_repo::insert_circle_involvement_if_missing,
+    people::repo::{find_or_insert_person, find_person_by_user_id},
     repo_utilities::InsertRecordError,
     shared::entities::{
         CircleId, CircleInvolvement, InvolvementStatus, Person, PersonId, ProjectId, UserId,

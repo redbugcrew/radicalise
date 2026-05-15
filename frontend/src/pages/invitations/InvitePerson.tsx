@@ -1,5 +1,5 @@
 import { Stack, Title } from "@mantine/core";
-import InvitePersonForm from "../../components/people/InvitePersonForm";
+import InvitePersonForm from "../../components/invitations/InvitePersonForm";
 import { handleAppEvents, useAppSelector } from "../../store";
 import type { InvitePersonRequest } from "../../api/Api";
 import { getApi } from "../../api";
