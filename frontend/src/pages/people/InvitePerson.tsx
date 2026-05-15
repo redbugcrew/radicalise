@@ -1,6 +1,6 @@
 import { Stack, Title } from "@mantine/core";
 import InvitePersonForm from "../../components/people/InvitePersonForm";
-import { useAppSelector } from "../../store";
+import { handleAppEvents, useAppSelector } from "../../store";
 import type { InvitePersonRequest } from "../../api/Api";
 import { getApi } from "../../api";
 import { actionFailure } from "../../components/ActionResult";
@@ -14,10 +14,12 @@ export default function InvitePerson() {
   const onSubmit = (values: InvitePersonRequest) => {
     return getApi()
       .api.invitePerson(values)
-      .then(() => {
+      .then((response) => {
+        const { events, person } = response.data;
+        handleAppEvents(events);
         notifications.show({
           title: "Invitation sent",
-          message: `${values.name} has been invited successfully.`,
+          message: `${person.display_name} has been invited successfully.`,
           color: "green",
         });
         navigate("/people");

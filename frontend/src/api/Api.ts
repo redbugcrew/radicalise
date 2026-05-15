@@ -289,6 +289,11 @@ export interface InvitePersonRequest {
   name: string;
 }
 
+export interface InvitePersonResponse {
+  events: AppEvent[];
+  person: Person;
+}
+
 export interface InvolvementData {
   current_interval?: null | IntervalInvolvementData;
   next_interval?: null | IntervalInvolvementData;
@@ -368,9 +373,13 @@ export interface Project {
   slug?: string | null;
 }
 
-export type ProjectEvent = {
-  ProjectUpdated: Project;
-};
+export type ProjectEvent =
+  | {
+      ProjectUpdated: Project;
+    }
+  | {
+      CircleInvolvementUpdated: CircleInvolvement;
+    };
 
 export interface ResetPasswordRequest {
   password: string;
@@ -887,7 +896,7 @@ export class Api<
      * @request POST:/api/people/invite
      */
     invitePerson: (data: InvitePersonRequest, params: RequestParams = {}) =>
-      this.request<AppEvent[], string>({
+      this.request<InvitePersonResponse, string>({
         path: `/api/people/invite`,
         method: "POST",
         body: data,

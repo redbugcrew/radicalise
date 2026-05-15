@@ -4,7 +4,7 @@ import projectReducer, { projectLoaded, projectUpdated } from "./project";
 import circlesReducer, { circlesLoaded, circleUpdated } from "./circles";
 import peopleReducer, { peopleLoaded, personUpdated } from "./people";
 import intervalsReducer, { intervalsLoaded, intervalCreated } from "./intervals";
-import involvementsReducer, { involvementsLoaded, intervalDataChanged } from "./involvements";
+import involvementsReducer, { involvementsLoaded, intervalDataChanged, involvementUpdated } from "./involvements";
 import crewsReducer, { crewsLoaded, crewUpdated } from "./crews";
 import entryPathwaysReducer, { entryPathwaysLoaded, entryPathwayUpdated } from "./entry_pathways";
 import eventTemplatesReducer, { eventTemplatesLoaded, eventTemplateUpdated } from "./event_templates";
@@ -118,8 +118,10 @@ export async function handleCrewsEvent(event: CrewsEvent) {
 }
 
 export async function handleProjectEvent(event: ProjectEvent) {
-  if (event.ProjectUpdated) {
+  if ("ProjectUpdated" in event && event.ProjectUpdated) {
     store.dispatch(projectUpdated(event.ProjectUpdated));
+  } else if ("CircleInvolvementUpdated" in event && event.CircleInvolvementUpdated) {
+    store.dispatch(involvementUpdated(event.CircleInvolvementUpdated));
   }
 }
 

@@ -120,6 +120,8 @@ export function asPeopleAlphaSorted<T extends { person_id: number }>(involvement
     .sort(compareStrings("display_name"));
 }
 
+const interval_keys: (keyof InvolvementsState)[] = ["current_interval", "next_interval"];
+
 const involvementsSlice = createSlice({
   name: "involvements",
   initialState: {
@@ -135,17 +137,37 @@ const involvementsSlice = createSlice({
         next_interval,
       };
     },
+    involvementUpdated: (state: InvolvementsState, action: PayloadAction<CircleInvolvement>) => {
+      let involvement = action.payload;
+      if (!state || !involvement) return state;
+
+      interval_keys.forEach((interval_key) => {
+        if (state[interval_key]?.interval_id === involvement.interval_id) {
+          const intervalState: IntervalInvolvementState = state[interval_key];
+          const circleId = involvement.circle_id;
+
+          if (!intervalState.circles[circleId]) {
+            intervalState.circles[circleId] = {
+              circle_id: circleId,
+              circle_involvements: [],
+              interval_id: intervalState.interval_id,
+            };
+          }
+
+          intervalState.circles[circleId] = upsertCircleInvolvement(intervalState.circles[circleId], involvement);
+        }
+      });
+
+      return state;
+    },
     intervalDataChanged: (state: InvolvementsState, action: PayloadAction<PersonIntervalInvolvementData>) => {
       let payload = action.payload;
-
       if (!state || !payload) return state;
 
       const person_id = payload.person_id;
 
-      const interval_keys: (keyof InvolvementsState)[] = ["current_interval", "next_interval"];
-
       interval_keys.forEach((interval_key) => {
-        if (state && state[interval_key] && state[interval_key].interval_id === payload.data.interval_id) {
+        if (state[interval_key]?.interval_id === payload.data.interval_id) {
           const intervalState: IntervalInvolvementState = state[interval_key];
 
           payload.data.involvements_for_circles.forEach((circleInvolvementData) => {
@@ -180,7 +202,7 @@ function updateCrewInvolvementsForPerson(crewInvolvements: WritableDraft<CrewInv
 
 // `createSlice` automatically generated action creators with these names.
 // export them as named exports from this "slice" file
-export const { involvementsLoaded, intervalDataChanged } = involvementsSlice.actions;
+export const { involvementsLoaded, involvementUpdated, intervalDataChanged } = involvementsSlice.actions;
 
 // Export the slice reducer as the default export
 export default involvementsSlice.reducer;

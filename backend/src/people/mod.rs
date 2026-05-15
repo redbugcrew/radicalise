@@ -1,10 +1,13 @@
 use axum::{Extension, Json, extract::Path, http::StatusCode, response::IntoResponse};
 use resend_rs::Resend;
+use serde::Serialize;
 use sqlx::SqlitePool;
+use utoipa::ToSchema;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     auth::auth_backend::AuthSession,
+    my_project::events::ProjectEvent,
     people::{
         events::PeopleEvent,
         invitatations_service::{InvitePersonError, InvitePersonRequest},
@@ -62,24 +65,30 @@ pub async fn update_person(
     }
 }
 
+#[derive(Serialize, ToSchema)]
+struct InvitePersonResponse {
+    events: Vec<AppEvent>,
+    person: Person,
+}
+
 #[utoipa::path(post, path = "/invite",
     request_body(content = InvitePersonRequest, content_type = "application/json"),
     responses(
-        (status = 200, body = Vec<AppEvent>),
+        (status = 200, body = InvitePersonResponse),
         (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
         (status = BAD_REQUEST,  body = String),
     ),
 )]
 pub async fn invite_person(
     Extension(pool): Extension<SqlitePool>,
-    // Extension(realtime_state): Extension<RealtimeState>,
+    Extension(realtime_state): Extension<RealtimeState>,
     auth_session: AuthSession,
     Extension(resend): Extension<Resend>,
     Json(input): Json<InvitePersonRequest>,
 ) -> impl IntoResponse {
     println!("Inviting person: {:?}", input);
 
-    let current_user_id = match auth_session.user {
+    let current_user_id = match auth_session.user.clone() {
         Some(user) => UserId::new(user.id),
         None => return (StatusCode::UNAUTHORIZED, "Unauthorized").into_response(),
     };
@@ -93,21 +102,40 @@ pub async fn invite_person(
     )
     .await;
 
-    match result {
-        Ok(_) => (StatusCode::OK, Json(Vec::<AppEvent>::new())).into_response(),
+    let result = match result {
+        Ok(result) => result,
         Err(InvitePersonError::ContextInvalid) => {
-            (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error").into_response()
+            return (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error").into_response();
         }
         Err(InvitePersonError::InputInvalid) => {
-            (StatusCode::BAD_REQUEST, "Invalid input").into_response()
+            return (StatusCode::BAD_REQUEST, "Invalid input").into_response();
         }
         Err(InvitePersonError::DatabaseError) => {
-            (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error").into_response()
+            return (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error").into_response();
         }
-        Err(InvitePersonError::EmailError) => (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            "Failed to send invitation email",
-        )
-            .into_response(),
-    }
+        Err(InvitePersonError::EmailError) => {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Failed to send invitation email",
+            )
+                .into_response();
+        }
+    };
+
+    let person_updated_event = PeopleEvent::PersonUpdated(result.person.clone());
+    let involvement_updated_event =
+        ProjectEvent::CircleInvolvementUpdated(result.circle_involvement.clone());
+    let app_events = vec![
+        AppEvent::PeopleEvent(person_updated_event),
+        AppEvent::ProjectEvent(involvement_updated_event),
+    ];
+    let response = InvitePersonResponse {
+        events: app_events.clone(),
+        person: result.person,
+    };
+    realtime_state
+        .broadcast_app_events(Some(auth_session), app_events.clone())
+        .await;
+
+    (StatusCode::OK, Json(response)).into_response()
 }

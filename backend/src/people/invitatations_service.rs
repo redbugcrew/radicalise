@@ -17,7 +17,7 @@ use crate::{
     },
     repo_utilities::InsertRecordError,
     shared::entities::{
-        CircleId, CircleInvolvement, InvolvementStatus, PersonId, ProjectId, UserId,
+        CircleId, CircleInvolvement, InvolvementStatus, Person, PersonId, ProjectId, UserId,
     },
 };
 
@@ -29,6 +29,11 @@ pub struct InvitePersonRequest {
     email: String,
     circle_id: i64,
     message: Option<String>,
+}
+
+pub struct InvitePersonResult {
+    pub person: Person,
+    pub circle_involvement: CircleInvolvement,
 }
 
 #[derive(Debug)]
@@ -45,9 +50,9 @@ pub async fn invite_person(
     input: &InvitePersonRequest,
     inviting_user_id: UserId,
     project_id: ProjectId,
-) -> Result<(), InvitePersonError> {
+) -> Result<InvitePersonResult, InvitePersonError> {
     match invite_person_inner(pool, resend, input, inviting_user_id, project_id).await {
-        Ok(_) => Ok(()),
+        Ok(result) => Ok(result),
         Err(err) => {
             eprintln!("Error inviting person: {:?}", err);
             Err(err)
@@ -61,7 +66,7 @@ async fn invite_person_inner(
     input: &InvitePersonRequest,
     inviting_user_id: UserId,
     project_id: ProjectId,
-) -> Result<(), InvitePersonError> {
+) -> Result<InvitePersonResult, InvitePersonError> {
     // Find the inviting person
     let inviting_person = find_person_by_user_id(inviting_user_id, project_id.clone(), pool)
         .await
@@ -109,12 +114,13 @@ async fn invite_person_inner(
         status: InvolvementStatus::Invited,
         ..Default::default()
     };
-    let _involvement_record = insert_circle_involvement_if_missing(new_involvement.into(), &pool)
-        .await
-        .map_err(|err| match err {
-            InsertRecordError::RecordAlreadyExists => InvitePersonError::InputInvalid,
-            InsertRecordError::DatabaseError => InvitePersonError::DatabaseError,
-        })?;
+    let _involvement_record =
+        insert_circle_involvement_if_missing(new_involvement.clone().into(), &pool)
+            .await
+            .map_err(|err| match err {
+                InsertRecordError::RecordAlreadyExists => InvitePersonError::InputInvalid,
+                InsertRecordError::DatabaseError => InvitePersonError::DatabaseError,
+            })?;
 
     // Create the circle invitation
     let invitation_token = Uuid::new_v4().to_string();
@@ -155,5 +161,8 @@ async fn invite_person_inner(
         .await
         .map_err(|_| InvitePersonError::DatabaseError)?;
 
-    Ok(())
+    Ok(InvitePersonResult {
+        person,
+        circle_involvement: new_involvement,
+    })
 }
