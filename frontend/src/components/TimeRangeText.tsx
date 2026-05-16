@@ -1,5 +1,5 @@
 import { Text } from "@mantine/core";
-import { format, isThisYear, isSameYear, isSameDay } from "date-fns";
+import { format, isThisYear, isSameYear, isSameDay, getMinutes } from "date-fns";
 
 interface FormatDateStringProps {
   displayDate?: boolean;
@@ -9,6 +9,7 @@ interface FormatDateStringProps {
 }
 
 function formatDateString({ displayDate, displayYear, displayTime, displayMinutes }: FormatDateStringProps): string {
+  console.log("formatDateString called with: ", { displayDate, displayYear, displayTime, displayMinutes });
   let datePart = "";
   if (displayDate) {
     datePart += "MMM d";
@@ -44,6 +45,7 @@ export default function TimeRangeText({ startAt, endAt }: TimeRangeTextProps) {
       displayDate: !isSameDay(startAt, endAt),
       displayYear: !isThisYear(endAt),
       displayTime: true,
+      displayMinutes: getMinutes(endAt) > 0,
     };
   }
 
@@ -53,6 +55,7 @@ export default function TimeRangeText({ startAt, endAt }: TimeRangeTextProps) {
     displayDate: true,
     displayTime: true,
     displayYear: !isThisYear(startAt) && !(endYearDisplayed && isSameYear(startAt, endAt)),
+    displayMinutes: getMinutes(startAt) > 0,
   };
 
   return (
