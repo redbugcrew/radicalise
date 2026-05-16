@@ -5,6 +5,23 @@ use crate::{
     shared::entities::{CircleId, CircleInvitation, PersonId},
 };
 
+pub async fn find_circle_invitation_by_email_and_circle_id(
+    circle_id: CircleId,
+    invitee_email: String,
+    pool: &SqlitePool,
+) -> Result<Option<CircleInvitation>, sqlx::Error> {
+    sqlx::query_as::<_, CircleInvitation>(
+        r#"
+        SELECT * FROM circle_invitations
+        WHERE circle_id = ?
+            AND lower(invitee_email) = lower(?)"#,
+    )
+    .bind(circle_id.id)
+    .bind(invitee_email)
+    .fetch_optional(pool)
+    .await
+}
+
 pub async fn find_circle_invitation_by_token(
     token: String,
     pool: &SqlitePool,

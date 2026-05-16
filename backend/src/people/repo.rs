@@ -42,6 +42,26 @@ pub async fn find_or_insert_person(
     }
 }
 
+pub async fn insert_person_without_user(
+    project_id: ProjectId,
+    display_name: String,
+    pool: &SqlitePool,
+) -> Result<Person, InsertRecordError> {
+    let result = sqlx::query_as!(
+        Person,
+        "
+        INSERT INTO people (project_id, display_name)
+        VALUES (?, ?)
+        RETURNING id, project_id, display_name, about, avatar_id",
+        project_id.id,
+        display_name,
+    )
+    .fetch_one(pool)
+    .await?;
+
+    Ok(result)
+}
+
 pub async fn update_person(
     input: Person,
     project_id: ProjectId,

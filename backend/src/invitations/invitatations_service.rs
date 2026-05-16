@@ -6,18 +6,17 @@ use utoipa::ToSchema;
 use uuid::Uuid;
 
 use crate::{
-    auth::auth_repo::AuthRepo,
     circles::repo::find_circle_by_id,
     intervals::repo::find_current_interval,
     invitations::{
         circle_invitations_repo::{
-            find_circle_invitation_by_token, mark_circle_invitation_as_sent,
-            upsert_circle_invitation,
+            find_circle_invitation_by_email_and_circle_id, find_circle_invitation_by_token,
+            mark_circle_invitation_as_sent, upsert_circle_invitation,
         },
         emails::{InvitedToCircleEmailParams, invited_to_circle_email},
     },
     my_project::involvements_repo::insert_circle_involvement_if_missing,
-    people::repo::{find_or_insert_person, find_person_by_user_id},
+    people::repo::{find_person_by_id, find_person_by_user_id, insert_person_without_user},
     repo_utilities::InsertRecordError,
     shared::entities::{
         CircleId, CircleInvolvement, InvolvementStatus, Person, PersonId, ProjectId, UserId,
@@ -47,6 +46,16 @@ pub enum InvitePersonError {
     EmailError,
 }
 
+fn db_err<E: std::fmt::Debug>(e: E) -> InvitePersonError {
+    eprintln!("Database error: {:?}", e);
+    InvitePersonError::DatabaseError
+}
+
+fn ctx_err<E: std::fmt::Debug>(e: E) -> InvitePersonError {
+    eprintln!("Context error: {:?}", e);
+    InvitePersonError::ContextInvalid
+}
+
 pub async fn invite_person(
     pool: &SqlitePool,
     resend: &Resend,
@@ -54,62 +63,63 @@ pub async fn invite_person(
     inviting_user_id: UserId,
     project_id: ProjectId,
 ) -> Result<InvitePersonResult, InvitePersonError> {
-    match invite_person_inner(pool, resend, input, inviting_user_id, project_id).await {
-        Ok(result) => Ok(result),
-        Err(err) => {
-            eprintln!("Error inviting person: {:?}", err);
-            Err(err)
-        }
-    }
-}
-
-async fn invite_person_inner(
-    pool: &SqlitePool,
-    resend: &Resend,
-    input: &InvitePersonRequest,
-    inviting_user_id: UserId,
-    project_id: ProjectId,
-) -> Result<InvitePersonResult, InvitePersonError> {
     // Find the inviting person
+    println!(
+        "Finding inviting person for user_id: {:?}",
+        inviting_user_id
+    );
     let inviting_person = find_person_by_user_id(inviting_user_id, project_id.clone(), pool)
         .await
-        .map_err(|_| InvitePersonError::ContextInvalid)?;
+        .map_err(ctx_err)?;
 
     // Find the circle
+    println!("Finding circle with id: {:?}", input.circle_id);
     let circle = find_circle_by_id(CircleId::new(input.circle_id), &pool)
         .await
-        .map_err(|_| InvitePersonError::ContextInvalid)?;
+        .map_err(ctx_err)?;
 
     // Find the current interval
+    println!("Finding current interval for project_id: {:?}", project_id);
     let current_interval = find_current_interval(project_id.clone(), &pool)
         .await
-        .map_err(|_| InvitePersonError::ContextInvalid)?;
+        .map_err(ctx_err)?;
 
-    // Create user if they don't already exist
-    let auth_repo = AuthRepo::new(&pool);
-    let auth_user = auth_repo
-        .upsert_user(input.email.clone())
-        .await
-        .map_err(|_| InvitePersonError::DatabaseError)?;
-
-    println!("Auth user: {:?}", (auth_user.id, auth_user.email));
-
-    // Create the person
-    let person = find_or_insert_person(
-        project_id.clone(),
-        UserId::new(auth_user.id),
-        input.name.clone(),
-        &pool,
+    // Load the invitation if we already have one, so that we can update it instead of creating a duplicate if the same person is invited again to the same circle
+    println!(
+        "Looking up existing invitation for email: {:?}, circle_id: {:?}",
+        input.email, input.circle_id
+    );
+    let existing_invitation = find_circle_invitation_by_email_and_circle_id(
+        CircleId::new(circle.id),
+        input.email.clone(),
+        pool,
     )
     .await
-    .map_err(|err| match err {
-        InsertRecordError::RecordAlreadyExists => InvitePersonError::InputInvalid,
-        InsertRecordError::DatabaseError => InvitePersonError::DatabaseError,
-    })?;
+    .map_err(db_err)?;
+
+    let person = match existing_invitation {
+        Some(invitation) => find_person_by_id(
+            PersonId::new(invitation.person_id),
+            project_id.clone(),
+            pool,
+        )
+        .await
+        .map_err(db_err)?,
+        None => insert_person_without_user(project_id.clone(), input.name.clone(), &pool)
+            .await
+            .map_err(|err| match err {
+                InsertRecordError::RecordAlreadyExists => InvitePersonError::InputInvalid,
+                InsertRecordError::DatabaseError => db_err(err),
+            })?,
+    };
 
     println!("Created person: {:?}", person);
 
     // Create the circle involvement
+    println!(
+        "Inserting circle involvement for person_id: {:?}, circle_id: {:?}",
+        person.id, circle.id
+    );
     let new_involvement = CircleInvolvement {
         person_id: person.id,
         circle_id: circle.id,
@@ -122,10 +132,14 @@ async fn invite_person_inner(
             .await
             .map_err(|err| match err {
                 InsertRecordError::RecordAlreadyExists => InvitePersonError::InputInvalid,
-                InsertRecordError::DatabaseError => InvitePersonError::DatabaseError,
+                InsertRecordError::DatabaseError => db_err(err),
             })?;
 
     // Create the circle invitation
+    println!(
+        "Upserting circle invitation for person_id: {:?}, circle_id: {:?}",
+        person.id, circle.id
+    );
     let invitation_token = Uuid::new_v4().to_string();
     let expires_at = (chrono::Utc::now() + Duration::days(INVITATION_EXPIRATION_DAYS)).to_rfc3339();
     let circle_invitation = upsert_circle_invitation(
@@ -138,11 +152,12 @@ async fn invite_person_inner(
         pool,
     )
     .await
-    .map_err(|_| InvitePersonError::DatabaseError)?;
+    .map_err(db_err)?;
 
     println!("Created circle invitation: {:?}", circle_invitation);
 
     // Send invitation email
+    println!("Sending invitation email to: {:?}", input.email);
     let email = invited_to_circle_email(
         input.email.clone(),
         InvitedToCircleEmailParams {
@@ -160,9 +175,10 @@ async fn invite_person_inner(
     })?;
 
     // Mark the invitation as sent
+    println!("Marking invitation {:?} as sent", circle_invitation.id);
     mark_circle_invitation_as_sent(circle_invitation.id, pool)
         .await
-        .map_err(|_| InvitePersonError::DatabaseError)?;
+        .map_err(db_err)?;
 
     Ok(InvitePersonResult {
         person,
