@@ -1,63 +1,35 @@
-import { Button, Container, Group, Paper, PasswordInput, TextInput, Title } from "@mantine/core";
-import classes from "../Auth.module.css";
 import { Anchor } from "../../../components";
-import { useForm } from "@mantine/form";
 import { getApi } from "../../../api";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import AuthLayout from "../components/AuthLayout";
+import type { LoginFormData } from "../components/LoginForm";
+import { actionFailure, actionSuccess, type ActionPromiseResult } from "../../../components/ActionResult";
+import LoginForm from "../components/LoginForm";
+import { Stack } from "@mantine/core";
 
 export default function Login() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
-  const form = useForm({
-    mode: "uncontrolled",
-    initialValues: {
-      email: "",
-      password: "",
-    },
-
-    validate: {
-      email: (value) => (/\S+@\S+\.\S+/.test(value) ? null : "Invalid email"),
-      password: (value) => (value.length >= 6 ? null : "Password must be at least 6 characters long"),
-    },
-  });
-
-  const onSubmit = ({ email, password }: { email: string; password: string }) => {
-    const api = getApi();
-    api.api
-      .login({ email, password })
-      .then(({ data }) => {
-        // Handle successful login
-        console.log("Login successful", data);
-        navigate("/");
+  const onSubmit = ({ email, password }: LoginFormData): Promise<ActionPromiseResult> => {
+    return getApi()
+      .api.login({ email, password })
+      .then((_) => {
+        navigate(searchParams.get("redirect") ?? "/");
+        return actionSuccess();
       })
-      .catch((error) => {
-        // Handle login error
-        console.error("Login failed", error);
-        form.setFieldError("password", "Invalid email or password");
-      });
+      .catch(actionFailure);
   };
 
   return (
-    <Container size={420} my={40}>
-      <form onSubmit={form.onSubmit(onSubmit)}>
-        {/* The form submission handler should be replaced with actual login logic */}
-        <Title ta="center" className={classes.title}>
-          Welcome back!
-        </Title>
+    <AuthLayout title="Welcome back!">
+      <Stack gap="md">
+        <LoginForm onSubmit={onSubmit} />
 
-        <Paper withBorder shadow="sm" p={22} mt={30} radius="md">
-          <TextInput label="Email" placeholder="Your email" required radius="md" {...form.getInputProps("email")} />
-          <PasswordInput label="Password" placeholder="Your password" required mt="md" radius="md" {...form.getInputProps("password")} />
-          <Group justify="space-between" mt="lg">
-            <Anchor href="../forgot_password" size="sm">
-              Forgot password?
-            </Anchor>
-          </Group>
-          <Button fullWidth mt="xl" radius="md" type="submit">
-            Sign in
-          </Button>
-        </Paper>
-      </form>
-    </Container>
+        <Anchor href="../forgot_password" size="sm">
+          Forgot password?
+        </Anchor>
+      </Stack>
+    </AuthLayout>
   );
 }

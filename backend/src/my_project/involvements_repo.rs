@@ -1,8 +1,11 @@
 use sqlx::SqlitePool;
 
-use crate::shared::entities::{
-    CircleId, CircleInvolvement, IntervalId, InvolvementStatus, OptOutType, ParticipationIntention,
-    PersonId, ProjectId,
+use crate::{
+    repo_utilities::InsertRecordError,
+    shared::entities::{
+        CircleId, CircleInvolvement, CircleInvolvementId, IntervalId, InvolvementStatus,
+        OptOutType, ParticipationIntention, PersonId, ProjectId,
+    },
 };
 
 #[derive(Debug, Clone)]
@@ -123,6 +126,40 @@ pub async fn find_circle_involvement(
     .await?;
 
     Ok(record.map(Into::into))
+}
+
+pub async fn find_circle_involvement_by_id(
+    id: CircleInvolvementId,
+    pool: &SqlitePool,
+) -> Result<CircleInvolvement, sqlx::Error> {
+    let record = sqlx::query_as!(
+        CircleInvolvementRecord,
+        "SELECT
+            circle_involvements.id AS id,
+            person_id,
+            circles.project_id AS \"project_id: i64\",
+            circle_id,
+            interval_id,
+            status as \"status: InvolvementStatus\",
+            private_capacity_planning,
+            wellbeing,
+            focus,
+            capacity_score,
+            capacity,
+            participation_intention as \"participation_intention: ParticipationIntention\",
+            opt_out_type as \"opt_out_type: OptOutType\",
+            opt_out_planned_return_date,
+            intention_context,
+            implicit_counter
+        FROM circle_involvements
+        INNER JOIN circles ON circle_involvements.circle_id = circles.id
+        WHERE circle_involvements.id = ?",
+        id.id,
+    )
+    .fetch_one(pool)
+    .await?;
+
+    Ok(record.into())
 }
 
 pub async fn find_all_circle_involvements(
@@ -253,15 +290,14 @@ pub async fn upsert_circle_involvement(
     }
 }
 
-pub async fn insert_circle_involvement_if_missing(
+pub async fn insert_circle_involvement(
     involvement: CircleInvolvementRecord,
     pool: &SqlitePool,
-) -> Result<(), sqlx::Error> {
-    sqlx::query!(
+) -> Result<CircleInvolvementRecord, InsertRecordError> {
+    let result = sqlx::query!(
         "INSERT INTO circle_involvements (person_id, circle_id, interval_id, status, private_capacity_planning, wellbeing, focus, capacity_score, capacity, participation_intention, opt_out_type, opt_out_planned_return_date,
         intention_context, implicit_counter)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(person_id, circle_id, interval_id) DO NOTHING",
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         involvement.person_id,
         involvement.circle_id,
         involvement.interval_id,
@@ -278,9 +314,28 @@ pub async fn insert_circle_involvement_if_missing(
         involvement.implicit_counter
     )
     .execute(pool)
-    .await?;
+    .await.map_err(InsertRecordError::from)?;
 
-    Ok(())
+    if result.rows_affected() == 0 {
+        return Err(InsertRecordError::DatabaseError);
+    } else {
+        let record = CircleInvolvementRecord {
+            id: result.last_insert_rowid(),
+            ..involvement
+        };
+        Ok(record)
+    }
+}
+
+pub async fn insert_circle_involvement_if_missing(
+    involvement: CircleInvolvementRecord,
+    pool: &SqlitePool,
+) -> Result<(), InsertRecordError> {
+    match insert_circle_involvement(involvement, pool).await {
+        Ok(_) => Ok(()),
+        Err(InsertRecordError::RecordAlreadyExists) => Ok(()), // Ignore if it already exists
+        Err(InsertRecordError::DatabaseError) => Err(InsertRecordError::DatabaseError),
+    }
 }
 
 pub async fn delete_implicit_circle_involvements(
@@ -296,6 +351,39 @@ pub async fn delete_implicit_circle_involvements(
             participation_intention IS NULL",
         interval_id.id,
         circle_id.id
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(())
+}
+
+pub async fn delete_circle_involvement_by_id(
+    involvement_id: CircleInvolvementId,
+    pool: &SqlitePool,
+) -> Result<(), sqlx::Error> {
+    sqlx::query!(
+        "DELETE FROM circle_involvements
+        WHERE id = ?",
+        involvement_id.id
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(())
+}
+
+pub async fn update_involvement_status(
+    involvement_id: CircleInvolvementId,
+    status: InvolvementStatus,
+    pool: &SqlitePool,
+) -> Result<(), sqlx::Error> {
+    sqlx::query!(
+        "UPDATE circle_involvements
+        SET status = ?
+        WHERE id = ?",
+        status,
+        involvement_id.id
     )
     .execute(pool)
     .await?;

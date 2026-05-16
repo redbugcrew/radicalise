@@ -1,20 +1,19 @@
 use resend_rs::types::CreateEmailBaseOptions;
 
+use crate::shared::email_helpers::{DEFAULT_EMAIL_FROM_ADDRESS, absolute_url_for_email};
+
 pub fn manage_your_eoi_email(
     to_address: String,
     project_slug: String,
     eoi_auth_token: String,
 ) -> CreateEmailBaseOptions {
-    let from = "RADicalise <noreply@radicalise.radhousing.org>";
     let to = [to_address];
     let subject = "Thanks for your expression of interest";
 
-    let base_url =
-        std::env::var("BASE_URL").unwrap_or_else(|_| "http://localhost:5173".to_string());
-    let manage_eoi_url = format!(
-        "{}/project/{}/interest/{}",
-        base_url, project_slug, eoi_auth_token
-    );
+    let manage_eoi_url = absolute_url_for_email(&format!(
+        "/project/{}/interest/{}",
+        project_slug, eoi_auth_token
+    ));
 
     let html_content = format!(
         "<p>Thanks for your expression of interest.</p>
@@ -22,25 +21,22 @@ pub fn manage_your_eoi_email(
         manage_eoi_url,
     );
 
-    CreateEmailBaseOptions::new(from, to, subject).with_html(&html_content)
+    CreateEmailBaseOptions::new(DEFAULT_EMAIL_FROM_ADDRESS, to, subject).with_html(&html_content)
 }
 
 pub fn eoi_received_notification_email(
     to_addresses: Vec<String>,
     project_name: Option<String>,
 ) -> CreateEmailBaseOptions {
-    let from = "RADicalise <noreply@radicalise.radhousing.org>";
     let to = to_addresses;
     let name = project_name.unwrap_or_else(|| "your project".to_string());
     let subject = format!("New expression of interest for {}", name);
-    let base_url =
-        std::env::var("BASE_URL").unwrap_or_else(|_| "http://localhost:5173".to_string());
-    let eoi_url = format!("{}/entry_pathways", base_url);
+    let eoi_url = absolute_url_for_email("/entry_pathways");
 
     let html_content = format!(
         "<p>A new expression of interest has been received for your project, {}.</p><p>You can view all expressions of interest <a href=\"{}\">here</a>.</p>",
         name, eoi_url
     );
 
-    CreateEmailBaseOptions::new(from, to, subject).with_html(&html_content)
+    CreateEmailBaseOptions::new(DEFAULT_EMAIL_FROM_ADDRESS, to, subject).with_html(&html_content)
 }

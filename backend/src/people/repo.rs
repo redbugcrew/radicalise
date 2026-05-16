@@ -1,33 +1,50 @@
 use sqlx::SqlitePool;
 
-use crate::shared::entities::{CrewId, IntervalId, Person, PersonId, ProjectId, UserId};
+use crate::{
+    repo_utilities::InsertRecordError,
+    shared::entities::{CrewId, IntervalId, Person, PersonId, ProjectId, UserId},
+};
 
-pub async fn update_person(
-    input: Person,
+pub async fn insert_person_without_user(
     project_id: ProjectId,
+    display_name: String,
     pool: &SqlitePool,
-) -> Result<Person, sqlx::Error> {
+) -> Result<Person, InsertRecordError> {
+    let result = sqlx::query_as!(
+        Person,
+        "
+        INSERT INTO people (project_id, display_name)
+        VALUES (?, ?)
+        RETURNING id, project_id, display_name, about, avatar_id",
+        project_id.id,
+        display_name,
+    )
+    .fetch_one(pool)
+    .await?;
+
+    Ok(result)
+}
+
+pub async fn update_person(input: Person, pool: &SqlitePool) -> Result<Person, sqlx::Error> {
     sqlx::query_as!(
         Person,
         "
         UPDATE people
         SET display_name = ?, about = ?, avatar_id = ?
-        WHERE id = ? AND project_id = ?",
+        WHERE id = ?",
         input.display_name,
         input.about,
         input.avatar_id,
         input.id,
-        project_id.id
     )
     .execute(pool)
     .await?;
 
-    find_person_by_id(input.typed_id(), project_id, pool).await
+    find_person_by_id(input.typed_id(), pool).await
 }
 
 pub async fn find_person_by_id(
     person_id: PersonId,
-    project_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<Person, sqlx::Error> {
     sqlx::query_as!(
@@ -36,10 +53,8 @@ pub async fn find_person_by_id(
         SELECT id, project_id, display_name, about, avatar_id
         FROM people
         WHERE
-            id = ? AND
-            project_id = ?",
+            id = ?",
         person_id.id,
-        project_id.id
     )
     .fetch_one(pool)
     .await
@@ -49,7 +64,7 @@ pub async fn find_person_by_user_id(
     user_id: UserId,
     project_id: ProjectId,
     pool: &SqlitePool,
-) -> Result<Person, sqlx::Error> {
+) -> Result<Option<Person>, sqlx::Error> {
     sqlx::query_as!(
         Person,
         "
@@ -61,7 +76,7 @@ pub async fn find_person_by_user_id(
         user_id.id,
         project_id.id
     )
-    .fetch_one(pool)
+    .fetch_optional(pool)
     .await
 }
 
@@ -119,4 +134,28 @@ pub async fn find_crew_involved_emails(
     .await?;
 
     Ok(rows.into_iter().filter_map(|row| row.email).collect())
+}
+
+pub async fn delete_person(person_id: PersonId, pool: &SqlitePool) -> Result<(), sqlx::Error> {
+    sqlx::query!("DELETE FROM people WHERE id = ?", person_id.id)
+        .execute(pool)
+        .await?;
+
+    Ok(())
+}
+
+pub async fn update_person_user_id(
+    person_id: PersonId,
+    user_id: UserId,
+    pool: &SqlitePool,
+) -> Result<(), sqlx::Error> {
+    sqlx::query!(
+        "UPDATE people SET user_id = ? WHERE id = ?",
+        user_id.id,
+        person_id.id
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(())
 }

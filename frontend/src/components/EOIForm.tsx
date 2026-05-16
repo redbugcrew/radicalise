@@ -1,6 +1,7 @@
 import { Button, Card, Stack, TextInput, Textarea, Title, Text, List, LoadingOverlay } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import type { Project, ExpressionOfInterest } from "../api/Api";
+import { isValidEmail } from "../utilities/validators";
 
 interface EOIFormProps {
   project: Project;
@@ -25,7 +26,7 @@ export default function EOIForm({ onSubmit, project, eoi, actionName }: EOIFormP
     },
     validate: {
       name: (value) => (value ? null : "Name is required"),
-      email: (value) => (/\S+@\S+\.\S+/.test(value) ? null : "Invalid email"),
+      email: (value) => (isValidEmail(value) ? null : "Invalid email"),
     },
   });
 

@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 use utoipa::ToSchema;
@@ -95,9 +96,11 @@ impl Interval {
 
 #[derive(Serialize, Deserialize, ToSchema, sqlx::Type, Clone, Debug)]
 pub enum InvolvementStatus {
+    Onboarding,
     Active,
     OnHiatus,
     Exiting,
+    Invited,
 }
 
 impl FromStr for InvolvementStatus {
@@ -105,9 +108,11 @@ impl FromStr for InvolvementStatus {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
+            "Onboarding" => Ok(InvolvementStatus::Onboarding),
             "Active" => Ok(InvolvementStatus::Active),
             "OnHiatus" => Ok(InvolvementStatus::OnHiatus),
             "Exiting" => Ok(InvolvementStatus::Exiting),
+            "Invited" => Ok(InvolvementStatus::Invited),
             _ => Err(()),
         }
     }
@@ -247,6 +252,44 @@ pub struct CircleInvolvement {
     pub implicit_counter: i64,
 }
 
+impl Default for CircleInvolvement {
+    fn default() -> Self {
+        CircleInvolvement {
+            id: 0,
+            person_id: 0,
+            project_id: 0,
+            circle_id: 0,
+            interval_id: 0,
+            status: InvolvementStatus::Active,
+            private_capacity_planning: false,
+            capacity_planning: None,
+            capacity_score: None,
+            participation_intention: None,
+            opt_out_type: None,
+            opt_out_planned_return_date: None,
+            intention_context: None,
+            implicit_counter: 0,
+        }
+    }
+}
+
+impl CircleInvolvement {
+    pub fn typed_id(&self) -> CircleInvolvementId {
+        CircleInvolvementId::new(self.id)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct CircleInvolvementId {
+    pub id: i64,
+}
+
+impl CircleInvolvementId {
+    pub fn new(id: i64) -> Self {
+        CircleInvolvementId { id }
+    }
+}
+
 #[derive(Serialize, Deserialize, ToSchema, Clone, Debug)]
 pub struct Circle {
     pub id: i64,
@@ -269,6 +312,60 @@ pub struct CircleId {
 impl CircleId {
     pub fn new(id: i64) -> Self {
         CircleId { id }
+    }
+}
+
+#[derive(Serialize, Deserialize, ToSchema, Clone, Debug, sqlx::FromRow)]
+pub struct CircleInvitation {
+    pub id: i64,
+    pub circle_id: i64,
+    pub person_id: i64,
+    pub circle_involvement_id: Option<i64>,
+    pub invitee_email: String,
+    pub message: Option<String>,
+    pub invitation_token: String,
+    pub created_at: String,
+    pub sent_at: Option<String>,
+    pub expires_at: String,
+}
+
+impl CircleInvitation {
+    pub fn has_expired(&self, now: DateTime<Utc>) -> bool {
+        DateTime::parse_from_rfc3339(&self.expires_at)
+            .map(|expires_at| expires_at.with_timezone(&Utc) <= now)
+            .unwrap_or(false)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::CircleInvitation;
+    use chrono::{DateTime, Utc};
+
+    fn invitation(expires_at: &str) -> CircleInvitation {
+        CircleInvitation {
+            id: 1,
+            circle_id: 1,
+            person_id: 1,
+            circle_involvement_id: Some(1),
+            invitee_email: "person@example.com".to_string(),
+            message: None,
+            invitation_token: "token".to_string(),
+            created_at: "2026-01-01T00:00:00Z".to_string(),
+            sent_at: None,
+            expires_at: expires_at.to_string(),
+        }
+    }
+
+    #[test]
+    fn has_expired_checks_expiry_against_supplied_time() {
+        let now = DateTime::parse_from_rfc3339("2026-01-02T00:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+
+        assert!(invitation("2026-01-01T23:59:59Z").has_expired(now));
+        assert!(invitation("2026-01-02T00:00:00Z").has_expired(now));
+        assert!(!invitation("2026-01-02T00:00:01Z").has_expired(now));
     }
 }
 

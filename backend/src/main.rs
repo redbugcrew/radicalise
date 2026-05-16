@@ -35,11 +35,13 @@ mod dev;
 mod entry_pathways;
 mod event_templates;
 mod intervals;
+mod invitations;
 mod me;
 mod my_project;
 mod people;
 mod public;
 mod realtime;
+mod repo_utilities;
 mod shared;
 mod static_server;
 

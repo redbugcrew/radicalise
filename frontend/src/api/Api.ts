@@ -21,9 +21,11 @@ export enum OptOutType {
 }
 
 export enum InvolvementStatus {
+  Onboarding = "Onboarding",
   Active = "Active",
   OnHiatus = "OnHiatus",
   Exiting = "Exiting",
+  Invited = "Invited",
 }
 
 export enum EventResponseExpectation {
@@ -125,6 +127,29 @@ export interface Circle {
   /** @format int64 */
   project_id: number;
   slug: string;
+}
+
+export interface CircleInvitation {
+  /** @format int64 */
+  circle_id: number;
+  /** @format int64 */
+  circle_involvement_id?: number | null;
+  created_at: string;
+  expires_at: string;
+  /** @format int64 */
+  id: number;
+  invitation_token: string;
+  invitee_email: string;
+  message?: string | null;
+  /** @format int64 */
+  person_id: number;
+  sent_at?: string | null;
+}
+
+export interface CircleInvitationDetails {
+  circle: Circle;
+  invitation: CircleInvitation;
+  project: Project;
 }
 
 export interface CircleInvolvement {
@@ -280,6 +305,19 @@ export type IntervalsEvent = {
   IntervalCreated: Interval;
 };
 
+export interface InvitePersonRequest {
+  /** @format int64 */
+  circle_id: number;
+  email: string;
+  message?: string | null;
+  name: string;
+}
+
+export interface InvitePersonResponse {
+  events: AppEvent[];
+  person: Person;
+}
+
 export interface InvolvementData {
   current_interval?: null | IntervalInvolvementData;
   next_interval?: null | IntervalInvolvementData;
@@ -359,13 +397,22 @@ export interface Project {
   slug?: string | null;
 }
 
-export type ProjectEvent = {
-  ProjectUpdated: Project;
-};
+export type ProjectEvent =
+  | {
+      ProjectUpdated: Project;
+    }
+  | {
+      CircleInvolvementUpdated: CircleInvolvement;
+    };
 
 export interface ResetPasswordRequest {
   password: string;
   token: string;
+}
+
+export interface SignUpRequest {
+  email: string;
+  password: string;
 }
 
 import type {
@@ -555,6 +602,20 @@ export class Api<
     /**
      * No description
      *
+     * @name GetCurrentUser
+     * @request GET:/api/auth/current_user
+     */
+    getCurrentUser: (params: RequestParams = {}) =>
+      this.request<null | LoginResponse, any>({
+        path: `/api/auth/current_user`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name ForgotPassword
      * @request POST:/api/auth/forgot_password
      */
@@ -595,6 +656,22 @@ export class Api<
         method: "POST",
         body: data,
         type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SignUp
+     * @request POST:/api/auth/sign_up
+     */
+    signUp: (data: SignUpRequest, params: RequestParams = {}) =>
+      this.request<any, string>({
+        path: `/api/auth/sign_up`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
         ...params,
       }),
 
@@ -778,6 +855,36 @@ export class Api<
     /**
      * No description
      *
+     * @name InvitePerson
+     * @request POST:/api/invitations/invitation/new
+     */
+    invitePerson: (data: InvitePersonRequest, params: RequestParams = {}) =>
+      this.request<InvitePersonResponse, string>({
+        path: `/api/invitations/invitation/new`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AcceptInvitation
+     * @request POST:/api/invitations/invitation/{token}/accept
+     */
+    acceptInvitation: (token: string, params: RequestParams = {}) =>
+      this.request<any, string>({
+        path: `/api/invitations/invitation/${token}/accept`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name GetMyState
      * @request GET:/api/me
      */
@@ -903,6 +1010,20 @@ export class Api<
         method: "POST",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GetInvitation
+     * @request GET:/api/public/invitation/{token}
+     */
+    getInvitation: (token: string, params: RequestParams = {}) =>
+      this.request<CircleInvitationDetails, string>({
+        path: `/api/public/invitation/${token}`,
+        method: "GET",
         format: "json",
         ...params,
       }),

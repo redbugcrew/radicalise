@@ -2,12 +2,12 @@ import { Navigate, RouterProvider, createBrowserRouter, type LoaderFunction } fr
 import { Provider as ReduxProvider } from "react-redux";
 import store, { loadInitialData, type AppStore } from "./store";
 import { MantineProvider } from "@mantine/core";
+import { Notifications } from "@mantine/notifications";
 import {
   EditPerson,
   CreateEoi,
   Layout,
   Dashboard,
-  NewPerson,
   People,
   Person,
   MyParticipation,
@@ -21,6 +21,8 @@ import {
   ManageMyEoi,
   PublicWithProject,
   Dev,
+  InvitePerson,
+  AcceptInvitation,
 } from "./pages";
 import { buildRoutes as buildAuthRoutes } from "./contexts/auth";
 import { theme } from "./theme";
@@ -30,6 +32,7 @@ import { EditEventTemplate, Events, EventTemplates, NewEventTemplate, NewEvent, 
 // All packages except `@mantine/hooks` require styles imports
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
+import "@mantine/notifications/styles.css";
 import { Circles, EditCircle, NewCircle } from "./contexts/circles";
 
 function withStore(func: (store: AppStore) => any, store: AppStore): LoaderFunction<any> {
@@ -87,10 +90,6 @@ const router = createBrowserRouter([
             element: <People />,
           },
           {
-            path: "new",
-            element: <NewPerson />,
-          },
-          {
             path: ":personId/edit",
             element: <EditPerson />,
           },
@@ -100,7 +99,15 @@ const router = createBrowserRouter([
           },
         ],
       },
-
+      {
+        path: "invitations",
+        children: [
+          {
+            path: "new",
+            element: <InvitePerson />,
+          },
+        ],
+      },
       {
         path: "crews",
         element: <Crews />,
@@ -189,6 +196,15 @@ const router = createBrowserRouter([
         path: "interest/:authToken",
         element: <ManageMyEoi />,
       },
+      {
+        path: "invitation",
+        children: [
+          {
+            path: "accept",
+            element: <AcceptInvitation />,
+          },
+        ],
+      },
     ],
   },
 ]);
@@ -196,6 +212,7 @@ const router = createBrowserRouter([
 function App() {
   return (
     <MantineProvider defaultColorScheme="dark" theme={theme}>
+      <Notifications />
       <ReduxProvider store={store}>
         <RouterProvider router={router} />
       </ReduxProvider>

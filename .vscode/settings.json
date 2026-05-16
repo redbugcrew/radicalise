@@ -29,5 +29,8 @@
   "files.associations": {
     "*.module.css": "postcss"
   },
-  "css.validate": false
+  "css.validate": false,
+  "chat.tools.terminal.autoApprove": {
+    "cargo test": true
+  }
 }

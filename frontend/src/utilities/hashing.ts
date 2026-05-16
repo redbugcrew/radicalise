@@ -11,6 +11,7 @@ export function hashByStatus<T extends { status: InvolvementStatus }>(records: T
   const map = new Map<InvolvementStatus, T[]>();
   records.forEach((record) => {
     const status = InvolvementStatus[record.status as keyof typeof InvolvementStatus];
+
     if (!map.has(status)) {
       map.set(status, []);
     }

@@ -15,6 +15,14 @@ pub enum AuthRepoError {
     DatabaseError,
 }
 
+#[derive(Debug, thiserror::Error)]
+pub enum AuthRepoInsertError {
+    #[error("Email already exists")]
+    EmailAlreadyExists,
+    #[error("Database error")]
+    DatabaseError,
+}
+
 pub struct AuthRepo<'a> {
     pool: &'a sqlx::SqlitePool,
 }
@@ -100,9 +108,38 @@ impl<'a> AuthRepo<'a> {
             Ok(())
         }
     }
+
+    pub async fn insert_user(
+        &self,
+        email: String,
+        hashed_password: String,
+    ) -> Result<AuthUser, AuthRepoInsertError> {
+        sqlx::query_as!(
+            AuthUser,
+            "INSERT INTO users (email, hashed_password)
+            VALUES (?, ?)
+            RETURNING id, email, hashed_password",
+            email,
+            hashed_password
+        )
+        .fetch_one(self.pool)
+        .await
+        .map_err(log_and_return_db_insert_error)
+    }
 }
 
 fn log_and_return_db_error(error: sqlx::Error) -> AuthRepoError {
     eprintln!("Database error: {}", error);
     AuthRepoError::DatabaseError
+}
+
+fn log_and_return_db_insert_error(error: sqlx::Error) -> AuthRepoInsertError {
+    eprintln!("Database error: {}", error);
+
+    if matches!(error, sqlx::Error::Database(db_err) if db_err.message().contains("UNIQUE constraint failed"))
+    {
+        AuthRepoInsertError::EmailAlreadyExists
+    } else {
+        AuthRepoInsertError::DatabaseError
+    }
 }

@@ -33,6 +33,17 @@ impl RealtimeState {
         }
     }
 
+    pub async fn broadcast_app_events(
+        &self,
+        auth_session: Option<AuthSession>,
+        events: Vec<AppEvent>,
+    ) {
+        let user_id = self.get_user_id_from_session(auth_session);
+        for event in events {
+            self.broadcast_app_event_for_user(user_id, event).await;
+        }
+    }
+
     pub async fn broadcast_app_event(&self, auth_session: Option<AuthSession>, event: AppEvent) {
         let user_id = self.get_user_id_from_session(auth_session);
         self.broadcast_app_event_for_user(user_id, event).await;
