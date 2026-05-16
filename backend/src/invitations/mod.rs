@@ -19,9 +19,7 @@ use crate::{
     shared::{
         default_project_id,
         email_sender::ResendEmailSender,
-        entities::{
-            Circle, CircleId, CircleInvitation, Person, Project, ProjectId, UserId,
-        },
+        entities::{Circle, CircleId, CircleInvitation, Person, Project, ProjectId, UserId},
         events::AppEvent,
     },
 };

@@ -36,13 +36,13 @@ pub struct IntervalInvolvementData {
     pub involvements_for_circles: Vec<CircleInvolvementData>,
 }
 
-#[derive(Serialize, Deserialize, ToSchema)]
+#[derive(Serialize, Deserialize, ToSchema, Clone)]
 pub struct InvolvementData {
     pub current_interval: Option<IntervalInvolvementData>,
     pub next_interval: Option<IntervalInvolvementData>,
 }
 
-#[derive(Serialize, Deserialize, ToSchema)]
+#[derive(Serialize, Deserialize, ToSchema, Clone)]
 pub struct InitialData {
     pub project: Project,
     pub circles: Vec<Circle>,

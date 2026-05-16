@@ -3,7 +3,7 @@ use sqlx::SqlitePool;
 use crate::{
     repo_utilities::InsertRecordError,
     shared::entities::{
-        CircleId, CircleInvolvement, CircleInvolvementId, IntervalId, InvolvementStatus,
+        Circle, CircleId, CircleInvolvement, CircleInvolvementId, IntervalId, InvolvementStatus,
         OptOutType, ParticipationIntention, PersonId, ProjectId,
     },
 };
@@ -417,4 +417,26 @@ pub async fn set_implicit_counter_to_zero(
     .await?;
 
     Ok(())
+}
+
+pub async fn find_circles_for_person_in_interval(
+    person_id: PersonId,
+    interval_id: IntervalId,
+    pool: &SqlitePool,
+) -> Result<Vec<Circle>, sqlx::Error> {
+    let records = sqlx::query_as!(
+        Circle,
+        "SELECT circles.id as \"id: i64\", project_id as \"project_id: i64\", name, slug
+        FROM circle_involvements
+        INNER JOIN circles ON circle_involvements.circle_id = circles.id
+        WHERE
+            circle_involvements.person_id = ? AND
+            circle_involvements.interval_id = ?",
+        person_id.id,
+        interval_id.id,
+    )
+    .fetch_all(pool)
+    .await?;
+
+    Ok(records)
 }

@@ -8,10 +8,11 @@ use crate::{
         events::ProjectEvent,
         repo::{InitialData, IntervalInvolvementData, find_interval_involvement_data},
     },
+    people::repo::find_person_by_user_id,
     realtime::RealtimeState,
     shared::{
         default_project_id,
-        entities::{IntervalId, Project},
+        entities::{IntervalId, Project, UserId},
         events::AppEvent,
         regular_tasks::check_intervals_tasks,
     },
@@ -20,6 +21,7 @@ use crate::{
 pub mod events;
 pub mod involvements_repo;
 pub mod repo;
+pub mod strip_data;
 
 pub fn router() -> OpenApiRouter {
     OpenApiRouter::new()
@@ -33,11 +35,35 @@ pub fn router() -> OpenApiRouter {
         (status = NOT_FOUND, description = "Project was not found", body = ()),
         (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
     ),)]
-async fn get_project_state(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse {
+async fn get_project_state(
+    auth_session: AuthSession,
+    Extension(pool): Extension<SqlitePool>,
+) -> impl IntoResponse {
+    let user_id = match auth_session.user {
+        Some(user) => UserId::new(user.id),
+        None => {
+            eprintln!("Unauthorized access to get_project_state");
+            return (StatusCode::UNAUTHORIZED, ()).into_response();
+        }
+    };
+
     let project = match repo::find_project_with_links(default_project_id(), &pool).await {
         Ok(project) => project,
         Err(e) => {
             eprintln!("Error fetching project: {:?}", e);
+            return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
+        }
+    };
+
+    // Fetch the person for this user_id and project
+    let person = match find_person_by_user_id(user_id.clone(), project.typed_id(), &pool).await {
+        Ok(Some(person)) => person,
+        Ok(None) => {
+            eprintln!("Person not found for user_id {:?}", user_id);
+            return (StatusCode::NOT_FOUND, ()).into_response();
+        }
+        Err(e) => {
+            eprintln!("Error fetching person for user_id {:?}: {:?}", user_id, e);
             return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
         }
     };
@@ -51,14 +77,38 @@ async fn get_project_state(Extension(pool): Extension<SqlitePool>) -> impl IntoR
         return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
     }
 
-    let initial_data_result = repo::find_initial_data_for_project(project, &pool).await;
-    match initial_data_result {
-        Ok(initial_data) => (StatusCode::OK, Json(initial_data)).into_response(),
+    let initial_data = match repo::find_initial_data_for_project(project, &pool).await {
+        Ok(data) => data,
         Err(e) => {
             eprintln!("Error fetching initial data: {:?}", e);
-            (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response()
+            return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
         }
-    }
+    };
+
+    // Fetch the circles for this person
+    let current_interval_id = initial_data.current_interval.typed_id();
+
+    let my_circles = match involvements_repo::find_circles_for_person_in_interval(
+        person.typed_id(),
+        current_interval_id,
+        &pool,
+    )
+    .await
+    {
+        Ok(circles) => circles,
+        Err(e) => {
+            eprintln!("Error fetching circles: {:?}", e);
+            return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
+        }
+    };
+
+    let initial_data = strip_data::strip_private_data_from_initial_data(
+        &initial_data,
+        &my_circles,
+        &person.typed_id(),
+    );
+
+    (StatusCode::OK, Json(initial_data)).into_response()
 }
 
 #[utoipa::path(get, path = "/interval/{interval_id}/involvements", responses(
