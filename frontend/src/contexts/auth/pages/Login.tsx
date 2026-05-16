@@ -17,9 +17,7 @@ export default function Login() {
         navigate("/");
         return actionSuccess();
       })
-      .catch((error) => {
-        return actionFailure(error);
-      });
+      .catch(actionFailure);
   };
 
   return (

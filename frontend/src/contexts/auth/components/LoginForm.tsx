@@ -15,7 +15,7 @@ interface LoginFormProps {
 export default function LoginForm({ onSubmit }: LoginFormProps) {
   const [actionResult, onSubmitWithResult] = useOnSubmitWithResult<LoginFormData>(onSubmit);
 
-  const form = useForm({
+  const form = useForm<LoginFormData>({
     mode: "controlled",
     initialValues: {
       email: "",
