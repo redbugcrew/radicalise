@@ -132,13 +132,12 @@ pub async fn invite_person(
         status: InvolvementStatus::Invited,
         ..Default::default()
     };
-    let _involvement_record =
-        insert_circle_involvement_if_missing(new_involvement.clone().into(), &pool)
-            .await
-            .map_err(|err| match err {
-                InsertRecordError::RecordAlreadyExists => InvitePersonError::InputInvalid,
-                InsertRecordError::DatabaseError => db_err(err),
-            })?;
+    let involvement_record = insert_circle_involvement(new_involvement.clone().into(), &pool)
+        .await
+        .map_err(|err| match err {
+            InsertRecordError::RecordAlreadyExists => InvitePersonError::InputInvalid,
+            InsertRecordError::DatabaseError => db_err(err),
+        })?;
 
     // Create the circle invitation
     println!(
@@ -150,7 +149,7 @@ pub async fn invite_person(
     let circle_invitation = upsert_circle_invitation(
         CircleId::new(circle.id),
         PersonId::new(person.id),
-        CircleInvolvementId::new(new_involvement.id),
+        CircleInvolvementId::new(involvement_record.id),
         input.email.clone(),
         input.message.clone(),
         invitation_token,
@@ -426,11 +425,30 @@ mod tests {
             .run(&pool)
             .await
             .expect("Failed to run migrations");
+
+        sqlx::query!(
+            "INSERT INTO users (email, hashed_password) VALUES ('test@example.com', 'hashed')"
+        )
+        .execute(&pool)
+        .await
+        .expect("Failed to insert test user");
+        sqlx::query!(
+            "INSERT INTO people (display_name, project_id, user_id) VALUES ('Test Inviter', 1, 1)"
+        )
+        .execute(&pool)
+        .await
+        .expect("Failed to insert test person");
+        sqlx::query!(
+            "INSERT INTO intervals (id, start_date, end_date, project_id) VALUES (1, date('now', '-1 day'), date('now', '+30 days'), 1)"
+        )
+        .execute(&pool)
+        .await
+        .expect("Failed to insert test interval");
         pool
     }
 
     #[tokio::test]
-    async fn invite_person_with_no_inviting_user_returns_error() {
+    async fn invite_new_person() {
         let pool = setup_db().await;
         let resend = Resend::default();
         let input = InvitePersonRequest {
@@ -440,7 +458,7 @@ mod tests {
             message: None,
         };
         let result = invite_person(&pool, &resend, &input, UserId::new(1), ProjectId::new(1)).await;
-        assert!(matches!(result, Err(InvitePersonError::ContextInvalid)));
+        assert!(result.is_ok());
     }
 
     #[tokio::test]
