@@ -476,4 +476,92 @@ mod tests {
         let result = accept_invitation(&pool, "dummy-token".to_string(), UserId::new(1)).await;
         assert!(result.is_err());
     }
+
+    #[tokio::test]
+    async fn invite_person_then_signup_and_accept_invitation() {
+        let pool = setup_db().await;
+        let email_sender = MockEmailSender::new();
+        let input = InvitePersonRequest {
+            name: "Test Invitee".to_string(),
+            email: "invitee@example.com".to_string(),
+            circle_id: 1,
+            message: None,
+        };
+
+        // Invite the person
+        let invite_result = invite_person(
+            &pool,
+            &email_sender,
+            &input,
+            UserId::new(1),
+            ProjectId::new(1),
+        )
+        .await;
+        assert!(
+            invite_result.is_ok(),
+            "invite_person failed: {:?}",
+            invite_result.err()
+        );
+        assert_eq!(email_sender.sent_emails.lock().unwrap().len(), 1);
+
+        // Simulate signup: create a user with the same email as the invitee
+        sqlx::query!(
+            "INSERT INTO users (email, hashed_password) VALUES ('invitee@example.com', 'hashed')"
+        )
+        .execute(&pool)
+        .await
+        .expect("Failed to insert invitee user");
+
+        let new_user = sqlx::query!("SELECT id FROM users WHERE email = 'invitee@example.com'")
+            .fetch_one(&pool)
+            .await
+            .expect("Failed to find new user");
+
+        // Retrieve the invitation token
+        let invitation_row = sqlx::query!(
+            "SELECT invitation_token FROM circle_invitations WHERE invitee_email = 'invitee@example.com'"
+        )
+        .fetch_one(&pool)
+        .await
+        .expect("Failed to find circle invitation");
+        let invitation_token = invitation_row.invitation_token;
+
+        // Accept the invitation as the newly signed-up user
+        let accept_result =
+            accept_invitation(&pool, invitation_token, UserId::new(new_user.id)).await;
+        assert!(
+            accept_result.is_ok(),
+            "accept_invitation failed: {:?}",
+            accept_result.err()
+        );
+
+        // Verify the person record is linked to the new user
+        let person_row = sqlx::query!(
+            "SELECT id, user_id FROM people WHERE user_id = ?",
+            new_user.id
+        )
+        .fetch_one(&pool)
+        .await
+        .expect("No person record found for the new user");
+
+        // Verify a circle_involvement exists for this person in the correct circle and current interval, in Onboarding status
+        let involvement_row = sqlx::query!(
+            "SELECT ci.status FROM circle_involvements ci
+             JOIN intervals i ON ci.interval_id = i.id
+             WHERE ci.person_id = ?
+               AND ci.circle_id = 1
+               AND i.start_date <= date('now')
+               AND i.end_date >= date('now')",
+            person_row.id
+        )
+        .fetch_one(&pool)
+        .await
+        .expect("No circle_involvement found for the accepted person in the current interval");
+
+        assert_eq!(
+            involvement_row.status, "Onboarding",
+            "Expected involvement status to be Onboarding, got {:?}",
+            involvement_row.status
+        );
+    }
 }
