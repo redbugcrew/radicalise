@@ -16,7 +16,9 @@ use crate::{
         },
         emails::{InvitedToCircleEmailParams, invited_to_circle_email},
     },
-    my_project::involvements_repo::insert_circle_involvement_if_missing,
+    my_project::involvements_repo::{
+        find_circle_involvement_by_id, insert_circle_involvement_if_missing,
+    },
     people::repo::{
         delete_person, find_person_by_id, find_person_by_user_id, insert_person_without_user,
         update_person_user_id,
@@ -206,6 +208,7 @@ pub async fn accept_invitation(
         current_interval,
         user_person,
         invitation_person,
+        circle_involvement,
     } = load_accept_invitation_context(token, accepting_user_id.clone(), pool).await?;
 
     let person = reconcile_person(
@@ -226,6 +229,7 @@ struct AcceptInvitationContext {
     current_interval: Interval,
     user_person: Option<Person>,
     invitation_person: Person,
+    circle_involvement: CircleInvolvement,
 }
 
 async fn load_accept_invitation_context(
@@ -263,12 +267,21 @@ async fn load_accept_invitation_context(
         .await
         .map_err(handle_accept_database_error)?;
 
+    // Find the circle involvement for the invitation
+    let circle_involvement = find_circle_involvement_by_id(
+        CircleInvolvementId::new(invitation.circle_involvement_id),
+        pool,
+    )
+    .await
+    .map_err(handle_accept_database_error)?;
+
     Ok(AcceptInvitationContext {
         invitation,
         circle,
         current_interval,
         user_person,
         invitation_person,
+        circle_involvement,
     })
 }
 

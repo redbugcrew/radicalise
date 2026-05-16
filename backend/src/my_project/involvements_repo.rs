@@ -3,7 +3,7 @@ use sqlx::SqlitePool;
 use crate::{
     repo_utilities::InsertRecordError,
     shared::entities::{
-        CircleId, CircleInvolvement, IntervalId, InvolvementStatus, OptOutType,
+        CircleId, CircleInvolvement, CircleInvolvementId, IntervalId, InvolvementStatus, OptOutType,
         ParticipationIntention, PersonId, ProjectId,
     },
 };
@@ -126,6 +126,40 @@ pub async fn find_circle_involvement(
     .await?;
 
     Ok(record.map(Into::into))
+}
+
+pub async fn find_circle_involvement_by_id(
+    id: CircleInvolvementId,
+    pool: &SqlitePool,
+) -> Result<CircleInvolvement, sqlx::Error> {
+    let record = sqlx::query_as!(
+        CircleInvolvementRecord,
+        "SELECT
+            circle_involvements.id AS id,
+            person_id,
+            circles.project_id AS \"project_id: i64\",
+            circle_id,
+            interval_id,
+            status as \"status: InvolvementStatus\",
+            private_capacity_planning,
+            wellbeing,
+            focus,
+            capacity_score,
+            capacity,
+            participation_intention as \"participation_intention: ParticipationIntention\",
+            opt_out_type as \"opt_out_type: OptOutType\",
+            opt_out_planned_return_date,
+            intention_context,
+            implicit_counter
+        FROM circle_involvements
+        INNER JOIN circles ON circle_involvements.circle_id = circles.id
+        WHERE circle_involvements.id = ?",
+        id.id,
+    )
+    .fetch_one(pool)
+    .await?;
+
+    Ok(record.into())
 }
 
 pub async fn find_all_circle_involvements(
