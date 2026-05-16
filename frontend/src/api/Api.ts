@@ -599,6 +599,20 @@ export class Api<
     /**
      * No description
      *
+     * @name GetCurrentUser
+     * @request GET:/api/auth/current_user
+     */
+    getCurrentUser: (params: RequestParams = {}) =>
+      this.request<null | LoginResponse, any>({
+        path: `/api/auth/current_user`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name ForgotPassword
      * @request POST:/api/auth/forgot_password
      */
@@ -847,6 +861,20 @@ export class Api<
         method: "POST",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AcceptInvitation
+     * @request POST:/api/invitations/invitation/{token}/accept
+     */
+    acceptInvitation: (token: string, params: RequestParams = {}) =>
+      this.request<any, string>({
+        path: `/api/invitations/invitation/${token}/accept`,
+        method: "POST",
         format: "json",
         ...params,
       }),

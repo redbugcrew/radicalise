@@ -27,7 +27,9 @@ mod emails;
 mod invitatations_service;
 
 pub fn router() -> OpenApiRouter {
-    OpenApiRouter::new().routes(routes!(invite_person))
+    OpenApiRouter::new()
+        .routes(routes!(invite_person))
+        .routes(routes!(accept_invitation))
 }
 
 #[derive(Serialize, ToSchema)]
@@ -112,7 +114,9 @@ pub struct CircleInvitationDetails {
     pub circle: Circle,
 }
 
-#[utoipa::path(get, path = "/invitation/{token}",
+#[utoipa::path(
+    get,
+    path = "/invitation/{token}",
     responses(
         (status = 200, body = CircleInvitationDetails),
         (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
@@ -150,4 +154,20 @@ pub async fn get_invitation(
         }),
     )
         .into_response()
+}
+
+#[utoipa::path(
+    post,
+    path = "/invitation/{token}/accept",
+    responses(
+        (status = 200, body = ()),
+        (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
+        (status = BAD_REQUEST,  body = String),
+    ),
+    params(
+        ("token" = String, Path, description = "Invitation token")
+    )
+)]
+pub async fn accept_invitation(Path(token): Path<String>) -> impl IntoResponse {
+    return (StatusCode::OK, ()).into_response();
 }

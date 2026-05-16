@@ -1,97 +1,105 @@
 import { Container, Stack, Title, Text, Button } from "@mantine/core";
-import { useEffect, useState, type JSX } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import type { CircleInvitationDetails } from "../../api/Api";
-import { getApi } from "../../api";
-import { actionFailure, actionSuccess, DisplayActionResult, type ActionResult } from "../../components/ActionResult";
 import { capitalizeFirstLetter } from "../../utilities/string";
+import TokenOrRedirect from "../../components/invitations/TokenOrRedirect";
+import InvitationOrError from "../../components/invitations/InvitationOrError";
+import MaybeLoggedIn from "../../components/invitations/MaybeLoggedIn";
+import { actionSuccess, DisplayActionResult, type ActionPromiseResult } from "../../components/ActionResult";
+import { getApi } from "../../api";
+import { useState } from "react";
+import { notifications } from "@mantine/notifications";
 
-interface TokenOrRedirectProps {
-  children: (token: string) => JSX.Element;
-  redirectTo?: string;
-}
-
-function TokenOrRedirect({ children, redirectTo }: TokenOrRedirectProps) {
-  const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
-  const queryToken = queryParams.get("token");
-  const [token, setToken] = useState<string | null>(null);
+function AcceptInvitationLoggedOut() {
   const navigate = useNavigate();
+  const location = useLocation();
 
-  useEffect(() => {
-    if (!queryToken) {
-      navigate(redirectTo ?? "/");
-    } else {
-      setToken(queryToken);
-    }
-  }, [queryToken]);
+  return (
+    <Stack gap="md">
+      <Text>To accept this invitation, please create an account here, or log in if you already have one.</Text>
 
-  if (!token) return null;
-  return children(token);
+      <Button onClick={() => navigate(`/auth/signup?redirect=${encodeURIComponent(location.pathname + location.search)}`)}>Accept</Button>
+    </Stack>
+  );
 }
 
-interface InvitationOrErrorProps {
+interface AcceptInvitationLoggedInProps {
   token: string;
-  children: (details: CircleInvitationDetails) => JSX.Element;
+  onAuthFailure: () => void;
 }
 
-function InvitationOrError({ token, children }: InvitationOrErrorProps) {
-  const [invitation, setInvitation] = useState<CircleInvitationDetails | null>(null);
-  const [actionResult, setActionResult] = useState<ActionResult | null>(null);
+function AcceptInvitationLoggedIn({ token, onAuthFailure }: AcceptInvitationLoggedInProps) {
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<ActionPromiseResult | null>(null);
 
-  useEffect(() => {
+  const handleAccept = () => {
+    setLoading(true);
     getApi()
-      .api.getInvitation(token)
-      .then((response) => {
-        setInvitation(response.data);
-        setActionResult(actionSuccess() || null);
+      .api.acceptInvitation(token)
+      .then(() => {
+        setResult(actionSuccess());
       })
       .catch((error) => {
-        setActionResult(actionFailure(error) || null);
+        if (error.response?.status === 401) {
+          notifications.show({
+            title: "Authentication Required",
+            message: "Your session has expired. Please log in again to accept the invitation.",
+            color: "red",
+          });
+          onAuthFailure();
+        } else {
+          setResult({
+            success: false,
+            error: error.response?.data || "An error occurred while accepting the invitation.",
+          });
+        }
+      })
+      .finally(() => {
+        setLoading(false);
       });
-  }, [token]);
+  };
 
-  if (actionResult && !actionResult.success) {
-    return <DisplayActionResult result={actionResult} />;
-  }
+  return (
+    <Stack gap="md">
+      <Text>You are already logged in. You can accept the invitation below.</Text>
 
-  if (invitation) {
-    return children(invitation);
-  }
+      {result ? <DisplayActionResult result={result} /> : null}
 
-  return null;
+      <Button onClick={handleAccept} loading={loading}>
+        Accept
+      </Button>
+    </Stack>
+  );
 }
 
 export default function AcceptInvitation() {
-  const navigate = useNavigate();
-  const location = useLocation();
-
   return (
     <Container maw={600} my={40}>
       <TokenOrRedirect redirectTo="/">
         {(token) => (
           <InvitationOrError token={token}>
-            {({ project, invitation, circle }) => (
-              <Stack gap="md">
-                <Stack gap={0} mb="md">
-                  <Title order={2} c="dimmed" m={0}>
-                    {project.name}
-                  </Title>
-                  <Title order={1} mt={0} lh={1.2}>
-                    You have been invited to participate
-                  </Title>
-                </Stack>
-                <Text size="lg">This is a platform for people to manage their own participation in projects, opting in to activities only when it fits their interest and capacity.</Text>
+            {({ project, circle }) => (
+              <MaybeLoggedIn>
+                {(loggedIn, handleAuthFailure) => (
+                  <Stack gap="md">
+                    <Stack gap={0} mb="md">
+                      <Title order={2} c="dimmed" m={0}>
+                        {project.name}
+                      </Title>
+                      <Title order={1} mt={0} lh={1.2}>
+                        You have been invited to participate
+                      </Title>
+                    </Stack>
+                    <Text size="lg">This is a platform for people to manage their own participation in projects, opting in to activities only when it fits their interest and capacity.</Text>
 
-                <Text>
-                  <strong>{capitalizeFirstLetter(project.noun_name ?? project.name ?? "This unnamed project")}</strong> would like to invite you to join their project, and engage in the circle called{" "}
-                  <strong>{circle.name}</strong>.
-                </Text>
+                    <Text>
+                      <strong>{capitalizeFirstLetter(project.noun_name ?? project.name ?? "This unnamed project")}</strong> would like to invite you to join their project, and engage in the circle called{" "}
+                      <strong>{circle.name}</strong>.
+                    </Text>
 
-                <Text>To accept this invitation, please create an account here, or log in if you already have one.</Text>
-
-                <Button onClick={() => navigate(`/auth/signup?redirect=${encodeURIComponent(location.pathname + location.search)}`)}>Accept</Button>
-              </Stack>
+                    {loggedIn ? <AcceptInvitationLoggedIn token={token} onAuthFailure={handleAuthFailure} /> : <AcceptInvitationLoggedOut />}
+                  </Stack>
+                )}
+              </MaybeLoggedIn>
             )}
           </InvitationOrError>
         )}

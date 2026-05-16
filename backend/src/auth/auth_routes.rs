@@ -22,6 +22,7 @@ pub fn auth_router() -> OpenApiRouter {
         .routes(routes!(reset_password))
         .routes(routes!(login))
         .routes(routes!(sign_up))
+        .routes(routes!(get_current_user))
 }
 
 #[derive(ToSchema, Deserialize)]
@@ -189,6 +190,24 @@ async fn sign_up(
     match repo.insert_user(data.email, hashed_password).await {
         Ok(_) => (StatusCode::OK, ()).into_response(),
         Err(err) => repo_insert_error_handler(err),
+    }
+}
+
+#[utoipa::path(
+    get,
+    path = "/current_user",
+    responses(
+        (status = OK, body = Option<LoginResponse>),
+    )
+)]
+async fn get_current_user(auth_session: AuthSession) -> impl IntoResponse {
+    match auth_session.user {
+        Some(ref user) => (
+            StatusCode::OK,
+            Json(Some(LoginResponse { user_id: user.id })),
+        )
+            .into_response(),
+        None => (StatusCode::OK, Json::<Option<LoginResponse>>(None)).into_response(),
     }
 }
 
