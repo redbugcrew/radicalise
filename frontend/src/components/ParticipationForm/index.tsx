@@ -41,6 +41,7 @@ export default function ParticipationForm({ personId, interval, previousInterval
     mode: "controlled",
     initialValues: {
       private_capacity_planning: involvement?.private_capacity_planning ?? false,
+      capacity_planning_visibility_circle_id: involvement?.capacity_planning_visibility_circle_id ?? null,
       wellbeing: involvement?.capacity_planning?.wellbeing ?? "",
       focus: involvement?.capacity_planning?.focus ?? "",
       capacity_score: involvement?.capacity_score?.toString() ?? null,

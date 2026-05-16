@@ -155,6 +155,8 @@ export interface CircleInvitationDetails {
 export interface CircleInvolvement {
   capacity_planning?: null | CapacityPlanning;
   /** @format int64 */
+  capacity_planning_visibility_circle_id?: number | null;
+  /** @format int64 */
   capacity_score?: number | null;
   /** @format int64 */
   circle_id: number;
@@ -346,6 +348,8 @@ export interface MyInitialData {
 
 export interface MyParticipationInput {
   capacity?: string | null;
+  /** @format int64 */
+  capacity_planning_visibility_circle_id?: number | null;
   /** @format int64 */
   capacity_score?: number | null;
   /** @format int64 */
@@ -592,7 +596,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 1.3.18
+ * @version 1.4.2
  * @license
  */
 export class Api<

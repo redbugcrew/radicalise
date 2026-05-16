@@ -3,6 +3,7 @@ import type { CrewInvolvement, OptOutType, ParticipationIntention } from "../../
 
 export interface MyParticipationFormData {
   private_capacity_planning: boolean;
+  capacity_planning_visibility_circle_id: number | null;
   wellbeing: string;
   focus: string;
   capacity_score: string | null;

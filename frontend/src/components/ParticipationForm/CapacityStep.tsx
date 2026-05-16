@@ -29,7 +29,7 @@ export default function CapacityStep({ form, readOnly, circles }: CapacityStepPr
             <SegmentedControl
               disabled={readOnly}
               size="xs"
-              data={[{ label: "Just me", value: null as any }, ...circles.map((circle) => ({ label: circle.name, value: circle.id.toString() }))]}
+              data={[{ label: "Just me", value: null as any }, ...circles.map((circle) => ({ label: circle.name, value: circle.id }))]}
               {...form.getInputProps("capacity_planning_visibility_circle_id")}
             />
           </Group>
