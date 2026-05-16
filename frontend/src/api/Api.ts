@@ -407,6 +407,11 @@ export interface ResetPasswordRequest {
   token: string;
 }
 
+export interface SignUpRequest {
+  email: string;
+  password: string;
+}
+
 import type {
   AxiosInstance,
   AxiosRequestConfig,
@@ -634,6 +639,22 @@ export class Api<
         method: "POST",
         body: data,
         type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SignUp
+     * @request POST:/api/auth/sign_up
+     */
+    signUp: (data: SignUpRequest, params: RequestParams = {}) =>
+      this.request<any, string>({
+        path: `/api/auth/sign_up`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
         ...params,
       }),
 

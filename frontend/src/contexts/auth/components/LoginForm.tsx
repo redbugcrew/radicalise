@@ -10,9 +10,10 @@ export interface LoginFormData {
 
 interface LoginFormProps {
   onSubmit: (values: LoginFormData) => Promise<ActionPromiseResult>;
+  submitText?: string;
 }
 
-export default function LoginForm({ onSubmit }: LoginFormProps) {
+export default function LoginForm({ onSubmit, submitText = "Sign in" }: LoginFormProps) {
   const [actionResult, onSubmitWithResult] = useOnSubmitWithResult<LoginFormData>(onSubmit);
 
   const form = useForm<LoginFormData>({
@@ -39,7 +40,7 @@ export default function LoginForm({ onSubmit }: LoginFormProps) {
         <DisplayActionResult result={actionResult} />
 
         <Button fullWidth radius="md" type="submit" loading={form.submitting}>
-          Sign in
+          {submitText}
         </Button>
       </Stack>
     </form>

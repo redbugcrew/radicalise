@@ -1,5 +1,5 @@
 use axum::{
-    Extension,
+    Extension, Json,
     http::{Response, StatusCode},
     response::IntoResponse,
 };
@@ -13,7 +13,7 @@ use uuid::Uuid;
 use crate::auth::{
     auth_backend::{AuthSession, Credentials},
     auth_email::reset_password_email,
-    auth_repo::{AuthRepo, AuthRepoError},
+    auth_repo::{AuthRepo, AuthRepoError, AuthRepoInsertError},
 };
 
 pub fn auth_router() -> OpenApiRouter {
@@ -21,6 +21,7 @@ pub fn auth_router() -> OpenApiRouter {
         .routes(routes!(forgot_password))
         .routes(routes!(reset_password))
         .routes(routes!(login))
+        .routes(routes!(sign_up))
 }
 
 #[derive(ToSchema, Deserialize)]
@@ -40,7 +41,7 @@ struct ForgotPasswordRequest {
 async fn forgot_password(
     Extension(pool): Extension<SqlitePool>,
     Extension(resend): Extension<resend_rs::Resend>,
-    axum::extract::Json(payload): axum::extract::Json<ForgotPasswordRequest>,
+    Json(payload): Json<ForgotPasswordRequest>,
 ) -> Result<Response<axum::body::Body>, Response<axum::body::Body>> {
     let repo = AuthRepo::new(&pool);
 
@@ -92,7 +93,7 @@ struct ResetPasswordRequest {
 )]
 async fn reset_password(
     Extension(pool): Extension<SqlitePool>,
-    axum::extract::Json(payload): axum::extract::Json<ResetPasswordRequest>,
+    Json(payload): Json<ResetPasswordRequest>,
 ) -> Result<Response<axum::body::Body>, Response<axum::body::Body>> {
     let repo = AuthRepo::new(&pool);
     let hashed_password = generate_hash(&payload.password);
@@ -120,7 +121,7 @@ struct LoginResponse {
 )]
 async fn login(
     mut auth_session: AuthSession,
-    axum::extract::Json(creds): axum::extract::Json<Credentials>,
+    Json(creds): Json<Credentials>,
 ) -> Result<Response<axum::body::Body>, Response<axum::body::Body>> {
     let user = match auth_session.authenticate(creds.clone()).await {
         Ok(Some(user)) => user,
@@ -141,11 +142,73 @@ async fn login(
         .into_response());
 }
 
+#[derive(ToSchema, Deserialize)]
+struct SignUpRequest {
+    email: String,
+    password: String,
+}
+
+impl SignUpRequest {
+    fn validate(&self) -> Result<(), String> {
+        if self.email.trim().is_empty() {
+            return Err("Email cannot be empty".to_string());
+        }
+        if self.password.trim().is_empty() {
+            return Err("Password cannot be empty".to_string());
+        }
+        if self.password.len() < 6 {
+            return Err("Password must be at least 8 characters long".to_string());
+        }
+        Ok(())
+    }
+}
+
+#[utoipa::path(
+    post,
+    path = "/sign_up",
+    request_body(content = SignUpRequest, content_type = "application/json"),
+    responses(
+        (status = OK, body = ()),
+        (status = INTERNAL_SERVER_ERROR, body = String),
+        (status = UNAUTHORIZED, body = String),
+        (status = BAD_REQUEST, body = String)
+    )
+)]
+async fn sign_up(
+    Extension(pool): Extension<SqlitePool>,
+    Json(data): Json<SignUpRequest>,
+) -> impl IntoResponse {
+    // Validate the incoming data
+    if let Err(err) = data.validate() {
+        return (StatusCode::BAD_REQUEST, err).into_response();
+    }
+
+    let hashed_password = generate_hash(&data.password);
+
+    let repo = AuthRepo::new(&pool);
+    match repo.insert_user(data.email, hashed_password).await {
+        Ok(_) => (StatusCode::OK, ()).into_response(),
+        Err(err) => repo_insert_error_handler(err),
+    }
+}
+
 fn repo_error_handler(error: AuthRepoError) -> Response<axum::body::Body> {
     let result = match error {
         crate::auth::auth_repo::AuthRepoError::UserNotFound => (StatusCode::UNAUTHORIZED, ()),
         crate::auth::auth_repo::AuthRepoError::DatabaseError => {
             (StatusCode::INTERNAL_SERVER_ERROR, ())
+        }
+    };
+    result.into_response()
+}
+
+fn repo_insert_error_handler(error: AuthRepoInsertError) -> Response<axum::body::Body> {
+    let result = match error {
+        crate::auth::auth_repo::AuthRepoInsertError::EmailAlreadyExists => {
+            (StatusCode::BAD_REQUEST, "Email already exists")
+        }
+        crate::auth::auth_repo::AuthRepoInsertError::DatabaseError => {
+            (StatusCode::INTERNAL_SERVER_ERROR, "Database error")
         }
     };
     result.into_response()
