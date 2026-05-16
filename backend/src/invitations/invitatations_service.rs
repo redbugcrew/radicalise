@@ -17,8 +17,8 @@ use crate::{
         emails::{InvitedToCircleEmailParams, invited_to_circle_email},
     },
     my_project::involvements_repo::{
-        delete_circle_involvement_by_id, find_circle_involvement_by_id, insert_circle_involvement,
-        update_involvement_status,
+        delete_circle_involvement_by_id, find_circle_involvement, find_circle_involvement_by_id,
+        insert_circle_involvement, update_involvement_status,
     },
     people::repo::{
         delete_person, find_person_by_id, find_person_by_user_id, insert_person_without_user,
@@ -135,12 +135,25 @@ pub async fn invite_person(
         status: InvolvementStatus::Invited,
         ..Default::default()
     };
-    let involvement_record = insert_circle_involvement(new_involvement.clone().into(), &pool)
+    let involvement_record = match insert_circle_involvement(new_involvement.clone().into(), &pool)
         .await
-        .map_err(|err| match err {
-            InsertRecordError::RecordAlreadyExists => InvitePersonError::InputInvalid,
-            InsertRecordError::DatabaseError => db_err(err),
-        })?;
+    {
+        Ok(record) => record,
+        Err(InsertRecordError::RecordAlreadyExists) => {
+            find_circle_involvement(
+                project_id.clone(),
+                CircleId::new(circle.id),
+                PersonId::new(person.id),
+                current_interval.typed_id(),
+                pool,
+            )
+            .await
+            .map_err(db_err)?
+            .ok_or(InvitePersonError::DatabaseError)?
+            .into()
+        }
+        Err(InsertRecordError::DatabaseError) => return Err(db_err(InsertRecordError::DatabaseError)),
+    };
 
     // Create the circle invitation
     println!(
@@ -482,6 +495,62 @@ mod tests {
         .await;
         assert!(result.is_ok());
         assert_eq!(email_sender.sent_emails.lock().unwrap().len(), 1);
+    }
+
+    #[tokio::test]
+    async fn invite_same_person_twice_creates_only_one_invitation() {
+        let pool = setup_db().await;
+        let email_sender = MockEmailSender::new();
+        let input = InvitePersonRequest {
+            name: "Test Invitee".to_string(),
+            email: "invitee@example.com".to_string(),
+            circle_id: 1,
+            message: Some("Welcome!".to_string()),
+        };
+
+        let first_result = invite_person(
+            &pool,
+            &email_sender,
+            &input,
+            UserId::new(1),
+            ProjectId::new(1),
+            interval_1(),
+        )
+        .await;
+        assert!(
+            first_result.is_ok(),
+            "first invite_person failed: {:?}",
+            first_result.err()
+        );
+
+        let second_result = invite_person(
+            &pool,
+            &email_sender,
+            &input,
+            UserId::new(1),
+            ProjectId::new(1),
+            interval_1(),
+        )
+        .await;
+        assert!(
+            second_result.is_ok(),
+            "second invite_person failed: {:?}",
+            second_result.err()
+        );
+
+        let invitation_count = sqlx::query!(
+            "SELECT COUNT(*) as count FROM circle_invitations WHERE invitee_email = ? AND circle_id = ?",
+            input.email,
+            input.circle_id
+        )
+        .fetch_one(&pool)
+        .await
+        .expect("Failed to count circle invitations");
+
+        assert_eq!(
+            invitation_count.count, 1,
+            "Expected exactly one invitation for the same email and circle"
+        );
     }
 
     #[tokio::test]
