@@ -430,6 +430,20 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn invite_person_with_no_inviting_user_returns_error() {
+        let pool = setup_db().await;
+        let resend = Resend::default();
+        let input = InvitePersonRequest {
+            name: "Test Invitee".to_string(),
+            email: "invitee@example.com".to_string(),
+            circle_id: 1,
+            message: None,
+        };
+        let result = invite_person(&pool, &resend, &input, UserId::new(1), ProjectId::new(1)).await;
+        assert!(matches!(result, Err(InvitePersonError::ContextInvalid)));
+    }
+
+    #[tokio::test]
     async fn accept_invitation_with_invalid_token_returns_error() {
         let pool = setup_db().await;
         let result = accept_invitation(&pool, "dummy-token".to_string(), UserId::new(1)).await;
