@@ -73,6 +73,15 @@ function AcceptInvitationLoggedIn({ token, onAuthFailure, onAccepted }: AcceptIn
   );
 }
 
+function InvitationNotFound() {
+  return (
+    <Stack gap="md">
+      <Title order={2}>Invitation Not Found</Title>
+      <Text>The invitation link you used is invalid. It may have expired or been revoked. Please ask the sender for a new invitation link.</Text>
+    </Stack>
+  );
+}
+
 export default function AcceptInvitation() {
   const navigate = useNavigate();
 
@@ -89,7 +98,7 @@ export default function AcceptInvitation() {
     <Container maw={600} my={40}>
       <TokenOrRedirect redirectTo="/">
         {(token) => (
-          <InvitationOrError token={token}>
+          <InvitationOrError token={token} onNotFound={<InvitationNotFound />}>
             {({ project, circle }) => (
               <MaybeLoggedIn>
                 {(loggedIn, handleAuthFailure) => (

@@ -6,9 +6,10 @@ import { type ActionResult, actionSuccess, actionFailure, DisplayActionResult } 
 export interface InvitationOrErrorProps {
   token: string;
   children: (details: CircleInvitationDetails) => JSX.Element;
+  onNotFound: JSX.Element;
 }
 
-export default function InvitationOrError({ token, children }: InvitationOrErrorProps) {
+export default function InvitationOrError({ token, children, onNotFound }: InvitationOrErrorProps) {
   const [invitation, setInvitation] = useState<CircleInvitationDetails | null>(null);
   const [actionResult, setActionResult] = useState<ActionResult | null>(null);
 
@@ -24,8 +25,13 @@ export default function InvitationOrError({ token, children }: InvitationOrError
       });
   }, [token]);
 
-  if (actionResult && !actionResult.success) {
-    return <DisplayActionResult result={actionResult} />;
+  if (actionResult) {
+    if (!actionResult.success) {
+      if (actionResult.error === "NotFound") {
+        return onNotFound;
+      }
+      return <DisplayActionResult result={actionResult} />;
+    }
   }
 
   if (invitation) {
