@@ -25,9 +25,10 @@ function AcceptInvitationLoggedOut() {
 interface AcceptInvitationLoggedInProps {
   token: string;
   onAuthFailure: () => void;
+  onAccepted: () => void;
 }
 
-function AcceptInvitationLoggedIn({ token, onAuthFailure }: AcceptInvitationLoggedInProps) {
+function AcceptInvitationLoggedIn({ token, onAuthFailure, onAccepted }: AcceptInvitationLoggedInProps) {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ActionPromiseResult | null>(null);
 
@@ -37,6 +38,7 @@ function AcceptInvitationLoggedIn({ token, onAuthFailure }: AcceptInvitationLogg
       .api.acceptInvitation(token)
       .then(() => {
         setResult(actionSuccess());
+        onAccepted();
       })
       .catch((error) => {
         if (error.response?.status === 401) {
@@ -72,6 +74,17 @@ function AcceptInvitationLoggedIn({ token, onAuthFailure }: AcceptInvitationLogg
 }
 
 export default function AcceptInvitation() {
+  const navigate = useNavigate();
+
+  const onAccepted = () => {
+    notifications.show({
+      title: "Invitation Accepted",
+      message: "You have successfully accepted the invitation.",
+      color: "green",
+    });
+    navigate("/people");
+  };
+
   return (
     <Container maw={600} my={40}>
       <TokenOrRedirect redirectTo="/">
@@ -96,7 +109,7 @@ export default function AcceptInvitation() {
                       <strong>{circle.name}</strong>.
                     </Text>
 
-                    {loggedIn ? <AcceptInvitationLoggedIn token={token} onAuthFailure={handleAuthFailure} /> : <AcceptInvitationLoggedOut />}
+                    {loggedIn ? <AcceptInvitationLoggedIn token={token} onAuthFailure={handleAuthFailure} onAccepted={onAccepted} /> : <AcceptInvitationLoggedOut />}
                   </Stack>
                 )}
               </MaybeLoggedIn>

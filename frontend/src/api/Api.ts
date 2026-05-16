@@ -21,6 +21,7 @@ export enum OptOutType {
 }
 
 export enum InvolvementStatus {
+  Onboarding = "Onboarding",
   Active = "Active",
   OnHiatus = "OnHiatus",
   Exiting = "Exiting",
@@ -131,6 +132,8 @@ export interface Circle {
 export interface CircleInvitation {
   /** @format int64 */
   circle_id: number;
+  /** @format int64 */
+  circle_involvement_id?: number | null;
   created_at: string;
   expires_at: string;
   /** @format int64 */
