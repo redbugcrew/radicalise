@@ -9,7 +9,6 @@ interface FormatDateStringProps {
 }
 
 function formatDateString({ displayDate, displayYear, displayTime, displayMinutes }: FormatDateStringProps): string {
-  console.log("formatDateString called with: ", { displayDate, displayYear, displayTime, displayMinutes });
   let datePart = "";
   if (displayDate) {
     datePart += "MMM d";

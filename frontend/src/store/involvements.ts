@@ -70,6 +70,7 @@ export function myCrewInvolvements(state: InvolvementsState, personId: number, k
 
 export function allCrewInvolvements(state: InvolvementsState, key: keyof InvolvementsState): CrewInvolvement[] | null {
   const intervalState = state[key];
+
   if (!intervalState) return null;
 
   return intervalState.crew_involvements || [];

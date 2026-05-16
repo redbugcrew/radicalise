@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { CircleInvolvement, Interval } from "../../api/Api";
 import { IconLock } from "@tabler/icons-react";
 import { useAppSelector } from "../../store";
-import { forPerson, intervalKeyForId, myCrewInvolvements } from "../../store/involvements";
+import { allCrewInvolvements, forPerson, intervalKeyForId, myCrewInvolvements } from "../../store/involvements";
 import type { MyParticipationFormData } from "./shared";
 import CapacityStep from "./CapacityStep";
 import { ParticipationStep } from "./ParticipationStep";
@@ -30,8 +30,8 @@ export default function ParticipationForm({ personId, interval, previousInterval
 
   if (intervalKey === null) return <div>Invalid interval</div>;
 
-  const crewInvolvements = myCrewInvolvements(involvements, personId, intervalKey) || [];
-  const previousCrewInvolvements = previousIntervalKey !== null ? myCrewInvolvements(involvements, personId, previousIntervalKey) : null;
+  const crewInvolvements = allCrewInvolvements(involvements, intervalKey) || [];
+  const previousCrewInvolvements = previousIntervalKey !== null ? allCrewInvolvements(involvements, previousIntervalKey) : null;
 
   const minStep = 0;
   const maxStep = additionalParticipationActive ? 2 : 1;
