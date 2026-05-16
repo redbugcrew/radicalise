@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { CircleInvolvement, Interval } from "../../api/Api";
 import { IconLock } from "@tabler/icons-react";
 import { useAppSelector } from "../../store";
-import { allCrewInvolvements, forPerson, intervalKeyForId, myCrewInvolvements } from "../../store/involvements";
+import { allCrewInvolvements, forPerson, intervalKeyForId } from "../../store/involvements";
 import type { MyParticipationFormData } from "./shared";
 import CapacityStep from "./CapacityStep";
 import { ParticipationStep } from "./ParticipationStep";
