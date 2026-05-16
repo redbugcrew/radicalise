@@ -76,6 +76,22 @@ pub async fn upsert_circle_invitation(
     Ok(result)
 }
 
+pub async fn update_circle_invitation_person_id(
+    invitation_id: i64,
+    person_id: PersonId,
+    pool: &SqlitePool,
+) -> Result<(), sqlx::Error> {
+    sqlx::query!(
+        "UPDATE circle_invitations SET person_id = ? WHERE id = ?",
+        person_id.id,
+        invitation_id
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(())
+}
+
 pub async fn mark_circle_invitation_as_sent(
     invitation_id: i64,
     pool: &SqlitePool,

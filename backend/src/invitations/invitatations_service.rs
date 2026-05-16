@@ -11,15 +11,20 @@ use crate::{
     invitations::{
         circle_invitations_repo::{
             find_circle_invitation_by_email_and_circle_id, find_circle_invitation_by_token,
-            mark_circle_invitation_as_sent, upsert_circle_invitation,
+            mark_circle_invitation_as_sent, update_circle_invitation_person_id,
+            upsert_circle_invitation,
         },
         emails::{InvitedToCircleEmailParams, invited_to_circle_email},
     },
     my_project::involvements_repo::insert_circle_involvement_if_missing,
-    people::repo::{find_person_by_id, find_person_by_user_id, insert_person_without_user},
+    people::repo::{
+        delete_person, find_person_by_id, find_person_by_user_id, insert_person_without_user,
+        update_person_user_id,
+    },
     repo_utilities::InsertRecordError,
     shared::entities::{
-        CircleId, CircleInvolvement, InvolvementStatus, Person, PersonId, ProjectId, UserId,
+        CircleId, CircleInvitation, CircleInvolvement, InvolvementStatus, Person, PersonId,
+        ProjectId, UserId,
     },
 };
 
@@ -99,13 +104,9 @@ pub async fn invite_person(
     .map_err(db_err)?;
 
     let person = match existing_invitation {
-        Some(invitation) => find_person_by_id(
-            PersonId::new(invitation.person_id),
-            project_id.clone(),
-            pool,
-        )
-        .await
-        .map_err(db_err)?,
+        Some(invitation) => find_person_by_id(PersonId::new(invitation.person_id), pool)
+            .await
+            .map_err(db_err)?,
         None => insert_person_without_user(project_id.clone(), input.name.clone(), &pool)
             .await
             .map_err(|err| match err {
@@ -213,7 +214,7 @@ pub async fn accept_invitation(
         .map_err(handle_accept_database_error)?;
 
     // Find the existing person for this user in the project, if any
-    let _person = find_person_by_user_id(
+    let user_person = find_person_by_user_id(
         accepting_user_id.clone(),
         ProjectId::new(circle.project_id),
         pool,
@@ -221,7 +222,48 @@ pub async fn accept_invitation(
     .await
     .map_err(handle_accept_database_error)?;
 
+    // Find the person for the invitation
+    let invitation_person = find_person_by_id(PersonId::new(invitation.person_id), pool)
+        .await
+        .map_err(handle_accept_database_error)?;
+
+    let person = reconcile_person(
+        user_person,
+        invitation_person,
+        accepting_user_id,
+        &invitation,
+        pool,
+    )
+    .await?;
+
     Ok(())
+}
+
+async fn reconcile_person(
+    user_person: Option<Person>,
+    invitation_person: Person,
+    accepting_user_id: UserId,
+    invitation: &CircleInvitation,
+    pool: &SqlitePool,
+) -> Result<Person, AcceptInvitationError> {
+    match user_person {
+        Some(user_person) if user_person.id == invitation_person.id => Ok(user_person),
+        Some(user_person) => {
+            delete_person(PersonId::new(invitation_person.id), pool)
+                .await
+                .map_err(handle_accept_database_error)?;
+            update_circle_invitation_person_id(invitation.id, PersonId::new(user_person.id), pool)
+                .await
+                .map_err(handle_accept_database_error)?;
+            Ok(user_person)
+        }
+        None => {
+            update_person_user_id(PersonId::new(invitation_person.id), accepting_user_id, pool)
+                .await
+                .map_err(handle_accept_database_error)?;
+            Ok(invitation_person)
+        }
+    }
 }
 
 fn handle_accept_database_error(err: sqlx::Error) -> AcceptInvitationError {
