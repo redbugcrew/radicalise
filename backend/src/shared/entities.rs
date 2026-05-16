@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 use utoipa::ToSchema;
@@ -306,6 +307,45 @@ pub struct CircleInvitation {
     pub created_at: String,
     pub sent_at: Option<String>,
     pub expires_at: String,
+}
+
+impl CircleInvitation {
+    pub fn has_expired(&self, now: DateTime<Utc>) -> bool {
+        DateTime::parse_from_rfc3339(&self.expires_at)
+            .map(|expires_at| expires_at.with_timezone(&Utc) <= now)
+            .unwrap_or(false)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::CircleInvitation;
+    use chrono::{DateTime, Utc};
+
+    fn invitation(expires_at: &str) -> CircleInvitation {
+        CircleInvitation {
+            id: 1,
+            circle_id: 1,
+            person_id: 1,
+            invitee_email: "person@example.com".to_string(),
+            message: None,
+            invitation_token: "token".to_string(),
+            created_at: "2026-01-01T00:00:00Z".to_string(),
+            sent_at: None,
+            expires_at: expires_at.to_string(),
+        }
+    }
+
+    #[test]
+    fn has_expired_checks_expiry_against_supplied_time() {
+        let now = DateTime::parse_from_rfc3339("2026-01-02T00:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+
+        assert!(invitation("2026-01-01T23:59:59Z").has_expired(now));
+        assert!(invitation("2026-01-02T00:00:00Z").has_expired(now));
+        assert!(!invitation("2026-01-02T00:00:01Z").has_expired(now));
+    }
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Debug)]

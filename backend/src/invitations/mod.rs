@@ -168,6 +168,23 @@ pub async fn get_invitation(
         ("token" = String, Path, description = "Invitation token")
     )
 )]
-pub async fn accept_invitation(Path(token): Path<String>) -> impl IntoResponse {
-    return (StatusCode::OK, ()).into_response();
+pub async fn accept_invitation(
+    Path(token): Path<String>,
+    Extension(pool): Extension<SqlitePool>,
+    auth_session: AuthSession,
+) -> impl IntoResponse {
+    let current_user_id = match auth_session.user.clone() {
+        Some(user) => UserId::new(user.id),
+        None => return (StatusCode::UNAUTHORIZED, "Unauthorized").into_response(),
+    };
+
+    match invitatations_service::accept_invitation(&pool, token, current_user_id).await {
+        Ok(_) => (StatusCode::OK, ()).into_response(),
+        Err(invitatations_service::AcceptInvitationError::InvitationExpired) => {
+            (StatusCode::BAD_REQUEST, "Invitation has expired").into_response()
+        }
+        Err(invitatations_service::AcceptInvitationError::DatabaseError) => {
+            (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error").into_response()
+        }
+    }
 }

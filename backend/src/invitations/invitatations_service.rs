@@ -1,4 +1,4 @@
-use chrono::Duration;
+use chrono::{Duration, Utc};
 use resend_rs::Resend;
 use serde::Deserialize;
 use sqlx::SqlitePool;
@@ -10,7 +10,10 @@ use crate::{
     circles::repo::find_circle_by_id,
     intervals::repo::find_current_interval,
     invitations::{
-        circle_invitations_repo::{mark_circle_invitation_as_sent, upsert_circle_invitation},
+        circle_invitations_repo::{
+            find_circle_invitation_by_token, mark_circle_invitation_as_sent,
+            upsert_circle_invitation,
+        },
         emails::{InvitedToCircleEmailParams, invited_to_circle_email},
     },
     my_project::involvements_repo::insert_circle_involvement_if_missing,
@@ -165,4 +168,32 @@ async fn invite_person_inner(
         person,
         circle_involvement: new_involvement,
     })
+}
+
+#[derive(Debug)]
+pub enum AcceptInvitationError {
+    InvitationExpired,
+    DatabaseError,
+}
+
+pub async fn accept_invitation(
+    pool: &SqlitePool,
+    token: String,
+    accepting_user_id: UserId,
+) -> Result<(), AcceptInvitationError> {
+    // Find and check the invitation
+    let invitation = find_circle_invitation_by_token(token, pool)
+        .await
+        .map_err(handle_accept_database_error)?;
+
+    if invitation.has_expired(Utc::now()) {
+        return Err(AcceptInvitationError::InvitationExpired);
+    }
+
+    Ok(())
+}
+
+fn handle_accept_database_error(err: sqlx::Error) -> AcceptInvitationError {
+    eprintln!("Database error: {:?}", err);
+    AcceptInvitationError::DatabaseError
 }

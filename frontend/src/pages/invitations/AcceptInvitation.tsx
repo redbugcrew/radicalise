@@ -17,7 +17,7 @@ function AcceptInvitationLoggedOut() {
     <Stack gap="md">
       <Text>To accept this invitation, please create an account here, or log in if you already have one.</Text>
 
-      <Button onClick={() => navigate(`/auth/signup?redirect=${encodeURIComponent(location.pathname + location.search)}`)}>Accept</Button>
+      <Button onClick={() => navigate(`/auth/signup?redirect=${encodeURIComponent(location.pathname + location.search)}`)}>Sign up</Button>
     </Stack>
   );
 }
@@ -60,7 +60,7 @@ function AcceptInvitationLoggedIn({ token, onAuthFailure }: AcceptInvitationLogg
 
   return (
     <Stack gap="md">
-      <Text>You are already logged in. You can accept the invitation below.</Text>
+      <Text>You are logged in. You can accept the invitation below.</Text>
 
       {result ? <DisplayActionResult result={result} /> : null}
 
