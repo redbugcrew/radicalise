@@ -10,6 +10,8 @@ CREATE TABLE circles (
     PRIMARY KEY("id" AUTOINCREMENT)
 );
 
+INSERT OR IGNORE INTO projects (id, name) VALUES (1, 'Default');
+
 INSERT INTO circles (id, project_id, name, slug) VALUES (1, 1, 'Participants', 'participants');
 
 CREATE TABLE circle_involvements (

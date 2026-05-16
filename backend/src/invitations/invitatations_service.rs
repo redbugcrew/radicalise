@@ -26,7 +26,7 @@ use crate::{
     },
     repo_utilities::InsertRecordError,
     shared::entities::{
-        Circle, CircleId, CircleInvitation, CircleInvolvement, CircleInvolvementId, Interval,
+        CircleId, CircleInvitation, CircleInvolvement, CircleInvolvementId, Interval,
         InvolvementStatus, Person, PersonId, ProjectId, UserId,
     },
 };
@@ -410,4 +410,29 @@ async fn reconcile_involvement(
 fn handle_accept_database_error(err: sqlx::Error) -> AcceptInvitationError {
     eprintln!("Database error: {:?}", err);
     AcceptInvitationError::DatabaseError
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use sqlx::sqlite::SqlitePoolOptions;
+
+    async fn setup_db() -> SqlitePool {
+        let pool = SqlitePoolOptions::new()
+            .connect("sqlite::memory:")
+            .await
+            .expect("Failed to create in-memory database");
+        sqlx::migrate!()
+            .run(&pool)
+            .await
+            .expect("Failed to run migrations");
+        pool
+    }
+
+    #[tokio::test]
+    async fn accept_invitation_with_invalid_token_returns_error() {
+        let pool = setup_db().await;
+        let result = accept_invitation(&pool, "dummy-token".to_string(), UserId::new(1)).await;
+        assert!(result.is_err());
+    }
 }
