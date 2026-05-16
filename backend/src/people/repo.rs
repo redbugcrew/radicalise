@@ -34,10 +34,8 @@ pub async fn find_or_insert_person(
     pool: &SqlitePool,
 ) -> Result<Person, InsertRecordError> {
     match find_person_by_user_id(user_id.clone(), project_id.clone(), pool).await {
-        Ok(person) => Ok(person),
-        Err(sqlx::Error::RowNotFound) => {
-            insert_person(project_id, user_id, display_name, pool).await
-        }
+        Ok(Some(person)) => Ok(person),
+        Ok(None) => insert_person(project_id, user_id, display_name, pool).await,
         Err(err) => Err(InsertRecordError::from(err)),
     }
 }
@@ -109,7 +107,7 @@ pub async fn find_person_by_user_id(
     user_id: UserId,
     project_id: ProjectId,
     pool: &SqlitePool,
-) -> Result<Person, sqlx::Error> {
+) -> Result<Option<Person>, sqlx::Error> {
     sqlx::query_as!(
         Person,
         "
@@ -121,7 +119,7 @@ pub async fn find_person_by_user_id(
         user_id.id,
         project_id.id
     )
-    .fetch_one(pool)
+    .fetch_optional(pool)
     .await
 }
 

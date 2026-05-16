@@ -70,7 +70,8 @@ pub async fn invite_person(
     );
     let inviting_person = find_person_by_user_id(inviting_user_id, project_id.clone(), pool)
         .await
-        .map_err(ctx_err)?;
+        .map_err(ctx_err)?
+        .ok_or(InvitePersonError::ContextInvalid)?;
 
     // Find the circle
     println!("Finding circle with id: {:?}", input.circle_id);
@@ -205,6 +206,20 @@ pub async fn accept_invitation(
     if invitation.has_expired(Utc::now()) {
         return Err(AcceptInvitationError::InvitationExpired);
     }
+
+    // Find the circle for this invitation
+    let circle = find_circle_by_id(CircleId::new(invitation.circle_id), pool)
+        .await
+        .map_err(handle_accept_database_error)?;
+
+    // Find the existing person for this user in the project, if any
+    let _person = find_person_by_user_id(
+        accepting_user_id.clone(),
+        ProjectId::new(circle.project_id),
+        pool,
+    )
+    .await
+    .map_err(handle_accept_database_error)?;
 
     Ok(())
 }

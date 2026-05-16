@@ -49,19 +49,20 @@ async fn create_calendar_event_attendance(
 ) -> impl IntoResponse {
     let user_id = UserId::new(auth_session.user.clone().unwrap().id);
 
-    let person = match find_person_by_user_id(
-        user_id.clone(),
-        crate::shared::default_project_id(),
-        &pool,
-    )
-    .await
-    {
-        Ok(person) => person,
-        Err(e) => {
-            println!("error finding person for user_id {:?}: {}", user_id, e);
-            return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
-        }
-    };
+    let person =
+        match find_person_by_user_id(user_id.clone(), crate::shared::default_project_id(), &pool)
+            .await
+        {
+            Ok(Some(person)) => person,
+            Ok(None) => {
+                println!("no person found for user_id {:?}", user_id);
+                return (StatusCode::NOT_FOUND, ()).into_response();
+            }
+            Err(e) => {
+                println!("error finding person for user_id {:?}: {}", user_id, e);
+                return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
+            }
+        };
 
     println!(
         "updating calendar event attendance with: intention: {:?}, calendar_event_id:{}, person_id: {}",
