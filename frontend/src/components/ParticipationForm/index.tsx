@@ -40,7 +40,6 @@ export default function ParticipationForm({ personId, interval, previousInterval
   const form = useForm<MyParticipationFormData>({
     mode: "controlled",
     initialValues: {
-      private_capacity_planning: involvement?.private_capacity_planning ?? false,
       capacity_planning_visibility_circle_id: involvement?.capacity_planning_visibility_circle_id ?? null,
       wellbeing: involvement?.capacity_planning?.wellbeing ?? "",
       focus: involvement?.capacity_planning?.focus ?? "",

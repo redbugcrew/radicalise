@@ -19,7 +19,7 @@ function CapacityQuestion({ question, answer }: { question: string; answer: stri
   );
 }
 
-function CapacityPlanningSection({ capacity_planning, capacity_score }: { capacity_planning: CapacityPlanning; capacity_score: number | null | undefined }) {
+function CapacityPlanningSection({ capacity_planning, capacity_score }: { capacity_planning: CapacityPlanning | null | undefined; capacity_score: number | null | undefined }) {
   if (!capacity_planning) return null;
   if (!capacity_planning.wellbeing && !capacity_planning.focus && !capacity_planning.capacity) return null;
 
@@ -80,7 +80,7 @@ function CircleInvolvementInfo({ involvement, person }: { involvement: CircleInv
         </Text>
       )}
 
-      {!involvement?.private_capacity_planning && involvement?.capacity_planning && <CapacityPlanningSection capacity_planning={involvement.capacity_planning} capacity_score={involvement.capacity_score} />}
+      <CapacityPlanningSection capacity_planning={involvement.capacity_planning} capacity_score={involvement.capacity_score} />
     </Stack>
   );
 }

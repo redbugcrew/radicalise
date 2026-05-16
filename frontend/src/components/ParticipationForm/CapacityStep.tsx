@@ -33,8 +33,6 @@ export default function CapacityStep({ form, readOnly, circles }: CapacityStepPr
               {...form.getInputProps("capacity_planning_visibility_circle_id")}
             />
           </Group>
-
-          <Switch label="Keep private" labelPosition="left" {...form.getInputProps("private_capacity_planning", { type: "checkbox" })} />
         </Flex>
         <Text c="dimmed">Optional questions to prompt reflection on life before planning your participation, sharing them with the group can help us be more aware of each other's needs.</Text>
       </Stack>
@@ -78,7 +76,7 @@ export default function CapacityStep({ form, readOnly, circles }: CapacityStepPr
         {...form.getInputProps("focus")}
       />
       <Select
-        label={form.values.private_capacity_planning ? "Capacity (Shared with group)" : "Capacity"}
+        label={form.values.capacity_planning_visibility_circle_id ? "Capacity (Shared with group)" : "Capacity"}
         description={`Given the context of your life (above), how would you describe your capacity to participate in ${project_noun_name} this interval?`}
         placeholder="Pick value"
         disabled={readOnly}
