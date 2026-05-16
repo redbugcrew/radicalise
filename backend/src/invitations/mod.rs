@@ -17,6 +17,7 @@ use crate::{
     realtime::RealtimeState,
     shared::{
         default_project_id,
+        email_sender::ResendEmailSender,
         entities::{Circle, CircleId, CircleInvitation, Person, Project, ProjectId, UserId},
         events::AppEvent,
     },
@@ -62,7 +63,7 @@ pub async fn invite_person(
 
     let result = invitatations_service::invite_person(
         &pool,
-        &resend,
+        &ResendEmailSender::new(resend),
         &input,
         current_user_id,
         default_project_id(),

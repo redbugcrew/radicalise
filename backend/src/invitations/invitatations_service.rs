@@ -1,10 +1,10 @@
 use chrono::{Duration, Utc};
-use resend_rs::Resend;
 use serde::Deserialize;
 use sqlx::SqlitePool;
 use utoipa::ToSchema;
 use uuid::Uuid;
 
+use crate::shared::email_sender::EmailSender;
 use crate::{
     circles::repo::find_circle_by_id,
     intervals::repo::find_current_interval,
@@ -66,7 +66,7 @@ fn ctx_err<E: std::fmt::Debug>(e: E) -> InvitePersonError {
 
 pub async fn invite_person(
     pool: &SqlitePool,
-    resend: &Resend,
+    email_sender: &impl EmailSender,
     input: &InvitePersonRequest,
     inviting_user_id: UserId,
     project_id: ProjectId,
@@ -174,7 +174,7 @@ pub async fn invite_person(
             message: input.message.clone(),
         },
     );
-    resend.emails.send(email).await.map_err(|err| {
+    email_sender.send_email(email).await.map_err(|err| {
         eprintln!("Error sending invitation email: {:?}", err);
         InvitePersonError::EmailError
     })?;
@@ -414,6 +414,7 @@ fn handle_accept_database_error(err: sqlx::Error) -> AcceptInvitationError {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::shared::email_sender::test_helpers::MockEmailSender;
     use sqlx::sqlite::SqlitePoolOptions;
 
     async fn setup_db() -> SqlitePool {
@@ -450,15 +451,23 @@ mod tests {
     #[tokio::test]
     async fn invite_new_person() {
         let pool = setup_db().await;
-        let resend = Resend::default();
+        let email_sender = MockEmailSender::new();
         let input = InvitePersonRequest {
             name: "Test Invitee".to_string(),
             email: "invitee@example.com".to_string(),
             circle_id: 1,
             message: None,
         };
-        let result = invite_person(&pool, &resend, &input, UserId::new(1), ProjectId::new(1)).await;
+        let result = invite_person(
+            &pool,
+            &email_sender,
+            &input,
+            UserId::new(1),
+            ProjectId::new(1),
+        )
+        .await;
         assert!(result.is_ok());
+        assert_eq!(email_sender.sent_emails.lock().unwrap().len(), 1);
     }
 
     #[tokio::test]
