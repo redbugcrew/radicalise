@@ -22,6 +22,7 @@ interface ParticipationFormProps {
 
 export default function ParticipationForm({ personId, interval, previousIntervalId, readOnly = false, involvement = null, onSubmit }: ParticipationFormProps) {
   const involvements = useAppSelector((state) => state.involvements);
+  const circles = useAppSelector((state) => state.circles.rootCircles);
   const [step, setStep] = useState(0);
   const [additionalParticipationActive, setAdditionalParticipationActive] = useState(involvement?.participation_intention === "OptIn");
 
@@ -105,7 +106,7 @@ export default function ParticipationForm({ personId, interval, previousInterval
       <Stepper active={step} onStepClick={setStepIfValid} iconSize={32} size="lg" mt="xl">
         <Stepper.Step label="Capacity">
           <Box mt="lg">
-            <CapacityStep form={form} readOnly={readOnly} />
+            <CapacityStep form={form} readOnly={readOnly} circles={circles} />
           </Box>
         </Stepper.Step>
         <Stepper.Step label="Participation">
