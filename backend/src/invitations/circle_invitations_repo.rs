@@ -111,3 +111,14 @@ pub async fn mark_circle_invitation_as_sent(
 
     Ok(())
 }
+
+pub async fn delete_circle_invitation(
+    invitation_id: i64,
+    pool: &SqlitePool,
+) -> Result<(), sqlx::Error> {
+    sqlx::query!("DELETE FROM circle_invitations WHERE id = ?", invitation_id)
+        .execute(pool)
+        .await?;
+
+    Ok(())
+}

@@ -4,6 +4,7 @@ use sqlx::SqlitePool;
 use utoipa::ToSchema;
 use uuid::Uuid;
 
+use crate::invitations::circle_invitations_repo::delete_circle_invitation;
 use crate::my_project::repo::find_project;
 use crate::shared::email_sender::EmailSender;
 use crate::{
@@ -135,12 +136,10 @@ pub async fn invite_person(
         status: InvolvementStatus::Invited,
         ..Default::default()
     };
-    let involvement_record = match insert_circle_involvement(new_involvement.clone().into(), &pool)
-        .await
-    {
-        Ok(record) => record,
-        Err(InsertRecordError::RecordAlreadyExists) => {
-            find_circle_involvement(
+    let involvement_record =
+        match insert_circle_involvement(new_involvement.clone().into(), &pool).await {
+            Ok(record) => record,
+            Err(InsertRecordError::RecordAlreadyExists) => find_circle_involvement(
                 project_id.clone(),
                 CircleId::new(circle.id),
                 PersonId::new(person.id),
@@ -150,10 +149,11 @@ pub async fn invite_person(
             .await
             .map_err(db_err)?
             .ok_or(InvitePersonError::DatabaseError)?
-            .into()
-        }
-        Err(InsertRecordError::DatabaseError) => return Err(db_err(InsertRecordError::DatabaseError)),
-    };
+            .into(),
+            Err(InsertRecordError::DatabaseError) => {
+                return Err(db_err(InsertRecordError::DatabaseError));
+            }
+        };
 
     // Create the circle invitation
     println!(
@@ -255,6 +255,10 @@ pub async fn accept_invitation(
         pool,
     )
     .await?;
+
+    delete_circle_invitation(context.invitation.id, pool)
+        .await
+        .map_err(handle_accept_database_error)?;
 
     Ok(())
 }
@@ -609,11 +613,12 @@ mod tests {
 
         // Retrieve the invitation token
         let invitation_row = sqlx::query!(
-            "SELECT invitation_token FROM circle_invitations WHERE invitee_email = 'invitee@example.com'"
+            "SELECT id, invitation_token FROM circle_invitations WHERE invitee_email = 'invitee@example.com'"
         )
         .fetch_one(&pool)
         .await
         .expect("Failed to find circle invitation");
+        let invitation_id = invitation_row.id;
         let invitation_token = invitation_row.invitation_token;
 
         // Accept the invitation as the newly signed-up user
@@ -657,6 +662,20 @@ mod tests {
             involvement_row.status, "Onboarding",
             "Expected involvement status to be Onboarding, got {:?}",
             involvement_row.status
+        );
+
+        // Verify the invitation record has been deleted after acceptance
+        let deleted_invitation = sqlx::query!(
+            "SELECT id FROM circle_invitations WHERE id = ?",
+            invitation_id
+        )
+        .fetch_optional(&pool)
+        .await
+        .expect("Failed to check deleted circle invitation");
+
+        assert!(
+            deleted_invitation.is_none(),
+            "Expected circle invitation to be deleted after acceptance"
         );
     }
 
@@ -844,17 +863,17 @@ mod tests {
             accept_result.err()
         );
 
-        // Invitation should now point at the accepter's existing person.
-        let updated_invitation = sqlx::query!(
-            "SELECT person_id FROM circle_invitations WHERE id = ?",
+        // Invitation should be deleted after acceptance.
+        let deleted_invitation = sqlx::query!(
+            "SELECT id FROM circle_invitations WHERE id = ?",
             invitation_row.id
         )
-        .fetch_one(&pool)
+        .fetch_optional(&pool)
         .await
-        .expect("Failed to refetch circle invitation");
-        assert_eq!(
-            updated_invitation.person_id, accepter_person.id,
-            "Expected invitation person_id to be moved to accepter person"
+        .expect("Failed to check deleted circle invitation");
+        assert!(
+            deleted_invitation.is_none(),
+            "Expected circle invitation to be deleted after acceptance"
         );
 
         // Placeholder person should be deleted during reconciliation.
