@@ -110,14 +110,8 @@ async fn add_interval_circle_implicit_involvements(
             circle_id: previous_involvement.circle_id,
             interval_id: interval.id,
             status: previous_involvement.status,
-            private_capacity_planning: false,
-            capacity_planning: None,
-            capacity_score: None,
-            participation_intention: None,
-            opt_out_type: None,
-            opt_out_planned_return_date: None,
-            intention_context: None,
             implicit_counter: new_counter,
+            ..CircleInvolvement::default()
         };
         let result = insert_circle_involvement_if_missing(new_involvement.into(), pool).await;
         if result.is_err() {
