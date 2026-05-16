@@ -7,7 +7,6 @@ use uuid::Uuid;
 use crate::shared::email_sender::EmailSender;
 use crate::{
     circles::repo::find_circle_by_id,
-    intervals::repo::find_current_interval,
     invitations::{
         circle_invitations_repo::{
             find_circle_invitation_by_email_and_circle_id, find_circle_invitation_by_token,
@@ -70,6 +69,7 @@ pub async fn invite_person(
     input: &InvitePersonRequest,
     inviting_user_id: UserId,
     project_id: ProjectId,
+    interval: Interval,
 ) -> Result<InvitePersonResult, InvitePersonError> {
     // Find the inviting person
     println!(
@@ -87,11 +87,7 @@ pub async fn invite_person(
         .await
         .map_err(ctx_err)?;
 
-    // Find the current interval
-    println!("Finding current interval for project_id: {:?}", project_id);
-    let current_interval = find_current_interval(project_id.clone(), &pool)
-        .await
-        .map_err(ctx_err)?;
+    let current_interval = interval;
 
     // Load the invitation if we already have one, so that we can update it instead of creating a duplicate if the same person is invited again to the same circle
     println!(
@@ -201,9 +197,10 @@ pub async fn accept_invitation(
     pool: &SqlitePool,
     token: String,
     accepting_user_id: UserId,
+    interval: Interval,
 ) -> Result<(), AcceptInvitationError> {
     let mut context =
-        load_accept_invitation_context(token, accepting_user_id.clone(), pool).await?;
+        load_accept_invitation_context(token, accepting_user_id.clone(), interval, pool).await?;
 
     let data_changed = reconcile_person(
         &context.user_person,
@@ -219,6 +216,7 @@ pub async fn accept_invitation(
             load_accept_invitation_context(
                 context.invitation.invitation_token.clone(),
                 accepting_user_id.clone(),
+                context.current_interval.clone(),
                 pool,
             )
             .await?
@@ -251,6 +249,7 @@ struct AcceptInvitationContext {
 async fn load_accept_invitation_context(
     token: String,
     accepting_user_id: UserId,
+    interval: Interval,
     pool: &SqlitePool,
 ) -> Result<AcceptInvitationContext, AcceptInvitationError> {
     // Find and check the invitation
@@ -267,10 +266,7 @@ async fn load_accept_invitation_context(
         .await
         .map_err(handle_accept_database_error)?;
 
-    // Find the current interval for the project
-    let current_interval = find_current_interval(ProjectId::new(circle.project_id), pool)
-        .await
-        .map_err(handle_accept_database_error)?;
+    let current_interval = interval;
 
     // Find the existing person for this user in the project, if any
     let user_person =
@@ -448,6 +444,14 @@ mod tests {
         pool
     }
 
+    fn interval_1() -> Interval {
+        Interval {
+            id: 1,
+            start_date: "2026-01-01".to_string(),
+            end_date: "2026-03-31".to_string(),
+        }
+    }
+
     #[tokio::test]
     async fn invite_new_person() {
         let pool = setup_db().await;
@@ -464,6 +468,7 @@ mod tests {
             &input,
             UserId::new(1),
             ProjectId::new(1),
+            interval_1(),
         )
         .await;
         assert!(result.is_ok());
@@ -473,7 +478,13 @@ mod tests {
     #[tokio::test]
     async fn accept_invitation_with_invalid_token_returns_error() {
         let pool = setup_db().await;
-        let result = accept_invitation(&pool, "dummy-token".to_string(), UserId::new(1)).await;
+        let result = accept_invitation(
+            &pool,
+            "dummy-token".to_string(),
+            UserId::new(1),
+            interval_1(),
+        )
+        .await;
         assert!(result.is_err());
     }
 
@@ -495,6 +506,7 @@ mod tests {
             &input,
             UserId::new(1),
             ProjectId::new(1),
+            interval_1(),
         )
         .await;
         assert!(
@@ -527,8 +539,13 @@ mod tests {
         let invitation_token = invitation_row.invitation_token;
 
         // Accept the invitation as the newly signed-up user
-        let accept_result =
-            accept_invitation(&pool, invitation_token, UserId::new(new_user.id)).await;
+        let accept_result = accept_invitation(
+            &pool,
+            invitation_token,
+            UserId::new(new_user.id),
+            interval_1(),
+        )
+        .await;
         assert!(
             accept_result.is_ok(),
             "accept_invitation failed: {:?}",
@@ -561,6 +578,111 @@ mod tests {
         assert_eq!(
             involvement_row.status, "Onboarding",
             "Expected involvement status to be Onboarding, got {:?}",
+            involvement_row.status
+        );
+    }
+
+    #[tokio::test]
+    async fn invite_in_interval_1_then_accept_in_interval_2() {
+        let pool = setup_db().await;
+        let email_sender = MockEmailSender::new();
+        let input = InvitePersonRequest {
+            name: "Test Invitee".to_string(),
+            email: "invitee@example.com".to_string(),
+            circle_id: 1,
+            message: None,
+        };
+
+        // Insert interval 2
+        sqlx::query!(
+            "INSERT INTO intervals (id, start_date, end_date, project_id) VALUES (2, '2026-04-01', '2026-06-30', 1)"
+        )
+        .execute(&pool)
+        .await
+        .expect("Failed to insert interval 2");
+
+        let interval_2 = Interval {
+            id: 2,
+            start_date: "2026-04-01".to_string(),
+            end_date: "2026-06-30".to_string(),
+        };
+
+        // Invite the person in interval 1
+        let invite_result = invite_person(
+            &pool,
+            &email_sender,
+            &input,
+            UserId::new(1),
+            ProjectId::new(1),
+            interval_1(),
+        )
+        .await;
+        assert!(
+            invite_result.is_ok(),
+            "invite_person failed: {:?}",
+            invite_result.err()
+        );
+
+        // Simulate signup: create a user with the same email as the invitee
+        sqlx::query!(
+            "INSERT INTO users (email, hashed_password) VALUES ('invitee@example.com', 'hashed')"
+        )
+        .execute(&pool)
+        .await
+        .expect("Failed to insert invitee user");
+
+        let new_user = sqlx::query!("SELECT id FROM users WHERE email = 'invitee@example.com'")
+            .fetch_one(&pool)
+            .await
+            .expect("Failed to find new user");
+
+        // Retrieve the invitation token
+        let invitation_row = sqlx::query!(
+            "SELECT invitation_token FROM circle_invitations WHERE invitee_email = 'invitee@example.com'"
+        )
+        .fetch_one(&pool)
+        .await
+        .expect("Failed to find circle invitation");
+        let invitation_token = invitation_row.invitation_token;
+
+        // Accept the invitation as the newly signed-up user, but in interval 2
+        let accept_result = accept_invitation(
+            &pool,
+            invitation_token,
+            UserId::new(new_user.id),
+            interval_2,
+        )
+        .await;
+        assert!(
+            accept_result.is_ok(),
+            "accept_invitation failed: {:?}",
+            accept_result.err()
+        );
+
+        // Verify the person record is linked to the new user
+        let person_row = sqlx::query!(
+            "SELECT id, user_id FROM people WHERE user_id = ?",
+            new_user.id
+        )
+        .fetch_one(&pool)
+        .await
+        .expect("No person record found for the new user");
+
+        // Verify a circle_involvement exists in interval 2 for this person, in Onboarding status
+        let involvement_row = sqlx::query!(
+            "SELECT ci.status FROM circle_involvements ci
+             WHERE ci.person_id = ?
+               AND ci.circle_id = 1
+               AND ci.interval_id = 2",
+            person_row.id
+        )
+        .fetch_one(&pool)
+        .await
+        .expect("No circle_involvement found for the accepted person in interval 2");
+
+        assert_eq!(
+            involvement_row.status, "Onboarding",
+            "Expected involvement status to be Onboarding in interval 2, got {:?}",
             involvement_row.status
         );
     }

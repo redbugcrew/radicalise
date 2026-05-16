@@ -8,6 +8,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 use crate::{
     auth::auth_backend::AuthSession,
     circles::repo::find_circle_by_id,
+    intervals::repo::find_current_interval,
     invitations::{
         circle_invitations_repo::find_circle_invitation_by_token,
         invitatations_service::{InvitePersonError, InvitePersonRequest},
@@ -18,7 +19,9 @@ use crate::{
     shared::{
         default_project_id,
         email_sender::ResendEmailSender,
-        entities::{Circle, CircleId, CircleInvitation, Person, Project, ProjectId, UserId},
+        entities::{
+            Circle, CircleId, CircleInvitation, Interval, Person, Project, ProjectId, UserId,
+        },
         events::AppEvent,
     },
 };
@@ -61,12 +64,20 @@ pub async fn invite_person(
         None => return (StatusCode::UNAUTHORIZED, "Unauthorized").into_response(),
     };
 
+    let current_interval = match find_current_interval(default_project_id(), &pool).await {
+        Ok(interval) => interval,
+        Err(_) => {
+            return (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error").into_response();
+        }
+    };
+
     let result = invitatations_service::invite_person(
         &pool,
         &ResendEmailSender::new(resend),
         &input,
         current_user_id,
         default_project_id(),
+        current_interval,
     )
     .await;
 
@@ -179,7 +190,16 @@ pub async fn accept_invitation(
         None => return (StatusCode::UNAUTHORIZED, "Unauthorized").into_response(),
     };
 
-    match invitatations_service::accept_invitation(&pool, token, current_user_id).await {
+    let current_interval = match find_current_interval(default_project_id(), &pool).await {
+        Ok(interval) => interval,
+        Err(_) => {
+            return (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error").into_response();
+        }
+    };
+
+    match invitatations_service::accept_invitation(&pool, token, current_user_id, current_interval)
+        .await
+    {
         Ok(_) => (StatusCode::OK, ()).into_response(),
         Err(invitatations_service::AcceptInvitationError::InvitationExpired) => {
             (StatusCode::BAD_REQUEST, "Invitation has expired").into_response()
