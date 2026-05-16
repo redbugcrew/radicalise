@@ -2,7 +2,7 @@ use sqlx::SqlitePool;
 
 use crate::{
     repo_utilities::InsertRecordError,
-    shared::entities::{CircleId, CircleInvitation, PersonId},
+    shared::entities::{CircleId, CircleInvitation, CircleInvolvementId, PersonId},
 };
 
 pub async fn find_circle_invitation_by_email_and_circle_id(
@@ -41,6 +41,7 @@ pub async fn find_circle_invitation_by_token(
 pub async fn upsert_circle_invitation(
     circle_id: CircleId,
     person_id: PersonId,
+    circle_involvement_id: CircleInvolvementId,
     invitee_email: String,
     message: Option<String>,
     invitation_token: String,
@@ -52,12 +53,13 @@ pub async fn upsert_circle_invitation(
         INSERT INTO circle_invitations (
             circle_id,
             person_id,
+            circle_involvement_id,
             invitee_email,
             message,
             invitation_token,
             expires_at
         )
-        VALUES (?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(circle_id, person_id) DO UPDATE SET
             invitee_email = excluded.invitee_email,
             message = excluded.message,
@@ -66,6 +68,7 @@ pub async fn upsert_circle_invitation(
     )
     .bind(circle_id.id)
     .bind(person_id.id)
+    .bind(circle_involvement_id.id)
     .bind(invitee_email)
     .bind(message)
     .bind(invitation_token)

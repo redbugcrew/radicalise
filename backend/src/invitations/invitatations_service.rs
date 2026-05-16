@@ -23,8 +23,8 @@ use crate::{
     },
     repo_utilities::InsertRecordError,
     shared::entities::{
-        CircleId, CircleInvitation, CircleInvolvement, InvolvementStatus, Person, PersonId,
-        ProjectId, UserId,
+        Circle, CircleId, CircleInvitation, CircleInvolvement, CircleInvolvementId, Interval,
+        InvolvementStatus, Person, PersonId, ProjectId, UserId,
     },
 };
 
@@ -147,6 +147,7 @@ pub async fn invite_person(
     let circle_invitation = upsert_circle_invitation(
         CircleId::new(circle.id),
         PersonId::new(person.id),
+        CircleInvolvementId::new(new_involvement.id),
         input.email.clone(),
         input.message.clone(),
         invitation_token,
@@ -199,6 +200,39 @@ pub async fn accept_invitation(
     token: String,
     accepting_user_id: UserId,
 ) -> Result<(), AcceptInvitationError> {
+    let AcceptInvitationContext {
+        invitation,
+        circle,
+        current_interval,
+        user_person,
+        invitation_person,
+    } = load_accept_invitation_context(token, accepting_user_id.clone(), pool).await?;
+
+    let person = reconcile_person(
+        user_person,
+        invitation_person,
+        accepting_user_id,
+        &invitation,
+        pool,
+    )
+    .await?;
+
+    Ok(())
+}
+
+struct AcceptInvitationContext {
+    invitation: CircleInvitation,
+    circle: Circle,
+    current_interval: Interval,
+    user_person: Option<Person>,
+    invitation_person: Person,
+}
+
+async fn load_accept_invitation_context(
+    token: String,
+    accepting_user_id: UserId,
+    pool: &SqlitePool,
+) -> Result<AcceptInvitationContext, AcceptInvitationError> {
     // Find and check the invitation
     let invitation = find_circle_invitation_by_token(token, pool)
         .await
@@ -213,30 +247,29 @@ pub async fn accept_invitation(
         .await
         .map_err(handle_accept_database_error)?;
 
+    // Find the current interval for the project
+    let current_interval = find_current_interval(ProjectId::new(circle.project_id), pool)
+        .await
+        .map_err(handle_accept_database_error)?;
+
     // Find the existing person for this user in the project, if any
-    let user_person = find_person_by_user_id(
-        accepting_user_id.clone(),
-        ProjectId::new(circle.project_id),
-        pool,
-    )
-    .await
-    .map_err(handle_accept_database_error)?;
+    let user_person =
+        find_person_by_user_id(accepting_user_id, ProjectId::new(circle.project_id), pool)
+            .await
+            .map_err(handle_accept_database_error)?;
 
     // Find the person for the invitation
     let invitation_person = find_person_by_id(PersonId::new(invitation.person_id), pool)
         .await
         .map_err(handle_accept_database_error)?;
 
-    let person = reconcile_person(
+    Ok(AcceptInvitationContext {
+        invitation,
+        circle,
+        current_interval,
         user_person,
         invitation_person,
-        accepting_user_id,
-        &invitation,
-        pool,
-    )
-    .await?;
-
-    Ok(())
+    })
 }
 
 async fn reconcile_person(

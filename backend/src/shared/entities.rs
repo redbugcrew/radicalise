@@ -271,6 +271,17 @@ impl Default for CircleInvolvement {
     }
 }
 
+#[derive(Clone, Debug, PartialEq)]
+pub struct CircleInvolvementId {
+    pub id: i64,
+}
+
+impl CircleInvolvementId {
+    pub fn new(id: i64) -> Self {
+        CircleInvolvementId { id }
+    }
+}
+
 #[derive(Serialize, Deserialize, ToSchema, Clone, Debug)]
 pub struct Circle {
     pub id: i64,
