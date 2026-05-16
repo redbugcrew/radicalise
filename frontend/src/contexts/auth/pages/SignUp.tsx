@@ -4,6 +4,8 @@ import { getApi } from "../../../api";
 import { actionFailure, actionSuccess, type ActionPromiseResult } from "../../../components/ActionResult";
 import AuthLayout from "../components/AuthLayout";
 import LoginForm from "../components/LoginForm";
+import { Stack, Text } from "@mantine/core";
+import { Anchor } from "../../../components";
 
 export default function SignUp() {
   const navigate = useNavigate();
@@ -27,7 +29,16 @@ export default function SignUp() {
 
   return (
     <AuthLayout title="Create your account">
-      <LoginForm onSubmit={onSubmit} submitText="Sign up" />
+      <Stack gap="md">
+        <LoginForm onSubmit={onSubmit} submitText="Sign up" />
+
+        <Text>
+          Already have an account?{" "}
+          <Anchor href={`../login${location.search}`} size="sm">
+            Log in
+          </Anchor>
+        </Text>
+      </Stack>
     </AuthLayout>
   );
 }

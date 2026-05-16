@@ -1,6 +1,6 @@
 import { Anchor } from "../../../components";
 import { getApi } from "../../../api";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import AuthLayout from "../components/AuthLayout";
 import type { LoginFormData } from "../components/LoginForm";
 import { actionFailure, actionSuccess, type ActionPromiseResult } from "../../../components/ActionResult";
@@ -9,12 +9,13 @@ import { Stack } from "@mantine/core";
 
 export default function Login() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const onSubmit = ({ email, password }: LoginFormData): Promise<ActionPromiseResult> => {
     return getApi()
       .api.login({ email, password })
       .then((_) => {
-        navigate("/");
+        navigate(searchParams.get("redirect") ?? "/");
         return actionSuccess();
       })
       .catch(actionFailure);

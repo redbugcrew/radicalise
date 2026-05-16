@@ -64,6 +64,7 @@ function InvitationOrError({ token, children }: InvitationOrErrorProps) {
 
 export default function AcceptInvitation() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   return (
     <Container maw={600} my={40}>
@@ -89,7 +90,7 @@ export default function AcceptInvitation() {
 
                 <Text>To accept this invitation, please create an account here, or log in if you already have one.</Text>
 
-                <Button onClick={() => navigate(`/auth/signup?token=${encodeURIComponent(token)}`)}>Accept</Button>
+                <Button onClick={() => navigate(`/auth/signup?redirect=${encodeURIComponent(location.pathname + location.search)}`)}>Accept</Button>
               </Stack>
             )}
           </InvitationOrError>
