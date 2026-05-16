@@ -2,10 +2,12 @@ use std::env;
 
 use axum::{
     body::Body,
-    http::{Request, Response, StatusCode, Uri},
+    http::{HeaderValue, Request, Response, StatusCode, Uri, header::ETAG},
 };
 use tower::ServiceExt;
 use tower_http::services::{ServeDir, ServeFile};
+
+const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 lazy_static! {
     pub static ref FRONTEND_PATH: String =
@@ -24,7 +26,11 @@ pub async fn frontend_handler(uri: Uri) -> Result<Response<Body>, (StatusCode, S
     let res = serve_dir(uri.clone(), FRONTEND_PATH.clone()).await?;
 
     match res.status() {
-        StatusCode::OK => Ok(res),
+        StatusCode::OK => {
+            let mut res = res;
+            apply_etag_header(&mut res);
+            Ok(res)
+        }
         StatusCode::NOT_FOUND => {
             // serve the HTML file for SPA routing
             let spa_file_path_string = FRONTEND_PATH.clone() + "/index.html";
@@ -33,7 +39,9 @@ pub async fn frontend_handler(uri: Uri) -> Result<Response<Body>, (StatusCode, S
                 uri.clone(),
                 spa_file_path_string
             );
-            return serve_file(uri.clone(), spa_file_path_string).await;
+            let mut response = serve_file(uri.clone(), spa_file_path_string).await?;
+            apply_etag_header(&mut response);
+            Ok(response)
         }
         other => {
             // If the status is not OK or NOT_FOUND, return the response as is
@@ -75,4 +83,14 @@ async fn serve_dir(uri: Uri, static_dir: String) -> Result<Response<Body>, (Stat
             ));
         }
     }
+}
+
+fn apply_etag_header(response: &mut Response<Body>) {
+    response
+        .headers_mut()
+        .insert(ETAG, HeaderValue::from_str(&app_version_etag()).unwrap());
+}
+
+fn app_version_etag() -> String {
+    format!("\"radicalise-{}\"", APP_VERSION)
 }
