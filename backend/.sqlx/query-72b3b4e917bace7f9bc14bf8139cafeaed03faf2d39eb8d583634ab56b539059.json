@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE circle_involvements\n        SET status = ?\n        WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "72b3b4e917bace7f9bc14bf8139cafeaed03faf2d39eb8d583634ab56b539059"
+}

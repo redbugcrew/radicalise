@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE circle_invitations SET person_id = ? WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "a8cd33ec21c2e0a2cc0c818d6351571e69710ac6277867fd464897b6d0718fa2"
+}

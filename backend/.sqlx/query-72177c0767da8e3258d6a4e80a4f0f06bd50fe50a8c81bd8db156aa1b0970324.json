@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id as \"id: i64\"\n        FROM circles\n        WHERE project_id = ?\n        ORDER BY id ASC",
+  "describe": {
+    "columns": [
+      {
+        "name": "id: i64",
+        "ordinal": 0,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "72177c0767da8e3258d6a4e80a4f0f06bd50fe50a8c81bd8db156aa1b0970324"
+}

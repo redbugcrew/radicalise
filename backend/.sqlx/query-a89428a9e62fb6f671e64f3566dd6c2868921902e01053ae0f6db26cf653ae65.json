@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE circles SET name = ?, slug = ? WHERE id = ? AND project_id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "a89428a9e62fb6f671e64f3566dd6c2868921902e01053ae0f6db26cf653ae65"
+}

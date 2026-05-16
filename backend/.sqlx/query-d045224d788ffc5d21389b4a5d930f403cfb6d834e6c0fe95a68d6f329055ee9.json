@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "\n        SELECT id, project_id, display_name, about, avatar_id\n        FROM people\n        WHERE\n            id = ? AND\n            project_id = ?",
+  "query": "\n        SELECT id, project_id, display_name, about, avatar_id\n        FROM people\n        WHERE\n            id = ?",
   "describe": {
     "columns": [
       {
@@ -30,7 +30,7 @@
       }
     ],
     "parameters": {
-      "Right": 2
+      "Right": 1
     },
     "nullable": [
       false,
@@ -40,5 +40,5 @@
       true
     ]
   },
-  "hash": "edfb116cbb3c26dfa52dc07d645c3f9970c744297af766b8ede2fa661ede29b1"
+  "hash": "d045224d788ffc5d21389b4a5d930f403cfb6d834e6c0fe95a68d6f329055ee9"
 }

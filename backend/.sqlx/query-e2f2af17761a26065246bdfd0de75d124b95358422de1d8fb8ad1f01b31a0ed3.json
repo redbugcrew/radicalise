@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE circle_involvements\n        SET implicit_counter = 0\n        WHERE\n            circle_id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "e2f2af17761a26065246bdfd0de75d124b95358422de1d8fb8ad1f01b31a0ed3"
+}

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM circle_invitations WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "f46e629c007e2864d00af3ff0384e87a4826db80b7794fb64ef0d5a4098bb75e"
+}

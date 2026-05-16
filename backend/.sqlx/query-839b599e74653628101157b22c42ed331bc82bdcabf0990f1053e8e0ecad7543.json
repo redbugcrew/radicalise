@@ -1,0 +1,110 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT\n            circle_involvements.id AS id,\n            person_id,\n            circles.project_id AS \"project_id: i64\",\n            circle_id,\n            interval_id,\n            status as \"status: InvolvementStatus\",\n            private_capacity_planning,\n            wellbeing,\n            focus,\n            capacity_score,\n            capacity,\n            participation_intention as \"participation_intention: ParticipationIntention\",\n            opt_out_type as \"opt_out_type: OptOutType\",\n            opt_out_planned_return_date,\n            intention_context,\n            implicit_counter\n        FROM circle_involvements\n        INNER JOIN circles ON circle_involvements.circle_id = circles.id\n        WHERE\n            project_id = ? AND\n            circles.id = ? AND\n            interval_id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer"
+      },
+      {
+        "name": "person_id",
+        "ordinal": 1,
+        "type_info": "Integer"
+      },
+      {
+        "name": "project_id: i64",
+        "ordinal": 2,
+        "type_info": "Null"
+      },
+      {
+        "name": "circle_id",
+        "ordinal": 3,
+        "type_info": "Integer"
+      },
+      {
+        "name": "interval_id",
+        "ordinal": 4,
+        "type_info": "Integer"
+      },
+      {
+        "name": "status: InvolvementStatus",
+        "ordinal": 5,
+        "type_info": "Text"
+      },
+      {
+        "name": "private_capacity_planning",
+        "ordinal": 6,
+        "type_info": "Bool"
+      },
+      {
+        "name": "wellbeing",
+        "ordinal": 7,
+        "type_info": "Text"
+      },
+      {
+        "name": "focus",
+        "ordinal": 8,
+        "type_info": "Text"
+      },
+      {
+        "name": "capacity_score",
+        "ordinal": 9,
+        "type_info": "Integer"
+      },
+      {
+        "name": "capacity",
+        "ordinal": 10,
+        "type_info": "Text"
+      },
+      {
+        "name": "participation_intention: ParticipationIntention",
+        "ordinal": 11,
+        "type_info": "Text"
+      },
+      {
+        "name": "opt_out_type: OptOutType",
+        "ordinal": 12,
+        "type_info": "Text"
+      },
+      {
+        "name": "opt_out_planned_return_date",
+        "ordinal": 13,
+        "type_info": "Text"
+      },
+      {
+        "name": "intention_context",
+        "ordinal": 14,
+        "type_info": "Text"
+      },
+      {
+        "name": "implicit_counter",
+        "ordinal": 15,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "839b599e74653628101157b22c42ed331bc82bdcabf0990f1053e8e0ecad7543"
+}
