@@ -29,9 +29,9 @@ CREATE TABLE circle_involvements (
   "intention_context" TEXT,
   "implicit_counter" INTEGER NOT NULL DEFAULT 0,
 
-  FOREIGN KEY (person_id) REFERENCES people(id),
-  FOREIGN KEY (circle_id) REFERENCES circles(id),
-  FOREIGN KEY (interval_id) REFERENCES intervals(id),
+  FOREIGN KEY (person_id) REFERENCES people(id) ON DELETE CASCADE,
+  FOREIGN KEY (circle_id) REFERENCES circles(id) ON DELETE CASCADE,
+  FOREIGN KEY (interval_id) REFERENCES intervals(id) ON DELETE CASCADE,
   CONSTRAINT "circle_involvements_unique" UNIQUE("circle_id","person_id","interval_id"),
   PRIMARY KEY("id" AUTOINCREMENT)
 );

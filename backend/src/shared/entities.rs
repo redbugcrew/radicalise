@@ -96,6 +96,7 @@ impl Interval {
 
 #[derive(Serialize, Deserialize, ToSchema, sqlx::Type, Clone, Debug)]
 pub enum InvolvementStatus {
+    Onboarding,
     Active,
     OnHiatus,
     Exiting,
@@ -107,6 +108,7 @@ impl FromStr for InvolvementStatus {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
+            "Onboarding" => Ok(InvolvementStatus::Onboarding),
             "Active" => Ok(InvolvementStatus::Active),
             "OnHiatus" => Ok(InvolvementStatus::OnHiatus),
             "Exiting" => Ok(InvolvementStatus::Exiting),
@@ -271,6 +273,12 @@ impl Default for CircleInvolvement {
     }
 }
 
+impl CircleInvolvement {
+    pub fn typed_id(&self) -> CircleInvolvementId {
+        CircleInvolvementId::new(self.id)
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct CircleInvolvementId {
     pub id: i64,
@@ -312,7 +320,7 @@ pub struct CircleInvitation {
     pub id: i64,
     pub circle_id: i64,
     pub person_id: i64,
-    pub circle_involvement_id: i64,
+    pub circle_involvement_id: Option<i64>,
     pub invitee_email: String,
     pub message: Option<String>,
     pub invitation_token: String,
@@ -339,7 +347,7 @@ mod tests {
             id: 1,
             circle_id: 1,
             person_id: 1,
-            circle_involvement_id: 1,
+            circle_involvement_id: Some(1),
             invitee_email: "person@example.com".to_string(),
             message: None,
             invitation_token: "token".to_string(),

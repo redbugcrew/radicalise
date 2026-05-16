@@ -3,8 +3,8 @@ use sqlx::SqlitePool;
 use crate::{
     repo_utilities::InsertRecordError,
     shared::entities::{
-        CircleId, CircleInvolvement, CircleInvolvementId, IntervalId, InvolvementStatus, OptOutType,
-        ParticipationIntention, PersonId, ProjectId,
+        CircleId, CircleInvolvement, CircleInvolvementId, IntervalId, InvolvementStatus,
+        OptOutType, ParticipationIntention, PersonId, ProjectId,
     },
 };
 
@@ -351,6 +351,39 @@ pub async fn delete_implicit_circle_involvements(
             participation_intention IS NULL",
         interval_id.id,
         circle_id.id
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(())
+}
+
+pub async fn delete_circle_involvement_by_id(
+    involvement_id: CircleInvolvementId,
+    pool: &SqlitePool,
+) -> Result<(), sqlx::Error> {
+    sqlx::query!(
+        "DELETE FROM circle_involvements
+        WHERE id = ?",
+        involvement_id.id
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(())
+}
+
+pub async fn update_involvement_status(
+    involvement_id: CircleInvolvementId,
+    status: InvolvementStatus,
+    pool: &SqlitePool,
+) -> Result<(), sqlx::Error> {
+    sqlx::query!(
+        "UPDATE circle_involvements
+        SET status = ?
+        WHERE id = ?",
+        status,
+        involvement_id.id
     )
     .execute(pool)
     .await?;

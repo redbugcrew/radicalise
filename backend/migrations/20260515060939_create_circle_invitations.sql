@@ -4,7 +4,7 @@ CREATE TABLE circle_invitations (
     id INTEGER,
     circle_id INTEGER NOT NULL,
     person_id INTEGER NOT NULL,
-    circle_involvement_id INTEGER NOT NULL,
+    circle_involvement_id INTEGER,
     invitee_email VARCHAR(255) NOT NULL,
     message TEXT,
     invitation_token TEXT NOT NULL UNIQUE,
@@ -14,6 +14,6 @@ CREATE TABLE circle_invitations (
     PRIMARY KEY (id AUTOINCREMENT),
     FOREIGN KEY (circle_id) REFERENCES circles(id) ON DELETE CASCADE,
     FOREIGN KEY (person_id) REFERENCES people(id) ON DELETE CASCADE,
-    FOREIGN KEY (circle_involvement_id) REFERENCES circle_involvements(id) ON DELETE CASCADE,
+    FOREIGN KEY (circle_involvement_id) REFERENCES circle_involvements(id) ON DELETE SET NULL,
     CONSTRAINT "circle_invitations_unique" UNIQUE("circle_id","person_id")
 );

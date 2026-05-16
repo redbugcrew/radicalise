@@ -17,7 +17,8 @@ use crate::{
         emails::{InvitedToCircleEmailParams, invited_to_circle_email},
     },
     my_project::involvements_repo::{
-        find_circle_involvement_by_id, insert_circle_involvement_if_missing,
+        delete_circle_involvement_by_id, find_circle_involvement_by_id, insert_circle_involvement,
+        insert_circle_involvement_if_missing, update_involvement_status,
     },
     people::repo::{
         delete_person, find_person_by_id, find_person_by_user_id, insert_person_without_user,
@@ -202,20 +203,38 @@ pub async fn accept_invitation(
     token: String,
     accepting_user_id: UserId,
 ) -> Result<(), AcceptInvitationError> {
-    let AcceptInvitationContext {
-        invitation,
-        circle,
-        current_interval,
-        user_person,
-        invitation_person,
-        circle_involvement,
-    } = load_accept_invitation_context(token, accepting_user_id.clone(), pool).await?;
+    let mut context =
+        load_accept_invitation_context(token, accepting_user_id.clone(), pool).await?;
 
-    let person = reconcile_person(
-        user_person,
-        invitation_person,
-        accepting_user_id,
-        &invitation,
+    let data_changed = reconcile_person(
+        &context.user_person,
+        &context.invitation_person,
+        accepting_user_id.clone(),
+        &context.invitation,
+        pool,
+    )
+    .await?;
+
+    context = match data_changed {
+        true => {
+            load_accept_invitation_context(
+                context.invitation.invitation_token.clone(),
+                accepting_user_id.clone(),
+                pool,
+            )
+            .await?
+        }
+        false => context,
+    };
+
+    reconcile_involvement(
+        context
+            .invitation
+            .circle_involvement_id
+            .map(CircleInvolvementId::new),
+        CircleId::new(context.invitation.circle_id),
+        &context.current_interval,
+        &context.invitation_person,
         pool,
     )
     .await?;
@@ -225,11 +244,9 @@ pub async fn accept_invitation(
 
 struct AcceptInvitationContext {
     invitation: CircleInvitation,
-    circle: Circle,
     current_interval: Interval,
     user_person: Option<Person>,
     invitation_person: Person,
-    circle_involvement: CircleInvolvement,
 }
 
 async fn load_accept_invitation_context(
@@ -267,33 +284,23 @@ async fn load_accept_invitation_context(
         .await
         .map_err(handle_accept_database_error)?;
 
-    // Find the circle involvement for the invitation
-    let circle_involvement = find_circle_involvement_by_id(
-        CircleInvolvementId::new(invitation.circle_involvement_id),
-        pool,
-    )
-    .await
-    .map_err(handle_accept_database_error)?;
-
     Ok(AcceptInvitationContext {
         invitation,
-        circle,
         current_interval,
         user_person,
         invitation_person,
-        circle_involvement,
     })
 }
 
 async fn reconcile_person(
-    user_person: Option<Person>,
-    invitation_person: Person,
+    user_person: &Option<Person>,
+    invitation_person: &Person,
     accepting_user_id: UserId,
     invitation: &CircleInvitation,
     pool: &SqlitePool,
-) -> Result<Person, AcceptInvitationError> {
+) -> Result<bool, AcceptInvitationError> {
     match user_person {
-        Some(user_person) if user_person.id == invitation_person.id => Ok(user_person),
+        Some(user_person) if user_person.id == invitation_person.id => Ok(false),
         Some(user_person) => {
             delete_person(PersonId::new(invitation_person.id), pool)
                 .await
@@ -301,15 +308,103 @@ async fn reconcile_person(
             update_circle_invitation_person_id(invitation.id, PersonId::new(user_person.id), pool)
                 .await
                 .map_err(handle_accept_database_error)?;
-            Ok(user_person)
+            Ok(true)
         }
         None => {
             update_person_user_id(PersonId::new(invitation_person.id), accepting_user_id, pool)
                 .await
                 .map_err(handle_accept_database_error)?;
-            Ok(invitation_person)
+            Ok(true)
         }
     }
+}
+
+async fn reconcile_involvement(
+    circle_involvement_id: Option<CircleInvolvementId>,
+    circle_id: CircleId,
+    current_interval: &Interval,
+    person: &Person,
+    pool: &SqlitePool,
+) -> Result<(), AcceptInvitationError> {
+    let mut maybe_involvement: Option<CircleInvolvement> = match circle_involvement_id {
+        Some(id) => Some(
+            find_circle_involvement_by_id(id, pool)
+                .await
+                .map_err(handle_accept_database_error)?,
+        ),
+        None => None,
+    };
+
+    // If involvement is now for the wrong person, delete it
+    maybe_involvement = match maybe_involvement {
+        Some(inv) if inv.person_id != person.id => {
+            println!(
+                "Involvement person_id {:?} does not match accepting person_id {:?}, deleting involvement",
+                inv.person_id, person.id
+            );
+            delete_circle_involvement_by_id(CircleInvolvementId::new(inv.id), pool)
+                .await
+                .map_err(handle_accept_database_error)?;
+            None
+        }
+        Some(inv) => Some(inv),
+        None => None,
+    };
+
+    // If involvement is for the wrong interval, don't delete it, just clear the local var
+    maybe_involvement = match maybe_involvement {
+        Some(inv) if inv.interval_id != current_interval.id => {
+            println!(
+                "Involvement interval_id {:?} does not match current interval_id {:?}, ignoring involvement",
+                inv.interval_id, current_interval.id
+            );
+            None
+        }
+        Some(inv) => Some(inv),
+        None => None,
+    };
+
+    // If we don't have an involvement at this point, create one
+    let involvement = match maybe_involvement {
+        Some(inv) => inv,
+        None => insert_circle_involvement(
+            CircleInvolvement {
+                person_id: person.id,
+                circle_id: circle_id.id,
+                interval_id: current_interval.id,
+                status: InvolvementStatus::Onboarding,
+                ..Default::default()
+            }
+            .into(),
+            pool,
+        )
+        .await
+        .map_err(|err| {
+            eprintln!("Database error: {:?}", err);
+            AcceptInvitationError::DatabaseError
+        })?
+        .into(),
+    };
+
+    // If our involvement is Invited or Exiting, move it to Onboarding
+    match involvement.status {
+        InvolvementStatus::Invited | InvolvementStatus::Exiting => {
+            println!(
+                "Updating involvement status from {:?} to Onboarding",
+                involvement.status
+            );
+            update_involvement_status(involvement.typed_id(), InvolvementStatus::Onboarding, pool)
+                .await
+                .map_err(handle_accept_database_error)?;
+            CircleInvolvement {
+                status: InvolvementStatus::Onboarding,
+                ..involvement
+            }
+        }
+        _ => involvement,
+    };
+
+    Ok(())
 }
 
 fn handle_accept_database_error(err: sqlx::Error) -> AcceptInvitationError {
