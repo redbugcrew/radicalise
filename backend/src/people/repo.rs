@@ -5,41 +5,6 @@ use crate::{
     shared::entities::{CrewId, IntervalId, Person, PersonId, ProjectId, UserId},
 };
 
-pub async fn insert_person(
-    project_id: ProjectId,
-    user_id: UserId,
-    display_name: String,
-    pool: &SqlitePool,
-) -> Result<Person, InsertRecordError> {
-    let result = sqlx::query_as!(
-        Person,
-        "
-        INSERT INTO people (project_id, display_name, user_id)
-        VALUES (?, ?, ?)
-        RETURNING id, project_id, display_name, about, avatar_id",
-        project_id.id,
-        display_name,
-        user_id.id
-    )
-    .fetch_one(pool)
-    .await?;
-
-    Ok(result)
-}
-
-pub async fn find_or_insert_person(
-    project_id: ProjectId,
-    user_id: UserId,
-    display_name: String,
-    pool: &SqlitePool,
-) -> Result<Person, InsertRecordError> {
-    match find_person_by_user_id(user_id.clone(), project_id.clone(), pool).await {
-        Ok(Some(person)) => Ok(person),
-        Ok(None) => insert_person(project_id, user_id, display_name, pool).await,
-        Err(err) => Err(InsertRecordError::from(err)),
-    }
-}
-
 pub async fn insert_person_without_user(
     project_id: ProjectId,
     display_name: String,

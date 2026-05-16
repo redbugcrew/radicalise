@@ -20,7 +20,7 @@ use crate::{
         default_project_id,
         email_sender::ResendEmailSender,
         entities::{
-            Circle, CircleId, CircleInvitation, Interval, Person, Project, ProjectId, UserId,
+            Circle, CircleId, CircleInvitation, Person, Project, ProjectId, UserId,
         },
         events::AppEvent,
     },

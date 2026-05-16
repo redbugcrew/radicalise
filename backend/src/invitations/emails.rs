@@ -5,7 +5,7 @@ use urlencoding::encode;
 use crate::shared::email_helpers::{DEFAULT_EMAIL_FROM_ADDRESS, absolute_url_for_email};
 
 pub struct InvitedToCircleEmailParams {
-    pub invitation_id: i64,
+    pub project_slug: String,
     pub invitation_token: String,
     pub invitee_name: String,
     pub inviter_name: String,
@@ -21,8 +21,8 @@ pub fn invited_to_circle_email(
     let subject = "You're invited to join a project on RADicalise";
 
     let manage_eoi_url = absolute_url_for_email(&format!(
-        "/people/invitation/{}/accept?token={}",
-        params.invitation_id,
+        "/project/{}/invitation/accept?token={}",
+        encode(&params.project_slug),
         encode(&params.invitation_token)
     ));
 

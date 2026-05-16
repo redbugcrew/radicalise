@@ -109,20 +109,6 @@ impl<'a> AuthRepo<'a> {
         }
     }
 
-    pub async fn upsert_user(&self, email: String) -> Result<AuthUser, AuthRepoError> {
-        sqlx::query_as!(
-            AuthUser,
-            "INSERT INTO users (email)
-            VALUES (?)
-            ON CONFLICT(email) DO UPDATE SET email = excluded.email
-            RETURNING id, email, hashed_password",
-            email,
-        )
-        .fetch_one(self.pool)
-        .await
-        .map_err(log_and_return_db_error)
-    }
-
     pub async fn insert_user(
         &self,
         email: String,

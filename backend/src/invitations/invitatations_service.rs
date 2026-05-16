@@ -4,6 +4,7 @@ use sqlx::SqlitePool;
 use utoipa::ToSchema;
 use uuid::Uuid;
 
+use crate::my_project::repo::find_project;
 use crate::shared::email_sender::EmailSender;
 use crate::{
     circles::repo::find_circle_by_id,
@@ -17,7 +18,7 @@ use crate::{
     },
     my_project::involvements_repo::{
         delete_circle_involvement_by_id, find_circle_involvement_by_id, insert_circle_involvement,
-        insert_circle_involvement_if_missing, update_involvement_status,
+        update_involvement_status,
     },
     people::repo::{
         delete_person, find_person_by_id, find_person_by_user_id, insert_person_without_user,
@@ -80,6 +81,12 @@ pub async fn invite_person(
         .await
         .map_err(ctx_err)?
         .ok_or(InvitePersonError::ContextInvalid)?;
+
+    // Find the project
+    println!("Finding project with id: {:?}", project_id);
+    let project = find_project(project_id.clone(), pool)
+        .await
+        .map_err(ctx_err)?;
 
     // Find the circle
     println!("Finding circle with id: {:?}", input.circle_id);
@@ -162,7 +169,7 @@ pub async fn invite_person(
     let email = invited_to_circle_email(
         input.email.clone(),
         InvitedToCircleEmailParams {
-            invitation_id: circle_invitation.id,
+            project_slug: project.slug.clone().unwrap_or("unknown".to_string()),
             invitation_token: circle_invitation.invitation_token.clone(),
             invitee_name: input.name.clone(),
             inviter_name: inviting_person.display_name.clone(),
