@@ -297,10 +297,10 @@ async fn reconcile_person(
     match user_person {
         Some(user_person) if user_person.id == invitation_person.id => Ok(false),
         Some(user_person) => {
-            delete_person(PersonId::new(invitation_person.id), pool)
+            update_circle_invitation_person_id(invitation.id, PersonId::new(user_person.id), pool)
                 .await
                 .map_err(handle_accept_database_error)?;
-            update_circle_invitation_person_id(invitation.id, PersonId::new(user_person.id), pool)
+            delete_person(PersonId::new(invitation_person.id), pool)
                 .await
                 .map_err(handle_accept_database_error)?;
             Ok(true)
@@ -322,11 +322,13 @@ async fn reconcile_involvement(
     pool: &SqlitePool,
 ) -> Result<(), AcceptInvitationError> {
     let mut maybe_involvement: Option<CircleInvolvement> = match circle_involvement_id {
-        Some(id) => Some(
-            find_circle_involvement_by_id(id, pool)
-                .await
-                .map_err(handle_accept_database_error)?,
-        ),
+        Some(id) => match find_circle_involvement_by_id(id, pool).await {
+            Ok(involvement) => Some(involvement),
+            // The invitation may still point to an involvement that was removed when the
+            // placeholder invited person was reconciled away.
+            Err(sqlx::Error::RowNotFound) => None,
+            Err(err) => return Err(handle_accept_database_error(err)),
+        },
         None => None,
     };
 
@@ -684,6 +686,136 @@ mod tests {
             involvement_row.status, "Onboarding",
             "Expected involvement status to be Onboarding in interval 2, got {:?}",
             involvement_row.status
+        );
+    }
+
+    #[tokio::test]
+    async fn accepting_user_with_existing_person_and_different_email_gets_involvement() {
+        let pool = setup_db().await;
+        let email_sender = MockEmailSender::new();
+
+        // Create the accepter user and their existing person in project 1.
+        sqlx::query!(
+            "INSERT INTO users (email, hashed_password) VALUES ('accepter@example.com', 'hashed')"
+        )
+        .execute(&pool)
+        .await
+        .expect("Failed to insert accepter user");
+
+        let accepter_user =
+            sqlx::query!("SELECT id FROM users WHERE email = 'accepter@example.com'")
+                .fetch_one(&pool)
+                .await
+                .expect("Failed to find accepter user");
+
+        sqlx::query!(
+            "INSERT INTO people (display_name, project_id, user_id) VALUES ('Existing Accepter Person', 1, ?)",
+            accepter_user.id
+        )
+        .execute(&pool)
+        .await
+        .expect("Failed to insert accepter person");
+
+        let accepter_person =
+            sqlx::query!("SELECT id FROM people WHERE user_id = ?", accepter_user.id)
+                .fetch_one(&pool)
+                .await
+                .expect("Failed to find accepter person");
+
+        // Invite a different email into circle 1.
+        let input = InvitePersonRequest {
+            name: "Invited Placeholder Person".to_string(),
+            email: "invitee@example.com".to_string(),
+            circle_id: 1,
+            message: None,
+        };
+
+        let invite_result = invite_person(
+            &pool,
+            &email_sender,
+            &input,
+            UserId::new(1),
+            ProjectId::new(1),
+            interval_1(),
+        )
+        .await;
+        assert!(
+            invite_result.is_ok(),
+            "invite_person failed: {:?}",
+            invite_result.err()
+        );
+
+        // Capture the placeholder person created by invitation flow.
+        let invitation_row = sqlx::query!(
+            "SELECT id, person_id, invitation_token FROM circle_invitations WHERE invitee_email = 'invitee@example.com'"
+        )
+        .fetch_one(&pool)
+        .await
+        .expect("Failed to find circle invitation");
+        let placeholder_person_id = invitation_row.person_id;
+
+        // Accept with the existing accepter user (different email from invitation).
+        let accept_result = accept_invitation(
+            &pool,
+            invitation_row.invitation_token,
+            UserId::new(accepter_user.id),
+            interval_1(),
+        )
+        .await;
+        assert!(
+            accept_result.is_ok(),
+            "accept_invitation failed: {:?}",
+            accept_result.err()
+        );
+
+        // Invitation should now point at the accepter's existing person.
+        let updated_invitation = sqlx::query!(
+            "SELECT person_id FROM circle_invitations WHERE id = ?",
+            invitation_row.id
+        )
+        .fetch_one(&pool)
+        .await
+        .expect("Failed to refetch circle invitation");
+        assert_eq!(
+            updated_invitation.person_id, accepter_person.id,
+            "Expected invitation person_id to be moved to accepter person"
+        );
+
+        // Placeholder person should be deleted during reconciliation.
+        let placeholder_person =
+            sqlx::query!("SELECT id FROM people WHERE id = ?", placeholder_person_id)
+                .fetch_optional(&pool)
+                .await
+                .expect("Failed to check placeholder person");
+        assert!(
+            placeholder_person.is_none(),
+            "Expected placeholder invited person to be deleted"
+        );
+
+        // The accepter should now have an onboarding involvement in circle 1, interval 1.
+        let accepter_involvement = sqlx::query!(
+            "SELECT status FROM circle_involvements WHERE person_id = ? AND circle_id = 1 AND interval_id = 1",
+            accepter_person.id
+        )
+        .fetch_one(&pool)
+        .await
+        .expect("Expected accepter person to have a circle involvement after acceptance");
+        assert_eq!(
+            accepter_involvement.status, "Onboarding",
+            "Expected accepter involvement status to be Onboarding"
+        );
+
+        // No involvement should remain for the deleted placeholder person.
+        let placeholder_involvements = sqlx::query!(
+            "SELECT COUNT(*) as count FROM circle_involvements WHERE person_id = ?",
+            placeholder_person_id
+        )
+        .fetch_one(&pool)
+        .await
+        .expect("Failed to count placeholder involvements");
+        assert_eq!(
+            placeholder_involvements.count, 0,
+            "Expected no circle involvements to remain for placeholder person"
         );
     }
 }
