@@ -1,8 +1,8 @@
-import { Anchor, AppShell, Burger, Container, Group } from "@mantine/core";
+import { AppShell, Burger, Container, Group } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconBrandGithub, IconHome2, IconSettings, IconUsers, IconUsersGroup, IconCalendarMonth, IconCalendar, IconCalendarCog, IconCirclesFilled } from "@tabler/icons-react";
 import { Outlet } from "react-router-dom";
-import { NavLink, PersonBadge } from "../../components";
+import { Anchor, NavLink, PersonBadge } from "../../components";
 import { handleOwnedAppEvent, useAppSelector } from "../../store";
 import packageJson from "../../../package.json";
 import useWebSocket from "react-use-websocket";

@@ -5,14 +5,15 @@ export type AnchorProps = MantineAnchorProps & {
   href: string | undefined;
   children: React.ReactNode;
   target?: string;
+  onClick?: () => void;
 };
 
-export default function Anchor({ href, children, ...otherProps }: AnchorProps) {
+export default function Anchor({ href, children, onClick, ...otherProps }: AnchorProps) {
   if (!href) {
     return <Text>{children}</Text>; // Fallback for undefined href
   }
   return (
-    <MantineAnchor component={Link} to={href} {...otherProps}>
+    <MantineAnchor component={Link} to={href} onClick={onClick} {...otherProps}>
       {children}
     </MantineAnchor>
   );
