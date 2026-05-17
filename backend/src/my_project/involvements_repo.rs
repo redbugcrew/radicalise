@@ -16,7 +16,6 @@ pub struct CircleInvolvementRecord {
     pub circle_id: i64,
     pub interval_id: i64,
     pub status: InvolvementStatus,
-    pub private_capacity_planning: bool,
     pub capacity_planning_visibility_circle_id: Option<i64>,
     pub wellbeing: Option<String>,
     pub focus: Option<String>,
@@ -38,7 +37,6 @@ impl From<CircleInvolvementRecord> for CircleInvolvement {
             circle_id: record.circle_id,
             interval_id: record.interval_id,
             status: record.status,
-            private_capacity_planning: record.private_capacity_planning,
             capacity_planning_visibility_circle_id: record.capacity_planning_visibility_circle_id,
             capacity_planning: Some(crate::shared::entities::CapacityPlanning {
                 wellbeing: record.wellbeing,
@@ -64,7 +62,6 @@ impl From<CircleInvolvement> for CircleInvolvementRecord {
             circle_id: involvement.circle_id,
             interval_id: involvement.interval_id,
             status: involvement.status,
-            private_capacity_planning: involvement.private_capacity_planning,
             capacity_planning_visibility_circle_id: involvement
                 .capacity_planning_visibility_circle_id,
             wellbeing: involvement
@@ -105,7 +102,6 @@ pub async fn find_circle_involvement(
             circle_id,
             interval_id,
             status as \"status: InvolvementStatus\",
-            private_capacity_planning,
             capacity_planning_visibility_circle_id,
             wellbeing,
             focus,
@@ -146,7 +142,6 @@ pub async fn find_circle_involvement_by_id(
             circle_id,
             interval_id,
             status as \"status: InvolvementStatus\",
-            private_capacity_planning,
             capacity_planning_visibility_circle_id,
             wellbeing,
             focus,
@@ -183,7 +178,6 @@ pub async fn find_all_circle_involvements(
             circle_id,
             interval_id,
             status as \"status: InvolvementStatus\",
-            private_capacity_planning,
             capacity_planning_visibility_circle_id,
             wellbeing,
             focus,
@@ -226,7 +220,6 @@ pub async fn find_all_circle_involvements_for_person(
             circle_id,
             interval_id,
             status as \"status: InvolvementStatus\",
-            private_capacity_planning,
             capacity_planning_visibility_circle_id,
             wellbeing,
             focus,
@@ -260,12 +253,11 @@ pub async fn upsert_circle_involvement(
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
     let result = sqlx::query!(
-        "INSERT INTO circle_involvements (person_id, circle_id, interval_id, status, private_capacity_planning, capacity_planning_visibility_circle_id, wellbeing, focus, capacity_score, capacity, participation_intention, opt_out_type, opt_out_planned_return_date,
+        "INSERT INTO circle_involvements (person_id, circle_id, interval_id, status, capacity_planning_visibility_circle_id, wellbeing, focus, capacity_score, capacity, participation_intention, opt_out_type, opt_out_planned_return_date,
         intention_context)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(person_id, circle_id, interval_id) DO UPDATE SET
             status = excluded.status,
-            private_capacity_planning = excluded.private_capacity_planning,
             capacity_planning_visibility_circle_id = excluded.capacity_planning_visibility_circle_id,
             wellbeing = excluded.wellbeing,
             focus = excluded.focus,
@@ -279,7 +271,6 @@ pub async fn upsert_circle_involvement(
         involvement.circle_id,
         involvement.interval_id,
         involvement.status,
-        involvement.private_capacity_planning,
         involvement.capacity_planning_visibility_circle_id,
         involvement.wellbeing,
         involvement.focus,
@@ -305,14 +296,13 @@ pub async fn insert_circle_involvement(
     pool: &SqlitePool,
 ) -> Result<CircleInvolvementRecord, InsertRecordError> {
     let result = sqlx::query!(
-        "INSERT INTO circle_involvements (person_id, circle_id, interval_id, status, private_capacity_planning, capacity_planning_visibility_circle_id, wellbeing, focus, capacity_score, capacity, participation_intention, opt_out_type, opt_out_planned_return_date,
+        "INSERT INTO circle_involvements (person_id, circle_id, interval_id, status, capacity_planning_visibility_circle_id, wellbeing, focus, capacity_score, capacity, participation_intention, opt_out_type, opt_out_planned_return_date,
         intention_context, implicit_counter)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         involvement.person_id,
         involvement.circle_id,
         involvement.interval_id,
         involvement.status,
-        involvement.private_capacity_planning,
         involvement.capacity_planning_visibility_circle_id,
         involvement.wellbeing,
         involvement.focus,

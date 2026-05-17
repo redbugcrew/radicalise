@@ -172,7 +172,6 @@ export interface CircleInvolvement {
   participation_intention?: null | ParticipationIntention;
   /** @format int64 */
   person_id: number;
-  private_capacity_planning: boolean;
   /** @format int64 */
   project_id: number;
   status: InvolvementStatus;
@@ -360,7 +359,6 @@ export interface MyParticipationInput {
   opt_out_planned_return_date?: string | null;
   opt_out_type?: null | OptOutType;
   participation_intention?: null | ParticipationIntention;
-  private_capacity_planning: boolean;
   /** @format int64 */
   project_id: number;
   wellbeing?: string | null;

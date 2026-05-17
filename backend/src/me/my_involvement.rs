@@ -18,7 +18,6 @@ use crate::{
 pub struct MyParticipationInput {
     pub project_id: i64,
     pub circle_id: i64,
-    pub private_capacity_planning: bool,
     pub capacity_planning_visibility_circle_id: Option<i64>,
     pub wellbeing: Option<String>,
     pub focus: Option<String>,
@@ -72,7 +71,6 @@ pub async fn update_my_involvements(
             circle_id: input.circle_id,
             interval_id: interval_id.id,
             status,
-            private_capacity_planning: input.private_capacity_planning,
             capacity_planning_visibility_circle_id: input.capacity_planning_visibility_circle_id,
             wellbeing: input.wellbeing,
             focus: input.focus,
