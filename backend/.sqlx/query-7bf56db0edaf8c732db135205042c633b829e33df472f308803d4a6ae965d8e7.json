@@ -1,10 +1,10 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT id as \"id: i64\", project_id as \"project_id: i64\", name, slug\n        FROM circles\n        WHERE project_id = ?\n        ORDER BY id ASC",
+  "query": "SELECT id, project_id as \"project_id: i64\", name, slug, inside_circle_id\n        FROM circles\n        WHERE project_id = ?\n        ORDER BY id ASC",
   "describe": {
     "columns": [
       {
-        "name": "id: i64",
+        "name": "id",
         "ordinal": 0,
         "type_info": "Integer"
       },
@@ -22,6 +22,11 @@
         "name": "slug",
         "ordinal": 3,
         "type_info": "Text"
+      },
+      {
+        "name": "inside_circle_id",
+        "ordinal": 4,
+        "type_info": "Integer"
       }
     ],
     "parameters": {
@@ -31,8 +36,9 @@
       false,
       false,
       false,
-      false
+      false,
+      true
     ]
   },
-  "hash": "dc9f31382ad05bdbb6585422734775ba1d4b6e465b0128636cb7df92bad43996"
+  "hash": "7bf56db0edaf8c732db135205042c633b829e33df472f308803d4a6ae965d8e7"
 }

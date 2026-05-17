@@ -1,6 +1,7 @@
 use sqlx::SqlitePool;
 
 use crate::{
+    circles::repo::add_inside_circles,
     repo_utilities::InsertRecordError,
     shared::entities::{
         Circle, CircleId, CircleInvolvement, CircleInvolvementId, IntervalId, InvolvementStatus,
@@ -416,7 +417,7 @@ pub async fn find_circles_for_person_in_interval(
 ) -> Result<Vec<Circle>, sqlx::Error> {
     let records = sqlx::query_as!(
         Circle,
-        "SELECT circles.id as \"id: i64\", project_id as \"project_id: i64\", name, slug, inside_circle_id
+        "SELECT circles.id as \"id: i64\", circles.project_id as \"project_id: i64\", name, slug, inside_circle_id
         FROM circle_involvements
         INNER JOIN circles ON circle_involvements.circle_id = circles.id
         WHERE
@@ -428,5 +429,5 @@ pub async fn find_circles_for_person_in_interval(
     .fetch_all(pool)
     .await?;
 
-    Ok(records)
+    add_inside_circles(records, pool).await
 }

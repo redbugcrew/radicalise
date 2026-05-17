@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT\n            circle_involvements.id AS id,\n            person_id,\n            circles.project_id AS \"project_id: i64\",\n            circle_id,\n            interval_id,\n            status as \"status: InvolvementStatus\",\n            private_capacity_planning,\n            wellbeing,\n            focus,\n            capacity_score,\n            capacity,\n            participation_intention as \"participation_intention: ParticipationIntention\",\n            opt_out_type as \"opt_out_type: OptOutType\",\n            opt_out_planned_return_date,\n            intention_context,\n            implicit_counter\n        FROM circle_involvements\n        INNER JOIN circles ON circle_involvements.circle_id = circles.id\n        WHERE circle_involvements.id = ?",
+  "query": "SELECT\n            circle_involvements.id AS id,\n            person_id,\n            circles.project_id AS \"project_id: i64\",\n            circle_id,\n            interval_id,\n            status as \"status: InvolvementStatus\",\n            capacity_planning_visibility_circle_id,\n            wellbeing,\n            focus,\n            capacity_score,\n            capacity,\n            participation_intention as \"participation_intention: ParticipationIntention\",\n            opt_out_type as \"opt_out_type: OptOutType\", opt_out_planned_return_date,\n            intention_context,\n            implicit_counter\n        FROM circle_involvements\n        INNER JOIN circles ON circle_involvements.circle_id = circles.id\n        WHERE\n            circles.project_id = ? AND\n            circles.id = ? AND\n            person_id = ? AND\n            interval_id = ?",
   "describe": {
     "columns": [
       {
@@ -34,9 +34,9 @@
         "type_info": "Text"
       },
       {
-        "name": "private_capacity_planning",
+        "name": "capacity_planning_visibility_circle_id",
         "ordinal": 6,
-        "type_info": "Bool"
+        "type_info": "Integer"
       },
       {
         "name": "wellbeing",
@@ -85,7 +85,7 @@
       }
     ],
     "parameters": {
-      "Right": 1
+      "Right": 4
     },
     "nullable": [
       false,
@@ -94,7 +94,7 @@
       false,
       false,
       false,
-      false,
+      true,
       true,
       true,
       true,
@@ -106,5 +106,5 @@
       false
     ]
   },
-  "hash": "6da72e3d51859d65ddc75c5292a714ee40483ff22da7261c3eddb580c1e14e74"
+  "hash": "3a2d6cb6507cf24d0081d48f7f43c26d3439217a69dc1b771c93cc2687cfb03d"
 }
