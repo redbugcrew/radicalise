@@ -8,8 +8,11 @@ import { actionFailure, type ActionPromiseResult } from "../../../components/Act
 
 export default function EditCircle() {
   const { circleSlug } = useParams<"circleSlug">();
-  const circle = useAppSelector((state) => state.circles.rootCircles?.find((c) => c.slug === circleSlug));
+  const rootCircles = useAppSelector((state) => state.circles.rootCircles);
   const navigate = useNavigate();
+
+  const circle = rootCircles?.find((c) => c.slug === circleSlug);
+  const otherCircles = rootCircles?.filter((c) => c.id !== circle?.id) || [];
 
   if (!circleSlug || !circle) {
     return (
@@ -36,7 +39,7 @@ export default function EditCircle() {
     <Stack>
       <Title order={1}>Edit Circle</Title>
 
-      <CircleForm onSubmit={handleSubmit} value={circle} />
+      <CircleForm onSubmit={handleSubmit} value={circle} otherCircles={otherCircles} />
     </Stack>
   );
 }

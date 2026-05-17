@@ -123,6 +123,8 @@ export interface CapacityPlanning {
 export interface Circle {
   /** @format int64 */
   id: number;
+  /** @format int64 */
+  inside_circle_id?: number | null;
   name: string;
   /** @format int64 */
   project_id: number;

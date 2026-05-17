@@ -296,6 +296,7 @@ pub struct Circle {
     pub project_id: i64,
     pub name: String,
     pub slug: String,
+    pub inside_circle_id: Option<i64>,
 }
 
 impl Circle {

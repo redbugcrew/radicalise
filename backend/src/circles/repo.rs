@@ -8,7 +8,7 @@ pub async fn find_all_circles(
 ) -> Result<Vec<Circle>, sqlx::Error> {
     sqlx::query_as!(
         Circle,
-        "SELECT id as \"id: i64\", project_id as \"project_id: i64\", name, slug
+        "SELECT id, project_id as \"project_id: i64\", name, slug, inside_circle_id
         FROM circles
         WHERE project_id = ?
         ORDER BY id ASC",
@@ -40,7 +40,7 @@ pub async fn find_circle_by_id(
 ) -> Result<Circle, sqlx::Error> {
     sqlx::query_as!(
         Circle,
-        "SELECT id as \"id: i64\", project_id as \"project_id: i64\", name, slug
+        "SELECT id, project_id as \"project_id: i64\", name, slug, inside_circle_id
         FROM circles
         WHERE id = ?",
         circle_id.id
@@ -55,10 +55,11 @@ pub async fn insert_circle(
     pool: &SqlitePool,
 ) -> Result<Circle, sqlx::Error> {
     let rec = sqlx::query!(
-        "INSERT INTO circles (project_id, name, slug) VALUES (?, ?, ?)",
+        "INSERT INTO circles (project_id, name, slug, inside_circle_id) VALUES (?, ?, ?, ?)",
         project_id.id,
         circle.name,
-        circle.slug
+        circle.slug,
+        circle.inside_circle_id
     )
     .execute(pool)
     .await?;
@@ -76,9 +77,10 @@ pub async fn update_circle(
     pool: &SqlitePool,
 ) -> Result<Circle, sqlx::Error> {
     sqlx::query!(
-        "UPDATE circles SET name = ?, slug = ? WHERE id = ? AND project_id = ?",
+        "UPDATE circles SET name = ?, slug = ?, inside_circle_id = ? WHERE id = ? AND project_id = ?",
         circle.name,
         circle.slug,
+        circle.inside_circle_id,
         circle_id.id,
         project_id.id
     )

@@ -1,5 +1,6 @@
-import { Anchor, Table } from "@mantine/core";
+import { Table } from "@mantine/core";
 import type { Circle } from "../../../api/Api";
+import { Anchor } from "../../../components";
 
 interface CirclesTableProps {
   circles: Circle[] | null;
@@ -12,7 +13,7 @@ function CirclesTableRow({ circle }: { circle: Circle }) {
     <Table.Tr key={circle.id}>
       <Table.Td>{circle.name}</Table.Td>
       <Table.Td maw={12} ta="right">
-        <Anchor href={`circles/${circle.slug}/edit`}>Edit</Anchor>
+        <Anchor href={`${circle.slug}/edit`}>Edit</Anchor>
       </Table.Td>
     </Table.Tr>
   );
