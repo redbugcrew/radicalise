@@ -242,7 +242,7 @@ pub struct CircleInvolvement {
     pub circle_id: i64,
     pub interval_id: i64,
     pub status: InvolvementStatus,
-    pub private_capacity_planning: bool,
+    pub capacity_planning_visibility_circle_id: Option<i64>,
     pub capacity_planning: Option<CapacityPlanning>,
     pub capacity_score: Option<i64>,
     pub participation_intention: Option<ParticipationIntention>,
@@ -261,7 +261,7 @@ impl Default for CircleInvolvement {
             circle_id: 0,
             interval_id: 0,
             status: InvolvementStatus::Active,
-            private_capacity_planning: false,
+            capacity_planning_visibility_circle_id: None,
             capacity_planning: None,
             capacity_score: None,
             participation_intention: None,
@@ -296,6 +296,7 @@ pub struct Circle {
     pub project_id: i64,
     pub name: String,
     pub slug: String,
+    pub inside_circle_id: Option<i64>,
 }
 
 impl Circle {

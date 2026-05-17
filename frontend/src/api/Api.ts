@@ -123,6 +123,8 @@ export interface CapacityPlanning {
 export interface Circle {
   /** @format int64 */
   id: number;
+  /** @format int64 */
+  inside_circle_id?: number | null;
   name: string;
   /** @format int64 */
   project_id: number;
@@ -155,6 +157,8 @@ export interface CircleInvitationDetails {
 export interface CircleInvolvement {
   capacity_planning?: null | CapacityPlanning;
   /** @format int64 */
+  capacity_planning_visibility_circle_id?: number | null;
+  /** @format int64 */
   capacity_score?: number | null;
   /** @format int64 */
   circle_id: number;
@@ -170,7 +174,6 @@ export interface CircleInvolvement {
   participation_intention?: null | ParticipationIntention;
   /** @format int64 */
   person_id: number;
-  private_capacity_planning: boolean;
   /** @format int64 */
   project_id: number;
   status: InvolvementStatus;
@@ -347,6 +350,8 @@ export interface MyInitialData {
 export interface MyParticipationInput {
   capacity?: string | null;
   /** @format int64 */
+  capacity_planning_visibility_circle_id?: number | null;
+  /** @format int64 */
   capacity_score?: number | null;
   /** @format int64 */
   circle_id: number;
@@ -356,7 +361,6 @@ export interface MyParticipationInput {
   opt_out_planned_return_date?: string | null;
   opt_out_type?: null | OptOutType;
   participation_intention?: null | ParticipationIntention;
-  private_capacity_planning: boolean;
   /** @format int64 */
   project_id: number;
   wellbeing?: string | null;
@@ -592,7 +596,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 1.3.18
+ * @version 1.4.2
  * @license
  */
 export class Api<

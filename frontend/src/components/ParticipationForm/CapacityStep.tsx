@@ -1,12 +1,17 @@
-import { Stack, Textarea, Select, Title, Text, Switch, Flex, type SelectProps, Group } from "@mantine/core";
+import { Stack, Textarea, Select, Title, Text, Switch, Flex, type SelectProps, Group, SegmentedControl } from "@mantine/core";
 import { useAppSelector } from "../../store";
 import { ComboTextArea } from "../";
 import type { ArrayOfStringTuples } from "../forms/ComboTextArea";
 import type { StepProps } from "./shared";
 import { IconCheck } from "@tabler/icons-react";
 import CapacityScoreIcon from "../CapacityScoreIcon";
+import type { Circle } from "../../api/Api";
 
-export default function CapacityStep({ form, readOnly }: StepProps) {
+type CapacityStepProps = StepProps & {
+  circles: Circle[];
+};
+
+export default function CapacityStep({ form, readOnly, circles }: CapacityStepProps) {
   const project_noun_name = useAppSelector((state) => state.project?.noun_name || "the project");
 
   return (
@@ -16,7 +21,18 @@ export default function CapacityStep({ form, readOnly }: StepProps) {
           <Title order={3} m={0}>
             Plan your capacity
           </Title>
-          <Switch label="Keep private" labelPosition="left" {...form.getInputProps("private_capacity_planning", { type: "checkbox" })} />
+
+          <Group gap="xs">
+            <Text c="dimmed" size="sm">
+              Visible to:
+            </Text>
+            <SegmentedControl
+              disabled={readOnly}
+              size="xs"
+              data={[{ label: "Just me", value: null as any }, ...circles.map((circle) => ({ label: circle.name, value: circle.id }))]}
+              {...form.getInputProps("capacity_planning_visibility_circle_id")}
+            />
+          </Group>
         </Flex>
         <Text c="dimmed">Optional questions to prompt reflection on life before planning your participation, sharing them with the group can help us be more aware of each other's needs.</Text>
       </Stack>
@@ -60,7 +76,7 @@ export default function CapacityStep({ form, readOnly }: StepProps) {
         {...form.getInputProps("focus")}
       />
       <Select
-        label={form.values.private_capacity_planning ? "Capacity (Shared with group)" : "Capacity"}
+        label={form.values.capacity_planning_visibility_circle_id ? "Capacity (Shared with group)" : "Capacity"}
         description={`Given the context of your life (above), how would you describe your capacity to participate in ${project_noun_name} this interval?`}
         placeholder="Pick value"
         disabled={readOnly}

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO circles (project_id, name, slug, inside_circle_id) VALUES (?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "a87c3fc74072058f11b23121f3c2b13dd8327ec005b28992bcc59a2cb4553189"
+}

@@ -1,0 +1,44 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT circles.id as \"id: i64\", circles.project_id as \"project_id: i64\", name, slug, inside_circle_id\n        FROM circle_involvements\n        INNER JOIN circles ON circle_involvements.circle_id = circles.id\n        WHERE\n            circle_involvements.person_id = ? AND\n            circle_involvements.interval_id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "id: i64",
+        "ordinal": 0,
+        "type_info": "Integer"
+      },
+      {
+        "name": "project_id: i64",
+        "ordinal": 1,
+        "type_info": "Null"
+      },
+      {
+        "name": "name",
+        "ordinal": 2,
+        "type_info": "Text"
+      },
+      {
+        "name": "slug",
+        "ordinal": 3,
+        "type_info": "Text"
+      },
+      {
+        "name": "inside_circle_id",
+        "ordinal": 4,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "6559b0fde8da36f9f96a50164894c3a403eb9fa3d04423a9ef03d2fec94ac93e"
+}
