@@ -46,7 +46,8 @@ function CrewContributions({ form, readOnly, personId, interval, crewInvolvement
 
 function EventContributions({ interval }: { interval: Interval }) {
   const expectations = [EventResponseExpectation.Encouraged, EventResponseExpectation.Welcome];
-  const events = useAppSelector((state) => withResponseExpection(occurInInterval(state.events, interval), expectations));
+  const events_state = useAppSelector((state) => state.events);
+  const events = withResponseExpection(occurInInterval(events_state, interval), expectations);
 
   if (events.length === 0) return null;
 
