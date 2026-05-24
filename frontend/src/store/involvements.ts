@@ -169,12 +169,15 @@ const involvementsSlice = createSlice({
       const intervalState = state[intervalKey];
       if (!intervalState) return state;
 
+      // Upsert circle involvements for the person
       payload.data.involvements_for_circles.forEach((circleInvolvementData) => {
         const circleId = circleInvolvementData.circle_id;
         const newInvolvement = circleInvolvementData.circle_involvements.find((involvement) => involvement.person_id === person_id);
 
         if (newInvolvement) intervalState.circles[circleId] = upsertCircleInvolvement(intervalState.circles[circleId], newInvolvement);
       });
+
+      // Upsert crew involvements for the person
       intervalState.crew_involvements = updateCrewInvolvementsForPerson(intervalState.crew_involvements, payload.data.crew_involvements, person_id);
 
       return state;
@@ -192,9 +195,10 @@ function upsertCircleInvolvement(state: CircleInvolvementData, newInvolvement: C
   };
 }
 
-function updateCrewInvolvementsForPerson(crewInvolvements: WritableDraft<CrewInvolvement>[], personInvolvements: CrewInvolvement[], personId: number): WritableDraft<CrewInvolvement>[] {
-  const withoutPerson = crewInvolvements.filter((involvement) => involvement.person_id !== personId);
-  return withoutPerson.concat(personInvolvements);
+function updateCrewInvolvementsForPerson(existingInvolvements: WritableDraft<CrewInvolvement>[], newInvolvements: CrewInvolvement[], personId: number): WritableDraft<CrewInvolvement>[] {
+  const existingWithoutPerson = existingInvolvements.filter((involvement) => involvement.person_id !== personId);
+  const newForPerson = newInvolvements.filter((involvement) => involvement.person_id === personId);
+  return existingWithoutPerson.concat(newForPerson);
 }
 
 // `createSlice` automatically generated action creators with these names.
