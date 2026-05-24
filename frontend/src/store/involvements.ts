@@ -121,8 +121,6 @@ export function asPeopleAlphaSorted<T extends { person_id: number }>(involvement
     .sort(compareStrings("display_name"));
 }
 
-const interval_keys: (keyof InvolvementsState)[] = ["current_interval", "next_interval"];
-
 const involvementsSlice = createSlice({
   name: "involvements",
   initialState: {
@@ -142,22 +140,22 @@ const involvementsSlice = createSlice({
       let involvement = action.payload;
       if (!state || !involvement) return state;
 
-      interval_keys.forEach((interval_key) => {
-        if (state[interval_key]?.interval_id === involvement.interval_id) {
-          const intervalState: IntervalInvolvementState = state[interval_key];
-          const circleId = involvement.circle_id;
+      const intervalKey = intervalKeyForId(state, involvement.interval_id);
+      if (!intervalKey) return state;
 
-          if (!intervalState.circles[circleId]) {
-            intervalState.circles[circleId] = {
-              circle_id: circleId,
-              circle_involvements: [],
-              interval_id: intervalState.interval_id,
-            };
-          }
+      const intervalState = state[intervalKey];
+      if (!intervalState) return state;
+      const circleId = involvement.circle_id;
 
-          intervalState.circles[circleId] = upsertCircleInvolvement(intervalState.circles[circleId], involvement);
-        }
-      });
+      if (!intervalState.circles[circleId]) {
+        intervalState.circles[circleId] = {
+          circle_id: circleId,
+          circle_involvements: [],
+          interval_id: intervalState.interval_id,
+        };
+      }
+
+      intervalState.circles[circleId] = upsertCircleInvolvement(intervalState.circles[circleId], involvement);
 
       return state;
     },
@@ -166,20 +164,18 @@ const involvementsSlice = createSlice({
       if (!state || !payload) return state;
 
       const person_id = payload.person_id;
+      const intervalKey = intervalKeyForId(state, payload.data.interval_id);
+      if (!intervalKey) return state;
+      const intervalState = state[intervalKey];
+      if (!intervalState) return state;
 
-      interval_keys.forEach((interval_key) => {
-        if (state[interval_key]?.interval_id === payload.data.interval_id) {
-          const intervalState: IntervalInvolvementState = state[interval_key];
+      payload.data.involvements_for_circles.forEach((circleInvolvementData) => {
+        const circleId = circleInvolvementData.circle_id;
+        const newInvolvement = circleInvolvementData.circle_involvements.find((involvement) => involvement.person_id === person_id);
 
-          payload.data.involvements_for_circles.forEach((circleInvolvementData) => {
-            const circleId = circleInvolvementData.circle_id;
-            const newInvolvement = circleInvolvementData.circle_involvements.find((involvement) => involvement.person_id === person_id);
-
-            if (newInvolvement) intervalState.circles[circleId] = upsertCircleInvolvement(intervalState.circles[circleId], newInvolvement);
-          });
-          intervalState.crew_involvements = updateCrewInvolvementsForPerson(intervalState.crew_involvements, payload.data.crew_involvements, person_id);
-        }
+        if (newInvolvement) intervalState.circles[circleId] = upsertCircleInvolvement(intervalState.circles[circleId], newInvolvement);
       });
+      intervalState.crew_involvements = updateCrewInvolvementsForPerson(intervalState.crew_involvements, payload.data.crew_involvements, person_id);
 
       return state;
     },
