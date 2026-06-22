@@ -9,7 +9,7 @@ struct MatchResults<PeerId> {
 
 impl<PeerId> MatchResults<PeerId>
 where
-    PeerId: std::fmt::Display + Eq + std::hash::Hash + Ord,
+    PeerId: std::fmt::Display + Eq + std::hash::Hash + Ord + std::fmt::Debug + Clone,
 {
     fn new() -> Self {
         MatchResults {
@@ -31,6 +31,39 @@ where
             })
             .collect();
         format!("{{{}}}", entries.join(", "))
+    }
+
+    fn insert_reciprocal(&mut self, person: PeerId, peer: PeerId) {
+        self.insert_one(person.clone(), peer.clone());
+        self.insert_one(peer, person);
+    }
+
+    fn join_group(&mut self, person: PeerId, peer: PeerId) {
+        let group = self.group_members(&person);
+
+        println!(
+            " + Joining group: person {:?} is joining the group of peer {:?} which has members {:?}",
+            person, peer, group
+        );
+
+        for member in group {
+            println!(
+                " - Joining group: inserting reciprocal match between {:?} and {:?}",
+                member, peer
+            );
+            self.insert_reciprocal(member.clone(), peer.clone());
+        }
+    }
+
+    fn group_members(&self, person: &PeerId) -> Vec<PeerId> {
+        match self.matches.get(person) {
+            Some(members) => {
+                let mut result = vec![person.clone()];
+                result.extend(members.clone());
+                result
+            }
+            None => vec![person.clone()],
+        }
     }
 
     fn insert_one(&mut self, person: PeerId, peer: PeerId) {
@@ -70,14 +103,26 @@ where
 
         match find_one_match_for_person(person, &unmatched, rng) {
             Some(peer) => {
-                results.insert_one(person.clone(), peer.clone());
-                results.insert_one(peer.clone(), person.clone());
+                results.insert_reciprocal(person.clone(), peer.clone());
 
                 println!(" Matched one, results are {:?}", results.to_string());
 
                 unmatched.retain(|p| *p != *person && *p != peer);
             }
-            None => results.insert_none(person.clone()),
+            None => {
+                println!(
+                    " No match found for person: {:?}, this person to an existing pair",
+                    person
+                );
+                match people.choose(rng).cloned() {
+                    Some(existing_peer) => {
+                        results.join_group(existing_peer.clone(), person.clone());
+                    }
+                    None => {
+                        results.insert_none(person.clone());
+                    }
+                }
+            }
         }
     }
     results
@@ -139,6 +184,26 @@ mod tests {
         assert_eq!(
             result.to_string(),
             "{andi: [bob], bob: [andi], carol: [dave], dave: [carol]}"
+        );
+    }
+
+    #[test]
+    fn match_everyone_matches_odd_number_of_people() {
+        let mut rng = SmallRng::seed_from_u64(0);
+        let result = match_everyone::<String, _>(
+            vec![
+                "andi".to_string(),
+                "bob".to_string(),
+                "carol".to_string(),
+                "dana".to_string(),
+                "eve".to_string(),
+            ],
+            &mut rng,
+        );
+
+        assert_eq!(
+            result.to_string(),
+            "{andi: [carol], bob: [dana, eve], carol: [andi], dana: [bob, eve], eve: [bob, dana]}"
         );
     }
 }
