@@ -45,6 +45,12 @@ pub async fn add_interval_implicit_involvements(
     recompute: bool,
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
+    println!(
+        "{} implicit involvements for interval {}",
+        if recompute { "Recomputing" } else { "Adding" },
+        interval.id,
+    );
+
     let circles = find_all_circles(project_id.clone(), pool).await?;
 
     for circle in circles {
@@ -96,7 +102,9 @@ async fn add_interval_circle_implicit_involvements(
     .await?;
 
     if recompute {
+        println!("  - deleting implicit involvements");
         delete_implicit_circle_involvements(circle_id.clone(), interval.typed_id(), pool).await?;
+        println!("  - done deleting implicit involvements");
     }
 
     for previous_involvement in previous_circle_involvements {
@@ -120,6 +128,13 @@ async fn add_interval_circle_implicit_involvements(
             implicit_counter: new_counter,
             ..CircleInvolvement::default()
         };
+
+        println!(
+            "  - inserting implicit involvement for person_id: {} in interval {}... ",
+            new_involvement.person_id.clone(),
+            interval.id
+        );
+
         let result = insert_circle_involvement_if_missing(new_involvement.into(), pool).await;
         if result.is_err() {
             eprintln!(
@@ -131,6 +146,7 @@ async fn add_interval_circle_implicit_involvements(
         }
     }
 
+    println!("  - marking implicit involvements as processed");
     mark_implicit_involvements_processed(interval.typed_id(), true, pool).await?;
 
     Ok(())
