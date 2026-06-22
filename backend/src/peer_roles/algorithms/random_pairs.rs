@@ -3,6 +3,7 @@ use rand::seq::IndexedRandom;
 use rand::seq::IteratorRandom;
 
 use super::super::match_results::MatchResults;
+use super::remove_person;
 
 pub fn random_pairs<PeerId, R: Rng>(people: Vec<PeerId>, rng: &mut R) -> MatchResults<PeerId>
 where
@@ -20,7 +21,7 @@ where
         match find_one_match_for_person(person, &unmatched, rng) {
             Some(peer) => {
                 results.insert_reciprocal(person.clone(), peer.clone());
-                unmatched.retain(|p| *p != peer);
+                remove_person(&peer, &mut unmatched);
             }
             None => {
                 println!(
@@ -37,7 +38,7 @@ where
                 }
             }
         }
-        unmatched.retain(|p| *p != *person);
+        remove_person(person, &mut unmatched);
     }
     results
 }
