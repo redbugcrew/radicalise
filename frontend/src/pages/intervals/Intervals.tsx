@@ -2,10 +2,13 @@ import { ActionIcon, Group, Stack, Title } from "@mantine/core";
 import { useAppSelector } from "../../store";
 import { Anchor, IntervalsTable } from "../../components";
 import { IconCalendarPlus } from "@tabler/icons-react";
+import IntervalChanger from "../../components/intervals/IntervalChanger";
+import { useNextInterval } from "../../store/intervals";
 
 export default function Intervals() {
   const intervals = useAppSelector((state) => state.intervals.allIntervals);
-  const currentIntervalId = useAppSelector((state) => state.intervals.currentInterval?.id || null);
+  const currentInterval = useAppSelector((state) => state.intervals.currentInterval);
+  const nextInterval = useNextInterval();
 
   return (
     <Stack>
@@ -17,7 +20,10 @@ export default function Intervals() {
           </ActionIcon>
         </Anchor>
       </Group>
-      <IntervalsTable intervals={intervals} currentIntervalId={currentIntervalId} />
+
+      <IntervalChanger interval={currentInterval} nextInterval={nextInterval} />
+
+      <IntervalsTable intervals={intervals} currentIntervalId={currentInterval?.id || null} />
     </Stack>
   );
 }
