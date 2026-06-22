@@ -38,6 +38,7 @@ mod intervals;
 mod invitations;
 mod me;
 mod my_project;
+mod peer_roles;
 mod people;
 mod public;
 mod realtime;
