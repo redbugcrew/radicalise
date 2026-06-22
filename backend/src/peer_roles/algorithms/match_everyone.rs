@@ -1,86 +1,7 @@
 use rand::Rng;
 use rand::seq::IndexedRandom;
-use std::collections::BTreeMap;
 
-#[derive(Debug)]
-struct MatchResults<PeerId> {
-    matches: BTreeMap<PeerId, Vec<PeerId>>,
-}
-
-impl<PeerId> MatchResults<PeerId>
-where
-    PeerId: std::fmt::Display + Eq + std::hash::Hash + Ord + std::fmt::Debug + Clone,
-{
-    fn new() -> Self {
-        MatchResults {
-            matches: BTreeMap::new(),
-        }
-    }
-
-    fn to_string(&self) -> String {
-        let entries: Vec<String> = self
-            .matches
-            .iter()
-            .map(|(person, matches)| {
-                let matches_str = matches
-                    .iter()
-                    .map(|m| m.to_string())
-                    .collect::<Vec<String>>()
-                    .join(", ");
-                format!("{}: [{}]", person, matches_str)
-            })
-            .collect();
-        format!("{{{}}}", entries.join(", "))
-    }
-
-    fn insert_reciprocal(&mut self, person: PeerId, peer: PeerId) {
-        self.insert_one(person.clone(), peer.clone());
-        self.insert_one(peer, person);
-    }
-
-    fn join_group(&mut self, person: PeerId, peer: PeerId) {
-        let group = self.group_members(&person);
-
-        println!(
-            " + Joining group: person {:?} is joining the group of peer {:?} which has members {:?}",
-            person, peer, group
-        );
-
-        for member in group {
-            println!(
-                " - Joining group: inserting reciprocal match between {:?} and {:?}",
-                member, peer
-            );
-            self.insert_reciprocal(member.clone(), peer.clone());
-        }
-    }
-
-    fn group_members(&self, person: &PeerId) -> Vec<PeerId> {
-        match self.matches.get(person) {
-            Some(members) => {
-                let mut result = vec![person.clone()];
-                result.extend(members.clone());
-                result
-            }
-            None => vec![person.clone()],
-        }
-    }
-
-    fn insert_one(&mut self, person: PeerId, peer: PeerId) {
-        self.matches
-            .entry(person)
-            .or_insert_with(Vec::new)
-            .push(peer);
-    }
-
-    fn insert_none(&mut self, person: PeerId) {
-        self.matches.entry(person).or_insert_with(Vec::new);
-    }
-
-    fn contains_key(&self, person: &PeerId) -> bool {
-        self.matches.contains_key(person)
-    }
-}
+use super::super::match_results::MatchResults;
 
 pub fn match_everyone<PeerId, R: Rng>(people: Vec<PeerId>, rng: &mut R) -> MatchResults<PeerId>
 where
@@ -156,7 +77,7 @@ mod tests {
     fn match_everyone_returns_empty_matches_by_default() {
         let mut rng = SmallRng::seed_from_u64(0);
         let result = match_everyone::<String, _>(vec![], &mut rng);
-        assert!(result.matches.is_empty());
+        assert!(result.is_empty());
     }
 
     #[test]
