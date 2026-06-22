@@ -2,6 +2,7 @@ use rand::Rng;
 use rand::seq::IndexedRandom;
 use std::collections::BTreeMap;
 
+#[derive(Debug)]
 struct MatchResults<PeerId> {
     matches: BTreeMap<PeerId, Vec<PeerId>>,
 }
@@ -32,28 +33,59 @@ where
         format!("{{{}}}", entries.join(", "))
     }
 
-    fn insert(&mut self, person: PeerId, peers: Vec<PeerId>) {
-        self.matches.insert(person, peers);
+    fn insert_one(&mut self, person: PeerId, peer: PeerId) {
+        self.matches
+            .entry(person)
+            .or_insert_with(Vec::new)
+            .push(peer);
+    }
+
+    fn insert_none(&mut self, person: PeerId) {
+        self.matches.entry(person).or_insert_with(Vec::new);
+    }
+
+    fn contains_key(&self, person: &PeerId) -> bool {
+        self.matches.contains_key(person)
     }
 }
 
 pub fn match_everyone<PeerId, R: Rng>(people: Vec<PeerId>, rng: &mut R) -> MatchResults<PeerId>
 where
-    PeerId: std::fmt::Display + Clone + Eq + std::hash::Hash + Ord,
+    PeerId: std::fmt::Display + Clone + Eq + std::hash::Hash + Ord + std::fmt::Debug,
 {
     let mut unmatched = people.clone();
     let mut results = MatchResults::new();
 
     for person in &people {
-        let peer = find_one_match_for_person(person, &mut unmatched, rng);
-        results.insert(person.clone(), peer.into_iter().collect());
+        // If person is already in the results, skip them
+        if results.contains_key(person) {
+            println!("Already matched person: {:?}, skipping", person);
+            continue;
+        }
+
+        println!(
+            "Matching for person: {:?} from values {:?}",
+            person, unmatched
+        );
+
+        match find_one_match_for_person(person, &unmatched, rng) {
+            Some(peer) => {
+                results.insert_one(person.clone(), peer.clone());
+                results.insert_one(peer.clone(), person.clone());
+
+                println!(" Matched one, results are {:?}", results.to_string());
+
+                unmatched.retain(|p| *p != *person && *p != peer);
+            }
+            None => results.insert_none(person.clone()),
+        }
     }
     results
 }
 
 fn find_one_match_for_person<PeerId, R: Rng>(
     person: &PeerId,
-    unmatched: &mut Vec<PeerId>,
+    unmatched: &Vec<PeerId>,
     rng: &mut R,
 ) -> Option<PeerId>
 where
@@ -65,11 +97,6 @@ where
     }
 
     let chosen_peer = available_peers.choose(rng).cloned();
-
-    // Remove the chosen peer from the unmatched list
-    if let Some(peer) = &chosen_peer {
-        unmatched.retain(|p| p != peer);
-    }
 
     chosen_peer
 }
@@ -111,7 +138,7 @@ mod tests {
 
         assert_eq!(
             result.to_string(),
-            "{andi: [bob], bob: [carol], carol: [andi], dave: []}"
+            "{andi: [bob], bob: [andi], carol: [dave], dave: [carol]}"
         );
     }
 }
