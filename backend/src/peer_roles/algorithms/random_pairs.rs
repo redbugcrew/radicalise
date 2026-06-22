@@ -107,9 +107,9 @@ mod tests {
             "{andi: [bob], bob: [andi], carol: [dave], dave: [carol]}"
         );
     }
-                                                                                                                                                                                                                                                                                    
+
     #[test]
-    fn                                                                                                                                                                                                                                                                                                                                                                                                                                                                              matches_odd_number_of_people() {
+    fn matches_odd_number_of_people() {
         let mut rng = SmallRng::seed_from_u64(0);
         let result = random_pairs::<String, _>(
             vec![
