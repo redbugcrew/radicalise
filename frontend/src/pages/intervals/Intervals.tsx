@@ -1,5 +1,5 @@
 import { ActionIcon, Group, Stack, Title } from "@mantine/core";
-import { useAppSelector } from "../../store";
+import { handleAppEvents, useAppSelector } from "../../store";
 import { Anchor, IntervalsTable } from "../../components";
 import { IconCalendarPlus } from "@tabler/icons-react";
 import IntervalChanger from "../../components/intervals/IntervalChanger";
@@ -15,7 +15,8 @@ export default function Intervals() {
   const onNextInterval = async (): Promise<ActionPromiseResult> => {
     return getApi()
       .api.startNextInterval()
-      .then((result) => {
+      .then((response) => {
+        handleAppEvents(response.data);
         return actionSuccess();
       })
       .catch((error) => {

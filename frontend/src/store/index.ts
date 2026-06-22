@@ -106,8 +106,11 @@ export async function handleMeEvent(event: MeEvent) {
 }
 
 export async function handleIntervalsEvent(event: IntervalsEvent) {
-  if (event.IntervalCreated) {
+  if ("IntervalCreated" in event && event.IntervalCreated) {
     store.dispatch(intervalCreated(event.IntervalCreated));
+  } else if ("IntervalStarted" in event && event.IntervalStarted) {
+    // For simplicity, we'll just reload all interval data when an interval starts
+    loadProjectData(store, getApi());
   }
 }
 
