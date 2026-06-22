@@ -87,12 +87,11 @@ pub async fn find_current_interval(
 ) -> Result<Interval, sqlx::Error> {
     sqlx::query_as!(
         Interval,
-        "SELECT id, start_date, end_date
+        "SELECT intervals.id, intervals.start_date, intervals.end_date
         FROM intervals
-        WHERE
-            project_id = ? AND
-            start_date <= date('now') AND (end_date IS NULL OR end_date >= date('now'))
-        ORDER BY id ASC
+        INNER JOIN projects ON projects.current_interval_id = intervals.id AND projects.id = intervals.project_id
+        WHERE projects.id = ?
+        ORDER BY intervals.id ASC
         LIMIT 1",
         project_id.id
     )
