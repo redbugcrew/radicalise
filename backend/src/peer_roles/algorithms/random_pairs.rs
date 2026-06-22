@@ -1,5 +1,6 @@
 use rand::Rng;
 use rand::seq::IndexedRandom;
+use rand::seq::IteratorRandom;
 
 use super::super::match_results::MatchResults;
 
@@ -49,14 +50,11 @@ fn find_one_match_for_person<PeerId, R: Rng>(
 where
     PeerId: std::fmt::Display + Clone + Eq + std::hash::Hash + Ord,
 {
-    let available_peers: Vec<PeerId> = unmatched.iter().filter(|&p| p != person).cloned().collect();
-    if available_peers.is_empty() {
-        return None;
-    }
-
-    let chosen_peer = available_peers.choose(rng).cloned();
-
-    chosen_peer
+    unmatched
+        .iter()
+        .filter(|&p| p != person)
+        .choose(rng)
+        .cloned()
 }
 
 #[cfg(test)]
@@ -96,7 +94,7 @@ mod tests {
 
         assert_eq!(
             result.to_string(),
-            "{andi: [bob], bob: [andi], carol: [dave], dave: [carol]}"
+            "{andi: [carol], bob: [dave], carol: [andi], dave: [bob]}"
         );
     }
 
@@ -116,7 +114,7 @@ mod tests {
 
         assert_eq!(
             result.to_string(),
-            "{andi: [carol], bob: [dana, eve], carol: [andi], dana: [bob, eve], eve: [bob, dana]}"
+            "{andi: [carol], bob: [eve, dana], carol: [andi], dana: [bob, eve], eve: [bob, dana]}"
         );
     }
 }
