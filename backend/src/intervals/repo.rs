@@ -158,35 +158,6 @@ pub fn get_interval_type(interval: Interval) -> IntervalType {
     return IntervalType::Current;
 }
 
-pub async fn find_intervals_needing_implicit_involvements(
-    project_id: ProjectId,
-    pool: &SqlitePool,
-) -> Result<Vec<Interval>, sqlx::Error> {
-    let current_interval = find_current_interval(project_id.clone(), pool).await?;
-    let next_interval_result =
-        find_next_interval(project_id.clone(), current_interval.typed_id(), pool).await?;
-
-    let next_interval = match next_interval_result {
-        Some(interval) => interval,
-        None => return Ok(vec![]),
-    };
-
-    sqlx::query_as!(
-        Interval,
-        "SELECT id, start_date, end_date
-        FROM intervals
-        WHERE
-          project_id = ? AND
-          intervals.id <= ? AND
-          processed_implicit_involvements = FALSE
-        ORDER BY id ASC",
-        project_id.id,
-        next_interval.id
-    )
-    .fetch_all(pool)
-    .await
-}
-
 pub async fn mark_implicit_involvements_processed(
     interval_id: IntervalId,
     value: bool,

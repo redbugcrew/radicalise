@@ -6,7 +6,10 @@ use crate::{
     auth::auth_backend::AuthSession,
     intervals::events::IntervalsEvent,
     realtime::RealtimeState,
-    shared::{default_project_id, entities::Interval, events::AppEvent},
+    shared::{
+        default_project_id, entities::Interval, events::AppEvent,
+        regular_tasks::add_interval_implicit_involvements,
+    },
 };
 
 pub mod events;
@@ -49,6 +52,7 @@ async fn create_interval(
 enum StartNextIntervalError {
     CurrentIntervalNotFound,
     NextIntervalNotFound,
+    CouldntSetUpInterval,
     InternalServerError,
 }
 
@@ -61,6 +65,11 @@ impl IntoResponse for StartNextIntervalError {
             Self::NextIntervalNotFound => {
                 (StatusCode::BAD_REQUEST, "Next interval not found").into_response()
             }
+            Self::CouldntSetUpInterval => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Couldn't set up interval",
+            )
+                .into_response(),
             Self::InternalServerError => {
                 (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error").into_response()
             }
@@ -83,28 +92,38 @@ async fn start_next_interval(
 ) -> impl IntoResponse {
     println!("Starting next interval");
 
-    let current_interval = match repo::find_current_interval(default_project_id(), &pool).await {
+    let project_id = default_project_id();
+
+    let current_interval = match repo::find_current_interval(project_id.clone(), &pool).await {
         Ok(interval) => interval,
         Err(_) => {
             return StartNextIntervalError::CurrentIntervalNotFound.into_response();
         }
     };
 
-    let next_interval =
-        match repo::find_next_interval(default_project_id(), current_interval.typed_id(), &pool)
-            .await
-        {
-            Ok(Some(interval)) => interval,
-            Ok(None) => {
-                return StartNextIntervalError::NextIntervalNotFound.into_response();
-            }
-            Err(_) => {
-                return StartNextIntervalError::InternalServerError.into_response();
-            }
-        };
-
-    match repo::change_project_interval(default_project_id(), next_interval.typed_id(), &pool).await
+    let next_interval = match repo::find_next_interval(
+        project_id.clone(),
+        current_interval.typed_id(),
+        &pool,
+    )
+    .await
     {
+        Ok(Some(interval)) => interval,
+        Ok(None) => {
+            return StartNextIntervalError::NextIntervalNotFound.into_response();
+        }
+        Err(_) => {
+            return StartNextIntervalError::InternalServerError.into_response();
+        }
+    };
+
+    match add_interval_implicit_involvements(&next_interval, project_id.clone(), false, &pool).await
+    {
+        Ok(_) => (),
+        Err(_) => return StartNextIntervalError::CouldntSetUpInterval.into_response(),
+    };
+
+    match repo::change_project_interval(project_id.clone(), next_interval.typed_id(), &pool).await {
         Ok(_) => {
             let event = AppEvent::IntervalsEvent(IntervalsEvent::IntervalStarted(next_interval));
             realtime_state
