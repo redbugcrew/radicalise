@@ -4,11 +4,24 @@ import { Anchor, IntervalsTable } from "../../components";
 import { IconCalendarPlus } from "@tabler/icons-react";
 import IntervalChanger from "../../components/intervals/IntervalChanger";
 import { useNextInterval } from "../../store/intervals";
+import { actionFailure, actionSuccess, type ActionPromiseResult } from "../../components/ActionResult";
+import { getApi } from "../../api";
 
 export default function Intervals() {
   const intervals = useAppSelector((state) => state.intervals.allIntervals);
   const currentInterval = useAppSelector((state) => state.intervals.currentInterval);
   const nextInterval = useNextInterval();
+
+  const onNextInterval = async (): Promise<ActionPromiseResult> => {
+    return getApi()
+      .api.startNextInterval()
+      .then((result) => {
+        return actionSuccess();
+      })
+      .catch((error) => {
+        return actionFailure(error);
+      });
+  };
 
   return (
     <Stack>
@@ -21,7 +34,7 @@ export default function Intervals() {
         </Anchor>
       </Group>
 
-      <IntervalChanger interval={currentInterval} nextInterval={nextInterval} />
+      <IntervalChanger interval={currentInterval} nextInterval={nextInterval} onNextInterval={onNextInterval} />
 
       <IntervalsTable intervals={intervals} currentIntervalId={currentInterval?.id || null} />
     </Stack>

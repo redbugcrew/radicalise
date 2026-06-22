@@ -1,10 +1,13 @@
-import { Button, Card, Group, Stack, Text, Title } from "@mantine/core";
+import { Card, Group, Stack, Text, Title } from "@mantine/core";
 import type { Interval } from "../../api/Api";
 import { formatDuration, intervalToDuration, type Duration, type FormatDurationOptions } from "date-fns";
+import ActionButton from "../ActionButton";
+import type { ActionPromiseResult } from "../ActionResult";
 
 interface IntervalChangerProps {
   interval: Interval | null;
   nextInterval?: Interval | null;
+  onNextInterval: () => Promise<ActionPromiseResult>;
 }
 
 function absDuration(duration: Duration): Duration {
@@ -17,7 +20,7 @@ function absDuration(duration: Duration): Duration {
   return inverted;
 }
 
-export default function IntervalChanger({ interval, nextInterval }: IntervalChangerProps) {
+export default function IntervalChanger({ interval, nextInterval, onNextInterval }: IntervalChangerProps) {
   if (!interval) return null;
 
   const now = new Date();
@@ -40,7 +43,11 @@ export default function IntervalChanger({ interval, nextInterval }: IntervalChan
           </Title>
           {endsInPast ? <Text c="red">Was due to end {formatDuration(absDuration(duration), durationOptions)} ago</Text> : <Text>Due to end in {formatDuration(duration, durationOptions)}</Text>}
         </Stack>
-        {nextInterval && <Button color="blue">Start interval {nextInterval.id}</Button>}
+        {nextInterval && (
+          <ActionButton color="blue" onClick={onNextInterval}>
+            Start interval {nextInterval.id}
+          </ActionButton>
+        )}
       </Group>
     </Card>
   );
