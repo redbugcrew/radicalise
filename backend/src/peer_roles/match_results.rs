@@ -39,16 +39,7 @@ where
     pub fn join_group(&mut self, person: PeerId, peer: PeerId) {
         let group = self.group_members(&person);
 
-        println!(
-            " + Joining group: person {:?} is joining the group of peer {:?} which has members {:?}",
-            person, peer, group
-        );
-
         for member in group {
-            println!(
-                " - Joining group: inserting reciprocal match between {:?} and {:?}",
-                member, peer
-            );
             self.insert_reciprocal(member.clone(), peer.clone());
         }
     }

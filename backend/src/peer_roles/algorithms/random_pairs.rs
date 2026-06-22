@@ -13,22 +13,13 @@ where
     for person in &people {
         // If person is already in the results, skip them
         if results.contains_key(person) {
-            println!("Already matched person: {:?}, skipping", person);
             continue;
         }
-
-        println!(
-            "Matching for person: {:?} from values {:?}",
-            person, unmatched
-        );
 
         match find_one_match_for_person(person, &unmatched, rng) {
             Some(peer) => {
                 results.insert_reciprocal(person.clone(), peer.clone());
-
-                println!(" Matched one, results are {:?}", results.to_string());
-
-                unmatched.retain(|p| *p != *person && *p != peer);
+                unmatched.retain(|p| *p != peer);
             }
             None => {
                 println!(
@@ -45,6 +36,7 @@ where
                 }
             }
         }
+        unmatched.retain(|p| *p != *person);
     }
     results
 }
