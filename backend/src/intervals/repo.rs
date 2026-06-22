@@ -208,3 +208,21 @@ pub async fn mark_implicit_involvements_processed(
 pub fn parse_date_only(date_str: &str) -> Option<chrono::NaiveDate> {
     chrono::NaiveDate::parse_from_str(date_str, "%Y-%m-%d").ok()
 }
+
+pub async fn change_project_interval(
+    project_id: ProjectId,
+    new_interval_id: IntervalId,
+    pool: &SqlitePool,
+) -> Result<(), sqlx::Error> {
+    sqlx::query!(
+        "UPDATE projects
+         SET current_interval_id = ?
+         WHERE id = ?",
+        new_interval_id.id,
+        project_id.id
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(())
+}
