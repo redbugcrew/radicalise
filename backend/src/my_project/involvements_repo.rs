@@ -333,11 +333,30 @@ pub async fn insert_circle_involvement_if_missing(
     involvement: CircleInvolvementRecord,
     pool: &SqlitePool,
 ) -> Result<(), InsertRecordError> {
-    match insert_circle_involvement(involvement, pool).await {
-        Ok(_) => Ok(()),
-        Err(InsertRecordError::RecordAlreadyExists) => Ok(()), // Ignore if it already exists
-        Err(InsertRecordError::DatabaseError) => Err(InsertRecordError::DatabaseError),
-    }
+    sqlx::query!(
+        "INSERT INTO circle_involvements (person_id, circle_id, interval_id, status, capacity_planning_visibility_circle_id, wellbeing, focus, capacity_score, capacity, participation_intention, opt_out_type, opt_out_planned_return_date,
+        intention_context, implicit_counter)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(person_id, circle_id, interval_id) DO NOTHING",
+        involvement.person_id,
+        involvement.circle_id,
+        involvement.interval_id,
+        involvement.status,
+        involvement.capacity_planning_visibility_circle_id,
+        involvement.wellbeing,
+        involvement.focus,
+        involvement.capacity_score,
+        involvement.capacity,
+        involvement.participation_intention,
+        involvement.opt_out_type,
+        involvement.opt_out_planned_return_date,
+        involvement.intention_context,
+        involvement.implicit_counter
+    )
+    .execute(pool)
+    .await.map_err(InsertRecordError::from)?;
+
+    Ok(())
 }
 
 pub async fn delete_implicit_circle_involvements(
