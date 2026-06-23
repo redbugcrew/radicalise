@@ -13,7 +13,7 @@ import { useDisclosure } from "@mantine/hooks";
 import CopyIconButton from "../../components/CopyIconButton";
 import { getApiUrl } from "../../api";
 import { myCircleInvolvement, myCrewInvolvements } from "../../store/involvements";
-import { intervalById } from "../../store/intervals";
+import { intervalById, useNextInterval } from "../../store/intervals";
 
 function ParticipationBadge({ involvement }: { involvement: CircleInvolvement | null }) {
   if (!involvement) return <Badge color="gray">No intention</Badge>;
@@ -151,6 +151,7 @@ export default function Dashboard() {
   const project = useAppSelector((state) => state.project);
   const circleId = useAppSelector((state) => state.circles.rootCircles[0]?.id);
   const involvements = useAppSelector((state) => state.involvements);
+  const nextInterval = useNextInterval();
 
   if (!myData || !project || !circleId) {
     return <Text>Error: Data not found.</Text>;
@@ -161,7 +162,6 @@ export default function Dashboard() {
   const currentInterval = myCurrentCircle ? intervalById(intervals, myCurrentCircle.interval_id) : null;
 
   const myNextCircle = myCircleInvolvement(involvements, circleId, personId, "next_interval");
-  const nextInterval = myNextCircle ? intervalById(intervals, myNextCircle.interval_id) : null;
 
   const myCurrentCrewInvolvements = myCrewInvolvements(involvements, personId, "current_interval");
 
@@ -173,7 +173,7 @@ export default function Dashboard() {
       <Stack gap="lg">
         <Stack gap="md">
           {myCurrentCircle && currentInterval && <MyIntervalPartipationCard interval={currentInterval} circleInvolvement={myCurrentCircle} current={true} />}
-          {myNextCircle && nextInterval && <MyIntervalPartipationCard interval={nextInterval} circleInvolvement={myNextCircle} current={false} />}
+          {(myCurrentCircle || myNextCircle) && nextInterval && <MyIntervalPartipationCard interval={nextInterval} circleInvolvement={myNextCircle} current={false} />}
         </Stack>
         <MyEvents />
         {myCurrentCrewInvolvements && <MyCrews personId={myData.person_id} myInvolvements={myCurrentCrewInvolvements} />}
