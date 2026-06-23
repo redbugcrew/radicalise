@@ -87,12 +87,11 @@ pub async fn find_current_interval(
 ) -> Result<Interval, sqlx::Error> {
     sqlx::query_as!(
         Interval,
-        "SELECT id, start_date, end_date
+        "SELECT intervals.id, intervals.start_date, intervals.end_date
         FROM intervals
-        WHERE
-            project_id = ? AND
-            start_date <= date('now') AND (end_date IS NULL OR end_date >= date('now'))
-        ORDER BY id ASC
+        INNER JOIN projects ON projects.current_interval_id = intervals.id AND projects.id = intervals.project_id
+        WHERE projects.id = ?
+        ORDER BY intervals.id ASC
         LIMIT 1",
         project_id.id
     )
@@ -159,35 +158,6 @@ pub fn get_interval_type(interval: Interval) -> IntervalType {
     return IntervalType::Current;
 }
 
-pub async fn find_intervals_needing_implicit_involvements(
-    project_id: ProjectId,
-    pool: &SqlitePool,
-) -> Result<Vec<Interval>, sqlx::Error> {
-    let current_interval = find_current_interval(project_id.clone(), pool).await?;
-    let next_interval_result =
-        find_next_interval(project_id.clone(), current_interval.typed_id(), pool).await?;
-
-    let next_interval = match next_interval_result {
-        Some(interval) => interval,
-        None => return Ok(vec![]),
-    };
-
-    sqlx::query_as!(
-        Interval,
-        "SELECT id, start_date, end_date
-        FROM intervals
-        WHERE
-          project_id = ? AND
-          intervals.id <= ? AND
-          processed_implicit_involvements = FALSE
-        ORDER BY id ASC",
-        project_id.id,
-        next_interval.id
-    )
-    .fetch_all(pool)
-    .await
-}
-
 pub async fn mark_implicit_involvements_processed(
     interval_id: IntervalId,
     value: bool,
@@ -208,4 +178,22 @@ pub async fn mark_implicit_involvements_processed(
 
 pub fn parse_date_only(date_str: &str) -> Option<chrono::NaiveDate> {
     chrono::NaiveDate::parse_from_str(date_str, "%Y-%m-%d").ok()
+}
+
+pub async fn change_project_interval(
+    project_id: ProjectId,
+    new_interval_id: IntervalId,
+    pool: &SqlitePool,
+) -> Result<(), sqlx::Error> {
+    sqlx::query!(
+        "UPDATE projects
+         SET current_interval_id = ?
+         WHERE id = ?",
+        new_interval_id.id,
+        project_id.id
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(())
 }

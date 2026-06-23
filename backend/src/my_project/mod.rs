@@ -14,7 +14,6 @@ use crate::{
         default_project_id,
         entities::{IntervalId, Project, UserId},
         events::AppEvent,
-        regular_tasks::check_intervals_tasks,
     },
 };
 
@@ -67,15 +66,6 @@ async fn get_project_state(
             return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
         }
     };
-
-    // Run automated tasks
-    if check_intervals_tasks(project.typed_id(), &pool)
-        .await
-        .is_err()
-    {
-        eprintln!("Error checking next interval for project: {:?}", project);
-        return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
-    }
 
     let initial_data = match repo::find_initial_data_for_project(project, &pool).await {
         Ok(data) => data,

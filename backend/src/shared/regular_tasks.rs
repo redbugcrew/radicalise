@@ -2,10 +2,7 @@ use sqlx::SqlitePool;
 
 use crate::{
     circles::repo::find_all_circles,
-    intervals::repo::{
-        find_intervals_needing_implicit_involvements, find_previous_interval,
-        mark_implicit_involvements_processed,
-    },
+    intervals::repo::{find_previous_interval, mark_implicit_involvements_processed},
     my_project::involvements_repo::{
         delete_implicit_circle_involvements, find_all_circle_involvements,
         insert_circle_involvement_if_missing,
@@ -14,30 +11,6 @@ use crate::{
 };
 
 use super::entities::{CircleInvolvement, Interval, ProjectId};
-
-pub async fn check_intervals_tasks(
-    project_id: ProjectId,
-    pool: &SqlitePool,
-) -> Result<(), sqlx::Error> {
-    let intervals = find_intervals_needing_implicit_involvements(project_id.clone(), pool).await?;
-
-    for interval in intervals {
-        println!(
-            "Checking interval {} for implicit involvements",
-            interval.id
-        );
-        if let Err(e) =
-            add_interval_implicit_involvements(&interval, project_id.clone(), false, pool).await
-        {
-            eprintln!(
-                "Error adding implicit involvements for interval {}: {:?}",
-                interval.id, e
-            );
-        }
-    }
-
-    Ok(())
-}
 
 pub async fn add_interval_implicit_involvements(
     interval: &Interval,

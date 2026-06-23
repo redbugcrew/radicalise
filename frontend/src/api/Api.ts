@@ -10,6 +10,12 @@
  * ---------------------------------------------------------------
  */
 
+export enum StartNextIntervalError {
+  CurrentIntervalNotFound = "CurrentIntervalNotFound",
+  NextIntervalNotFound = "NextIntervalNotFound",
+  InternalServerError = "InternalServerError",
+}
+
 export enum ParticipationIntention {
   OptIn = "OptIn",
   OptOut = "OptOut",
@@ -304,9 +310,13 @@ export interface IntervalInvolvementData {
   involvements_for_circles: CircleInvolvementData[];
 }
 
-export type IntervalsEvent = {
-  IntervalCreated: Interval;
-};
+export type IntervalsEvent =
+  | {
+      IntervalCreated: Interval;
+    }
+  | {
+      IntervalStarted: Interval;
+    };
 
 export interface InvitePersonRequest {
   /** @format int64 */
@@ -596,7 +606,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 1.4.2
+ * @version 1.4.5
  * @license
  */
 export class Api<
@@ -852,6 +862,20 @@ export class Api<
         method: "POST",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StartNextInterval
+     * @request POST:/api/intervals/start_next_interval
+     */
+    startNextInterval: (params: RequestParams = {}) =>
+      this.request<AppEvent[], StartNextIntervalError>({
+        path: `/api/intervals/start_next_interval`,
+        method: "POST",
         format: "json",
         ...params,
       }),

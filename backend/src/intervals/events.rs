@@ -6,4 +6,5 @@ use crate::shared::entities::Interval;
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
 pub enum IntervalsEvent {
     IntervalCreated(Interval),
+    IntervalStarted(Interval),
 }
