@@ -1,4 +1,9 @@
-import { Navigate, RouterProvider, createBrowserRouter, type LoaderFunction } from "react-router-dom";
+import {
+  Navigate,
+  RouterProvider,
+  createBrowserRouter,
+  type LoaderFunction,
+} from "react-router-dom";
 import { Provider as ReduxProvider } from "react-redux";
 import store, { loadInitialData, type AppStore } from "./store";
 import { MantineProvider } from "@mantine/core";
@@ -26,7 +31,17 @@ import {
 } from "./pages";
 import { buildRoutes as buildAuthRoutes } from "./contexts/auth";
 import { theme } from "./theme";
-import { EditEventTemplate, Events, EventTemplates, NewEventTemplate, NewEvent, ShowEvent, EditEvent, UpcomingEvents, AllEvents } from "./contexts/events";
+import {
+  EditEventTemplate,
+  Events,
+  EventTemplates,
+  NewEventTemplate,
+  NewEvent,
+  ShowEvent,
+  EditEvent,
+  UpcomingEvents,
+  AllEvents,
+} from "./contexts/events";
 
 // Import styles of packages that you've installed.
 // All packages except `@mantine/hooks` require styles imports
@@ -34,8 +49,12 @@ import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
 import "@mantine/notifications/styles.css";
 import { Circles, EditCircle, NewCircle } from "./contexts/circles";
+import { PeerRoleTemplates } from "./contexts/peer_roles";
 
-function withStore(func: (store: AppStore) => any, store: AppStore): LoaderFunction<any> {
+function withStore(
+  func: (store: AppStore) => any,
+  store: AppStore,
+): LoaderFunction<any> {
   const wrappedFunc: LoaderFunction<any> = async () => {
     return func(store);
   };
@@ -107,6 +126,10 @@ const router = createBrowserRouter([
             element: <InvitePerson />,
           },
         ],
+      },
+      {
+        path: "peer_roles",
+        element: <PeerRoleTemplates />,
       },
       {
         path: "crews",
