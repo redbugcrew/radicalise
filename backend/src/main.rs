@@ -11,7 +11,7 @@ use resend_rs::Resend;
 use std::env;
 use time::Duration;
 use tower_http::cors::CorsLayer;
-use tower_sessions::MemoryStore;
+use tower_sessions_sqlx_store::SqliteStore;
 use utoipa::OpenApi;
 use utoipa_axum::router::OpenApiRouter;
 use utoipa_swagger_ui::SwaggerUi;
@@ -77,7 +77,11 @@ async fn main() {
         .expect("Failed to prepare database");
 
     // SESSION MANAGEMENT
-    let session_store = MemoryStore::default();
+    let session_store = SqliteStore::new(pool.clone());
+    session_store
+        .migrate()
+        .await
+        .expect("Failed to migrate session store");
     let session_layer = SessionManagerLayer::new(session_store)
         .with_secure(false)
         .with_expiry(Expiry::OnInactivity(Duration::days(30)));
