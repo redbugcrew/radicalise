@@ -492,3 +492,12 @@ pub struct CalendarEventAttendance {
     pub intention: Option<AttendanceIntention>,
     pub actual: Option<bool>,
 }
+
+#[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
+pub struct PeerRole {
+    pub id: i64,
+    pub name: String,
+    pub project_id: i64,
+    pub circle_id: i64,
+    pub distribution_type: String,
+}
