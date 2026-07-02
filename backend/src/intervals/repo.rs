@@ -176,6 +176,24 @@ pub async fn mark_implicit_involvements_processed(
     Ok(())
 }
 
+pub async fn mark_peer_roles_processed(
+    interval_id: IntervalId,
+    value: bool,
+    pool: &SqlitePool,
+) -> Result<(), sqlx::Error> {
+    sqlx::query!(
+        "UPDATE intervals
+         SET processed_peer_roles = ?
+         WHERE id = ?",
+        value,
+        interval_id.id
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(())
+}
+
 pub fn parse_date_only(date_str: &str) -> Option<chrono::NaiveDate> {
     chrono::NaiveDate::parse_from_str(date_str, "%Y-%m-%d").ok()
 }
