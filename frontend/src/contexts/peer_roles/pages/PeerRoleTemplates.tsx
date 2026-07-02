@@ -10,21 +10,17 @@ export default function EventTemplates() {
     { id: 3, project_id: 1, circle_id: 1, name: "Conduct Supporter", distribution_type: "special", constrained: "yes", constrained by id: 2 },
   ];
 
-  return (
-    <Stack>
-      <Group justify="space-between">
-        <Title order={1}>Peer Role Templates</Title>
-        <Anchor href="new">
-          <ActionIcon
-            variant="filled"
-            aria-label="Add Peer Role Template"
-            size="lg"
-          >
-            <IconPlus style={{ width: "70%", height: "70%" }} stroke={2} />
-          </ActionIcon>
-        </Anchor>
-      </Group>
-      <EventTemplatesTable peerroleTemplates={PeerRoleTemplates} />
-    </Stack>
-  );
+ return (
+     <Stack>
+       <Group justify="space-between">
+         <Title order={1}>Peer Role Templates</Title>
+         <Anchor href="new">
+           <ActionIcon variant="filled" aria-label="Add Peer Role Template" size="lg">
+             <IconPlus style={{ width: "70%", height: "70%" }} stroke={2} />
+           </ActionIcon>
+         </Anchor>
+       </Group>
+       <EventTemplatesTable eventTemplates={eventTemplates} />
+     </Stack>
+   );
 }
