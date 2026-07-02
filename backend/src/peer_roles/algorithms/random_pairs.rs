@@ -1,7 +1,9 @@
 use rand::Rng;
 use rand::seq::IndexedRandom;
+use rand::seq::IteratorRandom;
 
 use super::super::match_results::MatchResults;
+use super::remove_person;
 
 pub fn random_pairs<PeerId, R: Rng>(people: Vec<PeerId>, rng: &mut R) -> MatchResults<PeerId>
 where
@@ -13,22 +15,13 @@ where
     for person in &people {
         // If person is already in the results, skip them
         if results.contains_key(person) {
-            println!("Already matched person: {:?}, skipping", person);
             continue;
         }
-
-        println!(
-            "Matching for person: {:?} from values {:?}",
-            person, unmatched
-        );
 
         match find_one_match_for_person(person, &unmatched, rng) {
             Some(peer) => {
                 results.insert_reciprocal(person.clone(), peer.clone());
-
-                println!(" Matched one, results are {:?}", results.to_string());
-
-                unmatched.retain(|p| *p != *person && *p != peer);
+                remove_person(&peer, &mut unmatched);
             }
             None => {
                 println!(
@@ -45,6 +38,7 @@ where
                 }
             }
         }
+        remove_person(person, &mut unmatched);
     }
     results
 }
@@ -57,14 +51,11 @@ fn find_one_match_for_person<PeerId, R: Rng>(
 where
     PeerId: std::fmt::Display + Clone + Eq + std::hash::Hash + Ord,
 {
-    let available_peers: Vec<PeerId> = unmatched.iter().filter(|&p| p != person).cloned().collect();
-    if available_peers.is_empty() {
-        return None;
-    }
-
-    let chosen_peer = available_peers.choose(rng).cloned();
-
-    chosen_peer
+    unmatched
+        .iter()
+        .filter(|&p| p != person)
+        .choose(rng)
+        .cloned()
 }
 
 #[cfg(test)]
@@ -104,12 +95,12 @@ mod tests {
 
         assert_eq!(
             result.to_string(),
-            "{andi: [bob], bob: [andi], carol: [dave], dave: [carol]}"
+            "{andi: [carol], bob: [dave], carol: [andi], dave: [bob]}"
         );
     }
-                                                                                                                                                                                                                                                                                    
+
     #[test]
-    fn                                                                                                                                                                                                                                                                                                                                                                                                                                                                              matches_odd_number_of_people() {
+    fn matches_odd_number_of_people() {
         let mut rng = SmallRng::seed_from_u64(0);
         let result = random_pairs::<String, _>(
             vec![
@@ -124,7 +115,7 @@ mod tests {
 
         assert_eq!(
             result.to_string(),
-            "{andi: [carol], bob: [dana, eve], carol: [andi], dana: [bob, eve], eve: [bob, dana]}"
+            "{andi: [carol], bob: [eve, dana], carol: [andi], dana: [bob, eve], eve: [bob, dana]}"
         );
     }
 }

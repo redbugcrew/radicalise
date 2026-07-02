@@ -31,3 +31,4 @@ uuid = { version = "1.17.0", features = ["v4"] }
 openssl = { version = "0.10", features = ["vendored"] }
 icalendar = { version = "0.17.6", default-features = false }
 futures-util = "0.3.32"
+rand = "0.10.1"
