@@ -4,16 +4,14 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     auth::auth_backend::AuthSession,
-    intervals::events::IntervalsEvent,
+    intervals::{events::IntervalsEvent, tasks::add_interval_implicit_involvements},
     realtime::RealtimeState,
-    shared::{
-        default_project_id, entities::Interval, events::AppEvent,
-        regular_tasks::add_interval_implicit_involvements,
-    },
+    shared::{default_project_id, entities::Interval, events::AppEvent},
 };
 
 pub mod events;
 pub mod repo;
+pub mod tasks;
 
 pub fn router() -> OpenApiRouter {
     OpenApiRouter::new()
