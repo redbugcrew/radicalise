@@ -4,15 +4,16 @@ use sqlx::SqlitePool;
 use crate::{
     intervals::repo::mark_peer_roles_processed,
     my_project::involvements_repo::find_all_circle_involvements,
-    peer_roles::repo::find_all_peer_roles,
+    peer_roles::{enrollments_repo::upsert_peer_enrollments, peer_roles_repo::find_all_peer_roles},
     shared::entities::{
         CircleId, Interval, IntervalId, PeerRole, PeerRoleDistributionType, ProjectId,
     },
 };
 
 mod algorithms;
+mod enrollments_repo;
 mod match_results;
-mod repo;
+mod peer_roles_repo;
 
 pub async fn assign_interval_peer_roles(
     interval: &Interval,
@@ -67,6 +68,8 @@ async fn assign_interval_peer_role(
         interval.id,
         results.to_string()
     );
+
+    upsert_peer_enrollments(interval.id, peer_role.id, results.edges(), pool).await?;
 
     Ok(())
 }
