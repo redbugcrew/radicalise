@@ -1,7 +1,8 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { CircleInvolvement, Interval, IntervalData } from "../../api/Api";
+import type { CircleInvolvement, Interval, IntervalData, PersonIntervalData } from "../../api/Api";
 import { useAppSelector } from "..";
-import { forCircle, upsertCircleData, upsertCircleInvolvement } from "./circle_involvements";
+import { forCircle, updatePersonCircleInvolvements, upsertCircleData, upsertCircleInvolvement } from "./circle_involvements";
+import { updatePersonCrewInvolvements } from "./crew_involvements";
 
 export type CurrentIntervalState = IntervalData | null;
 
@@ -29,12 +30,27 @@ const currentIntervalSlice = createSlice({
         circle_involvements: newCircleInvolvements,
       };
     },
+    personIntervalDataChanged: (state: CurrentIntervalState, action: PayloadAction<PersonIntervalData>) => {
+      let payload = action.payload;
+      if (!state || !payload) return state;
+
+      const person_id = payload.person_id;
+      const interval_id = payload.data.interval.id;
+
+      if (state.interval.id !== interval_id) return state;
+
+      return {
+        ...state,
+        circle_involvements: updatePersonCircleInvolvements(state.circle_involvements, payload.data.circle_involvements, person_id),
+        crew_involvements: updatePersonCrewInvolvements(state.crew_involvements, payload.data.crew_involvements, person_id),
+      };
+    },
   },
 });
 
 // `createSlice` automatically generated action creators with these names.
 // export them as named exports from this "slice" file
-export const { currentIntervalLoaded, circleInvolvementUpdated } = currentIntervalSlice.actions;
+export const { currentIntervalLoaded, circleInvolvementUpdated, personIntervalDataChanged } = currentIntervalSlice.actions;
 
 // Export the slice reducer as the default export
 export default currentIntervalSlice.reducer;

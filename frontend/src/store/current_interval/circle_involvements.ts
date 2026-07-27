@@ -23,7 +23,7 @@ export function circleInvolvementsforPerson(records: CircleInvolvementData[] | n
   return result;
 }
 
-export function circleInvolvementsforCircleAndPerson(records: CircleInvolvementData[] | null | undefined, circleId: number, personId: number): CircleInvolvement | null {
+export function circleInvolvementforCircleAndPerson(records: CircleInvolvementData[] | null | undefined, circleId: number, personId: number): CircleInvolvement | null {
   if (!records) return null;
 
   const record = forCircle(records, circleId);
@@ -55,6 +55,21 @@ export function upsertCircleInvolvement(state: CircleInvolvementData, newInvolve
     ...state,
     circle_involvements: newCircleInvolvements,
   };
+}
+
+export function updatePersonCircleInvolvements(state: CircleInvolvementData[], newInvolvements: CircleInvolvementData[], personId: number): CircleInvolvementData[] {
+  const updatedCircleInvolvements = state.map((circleData) => {
+    const existingCircleInvolvements = circleData.circle_involvements.filter((involvement) => involvement.person_id !== personId);
+    const newInvolvementForCircle = circleInvolvementforCircleAndPerson(newInvolvements, circleData.circle_id, personId);
+    const combinedInvolvements = existingCircleInvolvements.concat(newInvolvementForCircle ? [newInvolvementForCircle] : []);
+
+    return {
+      ...circleData,
+      circle_involvements: combinedInvolvements,
+    };
+  });
+
+  return updatedCircleInvolvements;
 }
 
 export function upsertCircleData(state: CircleInvolvementData[], newCircleData: CircleInvolvementData): CircleInvolvementData[] {

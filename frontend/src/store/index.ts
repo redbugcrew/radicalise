@@ -4,8 +4,8 @@ import projectReducer, { projectLoaded, projectUpdated } from "./project";
 import circlesReducer, { circlesLoaded, circleUpdated } from "./circles";
 import peopleReducer, { peopleLoaded, personUpdated } from "./people";
 import intervalsReducer, { intervalsLoaded, intervalCreated } from "./intervals";
-import currentIntervalReducer, { circleInvolvementUpdated, currentIntervalLoaded } from "./current_interval";
-import involvementsReducer, { intervalDataChanged } from "./involvements";
+import currentIntervalReducer, { circleInvolvementUpdated, currentIntervalLoaded, personIntervalDataChanged } from "./current_interval";
+import involvementsReducer from "./involvements";
 import crewsReducer, { crewsLoaded, crewUpdated } from "./crews";
 import entryPathwaysReducer, { entryPathwaysLoaded, entryPathwayUpdated } from "./entry_pathways";
 import eventTemplatesReducer, { eventTemplatesLoaded, eventTemplateUpdated } from "./event_templates";
@@ -103,7 +103,7 @@ export async function loadInitialData(store: AppStore) {
 
 export async function handleMeEvent(event: MeEvent) {
   if (event.IntervalDataChanged) {
-    store.dispatch(intervalDataChanged(event.IntervalDataChanged));
+    store.dispatch(personIntervalDataChanged(event.IntervalDataChanged));
   }
 }
 

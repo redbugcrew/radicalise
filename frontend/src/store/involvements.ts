@@ -1,6 +1,5 @@
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { CircleInvolvement, IntervalInvolvementData, CrewInvolvement, Person, PersonIntervalInvolvementData, CircleInvolvementData, InvolvementData } from "../api/Api";
-import { type WritableDraft } from "immer";
+import { createSlice } from "@reduxjs/toolkit";
+import type { IntervalInvolvementData, CrewInvolvement, Person, CircleInvolvementData } from "../api/Api";
 import type { PeopleObjectMap } from "./people";
 import { compareStrings } from "../utilities/comparison";
 
@@ -79,52 +78,12 @@ const involvementsSlice = createSlice({
     current_interval: null,
     next_interval: null,
   } as InvolvementsState,
-  reducers: {
-    intervalDataChanged: (state: InvolvementsState, action: PayloadAction<PersonIntervalInvolvementData>) => {
-      let payload = action.payload;
-      if (!state || !payload) return state;
-
-      const person_id = payload.person_id;
-      const intervalKey = intervalKeyForId(state, payload.data.interval_id);
-      if (!intervalKey) return state;
-      const intervalState = state[intervalKey];
-      if (!intervalState) return state;
-
-      // Upsert circle involvements for the person
-      payload.data.involvements_for_circles.forEach((circleInvolvementData) => {
-        const circleId = circleInvolvementData.circle_id;
-        const newInvolvement = circleInvolvementData.circle_involvements.find((involvement) => involvement.person_id === person_id);
-
-        if (newInvolvement) intervalState.circles[circleId] = upsertCircleInvolvement(intervalState.circles[circleId], newInvolvement);
-      });
-
-      // Upsert crew involvements for the person
-      intervalState.crew_involvements = updateCrewInvolvementsForPerson(intervalState.crew_involvements, payload.data.crew_involvements, person_id);
-
-      return state;
-    },
-  },
+  reducers: {},
 });
-
-function upsertCircleInvolvement(state: CircleInvolvementData, newInvolvement: CircleInvolvement): CircleInvolvementData {
-  const existingCircleInvolvements = state.circle_involvements || [];
-  const newCircleInvolvements = existingCircleInvolvements.filter((involvement) => involvement.id !== newInvolvement.id).concat(newInvolvement);
-
-  return {
-    ...state,
-    circle_involvements: newCircleInvolvements,
-  };
-}
-
-function updateCrewInvolvementsForPerson(existingInvolvements: WritableDraft<CrewInvolvement>[], newInvolvements: CrewInvolvement[], personId: number): WritableDraft<CrewInvolvement>[] {
-  const existingWithoutPerson = existingInvolvements.filter((involvement) => involvement.person_id !== personId);
-  const newForPerson = newInvolvements.filter((involvement) => involvement.person_id === personId);
-  return existingWithoutPerson.concat(newForPerson);
-}
 
 // `createSlice` automatically generated action creators with these names.
 // export them as named exports from this "slice" file
-export const { intervalDataChanged } = involvementsSlice.actions;
+export const {} = involvementsSlice.actions;
 
 // Export the slice reducer as the default export
 export default involvementsSlice.reducer;

@@ -15,7 +15,7 @@ import { getApiUrl } from "../../api";
 import { useNextInterval } from "../../store/intervals";
 import { useCurrentInterval } from "../../store/current_interval";
 import { forPerson } from "../../store/current_interval/crew_involvements";
-import { circleInvolvementsforCircleAndPerson } from "../../store/current_interval/circle_involvements";
+import { circleInvolvementforCircleAndPerson } from "../../store/current_interval/circle_involvements";
 import WithIntervalData from "../intervals/WithIntervalData";
 
 function ParticipationBadge({ involvement }: { involvement: CircleInvolvement | null }) {
@@ -162,7 +162,7 @@ export default function Dashboard() {
 
   const personId = myData.person_id;
 
-  const myCurrentCircle = circleInvolvementsforCircleAndPerson(currentIntervalData?.circle_involvements, circleId, personId);
+  const myCurrentCircle = circleInvolvementforCircleAndPerson(currentIntervalData?.circle_involvements, circleId, personId);
 
   const myCurrentCrewInvolvements = forPerson(currentIntervalData?.crew_involvements || [], personId);
 
@@ -177,7 +177,7 @@ export default function Dashboard() {
 
           <WithIntervalData interval={nextInterval}>
             {({ intervalData: nextIntervalData }) => {
-              const myNextCircle = circleInvolvementsforCircleAndPerson(nextIntervalData?.circle_involvements, circleId, personId);
+              const myNextCircle = circleInvolvementforCircleAndPerson(nextIntervalData?.circle_involvements, circleId, personId);
 
               return (myCurrentCircle || myNextCircle) && nextInterval && <MyIntervalPartipationCard interval={nextInterval} circleInvolvement={myNextCircle} current={false} />;
             }}

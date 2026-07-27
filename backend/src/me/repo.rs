@@ -3,14 +3,19 @@ use sqlx::{QueryBuilder, Sqlite, SqlitePool};
 use utoipa::ToSchema;
 
 use crate::{
-    my_project::repo::{IntervalInvolvementData, find_interval_involvement_data_for_person},
+    circles::repo::find_all_circles_ids,
+    intervals::repo::find_interval,
+    my_project::repo::{
+        IntervalData, find_all_crew_involvements,
+        find_interval_involvement_data_for_circles_and_person,
+    },
     shared::entities::{CrewId, CrewInvolvement, IntervalId, Person, PersonId, ProjectId, UserId},
 };
 
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
-pub struct PersonIntervalInvolvementData {
+pub struct PersonIntervalData {
     pub person_id: i64,
-    pub data: IntervalInvolvementData,
+    pub data: IntervalData,
 }
 
 #[derive(Serialize, Deserialize, ToSchema)]
@@ -24,16 +29,29 @@ pub async fn find_interval_data_for_person(
     person_id: PersonId,
     interval_id: IntervalId,
     pool: &SqlitePool,
-) -> Result<PersonIntervalInvolvementData, sqlx::Error> {
-    let result = find_interval_involvement_data_for_person(
+) -> Result<PersonIntervalData, sqlx::Error> {
+    let interval = find_interval(interval_id.clone(), pool).await?;
+
+    let circle_ids = find_all_circles_ids(project_id.clone(), &pool).await?;
+
+    let circle_involvements_result = find_interval_involvement_data_for_circles_and_person(
         person_id.clone(),
+        circle_ids,
         interval_id.clone(),
-        project_id.clone(),
-        pool,
+        project_id,
+        &pool,
     )
     .await?;
 
-    Ok(PersonIntervalInvolvementData {
+    let crew_involvements_result = find_all_crew_involvements(interval_id, pool).await?;
+
+    let result = IntervalData {
+        interval: interval,
+        circle_involvements: circle_involvements_result,
+        crew_involvements: crew_involvements_result,
+    };
+
+    Ok(PersonIntervalData {
         person_id: person_id.id,
         data: result,
     })

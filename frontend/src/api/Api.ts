@@ -355,7 +355,7 @@ export interface LoginResponse {
 }
 
 export type MeEvent = {
-  IntervalDataChanged: PersonIntervalInvolvementData;
+  IntervalDataChanged: PersonIntervalData;
 };
 
 export interface MyInitialData {
@@ -398,8 +398,8 @@ export interface Person {
   project_id: number;
 }
 
-export interface PersonIntervalInvolvementData {
-  data: IntervalInvolvementData;
+export interface PersonIntervalData {
+  data: IntervalData;
   /** @format int64 */
   person_id: number;
 }
