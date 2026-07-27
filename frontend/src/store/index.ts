@@ -4,8 +4,8 @@ import projectReducer, { projectLoaded, projectUpdated } from "./project";
 import circlesReducer, { circlesLoaded, circleUpdated } from "./circles";
 import peopleReducer, { peopleLoaded, personUpdated } from "./people";
 import intervalsReducer, { intervalsLoaded, intervalCreated } from "./intervals";
-import currentIntervalReducer, { currentIntervalLoaded } from "./current_interval";
-import involvementsReducer, { involvementsLoaded, intervalDataChanged, involvementUpdated } from "./involvements";
+import currentIntervalReducer, { circleInvolvementUpdated, currentIntervalLoaded } from "./current_interval";
+import involvementsReducer, { intervalDataChanged } from "./involvements";
 import crewsReducer, { crewsLoaded, crewUpdated } from "./crews";
 import entryPathwaysReducer, { entryPathwaysLoaded, entryPathwayUpdated } from "./entry_pathways";
 import eventTemplatesReducer, { eventTemplatesLoaded, eventTemplateUpdated } from "./event_templates";
@@ -53,7 +53,6 @@ async function loadProjectData(store: AppStore, api: ReturnType<typeof getApi>):
       store.dispatch(crewsLoaded(response.data.crews));
       store.dispatch(intervalsLoaded({ allIntervals: response.data.intervals }));
       store.dispatch(currentIntervalLoaded(response.data.current_interval_data));
-      store.dispatch(involvementsLoaded(response.data.involvements));
       store.dispatch(entryPathwaysLoaded(response.data.entry_pathways));
       store.dispatch(projectLoaded(response.data.project));
       store.dispatch(eventTemplatesLoaded(response.data.event_templates));
@@ -127,7 +126,7 @@ export async function handleProjectEvent(event: ProjectEvent) {
   if ("ProjectUpdated" in event && event.ProjectUpdated) {
     store.dispatch(projectUpdated(event.ProjectUpdated));
   } else if ("CircleInvolvementUpdated" in event && event.CircleInvolvementUpdated) {
-    store.dispatch(involvementUpdated(event.CircleInvolvementUpdated));
+    store.dispatch(circleInvolvementUpdated(event.CircleInvolvementUpdated));
   }
 }
 

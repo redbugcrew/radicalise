@@ -33,7 +33,7 @@ export function circleInvolvementsforCircleAndPerson(records: CircleInvolvementD
   return involvement || null;
 }
 
-function forCircle(records: CircleInvolvementData[] | null | undefined, circleId: number): CircleInvolvementData | null {
+export function forCircle(records: CircleInvolvementData[] | null | undefined, circleId: number): CircleInvolvementData | null {
   if (!records) return null;
 
   const record = records.find((rec) => rec.circle_id === circleId);
@@ -45,4 +45,19 @@ function forPerson(records: CircleInvolvement[] | null | undefined, personId: nu
 
   const record = records.find((rec) => rec.person_id === personId);
   return record || null;
+}
+
+export function upsertCircleInvolvement(state: CircleInvolvementData, newInvolvement: CircleInvolvement): CircleInvolvementData {
+  const existingCircleInvolvements = state.circle_involvements || [];
+  const newCircleInvolvements = existingCircleInvolvements.filter((involvement) => involvement.id !== newInvolvement.id).concat(newInvolvement);
+
+  return {
+    ...state,
+    circle_involvements: newCircleInvolvements,
+  };
+}
+
+export function upsertCircleData(state: CircleInvolvementData[], newCircleData: CircleInvolvementData): CircleInvolvementData[] {
+  const existingCircleData = state.filter((data) => data.circle_id !== newCircleData.circle_id);
+  return existingCircleData.concat(newCircleData);
 }

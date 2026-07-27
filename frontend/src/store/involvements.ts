@@ -32,10 +32,6 @@ export function mapCirclesData(data: IntervalInvolvementData): IntervalInvolveme
   };
 }
 
-export function intervalDataForKey(state: InvolvementsState, key: keyof InvolvementsState): IntervalInvolvementState | null {
-  return state[key] || null;
-}
-
 export function intervalKeyForId(state: InvolvementsState, intervalId: number): keyof InvolvementsState | null {
   if (state.current_interval?.interval_id === intervalId) return "current_interval";
   if (state.next_interval?.interval_id === intervalId) return "next_interval";
@@ -84,37 +80,6 @@ const involvementsSlice = createSlice({
     next_interval: null,
   } as InvolvementsState,
   reducers: {
-    involvementsLoaded: (_state: InvolvementsState, action: PayloadAction<InvolvementData>) => {
-      const current_interval = action.payload.current_interval ? mapCirclesData(action.payload.current_interval) : null;
-      const next_interval = action.payload.next_interval ? mapCirclesData(action.payload.next_interval) : null;
-      return {
-        current_interval,
-        next_interval,
-      };
-    },
-    involvementUpdated: (state: InvolvementsState, action: PayloadAction<CircleInvolvement>) => {
-      let involvement = action.payload;
-      if (!state || !involvement) return state;
-
-      const intervalKey = intervalKeyForId(state, involvement.interval_id);
-      if (!intervalKey) return state;
-
-      const intervalState = state[intervalKey];
-      if (!intervalState) return state;
-      const circleId = involvement.circle_id;
-
-      if (!intervalState.circles[circleId]) {
-        intervalState.circles[circleId] = {
-          circle_id: circleId,
-          circle_involvements: [],
-          interval_id: intervalState.interval_id,
-        };
-      }
-
-      intervalState.circles[circleId] = upsertCircleInvolvement(intervalState.circles[circleId], involvement);
-
-      return state;
-    },
     intervalDataChanged: (state: InvolvementsState, action: PayloadAction<PersonIntervalInvolvementData>) => {
       let payload = action.payload;
       if (!state || !payload) return state;
@@ -159,7 +124,7 @@ function updateCrewInvolvementsForPerson(existingInvolvements: WritableDraft<Cre
 
 // `createSlice` automatically generated action creators with these names.
 // export them as named exports from this "slice" file
-export const { involvementsLoaded, involvementUpdated, intervalDataChanged } = involvementsSlice.actions;
+export const { intervalDataChanged } = involvementsSlice.actions;
 
 // Export the slice reducer as the default export
 export default involvementsSlice.reducer;
