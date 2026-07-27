@@ -10,6 +10,7 @@ import entryPathwaysReducer, { entryPathwaysLoaded, entryPathwayUpdated } from "
 import eventTemplatesReducer, { eventTemplatesLoaded, eventTemplateUpdated } from "./event_templates";
 import eventsReducer, { eventsLoaded, eventUpdated, singleAttendanceUpdate } from "./events";
 import meReducer, { meLoaded } from "./me";
+import peerRolesReducer, { peerRolesLoaded } from "./peer_roles";
 import { getApi } from "../api";
 import { redirect } from "react-router-dom";
 import type { AppEvent, CalendarEventAttendancesEvent, CalendarEventsEvent, ProjectEvent, CrewsEvent, EntryPathwayEvent, EventTemplatesEvent, IntervalsEvent, MeEvent, PeopleEvent, CirclesEvent } from "../api/Api";
@@ -26,6 +27,7 @@ const store = configureStore({
     entryPathways: entryPathwaysReducer,
     eventTemplates: eventTemplatesReducer,
     events: eventsReducer,
+    peerRoles: peerRolesReducer,
   },
 });
 
@@ -55,6 +57,7 @@ async function loadProjectData(store: AppStore, api: ReturnType<typeof getApi>):
       store.dispatch(projectLoaded(response.data.project));
       store.dispatch(eventTemplatesLoaded(response.data.event_templates));
       store.dispatch(eventsLoaded(response.data.calendar_events));
+      store.dispatch(peerRolesLoaded(response.data.peer_roles));
 
       return null;
     })
