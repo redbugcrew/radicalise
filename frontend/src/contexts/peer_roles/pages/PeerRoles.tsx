@@ -7,7 +7,7 @@ export default function EventTemplates() {
   const dummyPeers = [
     {
       role: 1,
-      name: "Buddy",
+      name: "Participation Buddy",
       summary:
         "Participation Buddies support each-other to communicate and meet our participation intentions in the project",
     },
