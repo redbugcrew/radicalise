@@ -1,10 +1,10 @@
 import { Stack, Text } from "@mantine/core";
 import type { CrewInvolvement } from "../../api/Api";
 import { useAppSelector } from "../../store";
-import type { CircleInvolvementDataMap } from "../../store/involvements";
 import PeopleByInvolvementStatus from "./PeopleByInvolvementStatus";
 import { CircleSelector } from "../../components";
 import { useNavigate, useLocation } from "react-router-dom";
+import type { CircleInvolvementDataMap } from "../../store/current_interval/circle_involvements";
 
 interface PeopleByCircleProps {
   involvementByCircle: CircleInvolvementDataMap;

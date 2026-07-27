@@ -1,5 +1,5 @@
 import { Alert, Input, Stack, Title } from "@mantine/core";
-import { forCrew } from "../../store/involvements";
+import { forCrew } from "../../store/current_interval/crew_involvements";
 import type { PeopleObjectMap } from "../../store/people";
 import type { CrewInvolvement } from "../../api/Api";
 import { useUncontrolled } from "@mantine/hooks";

@@ -2,9 +2,9 @@ import { Card, Group, Stack, Switch, Title, Text } from "@mantine/core";
 import type { PeopleObjectMap } from "../../store/people";
 import type { CrewInvolvement, Person } from "../../api/Api";
 import styles from "./CrewParticipationsInput.module.css";
-import { asPeopleAlphaSorted } from "../../store/involvements";
 import PersonBadgeGroup from "../people/PersonBadge/PersonBadgeGroup";
 import type { CrewWithLinks } from "../../store/crews";
+import { asPeopleAlphaSorted } from "../../store/current_interval/crew_involvements";
 
 export interface CrewParticipationControlData {
   participating: boolean;

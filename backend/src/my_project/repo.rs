@@ -8,16 +8,19 @@ use crate::{
     crews::repo::find_all_crews_with_links,
     entry_pathways::repo::find_all_entry_pathways_for_project,
     event_templates::repo::find_all_event_templates,
-    intervals::repo::{find_current_interval, find_next_interval},
+    intervals::repo::find_current_interval,
     my_project::involvements_repo::{
         find_all_circle_involvements, find_all_circle_involvements_for_person,
+    },
+    peer_roles::{
+        enrollments_repo::find_peer_enrollments_for_interval, peer_roles_repo::find_all_peer_roles,
     },
     people::repo::find_all_people,
     shared::{
         entities::{
             CalendarEvent, Circle, CircleId, CircleInvolvement, CrewInvolvement, CrewWithLinks,
-            EntryPathway, EventTemplate, Interval, IntervalId, Person, PersonId, Project,
-            ProjectId,
+            EntryPathway, EventTemplate, Interval, IntervalId, PeerEnrollment, PeerRole, Person,
+            PersonId, Project, ProjectId,
         },
         links_repo::{find_all_links_for_owner, update_links_for_owner},
     },
@@ -36,10 +39,12 @@ pub struct IntervalInvolvementData {
     pub involvements_for_circles: Vec<CircleInvolvementData>,
 }
 
-#[derive(Serialize, Deserialize, ToSchema, Clone)]
-pub struct InvolvementData {
-    pub current_interval: Option<IntervalInvolvementData>,
-    pub next_interval: Option<IntervalInvolvementData>,
+#[derive(Serialize, Deserialize, ToSchema, Clone, Debug)]
+pub struct IntervalData {
+    pub interval: Interval,
+    pub crew_involvements: Vec<CrewInvolvement>,
+    pub circle_involvements: Vec<CircleInvolvementData>,
+    pub peer_enrollments: Vec<PeerEnrollment>,
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Clone)]
@@ -49,11 +54,11 @@ pub struct InitialData {
     pub people: Vec<Person>,
     pub crews: Vec<CrewWithLinks>,
     pub intervals: Vec<Interval>,
-    pub current_interval: Interval,
-    pub involvements: InvolvementData,
+    pub current_interval_data: IntervalData,
     pub entry_pathways: Vec<EntryPathway>,
     pub event_templates: Vec<EventTemplate>,
     pub calendar_events: Vec<CalendarEvent>,
+    pub peer_roles: Vec<PeerRole>,
 }
 
 pub async fn find_project(
@@ -154,32 +159,6 @@ pub async fn find_interval_involvement_data(
     Ok(result)
 }
 
-pub async fn find_interval_involvement_data_for_person(
-    person_id: PersonId,
-    interval_id: IntervalId,
-    project_id: ProjectId,
-    pool: &SqlitePool,
-) -> Result<IntervalInvolvementData, sqlx::Error> {
-    let circle_ids = find_all_circles_ids(project_id.clone(), &pool).await?;
-
-    let circle_involvements_result = find_interval_involvement_data_for_circles_and_person(
-        person_id,
-        circle_ids,
-        interval_id.clone(),
-        project_id,
-        &pool,
-    )
-    .await?;
-
-    let result = IntervalInvolvementData {
-        interval_id: interval_id.id,
-        involvements_for_circles: circle_involvements_result,
-        crew_involvements: find_all_crew_involvements(interval_id, pool).await?,
-    };
-
-    Ok(result)
-}
-
 pub async fn find_initial_data_for_project(
     project: Project,
     pool: &SqlitePool,
@@ -199,22 +178,15 @@ pub async fn find_initial_data_for_project(
     .await?;
 
     let current_interval = find_current_interval(project.typed_id(), pool).await?;
-    let current_interval_id = current_interval.typed_id().clone();
-    let next_interval =
-        find_next_interval(project.typed_id(), current_interval_id.clone(), pool).await?;
-
-    let current_interval_data =
-        find_interval_involvement_data(current_interval_id.clone(), project.typed_id(), pool)
-            .await?;
-    let next_interval_data = if let Some(interval) = next_interval {
-        Some(find_interval_involvement_data(interval.typed_id(), project.typed_id(), pool).await?)
-    } else {
-        None
-    };
 
     let entry_pathways = find_all_entry_pathways_for_project(project.typed_id(), pool).await?;
     let event_templates = find_all_event_templates(project.typed_id(), pool).await?;
     let calendar_events = list_calendar_events_with_attendances(project.typed_id(), pool).await?;
+
+    let current_interval_data =
+        find_interval_data(&current_interval, project.typed_id(), pool).await?;
+
+    let peer_roles = find_all_peer_roles(project.typed_id(), pool).await?;
 
     Ok(InitialData {
         project,
@@ -223,13 +195,28 @@ pub async fn find_initial_data_for_project(
         crews,
         event_templates,
         intervals,
-        current_interval,
-        involvements: InvolvementData {
-            current_interval: Some(current_interval_data),
-            next_interval: next_interval_data,
-        },
+        current_interval_data,
         entry_pathways,
         calendar_events,
+        peer_roles,
+    })
+}
+
+pub async fn find_interval_data(
+    interval: &Interval,
+    project_id: ProjectId,
+    pool: &SqlitePool,
+) -> Result<IntervalData, sqlx::Error> {
+    let involvements =
+        find_interval_involvement_data(interval.typed_id(), project_id, pool).await?;
+
+    let enrollments = find_peer_enrollments_for_interval(&interval.typed_id(), pool).await?;
+
+    Ok(IntervalData {
+        interval: interval.clone(),
+        crew_involvements: involvements.crew_involvements,
+        circle_involvements: involvements.involvements_for_circles,
+        peer_enrollments: enrollments,
     })
 }
 

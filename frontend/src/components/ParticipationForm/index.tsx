@@ -1,14 +1,16 @@
 import { Stepper, Group, Button, Box } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useState } from "react";
-import type { CircleInvolvement, Interval } from "../../api/Api";
+import type { CircleInvolvement, Interval, IntervalData } from "../../api/Api";
 import { IconLock } from "@tabler/icons-react";
 import { useAppSelector } from "../../store";
-import { allCrewInvolvements, forPerson, intervalKeyForId } from "../../store/involvements";
 import type { MyParticipationFormData } from "./shared";
 import CapacityStep from "./CapacityStep";
 import { ParticipationStep } from "./ParticipationStep";
 import ContributionStep from "./ContributionStep";
+import WithIntervalData from "../../pages/intervals/WithIntervalData";
+import { findPreviousInterval } from "../../store/intervals";
+import { forPerson } from "../../store/current_interval/crew_involvements";
 export type { MyParticipationFormData } from "./shared";
 
 interface ParticipationFormProps {
@@ -16,23 +18,41 @@ interface ParticipationFormProps {
   readOnly?: boolean;
   involvement?: CircleInvolvement | null;
   interval: Interval;
-  previousIntervalId?: number | undefined;
   onSubmit: (data: MyParticipationFormData) => void;
 }
 
-export default function ParticipationForm({ personId, interval, previousIntervalId, readOnly = false, involvement = null, onSubmit }: ParticipationFormProps) {
-  const involvements = useAppSelector((state) => state.involvements);
+export default function ParticipationForm(props: ParticipationFormProps) {
+  const previousInterval = useAppSelector((state) => findPreviousInterval(state.intervals, props.interval.id));
+
+  return (
+    <WithIntervalData interval={props.interval}>
+      {({ intervalData }) => {
+        if (!intervalData) {
+          return <div>Loading interval data...</div>;
+        }
+
+        return (
+          <WithIntervalData interval={previousInterval}>
+            {({ intervalData: previousIntervalData }) => <ParticipationFormForInterval {...props} intervalData={intervalData} previousIntervalData={previousIntervalData ?? null} />}
+          </WithIntervalData>
+        );
+      }}
+    </WithIntervalData>
+  );
+}
+
+interface ParticipationFormForIntervalProps extends ParticipationFormProps {
+  intervalData: IntervalData;
+  previousIntervalData: IntervalData | null;
+}
+
+function ParticipationFormForInterval({ personId, interval, readOnly = false, involvement = null, onSubmit, intervalData, previousIntervalData }: ParticipationFormForIntervalProps) {
   const circles = useAppSelector((state) => state.circles.rootCircles);
   const [step, setStep] = useState(0);
   const [additionalParticipationActive, setAdditionalParticipationActive] = useState(involvement?.participation_intention === "OptIn");
 
-  const intervalKey = intervalKeyForId(involvements, interval.id);
-  const previousIntervalKey = typeof previousIntervalId === "number" ? intervalKeyForId(involvements, previousIntervalId) : null;
-
-  if (intervalKey === null) return <div>Invalid interval</div>;
-
-  const crewInvolvements = allCrewInvolvements(involvements, intervalKey) || [];
-  const previousCrewInvolvements = previousIntervalKey !== null ? allCrewInvolvements(involvements, previousIntervalKey) : null;
+  const crewInvolvements = intervalData?.crew_involvements || [];
+  const previousCrewInvolvements = previousIntervalData?.crew_involvements || [];
 
   const minStep = 0;
   const maxStep = additionalParticipationActive ? 2 : 1;

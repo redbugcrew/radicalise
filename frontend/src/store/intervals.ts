@@ -2,13 +2,10 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { Interval } from "../api/Api";
 import { useAppSelector } from "./index";
 
-export type IntervalsState = {
-  allIntervals: Interval[];
-  currentInterval: Interval | null;
-};
+export type IntervalsState = Interval[];
 
 export function intervalById(state: IntervalsState, id: number): Interval | null {
-  return state.allIntervals.find((interval) => interval.id === id) || null;
+  return state.find((interval) => interval.id === id) || null;
 }
 
 export function findPreviousInterval(intervals: Interval[], currentIntervalId: number): Interval | null {
@@ -19,15 +16,12 @@ export function findPreviousInterval(intervals: Interval[], currentIntervalId: n
 
 const intervalsSlice = createSlice({
   name: "people",
-  initialState: {
-    allIntervals: [],
-    currentInterval: null,
-  } as IntervalsState,
+  initialState: [] as IntervalsState,
   reducers: {
     intervalsLoaded: (_state: IntervalsState, action: PayloadAction<IntervalsState>) => action.payload,
     intervalCreated: (state, action: PayloadAction<Interval>) => {
       const newInterval = action.payload;
-      state.allIntervals.push(newInterval);
+      state.push(newInterval);
       return state;
     },
   },
@@ -41,7 +35,9 @@ export const { intervalsLoaded, intervalCreated } = intervalsSlice.actions;
 export default intervalsSlice.reducer;
 
 export function useNextInterval(): Interval | null {
-  const { allIntervals, currentInterval } = useAppSelector((state) => state.intervals);
+  const allIntervals = useAppSelector((state) => state.intervals);
+  const currentInterval = useAppSelector((state) => state.currentInterval?.interval);
+
   if (!currentInterval) return null;
 
   const currentIntervalIndex = allIntervals.findIndex((i) => i.id === currentInterval.id);

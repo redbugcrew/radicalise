@@ -4,12 +4,13 @@ import projectReducer, { projectLoaded, projectUpdated } from "./project";
 import circlesReducer, { circlesLoaded, circleUpdated } from "./circles";
 import peopleReducer, { peopleLoaded, personUpdated } from "./people";
 import intervalsReducer, { intervalsLoaded, intervalCreated } from "./intervals";
-import involvementsReducer, { involvementsLoaded, intervalDataChanged, involvementUpdated } from "./involvements";
+import currentIntervalReducer, { circleInvolvementUpdated, currentIntervalLoaded, personIntervalDataChanged } from "./current_interval";
 import crewsReducer, { crewsLoaded, crewUpdated } from "./crews";
 import entryPathwaysReducer, { entryPathwaysLoaded, entryPathwayUpdated } from "./entry_pathways";
 import eventTemplatesReducer, { eventTemplatesLoaded, eventTemplateUpdated } from "./event_templates";
 import eventsReducer, { eventsLoaded, eventUpdated, singleAttendanceUpdate } from "./events";
 import meReducer, { meLoaded } from "./me";
+import peerRolesReducer, { peerRolesLoaded } from "./peer_roles";
 import { getApi } from "../api";
 import { redirect } from "react-router-dom";
 import type { AppEvent, CalendarEventAttendancesEvent, CalendarEventsEvent, ProjectEvent, CrewsEvent, EntryPathwayEvent, EventTemplatesEvent, IntervalsEvent, MeEvent, PeopleEvent, CirclesEvent } from "../api/Api";
@@ -20,12 +21,13 @@ const store = configureStore({
     circles: circlesReducer,
     people: peopleReducer,
     intervals: intervalsReducer,
-    involvements: involvementsReducer,
+    currentInterval: currentIntervalReducer,
     crews: crewsReducer,
     me: meReducer,
     entryPathways: entryPathwaysReducer,
     eventTemplates: eventTemplatesReducer,
     events: eventsReducer,
+    peerRoles: peerRolesReducer,
   },
 });
 
@@ -49,12 +51,13 @@ async function loadProjectData(store: AppStore, api: ReturnType<typeof getApi>):
       store.dispatch(circlesLoaded(response.data.circles));
       store.dispatch(peopleLoaded(response.data.people));
       store.dispatch(crewsLoaded(response.data.crews));
-      store.dispatch(intervalsLoaded({ allIntervals: response.data.intervals, currentInterval: response.data.current_interval }));
-      store.dispatch(involvementsLoaded(response.data.involvements));
+      store.dispatch(intervalsLoaded(response.data.intervals));
+      store.dispatch(currentIntervalLoaded(response.data.current_interval_data));
       store.dispatch(entryPathwaysLoaded(response.data.entry_pathways));
       store.dispatch(projectLoaded(response.data.project));
       store.dispatch(eventTemplatesLoaded(response.data.event_templates));
       store.dispatch(eventsLoaded(response.data.calendar_events));
+      store.dispatch(peerRolesLoaded(response.data.peer_roles));
 
       return null;
     })
@@ -101,7 +104,7 @@ export async function loadInitialData(store: AppStore) {
 
 export async function handleMeEvent(event: MeEvent) {
   if (event.IntervalDataChanged) {
-    store.dispatch(intervalDataChanged(event.IntervalDataChanged));
+    store.dispatch(personIntervalDataChanged(event.IntervalDataChanged));
   }
 }
 
@@ -124,7 +127,7 @@ export async function handleProjectEvent(event: ProjectEvent) {
   if ("ProjectUpdated" in event && event.ProjectUpdated) {
     store.dispatch(projectUpdated(event.ProjectUpdated));
   } else if ("CircleInvolvementUpdated" in event && event.CircleInvolvementUpdated) {
-    store.dispatch(involvementUpdated(event.CircleInvolvementUpdated));
+    store.dispatch(circleInvolvementUpdated(event.CircleInvolvementUpdated));
   }
 }
 

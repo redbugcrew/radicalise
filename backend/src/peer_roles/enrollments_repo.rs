@@ -1,5 +1,7 @@
 use sqlx::SqlitePool;
 
+use crate::shared::entities::{IntervalId, PeerEnrollment, PersonId};
+
 pub async fn upsert_peer_enrollments(
     interval_id: i64,
     peer_role_id: i64,
@@ -32,4 +34,37 @@ pub async fn upsert_peer_enrollments(
     transaction.commit().await?;
 
     Ok(())
+}
+
+pub async fn find_peer_enrollments_for_interval(
+    interval_id: &IntervalId,
+    pool: &SqlitePool,
+) -> Result<Vec<PeerEnrollment>, sqlx::Error> {
+    let enrollments = sqlx::query_as!(
+        PeerEnrollment,
+        "SELECT * FROM peer_enrollments WHERE interval_id = ?",
+        interval_id.id
+    )
+    .fetch_all(pool)
+    .await?;
+
+    Ok(enrollments)
+}
+
+pub async fn find_peer_enrollments_for_interval_and_person(
+    interval_id: &IntervalId,
+    person_id: &PersonId,
+    pool: &SqlitePool,
+) -> Result<Vec<PeerEnrollment>, sqlx::Error> {
+    let enrollments = sqlx::query_as!(
+        PeerEnrollment,
+        "SELECT * FROM peer_enrollments WHERE interval_id = ? AND (person_id = ? OR peer_id = ?)",
+        interval_id.id,
+        person_id.id,
+        person_id.id
+    )
+    .fetch_all(pool)
+    .await?;
+
+    Ok(enrollments)
 }

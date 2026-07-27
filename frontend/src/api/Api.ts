@@ -13,7 +13,12 @@
 export enum StartNextIntervalError {
   CurrentIntervalNotFound = "CurrentIntervalNotFound",
   NextIntervalNotFound = "NextIntervalNotFound",
+  CouldntSetUpInterval = "CouldntSetUpInterval",
   InternalServerError = "InternalServerError",
+}
+
+export enum PeerRoleDistributionType {
+  RandomPairs = "RandomPairs",
 }
 
 export enum ParticipationIntention {
@@ -287,11 +292,11 @@ export interface InitialData {
   calendar_events: CalendarEvent[];
   circles: Circle[];
   crews: CrewWithLinks[];
-  current_interval: Interval;
+  current_interval_data: IntervalData;
   entry_pathways: EntryPathway[];
   event_templates: EventTemplate[];
   intervals: Interval[];
-  involvements: InvolvementData;
+  peer_roles: PeerRole[];
   people: Person[];
   project: Project;
 }
@@ -303,11 +308,11 @@ export interface Interval {
   start_date: string;
 }
 
-export interface IntervalInvolvementData {
+export interface IntervalData {
+  circle_involvements: CircleInvolvementData[];
   crew_involvements: CrewInvolvement[];
-  /** @format int64 */
-  interval_id: number;
-  involvements_for_circles: CircleInvolvementData[];
+  interval: Interval;
+  peer_enrollments: PeerEnrollment[];
 }
 
 export type IntervalsEvent =
@@ -331,11 +336,6 @@ export interface InvitePersonResponse {
   person: Person;
 }
 
-export interface InvolvementData {
-  current_interval?: null | IntervalInvolvementData;
-  next_interval?: null | IntervalInvolvementData;
-}
-
 export interface Link {
   label?: string | null;
   link_type: string;
@@ -348,7 +348,7 @@ export interface LoginResponse {
 }
 
 export type MeEvent = {
-  IntervalDataChanged: PersonIntervalInvolvementData;
+  IntervalDataChanged: PersonIntervalData;
 };
 
 export interface MyInitialData {
@@ -376,6 +376,30 @@ export interface MyParticipationInput {
   wellbeing?: string | null;
 }
 
+export interface PeerEnrollment {
+  /** @format int64 */
+  id: number;
+  /** @format int64 */
+  interval_id: number;
+  /** @format int64 */
+  peer_id: number;
+  /** @format int64 */
+  peer_role_id: number;
+  /** @format int64 */
+  person_id: number;
+}
+
+export interface PeerRole {
+  /** @format int64 */
+  circle_id: number;
+  distribution_type: PeerRoleDistributionType;
+  /** @format int64 */
+  id: number;
+  name: string;
+  /** @format int64 */
+  project_id: number;
+}
+
 export type PeopleEvent = {
   PersonUpdated: Person;
 };
@@ -391,8 +415,8 @@ export interface Person {
   project_id: number;
 }
 
-export interface PersonIntervalInvolvementData {
-  data: IntervalInvolvementData;
+export interface PersonIntervalData {
+  data: IntervalData;
   /** @format int64 */
   person_id: number;
 }
@@ -981,12 +1005,12 @@ export class Api<
     /**
      * No description
      *
-     * @name GetInvolvements
-     * @request GET:/api/my_project/interval/{interval_id}/involvements
+     * @name GetIntervalData
+     * @request GET:/api/my_project/interval/{interval_id}/state
      */
-    getInvolvements: (intervalId: number, params: RequestParams = {}) =>
-      this.request<IntervalInvolvementData, any>({
-        path: `/api/my_project/interval/${intervalId}/involvements`,
+    getIntervalData: (intervalId: number, params: RequestParams = {}) =>
+      this.request<IntervalData, any>({
+        path: `/api/my_project/interval/${intervalId}/state`,
         method: "GET",
         format: "json",
         ...params,

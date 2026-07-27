@@ -3,8 +3,8 @@ import { useAppSelector } from "../../store";
 import type { CapacityPlanning, CircleInvolvement, Interval, Person } from "../../api/Api";
 import CapacityScoreIcon from "../../components/CapacityScoreIcon";
 import DateText from "../../components/DateText";
-import { myCircleInvolvements } from "../../store/involvements";
-import WithIntervalInvolvements from "../intervals/WithIntervalInvolvements";
+import WithIntervalData from "../intervals/WithIntervalData";
+import { circleInvolvementsforPerson } from "../../store/current_interval/circle_involvements";
 
 function CapacityQuestion({ question, answer }: { question: string; answer: string | null | undefined }) {
   if (!answer) return null;
@@ -94,9 +94,9 @@ export default function PersonForInterval({ personIdNum, interval }: PersonForIn
   const person = useAppSelector((state) => state.people[personIdNum || -1]);
 
   return (
-    <WithIntervalInvolvements interval={interval}>
-      {({ involvements, key }) => {
-        const circleInvolvements = myCircleInvolvements(involvements, personIdNum) || [];
+    <WithIntervalData interval={interval}>
+      {({ intervalData, key }) => {
+        const circleInvolvements = circleInvolvementsforPerson(intervalData?.circle_involvements, personIdNum);
 
         return (
           <Container key={key}>
@@ -108,6 +108,6 @@ export default function PersonForInterval({ personIdNum, interval }: PersonForIn
           </Container>
         );
       }}
-    </WithIntervalInvolvements>
+    </WithIntervalData>
   );
 }
