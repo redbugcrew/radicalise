@@ -7,6 +7,10 @@ export interface PeopleObjectMap {
 
 export type PeopleState = PeopleObjectMap;
 
+export function mapPeopleIds(ids: number[], people: PeopleObjectMap): Person[] {
+  return ids.map((id) => people[id]);
+}
+
 const peopleSlice = createSlice({
   name: "people",
   initialState: {} as PeopleState,
