@@ -26,21 +26,30 @@ interface PeerRolesTableProps {}
 //  );
 //}
 
+const dummypeers = [
+  { Identity: 1, Name: "Seb", Action: "Buddy" },
+  { Identity: 4, Name: "Leah", Action: "Buddy" },
+];
+
 export default function PeerRolesTable({}: PeerRolesTableProps) {
+  const rows = dummypeers.map((dummypeers) => (
+    <Table.Tr key={dummypeers.Name}>
+      <Table.Td>{dummypeers.Identity}</Table.Td>
+      <Table.Td>{dummypeers.Name}</Table.Td>
+      <Table.Td>{dummypeers.Action}</Table.Td>
+    </Table.Tr>
+  ));
+
   return (
     <Table>
       <Table.Thead>
         <Table.Tr>
-          <Table.Th>#</Table.Th>
+          <Table.Th>Identity</Table.Th>
           <Table.Th>Name</Table.Th>
           <Table.Th>Actions</Table.Th>
         </Table.Tr>
       </Table.Thead>
-      <Table.Tbody>
-        {/*{peerroleTemplates.map((template) => (
-          <PeerRoleTemplateTableRow key={template.id} template={template} />
-        ))}*/}
-      </Table.Tbody>
+      <Table.Tbody>{rows}</Table.Tbody>
     </Table>
   );
 }
