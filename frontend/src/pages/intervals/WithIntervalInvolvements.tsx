@@ -4,6 +4,7 @@ import { useAppSelector } from "../../store";
 import { mapCirclesData, type IntervalInvolvementState, type InvolvementsState } from "../../store/involvements";
 import { getApi } from "../../api";
 import { useLocation } from "react-router-dom";
+import { useCurrentInterval } from "../../store/current_interval";
 
 interface WithIntervalInvolvementsChildProps {
   interval: Interval;
@@ -32,7 +33,7 @@ const useHashIntervalId = (): number | null => {
 
 export const useSelectedInterval = (): Interval | null => {
   const pathIntervalId = useHashIntervalId();
-  const currentInterval = useAppSelector((state) => state.intervals.currentInterval);
+  const currentInterval = useCurrentInterval();
   const allIntervals = useAppSelector((state) => state.intervals.allIntervals);
   const selectedInterval: Interval | null = pathIntervalId == null ? currentInterval : allIntervals.find((i) => i.id === pathIntervalId) || null;
   return selectedInterval;
@@ -40,7 +41,7 @@ export const useSelectedInterval = (): Interval | null => {
 
 export default function WithIntervalInvolvements({ children }: WithIntervalInvolvementsProps) {
   const pathIntervalId = useHashIntervalId();
-  const currentInterval = useAppSelector((state) => state.intervals.currentInterval);
+  const currentInterval = useCurrentInterval();
   const selectedInterval = useSelectedInterval();
 
   const involvementState: InvolvementsState = useAppSelector((state) => state.involvements);

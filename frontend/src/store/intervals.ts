@@ -4,7 +4,6 @@ import { useAppSelector } from "./index";
 
 export type IntervalsState = {
   allIntervals: Interval[];
-  currentInterval: Interval | null;
 };
 
 export function intervalById(state: IntervalsState, id: number): Interval | null {
@@ -41,7 +40,9 @@ export const { intervalsLoaded, intervalCreated } = intervalsSlice.actions;
 export default intervalsSlice.reducer;
 
 export function useNextInterval(): Interval | null {
-  const { allIntervals, currentInterval } = useAppSelector((state) => state.intervals);
+  const allIntervals = useAppSelector((state) => state.intervals.allIntervals);
+  const currentInterval = useAppSelector((state) => state.currentInterval?.interval);
+
   if (!currentInterval) return null;
 
   const currentIntervalIndex = allIntervals.findIndex((i) => i.id === currentInterval.id);

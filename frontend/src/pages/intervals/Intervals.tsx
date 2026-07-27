@@ -6,10 +6,11 @@ import IntervalChanger from "../../components/intervals/IntervalChanger";
 import { useNextInterval } from "../../store/intervals";
 import { actionFailure, actionSuccess, type ActionPromiseResult } from "../../components/ActionResult";
 import { getApi } from "../../api";
+import { useCurrentInterval } from "../../store/current_interval";
 
 export default function Intervals() {
   const intervals = useAppSelector((state) => state.intervals.allIntervals);
-  const currentInterval = useAppSelector((state) => state.intervals.currentInterval);
+  const currentInterval = useCurrentInterval();
   const nextInterval = useNextInterval();
 
   const onNextInterval = async (): Promise<ActionPromiseResult> => {

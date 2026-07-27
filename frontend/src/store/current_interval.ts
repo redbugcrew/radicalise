@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { IntervalData } from "../api/Api";
+import type { Interval, IntervalData } from "../api/Api";
+import { useAppSelector } from ".";
 
 export type CurrentIntervalState = IntervalData | null;
 
@@ -19,3 +20,8 @@ export const { currentIntervalLoaded } = currentIntervalSlice.actions;
 
 // Export the slice reducer as the default export
 export default currentIntervalSlice.reducer;
+
+export function useCurrentInterval(): Interval | null {
+  const currentInterval = useAppSelector((state) => state.currentInterval?.interval);
+  return currentInterval ?? null;
+}

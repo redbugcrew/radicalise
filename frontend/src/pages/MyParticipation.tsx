@@ -7,9 +7,11 @@ import { useEffect, useState } from "react";
 import { getApi } from "../api";
 import type { CircleInvolvement, MyParticipationInput } from "../api/Api";
 import { findPreviousInterval } from "../store/intervals";
+import { useCurrentInterval } from "../store/current_interval";
 
 export default function MyParticipation() {
-  const { allIntervals, currentInterval } = useAppSelector((state) => state.intervals);
+  const allIntervals = useAppSelector((state) => state.intervals.allIntervals);
+  const currentInterval = useCurrentInterval();
   const project = useAppSelector((state) => state.project);
   const circle = useAppSelector((state) => state.circles.rootCircles[0]);
   const personId = useAppSelector((state) => state.me?.person_id);
