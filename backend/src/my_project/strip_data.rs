@@ -1,6 +1,6 @@
 use crate::{
     me::repo::PersonIntervalData,
-    my_project::repo::{CircleInvolvementData, InitialData, IntervalData, IntervalInvolvementData},
+    my_project::repo::{CircleInvolvementData, InitialData, IntervalData},
     shared::entities::{Circle, CircleInvolvement, PersonId},
 };
 
@@ -24,13 +24,11 @@ pub fn strip_private_data_from_initial_data(
     person_id: &PersonId,
 ) -> InitialData {
     let mut result = data.clone();
-    result.involvements.current_interval =
-        data.involvements
-            .current_interval
-            .as_ref()
-            .map(|interval_data| {
-                strip_private_data_from_interval_datas(interval_data, viewer_circles, person_id)
-            });
+    result.current_interval_data = strip_private_data_from_interval_data(
+        &data.current_interval_data,
+        viewer_circles,
+        person_id,
+    );
     result
 }
 
@@ -42,20 +40,6 @@ pub fn strip_private_data_from_interval_data(
     let mut result = data.clone();
     result.circle_involvements = strip_private_data_from_circle_involvements_datas(
         &data.circle_involvements,
-        viewer_circles,
-        person_id,
-    );
-    result
-}
-
-fn strip_private_data_from_interval_datas(
-    data: &IntervalInvolvementData,
-    viewer_circles: &Vec<Circle>,
-    person_id: &PersonId,
-) -> IntervalInvolvementData {
-    let mut result = data.clone();
-    result.involvements_for_circles = strip_private_data_from_circle_involvements_datas(
-        &data.involvements_for_circles,
         viewer_circles,
         person_id,
     );

@@ -8,7 +8,7 @@ use crate::{
     crews::repo::find_all_crews_with_links,
     entry_pathways::repo::find_all_entry_pathways_for_project,
     event_templates::repo::find_all_event_templates,
-    intervals::repo::{find_current_interval, find_next_interval},
+    intervals::repo::find_current_interval,
     my_project::involvements_repo::{
         find_all_circle_involvements, find_all_circle_involvements_for_person,
     },
@@ -36,12 +36,6 @@ pub struct IntervalInvolvementData {
     pub involvements_for_circles: Vec<CircleInvolvementData>,
 }
 
-#[derive(Serialize, Deserialize, ToSchema, Clone)]
-pub struct InvolvementData {
-    pub current_interval: Option<IntervalInvolvementData>,
-    pub next_interval: Option<IntervalInvolvementData>,
-}
-
 #[derive(Serialize, Deserialize, ToSchema, Clone, Debug)]
 pub struct IntervalData {
     pub interval: Interval,
@@ -57,7 +51,6 @@ pub struct InitialData {
     pub crews: Vec<CrewWithLinks>,
     pub intervals: Vec<Interval>,
     pub current_interval_data: IntervalData,
-    pub involvements: InvolvementData,
     pub entry_pathways: Vec<EntryPathway>,
     pub event_templates: Vec<EventTemplate>,
     pub calendar_events: Vec<CalendarEvent>,
@@ -180,18 +173,6 @@ pub async fn find_initial_data_for_project(
     .await?;
 
     let current_interval = find_current_interval(project.typed_id(), pool).await?;
-    let current_interval_id = current_interval.typed_id().clone();
-    let next_interval =
-        find_next_interval(project.typed_id(), current_interval_id.clone(), pool).await?;
-
-    let current_interval_involvement_data =
-        find_interval_involvement_data(current_interval_id.clone(), project.typed_id(), pool)
-            .await?;
-    let next_interval_involvement_data = if let Some(interval) = next_interval {
-        Some(find_interval_involvement_data(interval.typed_id(), project.typed_id(), pool).await?)
-    } else {
-        None
-    };
 
     let entry_pathways = find_all_entry_pathways_for_project(project.typed_id(), pool).await?;
     let event_templates = find_all_event_templates(project.typed_id(), pool).await?;
@@ -208,10 +189,6 @@ pub async fn find_initial_data_for_project(
         event_templates,
         intervals,
         current_interval_data,
-        involvements: InvolvementData {
-            current_interval: Some(current_interval_involvement_data),
-            next_interval: next_interval_involvement_data,
-        },
         entry_pathways,
         calendar_events,
     })

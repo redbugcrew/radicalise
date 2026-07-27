@@ -292,7 +292,6 @@ export interface InitialData {
   entry_pathways: EntryPathway[];
   event_templates: EventTemplate[];
   intervals: Interval[];
-  involvements: InvolvementData;
   people: Person[];
   project: Project;
 }
@@ -336,11 +335,6 @@ export interface InvitePersonRequest {
 export interface InvitePersonResponse {
   events: AppEvent[];
   person: Person;
-}
-
-export interface InvolvementData {
-  current_interval?: null | IntervalInvolvementData;
-  next_interval?: null | IntervalInvolvementData;
 }
 
 export interface Link {
