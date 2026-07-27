@@ -17,7 +17,8 @@ import { useCurrentInterval } from "../../store/current_interval";
 import { forPerson } from "../../store/current_interval/crew_involvements";
 import { circleInvolvementforCircleAndPerson } from "../../store/current_interval/circle_involvements";
 import WithIntervalData from "../intervals/WithIntervalData";
-import { involvingPerson } from "../../store/current_interval/peer_enrollments";
+import { initiatingFromPerson, involvingPerson } from "../../store/current_interval/peer_enrollments";
+import YourEnrollment from "../../contexts/peer_roles/components/YourEnrollment";
 
 function ParticipationBadge({ involvement }: { involvement: CircleInvolvement | null }) {
   if (!involvement) return <Badge color="gray">No intention</Badge>;
@@ -151,19 +152,24 @@ function MyEvents({ personId }: { personId: number }) {
 
 function MyPeerRoles({ personId }: { personId: number }) {
   const allEnrollments = useAppSelector((state) => state.currentInterval?.peer_enrollments || []);
-  const myEnrollments = involvingPerson(allEnrollments, personId);
+  const roles = useAppSelector((state) => state.peerRoles);
+  const people = useAppSelector((state) => state.people);
+
+  const myEnrollments = initiatingFromPerson(allEnrollments, personId);
 
   if (myEnrollments.length === 0) return null;
 
   return (
     <Stack gap="md">
       <Title order={2}>My Peer Roles</Title>
-      {myEnrollments.map((enrollment: PeerEnrollment) => (
-        <Card key={enrollment.id} withBorder>
-          <Text>You are enrolled as a peer for person #{enrollment.peer_id}.</Text>
-        </Card>
-      ))}
-      <Text>Peer roles are not yet implemented.</Text>
+      <Stack>
+        {myEnrollments.map((enrollment: PeerEnrollment) => {
+          const role = roles[enrollment.peer_role_id];
+          if (!role) return null;
+
+          return <YourEnrollment key={enrollment.id} enrollment={enrollment} role={role} personId={personId} people={people} />;
+        })}
+      </Stack>
     </Stack>
   );
 }
