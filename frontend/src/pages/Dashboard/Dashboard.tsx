@@ -12,8 +12,10 @@ import { IconCalendar } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
 import CopyIconButton from "../../components/CopyIconButton";
 import { getApiUrl } from "../../api";
-import { myCircleInvolvement, myCrewInvolvements } from "../../store/involvements";
-import { intervalById, useNextInterval } from "../../store/intervals";
+import { forCircleAndPerson } from "../../store/involvements";
+import { useNextInterval } from "../../store/intervals";
+import { useCurrentInterval } from "../../store/current_interval";
+import { forPerson } from "../../store/current_interval/crew_involvements";
 
 function ParticipationBadge({ involvement }: { involvement: CircleInvolvement | null }) {
   if (!involvement) return <Badge color="gray">No intention</Badge>;
@@ -146,11 +148,12 @@ function MyEvents() {
 }
 
 export default function Dashboard() {
-  const intervals = useAppSelector((state) => state.intervals);
   const myData = useAppSelector((state) => state.me);
   const project = useAppSelector((state) => state.project);
   const circleId = useAppSelector((state) => state.circles.rootCircles[0]?.id);
-  const involvements = useAppSelector((state) => state.involvements);
+  const currentIntervalInvolvements = useAppSelector((state) => state.involvements.current_interval);
+  const nextIntervalInvolvements = useAppSelector((state) => state.involvements.next_interval);
+  const currentInterval = useCurrentInterval();
   const nextInterval = useNextInterval();
 
   if (!myData || !project || !circleId) {
@@ -158,12 +161,11 @@ export default function Dashboard() {
   }
 
   const personId = myData.person_id;
-  const myCurrentCircle = myCircleInvolvement(involvements, circleId, personId, "current_interval");
-  const currentInterval = myCurrentCircle ? intervalById(intervals, myCurrentCircle.interval_id) : null;
 
-  const myNextCircle = myCircleInvolvement(involvements, circleId, personId, "next_interval");
+  const myCurrentCircle = forCircleAndPerson(currentIntervalInvolvements?.circles, circleId, personId);
+  const myNextCircle = forCircleAndPerson(nextIntervalInvolvements?.circles, circleId, personId);
 
-  const myCurrentCrewInvolvements = myCrewInvolvements(involvements, personId, "current_interval");
+  const myCurrentCrewInvolvements = forPerson(currentIntervalInvolvements?.crew_involvements || [], personId);
 
   return (
     <Container>

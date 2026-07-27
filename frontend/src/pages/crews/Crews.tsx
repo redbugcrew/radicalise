@@ -2,7 +2,7 @@ import { Stack, Title } from "@mantine/core";
 import CrewsForInterval from "./CrewsForInterval";
 import { IntervalSelector } from "../../components";
 import { useAppSelector } from "../../store";
-import { useSelectedInterval } from "../intervals/WithIntervalInvolvements";
+import { useSelectedInterval } from "../intervals/WithIntervalData";
 import { useCurrentInterval } from "../../store/current_interval";
 
 export default function Crews() {

@@ -1,21 +1,20 @@
 import { useEffect, useState } from "react";
-import { type Interval } from "../../api/Api";
+import { type Interval, type IntervalData } from "../../api/Api";
 import { useAppSelector } from "../../store";
-import { mapCirclesData, type IntervalInvolvementState, type InvolvementsState } from "../../store/involvements";
 import { getApi } from "../../api";
 import { useLocation } from "react-router-dom";
-import { useCurrentInterval } from "../../store/current_interval";
+import { useCurrentInterval, type CurrentIntervalState } from "../../store/current_interval";
 
-interface WithIntervalInvolvementsChildProps {
+interface WithIntervalDataChildProps {
   interval: Interval;
-  involvements: IntervalInvolvementState | null;
+  intervalData: CurrentIntervalState;
   key: string;
   isCurrentInterval: boolean;
 }
 
-interface WithIntervalInvolvementsProps {
+interface WithIntervalDataProps {
   interval: Interval;
-  children: (props: WithIntervalInvolvementsChildProps) => React.ReactNode;
+  children: (props: WithIntervalDataChildProps) => React.ReactNode;
 }
 
 const useHashIntervalId = (): number | null => {
@@ -39,15 +38,28 @@ export const useSelectedInterval = (): Interval | null => {
   return selectedInterval;
 };
 
-export default function WithIntervalInvolvements({ children }: WithIntervalInvolvementsProps) {
+export async function fetchIntervalData(intervalId: number): Promise<IntervalData | null> {
+  return getApi()
+    .api.getIntervalData(intervalId)
+    .then((data) => {
+      return data.data;
+    })
+    .catch((error) => {
+      console.error("Error fetching interval data:", error);
+      return null;
+    });
+}
+
+export default function WithIntervalData({ children }: WithIntervalDataProps) {
   const pathIntervalId = useHashIntervalId();
   const currentInterval = useCurrentInterval();
   const selectedInterval = useSelectedInterval();
 
-  const involvementState: InvolvementsState = useAppSelector((state) => state.involvements);
+  const currentIntervalData = useAppSelector((state) => state.currentInterval);
+
   const [cacheKey, setCacheKey] = useState<number>(0);
 
-  const [intervalState, setIntervalState] = useState<IntervalInvolvementState | null>(null);
+  const [intervalData, setIntervalData] = useState<CurrentIntervalState | null>(null);
 
   console.log("path interval id:", pathIntervalId);
   console.log("selected interval:", selectedInterval);
@@ -61,28 +73,25 @@ export default function WithIntervalInvolvements({ children }: WithIntervalInvol
   const tableKey = `${selectedInterval.id}-${cacheKey}`;
 
   useEffect(() => {
-    if (involvementState.current_interval?.interval_id === selectedInterval.id) {
-      setIntervalState(involvementState.current_interval);
-    } else if (involvementState.next_interval?.interval_id === selectedInterval.id) {
-      console.log("using next interval");
-      setIntervalState(involvementState.next_interval);
+    if (currentIntervalData?.interval.id === selectedInterval.id) {
+      setIntervalData(currentIntervalData);
     } else {
       console.log("fetching interval involvements from API");
       const api = getApi();
 
       api.api
-        .getInvolvements(selectedInterval.id)
+        .getIntervalData(selectedInterval.id)
         .then((response) => {
-          setIntervalState(mapCirclesData(response.data));
+          setIntervalData(response.data);
         })
         .catch((error) => {
           console.error("Error fetching involvements:", error);
-          setIntervalState(null);
+          setIntervalData(null);
         });
     }
 
     incrementCacheKey();
-  }, [pathIntervalId, currentInterval, involvementState]);
+  }, [pathIntervalId, currentInterval, currentIntervalData]);
 
-  return children({ interval: selectedInterval, involvements: intervalState, key: tableKey, isCurrentInterval: selectedInterval.id === currentInterval?.id });
+  return children({ interval: selectedInterval, intervalData, key: tableKey, isCurrentInterval: selectedInterval.id === currentInterval?.id });
 }

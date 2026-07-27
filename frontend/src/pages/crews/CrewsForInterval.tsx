@@ -1,7 +1,7 @@
 import type { Interval } from "../../api/Api";
 import { CrewsList } from "../../components";
 import { useAppSelector } from "../../store";
-import WithIntervalInvolvements from "../intervals/WithIntervalInvolvements";
+import WithIntervalData from "../intervals/WithIntervalData";
 
 interface CrewsForIntervalProps {
   interval: Interval;
@@ -13,10 +13,10 @@ export default function CrewsForInterval({ interval }: CrewsForIntervalProps) {
   const people = useAppSelector((state) => state.people);
 
   return (
-    <WithIntervalInvolvements interval={interval}>
-      {({ involvements, key }) => {
-        return <CrewsList crews={crews} involvements={involvements?.crew_involvements || []} people={people} key={key} />;
+    <WithIntervalData interval={interval}>
+      {({ intervalData, key }) => {
+        return <CrewsList crews={crews} involvements={intervalData?.crew_involvements || []} people={people} key={key} />;
       }}
-    </WithIntervalInvolvements>
+    </WithIntervalData>
   );
 }

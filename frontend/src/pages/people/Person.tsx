@@ -1,7 +1,7 @@
 import { ActionIcon, Group, Stack, Title } from "@mantine/core";
 import PersonForInterval from "./PersonForInterval";
 import { useAppSelector } from "../../store";
-import { useSelectedInterval } from "../intervals/WithIntervalInvolvements";
+import { useSelectedInterval } from "../intervals/WithIntervalData";
 import { IntervalSelector } from "../../components";
 import { Anchor } from "../../components";
 import { IconUserEdit } from "@tabler/icons-react";

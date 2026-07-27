@@ -52,6 +52,26 @@ export function myCircleInvolvement(state: InvolvementsState, circleId: number, 
   return forPerson(circleState.circle_involvements || [], personId)[0] || null;
 }
 
+export function forCircle(involvements: CircleInvolvementDataMap | null | undefined, circleId: number): CircleInvolvement[] | null {
+  if (involvements === null || involvements === undefined) return null;
+  return involvements[circleId]?.circle_involvements || null;
+}
+
+export function forCircleAndPerson(involvements: CircleInvolvementDataMap | null | undefined, circleId: number, personId: number): CircleInvolvement | null {
+  const circleInvolvements = forCircle(involvements, circleId);
+  if (!circleInvolvements) return null;
+
+  const results = forPerson(circleInvolvements, personId);
+
+  if (results.length === 0) return null;
+
+  if (results.length >= 1) {
+    console.error(`Multiple involvements found for circleId ${circleId} and personId ${personId}. Returning the first one.`);
+  }
+
+  return results[0];
+}
+
 export function myCircleInvolvements(intervalState: IntervalInvolvementState | null, personId: number): CircleInvolvement[] | null {
   if (!intervalState) return null;
 
@@ -74,6 +94,10 @@ export function allCrewInvolvements(state: InvolvementsState, key: keyof Involve
   if (!intervalState) return null;
 
   return intervalState.crew_involvements || [];
+}
+
+export function intervalDataForKey(state: InvolvementsState, key: keyof InvolvementsState): IntervalInvolvementState | null {
+  return state[key] || null;
 }
 
 export function intervalKeyForId(state: InvolvementsState, intervalId: number): keyof InvolvementsState | null {
