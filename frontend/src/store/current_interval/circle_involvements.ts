@@ -22,3 +22,27 @@ export function circleInvolvementsforPerson(records: CircleInvolvementData[] | n
 
   return result;
 }
+
+export function circleInvolvementsforCircleAndPerson(records: CircleInvolvementData[] | null | undefined, circleId: number, personId: number): CircleInvolvement | null {
+  if (!records) return null;
+
+  const record = forCircle(records, circleId);
+  if (!record) return null;
+
+  const involvement = forPerson(record.circle_involvements, personId);
+  return involvement || null;
+}
+
+function forCircle(records: CircleInvolvementData[] | null | undefined, circleId: number): CircleInvolvementData | null {
+  if (!records) return null;
+
+  const record = records.find((rec) => rec.circle_id === circleId);
+  return record || null;
+}
+
+function forPerson(records: CircleInvolvement[] | null | undefined, personId: number): CircleInvolvement | null {
+  if (!records) return null;
+
+  const record = records.find((rec) => rec.person_id === personId);
+  return record || null;
+}

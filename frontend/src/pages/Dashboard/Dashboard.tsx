@@ -12,10 +12,11 @@ import { IconCalendar } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
 import CopyIconButton from "../../components/CopyIconButton";
 import { getApiUrl } from "../../api";
-import { forCircleAndPerson } from "../../store/involvements";
 import { useNextInterval } from "../../store/intervals";
 import { useCurrentInterval } from "../../store/current_interval";
 import { forPerson } from "../../store/current_interval/crew_involvements";
+import { circleInvolvementsforCircleAndPerson } from "../../store/current_interval/circle_involvements";
+import WithIntervalData from "../intervals/WithIntervalData";
 
 function ParticipationBadge({ involvement }: { involvement: CircleInvolvement | null }) {
   if (!involvement) return <Badge color="gray">No intention</Badge>;
@@ -151,8 +152,7 @@ export default function Dashboard() {
   const myData = useAppSelector((state) => state.me);
   const project = useAppSelector((state) => state.project);
   const circleId = useAppSelector((state) => state.circles.rootCircles[0]?.id);
-  const currentIntervalInvolvements = useAppSelector((state) => state.involvements.current_interval);
-  const nextIntervalInvolvements = useAppSelector((state) => state.involvements.next_interval);
+  const currentIntervalData = useAppSelector((state) => state.currentInterval);
   const currentInterval = useCurrentInterval();
   const nextInterval = useNextInterval();
 
@@ -162,10 +162,9 @@ export default function Dashboard() {
 
   const personId = myData.person_id;
 
-  const myCurrentCircle = forCircleAndPerson(currentIntervalInvolvements?.circles, circleId, personId);
-  const myNextCircle = forCircleAndPerson(nextIntervalInvolvements?.circles, circleId, personId);
+  const myCurrentCircle = circleInvolvementsforCircleAndPerson(currentIntervalData?.circle_involvements, circleId, personId);
 
-  const myCurrentCrewInvolvements = forPerson(currentIntervalInvolvements?.crew_involvements || [], personId);
+  const myCurrentCrewInvolvements = forPerson(currentIntervalData?.crew_involvements || [], personId);
 
   return (
     <Container>
@@ -175,7 +174,14 @@ export default function Dashboard() {
       <Stack gap="lg">
         <Stack gap="md">
           {myCurrentCircle && currentInterval && <MyIntervalPartipationCard interval={currentInterval} circleInvolvement={myCurrentCircle} current={true} />}
-          {(myCurrentCircle || myNextCircle) && nextInterval && <MyIntervalPartipationCard interval={nextInterval} circleInvolvement={myNextCircle} current={false} />}
+
+          <WithIntervalData interval={nextInterval}>
+            {({ intervalData: nextIntervalData }) => {
+              const myNextCircle = circleInvolvementsforCircleAndPerson(nextIntervalData?.circle_involvements, circleId, personId);
+
+              return (myCurrentCircle || myNextCircle) && nextInterval && <MyIntervalPartipationCard interval={nextInterval} circleInvolvement={myNextCircle} current={false} />;
+            }}
+          </WithIntervalData>
         </Stack>
         <MyEvents />
         {myCurrentCrewInvolvements && <MyCrews personId={myData.person_id} myInvolvements={myCurrentCrewInvolvements} />}

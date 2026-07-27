@@ -13,7 +13,7 @@ interface WithIntervalDataChildProps {
 }
 
 interface WithIntervalDataProps {
-  interval: Interval;
+  interval: Interval | null | undefined;
   children: (props: WithIntervalDataChildProps) => React.ReactNode;
 }
 
@@ -73,7 +73,9 @@ export default function WithIntervalData({ children }: WithIntervalDataProps) {
   const tableKey = `${selectedInterval.id}-${cacheKey}`;
 
   useEffect(() => {
-    if (currentIntervalData?.interval.id === selectedInterval.id) {
+    if (!selectedInterval) {
+      setIntervalData(null);
+    } else if (currentIntervalData?.interval.id === selectedInterval.id) {
       setIntervalData(currentIntervalData);
     } else {
       console.log("fetching interval involvements from API");
