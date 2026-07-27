@@ -73,7 +73,7 @@ function MyIntervalPartipationCard({ interval, circleInvolvement, current = true
 function MyCrews({ personId, myInvolvements }: { personId: number; myInvolvements: CrewInvolvement[] }) {
   const people = useAppSelector((state) => state.people);
   const crews = useAppSelector((state) => state.crews);
-  const allCrewInvolvements = useAppSelector((state) => state.involvements.current_interval?.crew_involvements || []);
+  const allCrewInvolvements = useAppSelector((state) => state.currentInterval?.crew_involvements || []);
 
   const myCrews = myInvolvements
     .map((involvement) => crews[involvement.crew_id])

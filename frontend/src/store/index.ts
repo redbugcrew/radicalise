@@ -5,7 +5,6 @@ import circlesReducer, { circlesLoaded, circleUpdated } from "./circles";
 import peopleReducer, { peopleLoaded, personUpdated } from "./people";
 import intervalsReducer, { intervalsLoaded, intervalCreated } from "./intervals";
 import currentIntervalReducer, { circleInvolvementUpdated, currentIntervalLoaded, personIntervalDataChanged } from "./current_interval";
-import involvementsReducer from "./involvements";
 import crewsReducer, { crewsLoaded, crewUpdated } from "./crews";
 import entryPathwaysReducer, { entryPathwaysLoaded, entryPathwayUpdated } from "./entry_pathways";
 import eventTemplatesReducer, { eventTemplatesLoaded, eventTemplateUpdated } from "./event_templates";
@@ -22,7 +21,6 @@ const store = configureStore({
     people: peopleReducer,
     intervals: intervalsReducer,
     currentInterval: currentIntervalReducer,
-    involvements: involvementsReducer,
     crews: crewsReducer,
     me: meReducer,
     entryPathways: entryPathwaysReducer,

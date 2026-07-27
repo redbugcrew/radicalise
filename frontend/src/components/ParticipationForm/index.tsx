@@ -4,13 +4,13 @@ import { useState } from "react";
 import type { CircleInvolvement, Interval, IntervalData } from "../../api/Api";
 import { IconLock } from "@tabler/icons-react";
 import { useAppSelector } from "../../store";
-import { forPerson } from "../../store/involvements";
 import type { MyParticipationFormData } from "./shared";
 import CapacityStep from "./CapacityStep";
 import { ParticipationStep } from "./ParticipationStep";
 import ContributionStep from "./ContributionStep";
 import WithIntervalData from "../../pages/intervals/WithIntervalData";
 import { findPreviousInterval } from "../../store/intervals";
+import { forPerson } from "../../store/current_interval/crew_involvements";
 export type { MyParticipationFormData } from "./shared";
 
 interface ParticipationFormProps {

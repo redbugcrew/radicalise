@@ -1,5 +1,8 @@
 import type { CircleInvolvement, CircleInvolvementData } from "../../api/Api";
-import type { CircleInvolvementDataMap } from "../involvements";
+
+export interface CircleInvolvementDataMap {
+  [key: number]: CircleInvolvementData;
+}
 
 export function mapCirclesInvolvements(records: CircleInvolvementData[]): CircleInvolvementDataMap {
   return records.reduce<CircleInvolvementDataMap>((acc, circleData) => {
