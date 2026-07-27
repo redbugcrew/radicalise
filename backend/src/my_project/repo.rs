@@ -243,7 +243,7 @@ pub async fn find_initial_data_for_project(
     })
 }
 
-async fn find_interval_data(
+pub async fn find_interval_data(
     interval: &Interval,
     project_id: ProjectId,
     pool: &SqlitePool,

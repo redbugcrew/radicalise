@@ -1,6 +1,6 @@
 use crate::{
     me::repo::PersonIntervalInvolvementData,
-    my_project::repo::{CircleInvolvementData, InitialData, IntervalInvolvementData},
+    my_project::repo::{CircleInvolvementData, InitialData, IntervalData, IntervalInvolvementData},
     shared::entities::{Circle, CircleInvolvement, PersonId},
 };
 
@@ -31,6 +31,20 @@ pub fn strip_private_data_from_initial_data(
             .map(|interval_data| {
                 strip_private_data_from_interval_datas(interval_data, viewer_circles, person_id)
             });
+    result
+}
+
+pub fn strip_private_data_from_interval_data(
+    data: &IntervalData,
+    viewer_circles: &Vec<Circle>,
+    person_id: &PersonId,
+) -> IntervalData {
+    let mut result = data.clone();
+    result.circle_involvements = strip_private_data_from_circle_involvements_datas(
+        &data.circle_involvements,
+        viewer_circles,
+        person_id,
+    );
     result
 }
 

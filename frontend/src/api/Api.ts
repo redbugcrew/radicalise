@@ -1002,6 +1002,20 @@ export class Api<
     /**
      * No description
      *
+     * @name GetIntervalData
+     * @request GET:/api/my_project/interval/{interval_id}/state
+     */
+    getIntervalData: (intervalId: number, params: RequestParams = {}) =>
+      this.request<IntervalData, any>({
+        path: `/api/my_project/interval/${intervalId}/state`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name GetProjectState
      * @request GET:/api/my_project/state
      */
