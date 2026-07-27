@@ -288,7 +288,6 @@ export interface InitialData {
   calendar_events: CalendarEvent[];
   circles: Circle[];
   crews: CrewWithLinks[];
-  current_interval: Interval;
   current_interval_data: IntervalData;
   entry_pathways: EntryPathway[];
   event_templates: EventTemplate[];

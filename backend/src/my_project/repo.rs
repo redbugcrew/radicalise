@@ -56,7 +56,6 @@ pub struct InitialData {
     pub people: Vec<Person>,
     pub crews: Vec<CrewWithLinks>,
     pub intervals: Vec<Interval>,
-    pub current_interval: Interval,
     pub current_interval_data: IntervalData,
     pub involvements: InvolvementData,
     pub entry_pathways: Vec<EntryPathway>,
@@ -234,7 +233,6 @@ pub async fn find_initial_data_for_project(
         crews,
         event_templates,
         intervals,
-        current_interval,
         current_interval_data,
         involvements: InvolvementData {
             current_interval: Some(current_interval_involvement_data),

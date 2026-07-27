@@ -76,7 +76,7 @@ async fn get_project_state(
     };
 
     // Fetch the circles for this person
-    let current_interval_id = initial_data.current_interval.typed_id();
+    let current_interval_id = initial_data.current_interval_data.interval.typed_id();
 
     let my_circles = match involvements_repo::find_circles_for_person_in_interval(
         person.typed_id(),
