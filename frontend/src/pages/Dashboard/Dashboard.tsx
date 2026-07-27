@@ -1,7 +1,7 @@
 import { Button, Card, Container, Title, Stack, Text, Badge, Group, Collapse } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import { useAppSelector } from "../../store";
-import { AttendanceIntention, type CalendarEvent, type CircleInvolvement, type CrewInvolvement, type Interval } from "../../api/Api";
+import { AttendanceIntention, type CalendarEvent, type CircleInvolvement, type CrewInvolvement, type Interval, type PeerEnrollment } from "../../api/Api";
 import DateText from "../../components/DateText";
 import classes from "./Dashboard.module.css";
 import { CrewsList, LinksStack } from "../../components";
@@ -17,6 +17,7 @@ import { useCurrentInterval } from "../../store/current_interval";
 import { forPerson } from "../../store/current_interval/crew_involvements";
 import { circleInvolvementforCircleAndPerson } from "../../store/current_interval/circle_involvements";
 import WithIntervalData from "../intervals/WithIntervalData";
+import { involvingPerson } from "../../store/current_interval/peer_enrollments";
 
 function ParticipationBadge({ involvement }: { involvement: CircleInvolvement | null }) {
   if (!involvement) return <Badge color="gray">No intention</Badge>;
@@ -121,8 +122,8 @@ function SubscribeDetails({ calendarToken }: { calendarToken: string }) {
   );
 }
 
-function MyEvents() {
-  const events = useAppSelector((state) => myUpcomingEvents(state.events, state.me?.person_id));
+function MyEvents({ personId }: { personId: number }) {
+  const events = useAppSelector((state) => myUpcomingEvents(state.events, personId));
   const [opened, { toggle }] = useDisclosure(false);
   const calendarToken = useAppSelector((state) => state.me?.calendar_token);
 
@@ -144,6 +145,25 @@ function MyEvents() {
         )}
         <EventsList events={events} noDataMessage="No upcoming events found" />
       </Stack>
+    </Stack>
+  );
+}
+
+function MyPeerRoles({ personId }: { personId: number }) {
+  const allEnrollments = useAppSelector((state) => state.currentInterval?.peer_enrollments || []);
+  const myEnrollments = involvingPerson(allEnrollments, personId);
+
+  if (myEnrollments.length === 0) return null;
+
+  return (
+    <Stack gap="md">
+      <Title order={2}>My Peer Roles</Title>
+      {myEnrollments.map((enrollment: PeerEnrollment) => (
+        <Card key={enrollment.id} withBorder>
+          <Text>You are enrolled as a peer for person #{enrollment.peer_id}.</Text>
+        </Card>
+      ))}
+      <Text>Peer roles are not yet implemented.</Text>
     </Stack>
   );
 }
@@ -183,7 +203,8 @@ export default function Dashboard() {
             }}
           </WithIntervalData>
         </Stack>
-        <MyEvents />
+        <MyEvents personId={personId} />
+        <MyPeerRoles personId={personId} />
         {myCurrentCrewInvolvements && <MyCrews personId={myData.person_id} myInvolvements={myCurrentCrewInvolvements} />}
         <Stack gap="md">
           <Title order={2}>Resources</Title>
