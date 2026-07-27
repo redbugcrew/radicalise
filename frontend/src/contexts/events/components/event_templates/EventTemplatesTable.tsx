@@ -25,7 +25,9 @@ function EventTemplateTableRow({ template }: { template: EventTemplate }) {
   );
 }
 
-export default function EventTemplatesTable({ eventTemplates }: EventTemplatesTableProps) {
+export default function EventTemplatesTable({
+  eventTemplates,
+}: EventTemplatesTableProps) {
   return (
     <Table>
       <Table.Thead>

@@ -49,7 +49,7 @@ import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
 import "@mantine/notifications/styles.css";
 import { Circles, EditCircle, NewCircle } from "./contexts/circles";
-import { PeerRoleTemplates } from "./contexts/peer_roles";
+import { PeerRoles } from "./contexts/peer_roles";
 
 function withStore(
   func: (store: AppStore) => any,
@@ -129,7 +129,7 @@ const router = createBrowserRouter([
       },
       {
         path: "peer_roles",
-        element: <PeerRoleTemplates />,
+        element: <PeerRoles />,
       },
       {
         path: "crews",

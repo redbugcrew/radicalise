@@ -1,1 +1,1 @@
-export { default as PeerRoleTemplates } from "./pages/PeerRoleTemplates";
+export { default as PeerRoles } from "./pages/PeerRoles";
