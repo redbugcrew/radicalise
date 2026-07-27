@@ -12,10 +12,7 @@ use crate::{
     intervals::repo::find_interval,
     my_project::{
         events::ProjectEvent,
-        repo::{
-            InitialData, IntervalData, IntervalInvolvementData, find_interval_data,
-            find_interval_involvement_data,
-        },
+        repo::{InitialData, IntervalData, find_interval_data},
     },
     people::repo::find_person_by_user_id,
     realtime::RealtimeState,
@@ -40,7 +37,6 @@ pub fn router() -> OpenApiRouter {
     OpenApiRouter::new()
         .routes(routes!(get_project_state))
         .routes(routes!(get_interval_data))
-        .routes(routes!(get_involvements))
         .routes(routes!(update_project))
 }
 
@@ -163,32 +159,6 @@ async fn get_interval_data(
     );
 
     (StatusCode::OK, Json(interval_data)).into_response()
-}
-
-#[utoipa::path(get, path = "/interval/{interval_id}/involvements", responses(
-        (status = 200, description = "Fetched Involvements successfully", body = IntervalInvolvementData),
-        (status = NOT_FOUND, description = "Not found", body = ())
-    ), params(
-            ("interval_id" = i64, Path, description = "Interval ID")
-        ),)]
-async fn get_involvements(
-    Path(interval_id): Path<i64>,
-    Extension(pool): Extension<SqlitePool>,
-) -> impl IntoResponse {
-    let interval_id = IntervalId::new(interval_id);
-
-    let result = match find_interval_involvement_data(
-        interval_id.clone(),
-        default_project_id(),
-        &pool,
-    )
-    .await
-    {
-        Ok(data) => data,
-        Err(e) => return db_error(e),
-    };
-
-    return (StatusCode::OK, Json(result)).into_response();
 }
 
 #[utoipa::path(put, path = "/",

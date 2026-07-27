@@ -310,13 +310,6 @@ export interface IntervalData {
   peer_enrollments: PeerEnrollment[];
 }
 
-export interface IntervalInvolvementData {
-  crew_involvements: CrewInvolvement[];
-  /** @format int64 */
-  interval_id: number;
-  involvements_for_circles: CircleInvolvementData[];
-}
-
 export type IntervalsEvent =
   | {
       IntervalCreated: Interval;
@@ -989,20 +982,6 @@ export class Api<
         method: "PUT",
         body: data,
         type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name GetInvolvements
-     * @request GET:/api/my_project/interval/{interval_id}/involvements
-     */
-    getInvolvements: (intervalId: number, params: RequestParams = {}) =>
-      this.request<IntervalInvolvementData, any>({
-        path: `/api/my_project/interval/${intervalId}/involvements`,
-        method: "GET",
         format: "json",
         ...params,
       }),
