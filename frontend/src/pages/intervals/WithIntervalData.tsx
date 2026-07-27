@@ -50,39 +50,32 @@ export async function fetchIntervalData(intervalId: number): Promise<IntervalDat
     });
 }
 
-export default function WithIntervalData({ children }: WithIntervalDataProps) {
-  const pathIntervalId = useHashIntervalId();
-  const currentInterval = useCurrentInterval();
-  const selectedInterval = useSelectedInterval();
-
+export default function WithIntervalData({ interval, children }: WithIntervalDataProps) {
   const currentIntervalData = useAppSelector((state) => state.currentInterval);
 
   const [cacheKey, setCacheKey] = useState<number>(0);
 
   const [intervalData, setIntervalData] = useState<CurrentIntervalState | null>(null);
 
-  console.log("path interval id:", pathIntervalId);
-  console.log("selected interval:", selectedInterval);
-
-  if (!selectedInterval) return null;
+  if (!interval) return null;
 
   const incrementCacheKey = () => {
     setCacheKey((prevKey) => prevKey + 1);
   };
 
-  const tableKey = `${selectedInterval.id}-${cacheKey}`;
+  const tableKey = `${interval.id}-${cacheKey}`;
 
   useEffect(() => {
-    if (!selectedInterval) {
+    if (!interval) {
       setIntervalData(null);
-    } else if (currentIntervalData?.interval.id === selectedInterval.id) {
+    } else if (currentIntervalData?.interval.id === interval.id) {
       setIntervalData(currentIntervalData);
     } else {
       console.log("fetching interval involvements from API");
       const api = getApi();
 
       api.api
-        .getIntervalData(selectedInterval.id)
+        .getIntervalData(interval.id)
         .then((response) => {
           setIntervalData(response.data);
         })
@@ -93,7 +86,7 @@ export default function WithIntervalData({ children }: WithIntervalDataProps) {
     }
 
     incrementCacheKey();
-  }, [pathIntervalId, currentInterval, currentIntervalData]);
+  }, [interval.id, currentIntervalData]);
 
-  return children({ interval: selectedInterval, intervalData, key: tableKey, isCurrentInterval: selectedInterval.id === currentInterval?.id });
+  return children({ interval: interval, intervalData, key: tableKey, isCurrentInterval: interval.id === currentIntervalData?.interval.id });
 }

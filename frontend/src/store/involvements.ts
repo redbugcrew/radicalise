@@ -32,45 +32,6 @@ export function mapCirclesData(data: IntervalInvolvementData): IntervalInvolveme
   };
 }
 
-export function getMatchingInvolvementInterval(involvements: InvolvementsState, intervalId: number): IntervalInvolvementState | null {
-  if (involvements.current_interval && involvements.current_interval.interval_id === intervalId) {
-    return involvements.current_interval;
-  }
-  if (involvements.next_interval && involvements.next_interval.interval_id === intervalId) {
-    return involvements.next_interval;
-  }
-  return null;
-}
-
-export function forCircle(involvements: CircleInvolvementDataMap | null | undefined, circleId: number): CircleInvolvement[] | null {
-  if (involvements === null || involvements === undefined) return null;
-  return involvements[circleId]?.circle_involvements || null;
-}
-
-export function myCircleInvolvements(intervalState: IntervalInvolvementState | null, personId: number): CircleInvolvement[] | null {
-  if (!intervalState) return null;
-
-  const involvementsForPerson: CircleInvolvement[] = [];
-  Object.values(intervalState.circles).forEach((circleState) => {
-    const involvements = forPerson<CircleInvolvement>(circleState.circle_involvements || [], personId);
-    involvementsForPerson.push(...involvements);
-  });
-
-  return involvementsForPerson;
-}
-
-export function myCrewInvolvements(state: InvolvementsState, personId: number, key: keyof InvolvementsState): CrewInvolvement[] | null {
-  return forPerson(allCrewInvolvements(state, key) || [], personId);
-}
-
-export function allCrewInvolvements(state: InvolvementsState, key: keyof InvolvementsState): CrewInvolvement[] | null {
-  const intervalState = state[key];
-
-  if (!intervalState) return null;
-
-  return intervalState.crew_involvements || [];
-}
-
 export function intervalDataForKey(state: InvolvementsState, key: keyof InvolvementsState): IntervalInvolvementState | null {
   return state[key] || null;
 }

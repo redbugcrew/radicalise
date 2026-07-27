@@ -6,7 +6,6 @@ import DateText from "../components/DateText";
 import { useEffect, useState } from "react";
 import { getApi } from "../api";
 import type { CircleInvolvement, MyParticipationInput } from "../api/Api";
-import { findPreviousInterval } from "../store/intervals";
 import { useCurrentInterval } from "../store/current_interval";
 
 export default function MyParticipation() {
@@ -27,7 +26,6 @@ export default function MyParticipation() {
   const api = getApi();
 
   const interval = allIntervals.find((i) => i.id === intervalIdNumber);
-  const previousInterval = findPreviousInterval(allIntervals, intervalIdNumber);
 
   if (!interval) {
     return <Text>Error: Interval not found.</Text>;
@@ -85,15 +83,7 @@ export default function MyParticipation() {
           <DateText date={interval.start_date} /> - <DateText date={interval.end_date} />
         </Text>
       </Stack>
-      <ParticipationForm
-        readOnly={readOnly}
-        personId={personId}
-        involvement={involvement}
-        key={involvement?.id || `fresh-${interval.id}`}
-        onSubmit={onSubmit}
-        interval={interval}
-        previousIntervalId={previousInterval?.id}
-      />
+      <ParticipationForm readOnly={readOnly} personId={personId} involvement={involvement} key={involvement?.id || `fresh-${interval.id}`} onSubmit={onSubmit} interval={interval} />
     </Container>
   );
 }
