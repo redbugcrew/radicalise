@@ -31,7 +31,7 @@ export default function Person() {
         )}
       </Group>
 
-      <IntervalSelector intervals={intervals.allIntervals} selectedInterval={selectedInterval} currentInterval={currentInterval} />
+      <IntervalSelector intervals={intervals} selectedInterval={selectedInterval} currentInterval={currentInterval} />
       {personIdNum !== undefined && selectedInterval && <PersonForInterval personIdNum={personIdNum} interval={selectedInterval} />}
     </Stack>
   );

@@ -31,7 +31,7 @@ const useHashIntervalId = (): number | null => {
 export const useSelectedInterval = (): Interval | null => {
   const pathIntervalId = useHashIntervalId();
   const currentInterval = useCurrentInterval();
-  const allIntervals = useAppSelector((state) => state.intervals.allIntervals);
+  const allIntervals = useAppSelector((state) => state.intervals);
   const selectedInterval: Interval | null = pathIntervalId == null ? currentInterval : allIntervals.find((i) => i.id === pathIntervalId) || null;
   return selectedInterval;
 };

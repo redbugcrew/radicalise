@@ -9,7 +9,7 @@ import { getApi } from "../../api";
 import { useCurrentInterval } from "../../store/current_interval";
 
 export default function Intervals() {
-  const intervals = useAppSelector((state) => state.intervals.allIntervals);
+  const intervals = useAppSelector((state) => state.intervals);
   const currentInterval = useCurrentInterval();
   const nextInterval = useNextInterval();
 

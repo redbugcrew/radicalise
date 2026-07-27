@@ -20,7 +20,7 @@ export default function People() {
           </ActionIcon>
         </Anchor> */}
       </Group>
-      <IntervalSelector intervals={intervals.allIntervals} selectedInterval={selectedInterval} currentInterval={currentInterval} />
+      <IntervalSelector intervals={intervals} selectedInterval={selectedInterval} currentInterval={currentInterval} />
       {selectedInterval && <PeopleForInterval interval={selectedInterval} key={selectedInterval.id} />}
     </Stack>
   );

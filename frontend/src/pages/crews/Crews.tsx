@@ -13,7 +13,7 @@ export default function Crews() {
   return (
     <Stack>
       <Title order={1}>Crews</Title>
-      <IntervalSelector intervals={intervals.allIntervals} selectedInterval={selectedInterval} currentInterval={currentInterval} />
+      <IntervalSelector intervals={intervals} selectedInterval={selectedInterval} currentInterval={currentInterval} />
 
       {selectedInterval && <CrewsForInterval interval={selectedInterval} key={selectedInterval.id} />}
     </Stack>

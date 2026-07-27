@@ -9,7 +9,7 @@ import type { CircleInvolvement, MyParticipationInput } from "../api/Api";
 import { useCurrentInterval } from "../store/current_interval";
 
 export default function MyParticipation() {
-  const allIntervals = useAppSelector((state) => state.intervals.allIntervals);
+  const allIntervals = useAppSelector((state) => state.intervals);
   const currentInterval = useCurrentInterval();
   const project = useAppSelector((state) => state.project);
   const circle = useAppSelector((state) => state.circles.rootCircles[0]);

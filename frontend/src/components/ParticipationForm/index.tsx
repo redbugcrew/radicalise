@@ -22,7 +22,7 @@ interface ParticipationFormProps {
 }
 
 export default function ParticipationForm(props: ParticipationFormProps) {
-  const previousInterval = useAppSelector((state) => findPreviousInterval(state.intervals.allIntervals, props.interval.id));
+  const previousInterval = useAppSelector((state) => findPreviousInterval(state.intervals, props.interval.id));
 
   return (
     <WithIntervalData interval={props.interval}>

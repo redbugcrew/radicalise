@@ -9,7 +9,7 @@ import { getApi } from "../../api";
 import { useNavigate } from "react-router-dom";
 
 export default function NewInterval() {
-  const intervals = useAppSelector((state) => state.intervals.allIntervals);
+  const intervals = useAppSelector((state) => state.intervals);
   const navigate = useNavigate();
   const lastInterval = intervals.length > 0 ? intervals[intervals.length - 1] : null;
 
