@@ -307,6 +307,7 @@ export interface IntervalData {
   circle_involvements: CircleInvolvementData[];
   crew_involvements: CrewInvolvement[];
   interval: Interval;
+  peer_enrollments: PeerEnrollment[];
 }
 
 export interface IntervalInvolvementData {
@@ -375,6 +376,19 @@ export interface MyParticipationInput {
   /** @format int64 */
   project_id: number;
   wellbeing?: string | null;
+}
+
+export interface PeerEnrollment {
+  /** @format int64 */
+  id: number;
+  /** @format int64 */
+  interval_id: number;
+  /** @format int64 */
+  peer_id: number;
+  /** @format int64 */
+  peer_role_id: number;
+  /** @format int64 */
+  person_id: number;
 }
 
 export type PeopleEvent = {

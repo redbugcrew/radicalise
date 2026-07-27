@@ -506,3 +506,12 @@ pub struct PeerRole {
     pub circle_id: i64,
     pub distribution_type: PeerRoleDistributionType,
 }
+
+#[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
+pub struct PeerEnrollment {
+    pub id: i64,
+    pub peer_role_id: i64,
+    pub interval_id: i64,
+    pub person_id: i64,
+    pub peer_id: i64,
+}

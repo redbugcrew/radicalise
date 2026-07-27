@@ -11,7 +11,7 @@ use crate::{
 };
 
 mod algorithms;
-mod enrollments_repo;
+pub mod enrollments_repo;
 mod match_results;
 mod peer_roles_repo;
 

@@ -12,12 +12,13 @@ use crate::{
     my_project::involvements_repo::{
         find_all_circle_involvements, find_all_circle_involvements_for_person,
     },
+    peer_roles::enrollments_repo::find_peer_enrollments_for_interval,
     people::repo::find_all_people,
     shared::{
         entities::{
             CalendarEvent, Circle, CircleId, CircleInvolvement, CrewInvolvement, CrewWithLinks,
-            EntryPathway, EventTemplate, Interval, IntervalId, Person, PersonId, Project,
-            ProjectId,
+            EntryPathway, EventTemplate, Interval, IntervalId, PeerEnrollment, Person, PersonId,
+            Project, ProjectId,
         },
         links_repo::{find_all_links_for_owner, update_links_for_owner},
     },
@@ -41,6 +42,7 @@ pub struct IntervalData {
     pub interval: Interval,
     pub crew_involvements: Vec<CrewInvolvement>,
     pub circle_involvements: Vec<CircleInvolvementData>,
+    pub peer_enrollments: Vec<PeerEnrollment>,
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Clone)]
@@ -202,10 +204,13 @@ pub async fn find_interval_data(
     let involvements =
         find_interval_involvement_data(interval.typed_id(), project_id, pool).await?;
 
+    let enrollments = find_peer_enrollments_for_interval(&interval.typed_id(), pool).await?;
+
     Ok(IntervalData {
         interval: interval.clone(),
         crew_involvements: involvements.crew_involvements,
         circle_involvements: involvements.involvements_for_circles,
+        peer_enrollments: enrollments,
     })
 }
 
