@@ -7,7 +7,6 @@ pub mod email_helpers;
 pub mod entities;
 pub mod events;
 pub mod links_repo;
-pub mod regular_tasks;
 
 pub fn default_project_id() -> entities::ProjectId {
     entities::ProjectId { id: COLLECTIVE_ID }

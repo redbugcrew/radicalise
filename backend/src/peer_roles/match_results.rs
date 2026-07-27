@@ -48,8 +48,13 @@ where
         self.matches.contains_key(person)
     }
 
-    pub fn is_empty(&self) -> bool {
-        self.matches.is_empty()
+    pub fn edges(&self) -> Vec<(PeerId, PeerId)> {
+        self.matches
+            .iter()
+            .flat_map(|(person, peers)| {
+                peers.iter().map(move |peer| (person.clone(), peer.clone()))
+            })
+            .collect()
     }
 
     pub fn insert_one(&mut self, person: PeerId, peer: PeerId) {

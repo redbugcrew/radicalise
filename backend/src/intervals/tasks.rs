@@ -7,10 +7,8 @@ use crate::{
         delete_implicit_circle_involvements, find_all_circle_involvements,
         insert_circle_involvement_if_missing,
     },
-    shared::entities::{CircleId, OptOutType},
+    shared::entities::{CircleId, CircleInvolvement, Interval, OptOutType, ProjectId},
 };
-
-use super::entities::{CircleInvolvement, Interval, ProjectId};
 
 pub async fn add_interval_implicit_involvements(
     interval: &Interval,

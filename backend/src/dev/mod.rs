@@ -4,9 +4,9 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     circles::repo::find_all_circles,
-    intervals::repo::find_all_intervals,
+    intervals::{repo::find_all_intervals, tasks::add_interval_implicit_involvements},
     my_project::involvements_repo::set_implicit_counter_to_zero,
-    shared::{default_project_id, regular_tasks::add_interval_implicit_involvements},
+    shared::default_project_id,
 };
 
 pub fn router() -> OpenApiRouter {
