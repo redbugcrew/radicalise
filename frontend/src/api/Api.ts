@@ -17,6 +17,10 @@ export enum StartNextIntervalError {
   InternalServerError = "InternalServerError",
 }
 
+export enum PeerRoleDistributionType {
+  RandomPairs = "RandomPairs",
+}
+
 export enum ParticipationIntention {
   OptIn = "OptIn",
   OptOut = "OptOut",
@@ -292,6 +296,7 @@ export interface InitialData {
   entry_pathways: EntryPathway[];
   event_templates: EventTemplate[];
   intervals: Interval[];
+  peer_roles: PeerRole[];
   people: Person[];
   project: Project;
 }
@@ -382,6 +387,17 @@ export interface PeerEnrollment {
   peer_role_id: number;
   /** @format int64 */
   person_id: number;
+}
+
+export interface PeerRole {
+  /** @format int64 */
+  circle_id: number;
+  distribution_type: PeerRoleDistributionType;
+  /** @format int64 */
+  id: number;
+  name: string;
+  /** @format int64 */
+  project_id: number;
 }
 
 export type PeopleEvent = {

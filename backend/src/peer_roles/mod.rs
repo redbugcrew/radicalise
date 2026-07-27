@@ -13,7 +13,7 @@ use crate::{
 mod algorithms;
 pub mod enrollments_repo;
 mod match_results;
-mod peer_roles_repo;
+pub mod peer_roles_repo;
 
 pub async fn assign_interval_peer_roles(
     interval: &Interval,

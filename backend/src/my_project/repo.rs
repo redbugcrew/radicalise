@@ -12,13 +12,15 @@ use crate::{
     my_project::involvements_repo::{
         find_all_circle_involvements, find_all_circle_involvements_for_person,
     },
-    peer_roles::enrollments_repo::find_peer_enrollments_for_interval,
+    peer_roles::{
+        enrollments_repo::find_peer_enrollments_for_interval, peer_roles_repo::find_all_peer_roles,
+    },
     people::repo::find_all_people,
     shared::{
         entities::{
             CalendarEvent, Circle, CircleId, CircleInvolvement, CrewInvolvement, CrewWithLinks,
-            EntryPathway, EventTemplate, Interval, IntervalId, PeerEnrollment, Person, PersonId,
-            Project, ProjectId,
+            EntryPathway, EventTemplate, Interval, IntervalId, PeerEnrollment, PeerRole, Person,
+            PersonId, Project, ProjectId,
         },
         links_repo::{find_all_links_for_owner, update_links_for_owner},
     },
@@ -56,6 +58,7 @@ pub struct InitialData {
     pub entry_pathways: Vec<EntryPathway>,
     pub event_templates: Vec<EventTemplate>,
     pub calendar_events: Vec<CalendarEvent>,
+    pub peer_roles: Vec<PeerRole>,
 }
 
 pub async fn find_project(
@@ -183,6 +186,8 @@ pub async fn find_initial_data_for_project(
     let current_interval_data =
         find_interval_data(&current_interval, project.typed_id(), pool).await?;
 
+    let peer_roles = find_all_peer_roles(project.typed_id(), pool).await?;
+
     Ok(InitialData {
         project,
         circles,
@@ -193,6 +198,7 @@ pub async fn find_initial_data_for_project(
         current_interval_data,
         entry_pathways,
         calendar_events,
+        peer_roles,
     })
 }
 
