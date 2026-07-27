@@ -27,15 +27,37 @@ interface PeerRolesTableProps {}
 //}
 
 const dummypeers = [
-  { Identity: 1, Name: "Seb", Action: "Buddy" },
-  { Identity: 4, Name: "Leah", Action: "Buddy" },
+  {
+    Role: 1,
+    Name: "Buddy",
+    Summary:
+      "Participation Buddies support each-other to communicate and meet our participation intentions in the project",
+    Action: "edit",
+  },
+  {
+    Role: 2,
+    Name: "Care Supporter",
+    Summary:
+      "The role of Care Supporters is to offer a holding space to practice expressing our feelings and reflecting on our experiences without exposing ourselves to either judgement or rescue.",
+    Action: "edit",
+  },
+  {
+    Role: 3,
+    Name: "Accountability Supporter",
+    Summary:
+      "The role of Accountability supporters is to offer gentle challenges to practice reflecting on alternative perspectives and holding ourselves accountable for how our actions impact others (without policing each others' behaviour).",
+    Action: "edit",
+  },
 ];
 
 export default function PeerRolesTable({}: PeerRolesTableProps) {
   const rows = dummypeers.map((dummypeers) => (
     <Table.Tr key={dummypeers.Name}>
-      <Table.Td>{dummypeers.Identity}</Table.Td>
-      <Table.Td>{dummypeers.Name}</Table.Td>
+      <Table.Td>{dummypeers.Role}</Table.Td>
+      <Stack gap={1}>
+        <Text>{dummypeers.Name}</Text>
+        <Text c="dimmed">{dummypeers.Summary}</Text>
+      </Stack>
       <Table.Td>{dummypeers.Action}</Table.Td>
     </Table.Tr>
   ));
@@ -44,7 +66,7 @@ export default function PeerRolesTable({}: PeerRolesTableProps) {
     <Table>
       <Table.Thead>
         <Table.Tr>
-          <Table.Th>Identity</Table.Th>
+          <Table.Th>Role</Table.Th>
           <Table.Th>Name</Table.Th>
           <Table.Th>Actions</Table.Th>
         </Table.Tr>
