@@ -11,13 +11,8 @@ function EventTemplateTableRow({ template }: { template: EventTemplate }) {
 
   return (
     <Table.Tr key={template.id}>
-      <Table.Td>{template.id}</Table.Td>
-      <Table.Td>
-        <Stack gap={0}>
-          <Text>{template.name}</Text>
-          <Text c="dimmed">{template.summary}</Text>
-        </Stack>
-      </Table.Td>
+      <Table.Td>{template.name}</Table.Td>
+      <Table.Td>{template.summary}</Table.Td>
       <Table.Td>
         <Anchor href={`${template.id}/edit`}>Edit</Anchor>
       </Table.Td>
@@ -32,8 +27,8 @@ export default function EventTemplatesTable({
     <Table>
       <Table.Thead>
         <Table.Tr>
-          <Table.Th>#</Table.Th>
-          <Table.Th>Name</Table.Th>
+          <Table.Th>Event Type</Table.Th>
+          <Table.Th>Summary</Table.Th>
           <Table.Th>Actions</Table.Th>
         </Table.Tr>
       </Table.Thead>
