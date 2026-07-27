@@ -3,7 +3,7 @@ import { IconPlus } from "@tabler/icons-react";
 import { Anchor } from "@mantine/core";
 import PeerRolesTable from "../components/PeerRolesTable";
 
-export default function EventTemplates() {
+export default function PeerRoles() {
   const dummyPeers = [
     {
       role: 1,
