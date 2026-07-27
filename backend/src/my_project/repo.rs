@@ -43,6 +43,13 @@ pub struct InvolvementData {
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Clone)]
+pub struct IntervalData {
+    pub interval: Interval,
+    pub crew_involvements: Vec<CrewInvolvement>,
+    pub circle_involvements: Vec<CircleInvolvementData>,
+}
+
+#[derive(Serialize, Deserialize, ToSchema, Clone)]
 pub struct InitialData {
     pub project: Project,
     pub circles: Vec<Circle>,
@@ -50,6 +57,7 @@ pub struct InitialData {
     pub crews: Vec<CrewWithLinks>,
     pub intervals: Vec<Interval>,
     pub current_interval: Interval,
+    pub current_interval_data: IntervalData,
     pub involvements: InvolvementData,
     pub entry_pathways: Vec<EntryPathway>,
     pub event_templates: Vec<EventTemplate>,
@@ -203,10 +211,10 @@ pub async fn find_initial_data_for_project(
     let next_interval =
         find_next_interval(project.typed_id(), current_interval_id.clone(), pool).await?;
 
-    let current_interval_data =
+    let current_interval_involvement_data =
         find_interval_involvement_data(current_interval_id.clone(), project.typed_id(), pool)
             .await?;
-    let next_interval_data = if let Some(interval) = next_interval {
+    let next_interval_involvement_data = if let Some(interval) = next_interval {
         Some(find_interval_involvement_data(interval.typed_id(), project.typed_id(), pool).await?)
     } else {
         None
@@ -216,6 +224,9 @@ pub async fn find_initial_data_for_project(
     let event_templates = find_all_event_templates(project.typed_id(), pool).await?;
     let calendar_events = list_calendar_events_with_attendances(project.typed_id(), pool).await?;
 
+    let current_interval_data =
+        find_interval_data(&current_interval, project.typed_id(), pool).await?;
+
     Ok(InitialData {
         project,
         circles,
@@ -224,12 +235,28 @@ pub async fn find_initial_data_for_project(
         event_templates,
         intervals,
         current_interval,
+        current_interval_data,
         involvements: InvolvementData {
-            current_interval: Some(current_interval_data),
-            next_interval: next_interval_data,
+            current_interval: Some(current_interval_involvement_data),
+            next_interval: next_interval_involvement_data,
         },
         entry_pathways,
         calendar_events,
+    })
+}
+
+async fn find_interval_data(
+    interval: &Interval,
+    project_id: ProjectId,
+    pool: &SqlitePool,
+) -> Result<IntervalData, sqlx::Error> {
+    let involvements =
+        find_interval_involvement_data(interval.typed_id(), project_id, pool).await?;
+
+    Ok(IntervalData {
+        interval: interval.clone(),
+        crew_involvements: involvements.crew_involvements,
+        circle_involvements: involvements.involvements_for_circles,
     })
 }
 

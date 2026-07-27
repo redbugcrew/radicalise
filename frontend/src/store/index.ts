@@ -4,6 +4,7 @@ import projectReducer, { projectLoaded, projectUpdated } from "./project";
 import circlesReducer, { circlesLoaded, circleUpdated } from "./circles";
 import peopleReducer, { peopleLoaded, personUpdated } from "./people";
 import intervalsReducer, { intervalsLoaded, intervalCreated } from "./intervals";
+import currentIntervalReducer, { currentIntervalLoaded } from "./current_interval";
 import involvementsReducer, { involvementsLoaded, intervalDataChanged, involvementUpdated } from "./involvements";
 import crewsReducer, { crewsLoaded, crewUpdated } from "./crews";
 import entryPathwaysReducer, { entryPathwaysLoaded, entryPathwayUpdated } from "./entry_pathways";
@@ -20,6 +21,7 @@ const store = configureStore({
     circles: circlesReducer,
     people: peopleReducer,
     intervals: intervalsReducer,
+    currentInterval: currentIntervalReducer,
     involvements: involvementsReducer,
     crews: crewsReducer,
     me: meReducer,
@@ -50,6 +52,7 @@ async function loadProjectData(store: AppStore, api: ReturnType<typeof getApi>):
       store.dispatch(peopleLoaded(response.data.people));
       store.dispatch(crewsLoaded(response.data.crews));
       store.dispatch(intervalsLoaded({ allIntervals: response.data.intervals, currentInterval: response.data.current_interval }));
+      store.dispatch(currentIntervalLoaded(response.data.current_interval_data));
       store.dispatch(involvementsLoaded(response.data.involvements));
       store.dispatch(entryPathwaysLoaded(response.data.entry_pathways));
       store.dispatch(projectLoaded(response.data.project));

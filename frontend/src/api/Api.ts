@@ -13,6 +13,7 @@
 export enum StartNextIntervalError {
   CurrentIntervalNotFound = "CurrentIntervalNotFound",
   NextIntervalNotFound = "NextIntervalNotFound",
+  CouldntSetUpInterval = "CouldntSetUpInterval",
   InternalServerError = "InternalServerError",
 }
 
@@ -288,6 +289,7 @@ export interface InitialData {
   circles: Circle[];
   crews: CrewWithLinks[];
   current_interval: Interval;
+  current_interval_data: IntervalData;
   entry_pathways: EntryPathway[];
   event_templates: EventTemplate[];
   intervals: Interval[];
@@ -301,6 +303,12 @@ export interface Interval {
   /** @format int64 */
   id: number;
   start_date: string;
+}
+
+export interface IntervalData {
+  circle_involvements: CircleInvolvementData[];
+  crew_involvements: CrewInvolvement[];
+  interval: Interval;
 }
 
 export interface IntervalInvolvementData {
