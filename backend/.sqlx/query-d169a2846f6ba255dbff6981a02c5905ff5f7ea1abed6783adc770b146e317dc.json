@@ -1,0 +1,44 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT * FROM peer_enrollments WHERE interval_id = ? AND (person_id = ? OR peer_id = ?)",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer"
+      },
+      {
+        "name": "peer_role_id",
+        "ordinal": 1,
+        "type_info": "Integer"
+      },
+      {
+        "name": "interval_id",
+        "ordinal": 2,
+        "type_info": "Integer"
+      },
+      {
+        "name": "person_id",
+        "ordinal": 3,
+        "type_info": "Integer"
+      },
+      {
+        "name": "peer_id",
+        "ordinal": 4,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "d169a2846f6ba255dbff6981a02c5905ff5f7ea1abed6783adc770b146e317dc"
+}

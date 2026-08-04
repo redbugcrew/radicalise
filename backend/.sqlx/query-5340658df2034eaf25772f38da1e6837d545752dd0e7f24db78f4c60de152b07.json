@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM peer_enrollments WHERE interval_id = ? AND peer_role_id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "5340658df2034eaf25772f38da1e6837d545752dd0e7f24db78f4c60de152b07"
+}

@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT id, start_date, end_date\n        FROM intervals\n        WHERE\n          project_id = ? AND\n          intervals.id <= ? AND\n          processed_implicit_involvements = FALSE\n        ORDER BY id ASC",
+  "query": "SELECT intervals.id, intervals.start_date, intervals.end_date\n        FROM intervals\n        INNER JOIN projects ON projects.current_interval_id = intervals.id AND projects.id = intervals.project_id\n        WHERE projects.id = ?\n        ORDER BY intervals.id ASC\n        LIMIT 1",
   "describe": {
     "columns": [
       {
@@ -20,7 +20,7 @@
       }
     ],
     "parameters": {
-      "Right": 2
+      "Right": 1
     },
     "nullable": [
       false,
@@ -28,5 +28,5 @@
       false
     ]
   },
-  "hash": "0ef0e7354785db8bea3a348efe86bb77fe634969d238d11159308c57d16afd32"
+  "hash": "18def8cdc1241d080bf190a34d8d076e188b2a3106316bb5ff7f6529b83bcf7c"
 }
