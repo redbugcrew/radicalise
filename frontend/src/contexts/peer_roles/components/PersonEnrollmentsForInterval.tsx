@@ -1,4 +1,4 @@
-import type { Person, PeerEnrollment, Interval } from "../../../api/Api";
+import type { Person, PeerEnrollment } from "../../../api/Api";
 import { Stack } from "@mantine/core";
 import { useAppSelector } from "../../../store";
 import { initiatingFromPerson } from "../../../store/current_interval/peer_enrollments";

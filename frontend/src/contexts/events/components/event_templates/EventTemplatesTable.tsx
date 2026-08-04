@@ -1,4 +1,4 @@
-import { Stack, Table, Text } from "@mantine/core";
+import { Table } from "@mantine/core";
 import type { EventTemplate } from "../../../../api/Api";
 import { Anchor } from "../../../../components";
 

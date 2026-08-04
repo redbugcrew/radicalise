@@ -1,4 +1,4 @@
-import { Stack, Table, Text } from "@mantine/core";
+import { Table } from "@mantine/core";
 
 interface PeerRolesTableProps {
   peerRoles: PeerRole[];

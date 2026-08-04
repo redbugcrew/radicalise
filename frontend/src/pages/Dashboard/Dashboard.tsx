@@ -17,7 +17,7 @@ import { useCurrentInterval } from "../../store/current_interval";
 import { forPerson } from "../../store/current_interval/crew_involvements";
 import { circleInvolvementforCircleAndPerson } from "../../store/current_interval/circle_involvements";
 import WithIntervalData from "../intervals/WithIntervalData";
-import { initiatingFromPerson, involvingPerson } from "../../store/current_interval/peer_enrollments";
+import { initiatingFromPerson } from "../../store/current_interval/peer_enrollments";
 import YourEnrollment from "../../contexts/peer_roles/components/YourEnrollment";
 
 function ParticipationBadge({ involvement }: { involvement: CircleInvolvement | null }) {
