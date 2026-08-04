@@ -5,6 +5,7 @@ import CapacityScoreIcon from "../../components/CapacityScoreIcon";
 import DateText from "../../components/DateText";
 import WithIntervalData from "../intervals/WithIntervalData";
 import { circleInvolvementsforPerson } from "../../store/current_interval/circle_involvements";
+import { PersonEnrollmentsForInterval } from "../../contexts/peer_roles";
 
 function CapacityQuestion({ question, answer }: { question: string; answer: string | null | undefined }) {
   if (!answer) return null;
@@ -92,6 +93,7 @@ interface PersonForIntervalProps {
 
 export default function PersonForInterval({ personIdNum, interval }: PersonForIntervalProps) {
   const person = useAppSelector((state) => state.people[personIdNum || -1]);
+  const viewerPersonId = useAppSelector((state) => state.me?.person_id);
 
   return (
     <WithIntervalData interval={interval}>
@@ -104,6 +106,13 @@ export default function PersonForInterval({ personIdNum, interval }: PersonForIn
               {circleInvolvements.map((involvement) => (
                 <CircleInvolvementInfo key={involvement.person_id} involvement={involvement} person={person} />
               ))}
+
+              <Card withBorder>
+                <Title order={2} size="h3">
+                  Peer roles
+                </Title>
+                <PersonEnrollmentsForInterval person={person} intervalData={intervalData} viewerPersonId={viewerPersonId} />
+              </Card>
             </Stack>
           </Container>
         );
