@@ -56,8 +56,10 @@ async fn assign_interval_peer_role(
         people.len()
     );
 
-    let mut rng = rng();
-    let results = peer_role.distribution_type.distribute(people, &mut rng);
+    let results = {
+        let mut rng = rng();
+        peer_role.distribution_type.distribute(people, &mut rng)
+    };
 
     println!(
         "Peer role '{}' (interval {}): {}",
