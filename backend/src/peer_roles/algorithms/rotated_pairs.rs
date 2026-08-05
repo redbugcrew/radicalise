@@ -3,9 +3,14 @@ use rand::seq::IndexedRandom;
 use rand::seq::IteratorRandom;
 
 use super::super::match_results::MatchResults;
+use super::MatchHistory;
 use super::remove_person;
 
-pub fn rotated_pairs<PeerId, R: Rng>(people: Vec<PeerId>, rng: &mut R) -> MatchResults<PeerId>
+pub fn rotated_pairs<PeerId, R: Rng>(
+    people: Vec<PeerId>,
+    _history: Option<&MatchHistory<PeerId>>,
+    rng: &mut R,
+) -> MatchResults<PeerId>
 where
     PeerId: std::fmt::Display + Clone + Eq + std::hash::Hash + Ord + std::fmt::Debug,
 {
@@ -67,7 +72,7 @@ mod tests {
     #[test]
     fn returns_empty_matches_by_default() {
         let mut rng = SmallRng::seed_from_u64(0);
-        let result = rotated_pairs::<String, _>(vec![], &mut rng);
+        let result = rotated_pairs::<String, _>(vec![], None, &mut rng);
         assert!(result.edges().is_empty());
     }
 
@@ -75,7 +80,7 @@ mod tests {
     fn matches_two_people() {
         let mut rng = SmallRng::seed_from_u64(0);
         let result =
-            rotated_pairs::<String, _>(vec!["andi".to_string(), "bob".to_string()], &mut rng);
+            rotated_pairs::<String, _>(vec!["andi".to_string(), "bob".to_string()], None, &mut rng);
 
         assert_eq!(result.to_string(), "{andi: [bob], bob: [andi]}");
     }
@@ -90,6 +95,7 @@ mod tests {
                 "carol".to_string(),
                 "dave".to_string(),
             ],
+            None,
             &mut rng,
         );
 
@@ -110,6 +116,7 @@ mod tests {
                 "dana".to_string(),
                 "eve".to_string(),
             ],
+            None,
             &mut rng,
         );
 
