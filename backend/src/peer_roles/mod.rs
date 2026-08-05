@@ -4,10 +4,12 @@ use sqlx::SqlitePool;
 use crate::{
     intervals::repo::mark_peer_roles_processed,
     my_project::involvements_repo::find_all_circle_involvements,
-    peer_roles::{enrollments_repo::upsert_peer_enrollments, peer_roles_repo::find_all_peer_roles},
-    shared::entities::{
-        CircleId, Interval, IntervalId, PeerRole, PeerRoleDistributionType, ProjectId,
+    peer_roles::{
+        algorithms::PairingAlgorithm,
+        enrollments_repo::{load_match_history, upsert_peer_enrollments},
+        peer_roles_repo::find_all_peer_roles,
     },
+    shared::entities::{CircleId, Interval, IntervalId, PeerRole, ProjectId},
 };
 
 mod algorithms;
@@ -55,11 +57,17 @@ async fn assign_interval_peer_role(
         people.len()
     );
 
-    let results = match peer_role.distribution_type {
-        PeerRoleDistributionType::RandomPairs => {
-            let mut rng = rng();
-            algorithms::random_pairs(people, &mut rng)
-        }
+    let history = if peer_role.distribution_type.requires_history() {
+        Some(load_match_history(peer_role.id, pool).await?)
+    } else {
+        None
+    };
+
+    let results = {
+        let mut rng = rng();
+        peer_role
+            .distribution_type
+            .distribute(people, history.as_ref(), &mut rng)
     };
 
     println!(

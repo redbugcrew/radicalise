@@ -1,0 +1,32 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        SELECT person_id AS \"person_id!: i64\", peer_id AS \"peer_id!: i64\", MAX(interval_id) AS \"last_interval!: i64\"\n        FROM peer_enrollments\n        WHERE peer_role_id = ?\n        GROUP BY person_id, peer_id\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "person_id!: i64",
+        "ordinal": 0,
+        "type_info": "Integer"
+      },
+      {
+        "name": "peer_id!: i64",
+        "ordinal": 1,
+        "type_info": "Integer"
+      },
+      {
+        "name": "last_interval!: i64",
+        "ordinal": 2,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "b358ede63ceae536e7262627ba600212c5896292a67b6ee761c2c1b85e85fc5e"
+}
