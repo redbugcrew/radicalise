@@ -45,7 +45,7 @@ impl PairingAlgorithm for PeerRoleDistributionType {
     {
         match self {
             Self::RandomPairs => random_pairs(people, rng),
-            Self::RotatedPairs => rotated_pairs(people, history, rng),
+            Self::RotatedPairs => rotated_pairs(people, history.expect("History required"), rng),
         }
     }
 }
