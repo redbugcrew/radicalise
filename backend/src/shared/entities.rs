@@ -496,6 +496,7 @@ pub struct CalendarEventAttendance {
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone, sqlx::Decode)]
 pub enum PeerRoleDistributionType {
     RandomPairs,
+    RotatedPairs,
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
