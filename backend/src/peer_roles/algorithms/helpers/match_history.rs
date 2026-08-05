@@ -4,17 +4,17 @@ use std::collections::HashMap;
 /// for a given peer role. A missing pair means they have never been matched.
 #[allow(dead_code)] // Constructed/consumed once the rotated-pairs algorithm uses it.
 #[derive(Debug, Clone)]
-pub struct IntervalLastMatched<PeerId> {
+pub struct MatchHistory<PeerId> {
     last_matched: HashMap<(PeerId, PeerId), i64>,
 }
 
 #[allow(dead_code)] // Consumed once the rotated-pairs algorithm uses it.
-impl<PeerId> IntervalLastMatched<PeerId>
+impl<PeerId> MatchHistory<PeerId>
 where
     PeerId: Eq + std::hash::Hash + Clone,
 {
     pub fn new() -> Self {
-        IntervalLastMatched {
+        MatchHistory {
             last_matched: HashMap::new(),
         }
     }
@@ -56,7 +56,7 @@ where
     }
 }
 
-impl<PeerId> Default for IntervalLastMatched<PeerId>
+impl<PeerId> Default for MatchHistory<PeerId>
 where
     PeerId: Eq + std::hash::Hash + Clone,
 {
@@ -73,13 +73,13 @@ mod tests {
 
     #[test]
     fn returns_empty_with_no_data() {
-        let history: IntervalLastMatched<String> = IntervalLastMatched::new();
+        let history: MatchHistory<String> = MatchHistory::new();
         assert_eq!(history.last_peer_matched(&"andi".to_string()), None);
     }
 
     #[test]
     fn returns_peer_for_one_match() {
-        let mut history: IntervalLastMatched<String> = IntervalLastMatched::new();
+        let mut history: MatchHistory<String> = MatchHistory::new();
 
         history.record("andi".to_string(), "bob".to_string(), 1);
 
@@ -91,7 +91,7 @@ mod tests {
 
     #[test]
     fn returns_most_recent_peer_for_multiple_matches() {
-        let mut history: IntervalLastMatched<String> = IntervalLastMatched::new();
+        let mut history: MatchHistory<String> = MatchHistory::new();
 
         history.record("andi".to_string(), "bob".to_string(), 1);
         history.record("andi".to_string(), "carol".to_string(), 2);

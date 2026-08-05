@@ -1,11 +1,11 @@
 use super::super::match_results::MatchResults;
-use super::helpers::interval_last_matched::IntervalLastMatched;
+use super::helpers::match_history::MatchHistory;
 use rand::Rng;
 use std::collections::VecDeque;
 
 pub fn sticky_unidirectional<PeerId, R: Rng>(
     people: Vec<PeerId>,
-    history: &IntervalLastMatched<PeerId>,
+    history: &MatchHistory<PeerId>,
     _rng: &mut R,
 ) -> MatchResults<PeerId>
 where
@@ -41,12 +41,12 @@ mod tests {
     use rand::SeedableRng;
     use rand::rngs::SmallRng;
 
-    fn empty_history() -> IntervalLastMatched<String> {
-        IntervalLastMatched::new()
+    fn empty_history() -> MatchHistory<String> {
+        MatchHistory::new()
     }
 
-    pub fn parse(data: &str) -> IntervalLastMatched<String> {
-        let mut history = IntervalLastMatched::new();
+    pub fn parse(data: &str) -> MatchHistory<String> {
+        let mut history = MatchHistory::new();
 
         for line in data.lines() {
             let parts: Vec<&str> = line.split("->").collect();
