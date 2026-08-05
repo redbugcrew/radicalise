@@ -31,6 +31,12 @@ where
         self.last_matched.get(&(a.clone(), b.clone())).copied()
     }
 
+    pub fn last_peer_matched(&self, person: &PeerId) -> Option<PeerId> {
+        self.most_recent_record(person)
+            .map(|((_, peer), _)| peer.clone())
+            .or(None)
+    }
+
     fn record_directed(
         map: &mut HashMap<(PeerId, PeerId), i64>,
         a: PeerId,
@@ -41,6 +47,13 @@ where
             .and_modify(|existing| *existing = (*existing).max(interval_id))
             .or_insert(interval_id);
     }
+
+    fn most_recent_record(&self, person: &PeerId) -> Option<(&(PeerId, PeerId), &i64)> {
+        self.last_matched
+            .iter()
+            .filter(|((a, _), _)| a == person)
+            .max_by_key(|(_, interval)| *interval)
+    }
 }
 
 impl<PeerId> Default for IntervalLastMatched<PeerId>
@@ -49,5 +62,43 @@ where
 {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // Last peer matched
+
+    #[test]
+    fn returns_empty_with_no_data() {
+        let history: IntervalLastMatched<String> = IntervalLastMatched::new();
+        assert_eq!(history.last_peer_matched(&"andi".to_string()), None);
+    }
+
+    #[test]
+    fn returns_peer_for_one_match() {
+        let mut history: IntervalLastMatched<String> = IntervalLastMatched::new();
+
+        history.record("andi".to_string(), "bob".to_string(), 1);
+
+        assert_eq!(
+            history.last_peer_matched(&"andi".to_string()),
+            Some("bob".to_string())
+        );
+    }
+
+    #[test]
+    fn returns_most_recent_peer_for_multiple_matches() {
+        let mut history: IntervalLastMatched<String> = IntervalLastMatched::new();
+
+        history.record("andi".to_string(), "bob".to_string(), 1);
+        history.record("andi".to_string(), "carol".to_string(), 2);
+
+        assert_eq!(
+            history.last_peer_matched(&"andi".to_string()),
+            Some("carol".to_string())
+        );
     }
 }

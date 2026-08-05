@@ -32,7 +32,7 @@ impl PairingAlgorithm for PeerRoleDistributionType {
         match self {
             Self::RandomPairs => false,
             Self::RotatedPairs => true,
-            Self::StickyUnidirectional => false,
+            Self::StickyUnidirectional => true,
         }
     }
 
@@ -53,7 +53,11 @@ impl PairingAlgorithm for PeerRoleDistributionType {
                 interval_last_matched.expect("History required"),
                 rng,
             ),
-            Self::StickyUnidirectional => sticky_unidirectional(people, rng),
+            Self::StickyUnidirectional => sticky_unidirectional(
+                people,
+                interval_last_matched.expect("History required"),
+                rng,
+            ),
         }
     }
 }
