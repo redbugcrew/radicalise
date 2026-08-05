@@ -497,6 +497,7 @@ pub struct CalendarEventAttendance {
 pub enum PeerRoleDistributionType {
     RandomPairs,
     RotatedPairs,
+    StickyUnidirectional,
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]

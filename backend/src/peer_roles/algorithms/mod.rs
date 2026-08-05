@@ -4,20 +4,22 @@ use rand::Rng;
 mod helpers;
 mod random_pairs;
 mod rotated_pairs;
+mod sticky_unidirectional;
 
-pub use helpers::match_history::MatchHistory;
+pub use helpers::interval_last_matched::IntervalLastMatched;
 pub use random_pairs::random_pairs;
 pub use rotated_pairs::rotated_pairs;
+pub use sticky_unidirectional::sticky_unidirectional;
 
 pub trait PairingAlgorithm {
     /// Whether this algorithm needs historical match data. The caller uses this
     /// to decide whether to fetch it before calling `distribute`.
-    fn requires_history(&self) -> bool;
+    fn requires_interval_last_matched(&self) -> bool;
 
     fn distribute<PeerId, R>(
         &self,
         people: Vec<PeerId>,
-        history: Option<&MatchHistory<PeerId>>,
+        history: Option<&IntervalLastMatched<PeerId>>,
         rng: &mut R,
     ) -> MatchResults<PeerId>
     where
@@ -26,17 +28,18 @@ pub trait PairingAlgorithm {
 }
 
 impl PairingAlgorithm for PeerRoleDistributionType {
-    fn requires_history(&self) -> bool {
+    fn requires_interval_last_matched(&self) -> bool {
         match self {
             Self::RandomPairs => false,
             Self::RotatedPairs => true,
+            Self::StickyUnidirectional => false,
         }
     }
 
     fn distribute<PeerId, R>(
         &self,
         people: Vec<PeerId>,
-        history: Option<&MatchHistory<PeerId>>,
+        interval_last_matched: Option<&IntervalLastMatched<PeerId>>,
         rng: &mut R,
     ) -> MatchResults<PeerId>
     where
@@ -45,7 +48,12 @@ impl PairingAlgorithm for PeerRoleDistributionType {
     {
         match self {
             Self::RandomPairs => random_pairs(people, rng),
-            Self::RotatedPairs => rotated_pairs(people, history.expect("History required"), rng),
+            Self::RotatedPairs => rotated_pairs(
+                people,
+                interval_last_matched.expect("History required"),
+                rng,
+            ),
+            Self::StickyUnidirectional => sticky_unidirectional(people, rng),
         }
     }
 }

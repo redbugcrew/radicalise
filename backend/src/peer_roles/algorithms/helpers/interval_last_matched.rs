@@ -4,17 +4,17 @@ use std::collections::HashMap;
 /// for a given peer role. A missing pair means they have never been matched.
 #[allow(dead_code)] // Constructed/consumed once the rotated-pairs algorithm uses it.
 #[derive(Debug, Clone)]
-pub struct MatchHistory<PeerId> {
+pub struct IntervalLastMatched<PeerId> {
     last_matched: HashMap<(PeerId, PeerId), i64>,
 }
 
 #[allow(dead_code)] // Consumed once the rotated-pairs algorithm uses it.
-impl<PeerId> MatchHistory<PeerId>
+impl<PeerId> IntervalLastMatched<PeerId>
 where
     PeerId: Eq + std::hash::Hash + Clone,
 {
     pub fn new() -> Self {
-        MatchHistory {
+        IntervalLastMatched {
             last_matched: HashMap::new(),
         }
     }
@@ -43,7 +43,7 @@ where
     }
 }
 
-impl<PeerId> Default for MatchHistory<PeerId>
+impl<PeerId> Default for IntervalLastMatched<PeerId>
 where
     PeerId: Eq + std::hash::Hash + Clone,
 {

@@ -2,12 +2,12 @@ use rand::Rng;
 use rand::seq::IteratorRandom;
 
 use super::super::match_results::MatchResults;
-use super::MatchHistory;
+use super::IntervalLastMatched;
 use super::remove_person;
 
 pub fn rotated_pairs<PeerId, R: Rng>(
     people: Vec<PeerId>,
-    history: &MatchHistory<PeerId>,
+    history: &IntervalLastMatched<PeerId>,
     rng: &mut R,
 ) -> MatchResults<PeerId>
 where
@@ -43,7 +43,7 @@ where
 fn least_recent_match<PeerId, R: Rng>(
     person: &PeerId,
     candidates: &[PeerId],
-    history: &MatchHistory<PeerId>,
+    history: &IntervalLastMatched<PeerId>,
     rng: &mut R,
 ) -> Option<PeerId>
 where
@@ -70,7 +70,7 @@ mod tests {
     #[test]
     fn returns_empty_matches_by_default() {
         let mut rng = SmallRng::seed_from_u64(0);
-        let history = MatchHistory::<String>::new();
+        let history = IntervalLastMatched::<String>::new();
 
         let result = rotated_pairs::<String, _>(vec![], &history, &mut rng);
         assert!(result.edges().is_empty());
@@ -79,7 +79,7 @@ mod tests {
     #[test]
     fn return_empty_matches_if_theres_only_one_person() {
         let mut rng = SmallRng::seed_from_u64(0);
-        let history = MatchHistory::<String>::new();
+        let history = IntervalLastMatched::<String>::new();
 
         let result = rotated_pairs::<String, _>(vec!["andi".to_string()], &history, &mut rng);
         assert!(result.edges().is_empty());
@@ -88,7 +88,7 @@ mod tests {
     #[test]
     fn matches_two_people_with_no_history() {
         let mut rng = SmallRng::seed_from_u64(0);
-        let history = MatchHistory::<String>::new();
+        let history = IntervalLastMatched::<String>::new();
 
         let result = rotated_pairs::<String, _>(
             vec!["andi".to_string(), "bob".to_string()],
@@ -102,7 +102,7 @@ mod tests {
     #[test]
     fn matches_four_people() {
         let mut rng = SmallRng::seed_from_u64(0);
-        let history = MatchHistory::<String>::new();
+        let history = IntervalLastMatched::<String>::new();
 
         let result = rotated_pairs::<String, _>(
             vec![
@@ -124,7 +124,7 @@ mod tests {
     #[test]
     fn matches_odd_number_of_people() {
         let mut rng = SmallRng::seed_from_u64(0);
-        let history = MatchHistory::<String>::new();
+        let history = IntervalLastMatched::<String>::new();
 
         let result = rotated_pairs::<String, _>(
             vec![
@@ -147,7 +147,7 @@ mod tests {
     #[test]
     fn picks_older_pair_first() {
         let mut rng = SmallRng::seed_from_u64(0);
-        let mut history = MatchHistory::<String>::new();
+        let mut history = IntervalLastMatched::<String>::new();
 
         history.record("andi".to_string(), "bob".to_string(), 3);
         history.record("andi".to_string(), "carol".to_string(), 1);
@@ -173,7 +173,7 @@ mod tests {
     #[test]
     fn picks_never_matched_pair_first() {
         let mut rng = SmallRng::seed_from_u64(3); // picks andi first
-        let mut history = MatchHistory::<String>::new();
+        let mut history = IntervalLastMatched::<String>::new();
 
         history.record("andi".to_string(), "carol".to_string(), 1);
         history.record("andi".to_string(), "dave".to_string(), 2);
