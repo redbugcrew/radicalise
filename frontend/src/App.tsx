@@ -132,10 +132,10 @@ const router = createBrowserRouter([
         path: "peer_roles",
         element: <PeerRoles />,
       },
-      {
-        path: "peer_roles/new",
-        element: <NewRole />,
-      },
+      //{
+      //  path: "peer_roles/new",
+      //  element: <NewRole />,
+      //}, //TODO
       {
         path: "crews",
         element: <Crews />,

@@ -26,9 +26,13 @@ export default function NewEvent() {
       <Stack mb="md">
         <Title order={1}>New Event</Title>
 
-        {eventTemplates.length === 0 && <p>No event templates available. Please create one first.</p>}
+        {eventTemplates.length === 0 && (
+          <p>No event templates available. Please create one first.</p>
+        )}
 
-        {eventTemplates.length > 0 && <EventForm onSubmit={handleSubmit} eventTemplates={eventTemplates} />}
+        {eventTemplates.length > 0 && (
+          <EventForm onSubmit={handleSubmit} eventTemplates={eventTemplates} />
+        )}
       </Stack>
     </Container>
   );

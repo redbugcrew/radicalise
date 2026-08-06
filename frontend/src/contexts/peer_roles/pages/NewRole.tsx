@@ -1,6 +1,6 @@
 import { Container, Title, Stack } from "@mantine/core";
 import RoleForm from "../components/RoleForm";
-import type { NewRole } from "../../../api/Api"; //Todo: add NewRole to Api.ts (see CalanderEvent for model)
+import type { NewRole } from "../../../api/Api"; //Todo: check NewRole in Api.ts (see CalanderEvent for model)
 import { handleAppEvents, useAppSelector } from "../../../store";
 import { getApi } from "../../../api";
 import { useNavigate } from "react-router-dom";
@@ -19,7 +19,7 @@ export default function NewRole() {
       .catch((error) => {
         console.error("Error creating role:", error);
       });
-  };
+  }; //
 
   return (
     <Container>
