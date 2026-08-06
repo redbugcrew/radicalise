@@ -1,44 +1,31 @@
 import { useForm } from "@mantine/form";
-import { Button, Select, Stack, Textarea, TextInput } from "@mantine/core";
+import { Button, Stack, TextInput } from "@mantine/core";
 
-interface RoleFormData {
+export interface RoleFormData {
   id: number;
-  role_table_id: number | null;
   name: string | null;
   summary: string;
-  action: string;
 }
 
 interface PeerRolesFormProps {
-  value?: NewRole | null; //Todo: add NewRole to Api.ts (see CalanderEvent for model)
-  peerRoles?: PeerRolesTable[]; //Todo: add PeerRolesTable to Api.ts (see example EventsTemplate)
+  value?: RoleFormData | null; //Todo: add NewRole to Api.ts (see CalanderEvent for model)
   submitText?: string;
-  onSubmit: (data: NewRole) => Promise<void>;
+  onSubmit: (data: RoleFormData) => Promise<void>;
 }
 
-// Todo: add NewRole and PeerRolesTable to Api.ts 
+// Todo: add NewRole and PeerRolesTable to Api.ts
 
 const defaultRole: RoleFormData = {
   id: -1,
-  role_table_id: null,
   name: "",
   summary: "",
-  action: "",
 };
 
-function prepareNewRole(data: RoleFormData): NewRole | null {
-  if (!data.role_table_id || !data.name) {
-    return null;
-  }
-
-  return {
-    ...data,
-    role_table_id: parseInt(data.role_table_id.toString(), 10),
-    name: data.name,
-  };
-}
-
-export default function NewRoleForm({ value, peerRoles, submitText, onSubmit }: PeerRolesFormProps) {
+export default function NewRoleForm({
+  value,
+  submitText,
+  onSubmit,
+}: PeerRolesFormProps) {
   const form = useForm<RoleFormData>({
     mode: "controlled",
     initialValues: {
@@ -46,37 +33,19 @@ export default function NewRoleForm({ value, peerRoles, submitText, onSubmit }: 
       ...value,
     },
     validate: {
-      role_table_id: (value) => (value ? null : "Peer role ID is required"),
-      name: (value) => (value && value.trim().length > 0 ? null : "Name is required"),
-        }
-        return null;
-      },
-  );  // Todo: investigate useForm error
+      name: (value) =>
+        value && value.trim().length > 0 ? null : "Name is required",
+    },
+  });
 
-  const onSubmitFormData = (data: RoleFormData) => {
-    const preparedRole = prepareNewRole(data);
-    if (preparedRole) {
-      onSubmit(preparedRole);
-    } else {
-      console.error("Failed to prepare new role from form data:", data);
-    }
-  };  
-  
   return (
-    <form onSubmit={form.onSubmit(onSubmitFormData, (errors) => console.log("Form submission errors:", errors))}>
+    <form
+      onSubmit={form.onSubmit(onSubmit, (errors) =>
+        console.log("Form submission errors:", errors),
+      )}
+    >
       <Stack gap="lg">
         <Stack gap="md">
-          {peerRoles && peerRoles.length >= 0 && (
-            <Select
-              label="Event Template"
-              description=""
-              placeholder="Pick value"
-              data={peerRoles.map((template) => ({ label: template.name, value: template.id.toString() }))}
-              key={form.key("peer_roles_table_id")}
-              {...form.getInputProps("peer_roles_table_id")}
-            />
-          )} //TODO resolve errors
-
           <TextInput
             label="Name"
             description="The name of this role."
@@ -84,20 +53,17 @@ export default function NewRoleForm({ value, peerRoles, submitText, onSubmit }: 
             withAsterisk
             {...form.getInputProps("name")}
           />
-  
           <TextInput
             label="Summary"
             description="A short summary of the role to provide more context."
             placeholder="A brief summary of the responsibilities associated with the role"
             {...form.getInputProps("summary")}
           />
-
         </Stack>
         <Button type="submit" loading={form.submitting}>
-          {submitText || "Create event"}
+          {submitText || "Create role"}
         </Button>
       </Stack>
     </form>
   );
 }
-

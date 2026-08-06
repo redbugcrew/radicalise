@@ -4,6 +4,7 @@ import { Anchor } from "../../../components";
 import PeerRolesTable from "../components/PeerRolesTable";
 
 export default function PeerRoles() {
+  //const peerRoles = useAppSelector((state) => state.peerRoles);
   const dummyPeers = [
     {
       role: 1,
