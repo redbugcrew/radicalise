@@ -15,7 +15,7 @@ export default function NewRole() {
     //  .catch((error) => {
     //    console.error("Error creating role:", error);
     //  });
-  }; // This can be used once the api has been set up
+  }; // These lines can replace the console.log line once the createNewRol api endpoint has been set up
 
   return (
     <Container>
