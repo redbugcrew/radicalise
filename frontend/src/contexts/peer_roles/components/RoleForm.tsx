@@ -60,7 +60,7 @@ export default function NewRoleForm({ value, peerRoles, submitText, onSubmit }: 
     } else {
       console.error("Failed to prepare new role from form data:", data);
     }
-  };  // Todo: investigate UseForm error
+  };  
   
   return (
     <form onSubmit={form.onSubmit(onSubmitFormData, (errors) => console.log("Form submission errors:", errors))}>
