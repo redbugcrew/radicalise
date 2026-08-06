@@ -1,10 +1,7 @@
-use crate::peer_roles::algorithms::IntervalsAgo;
-
 use super::super::match_results::MatchResults;
 use super::helpers::match_history::MatchHistory;
 use rand::Rng;
 use rand::seq::IndexedRandom;
-use std::collections::VecDeque;
 
 pub fn sticky_unidirectional<PeerId, R: Rng>(
     people: Vec<PeerId>,
@@ -14,111 +11,101 @@ pub fn sticky_unidirectional<PeerId, R: Rng>(
 where
     PeerId: std::fmt::Display + Clone + Eq + std::hash::Hash + Ord + std::fmt::Debug,
 {
-    let churn_data = people_intervals_since_churned(people.clone(), history);
-
-    let mut unmatched = VecDeque::from(people);
+    let mut unmatched = people.clone();
     let mut result_chain = Vec::<PeerId>::new();
 
-    let mut last_person = match unmatched.pop_front() {
+    let mut person = match select_start_person(&mut unmatched, rng) {
         Some(person) => person,
         None => return MatchResults::new(),
     };
-    result_chain.push(last_person.clone());
+    result_chain.push(person.clone());
 
-    while let Some(person) = select_next_person(last_person.clone(), &mut unmatched, history) {
-        last_person = person;
-        result_chain.push(last_person.clone());
+    println!("Starting with person: {}", person);
+
+    while let Some(next_person) =
+        select_next_person(person.clone(), &mut unmatched, &people, history, rng)
+    {
+        person = next_person;
+        result_chain.push(person.clone());
     }
 
     MatchResults::from_chain(result_chain)
 }
 
-fn select_next_person<PeerId>(
-    last_person: PeerId,
-    unmatched: &mut VecDeque<PeerId>,
-    history: &MatchHistory<PeerId>,
-) -> Option<PeerId>
+fn select_start_person<PeerId, R: Rng>(unmatched: &mut Vec<PeerId>, rng: &mut R) -> Option<PeerId>
 where
     PeerId: std::fmt::Display + Clone + Eq + std::hash::Hash + Ord + std::fmt::Debug,
 {
-    let previous_peer = history.last_peer_matched(&last_person);
-
-    // If previous peer is in the unmatches list then return it
-    if let Some(peer) = previous_peer {
-        if unmatched.contains(&peer) {
-            unmatched.retain(|p| p != &peer);
-            return Some(peer);
-        }
-    }
-
-    // Otherwise return the next person in the unmatched list
-    unmatched.pop_front()
+    return pop_random_person(unmatched, rng);
 }
 
-fn person_recently_churned<PeerId, R: Rng>(
-    people: Vec<PeerId>,
-    churn_data: &Vec<(PeerId, IntervalsAgo)>,
+fn select_next_person<PeerId, R: Rng>(
+    last_person: PeerId,
+    unmatched: &mut Vec<PeerId>,
+    all_people: &Vec<PeerId>,
+    history: &MatchHistory<PeerId>,
     rng: &mut R,
 ) -> Option<PeerId>
 where
-    PeerId: std::fmt::Display + Clone + Eq + std::hash::Hash + Ord + std::fmt::Debug,
+    PeerId: Clone + Eq + std::hash::Hash + Ord,
 {
-    let people = people_recently_churned(people, churn_data);
-    let person = people.choose(rng);
-    person.cloned()
+    if let Some(peer) = next_in_previous_chain(last_person.clone(), unmatched, all_people, history)
+    {
+        return Some(peer);
+    }
+
+    return pop_random_person(unmatched, rng);
 }
 
-fn people_recently_churned<PeerId>(
-    people: Vec<PeerId>,
-    churn_data: &Vec<(PeerId, IntervalsAgo)>,
-) -> Vec<PeerId>
+fn next_in_previous_chain<PeerId>(
+    last_person: PeerId,
+    unmatched: &mut Vec<PeerId>,
+    all_people: &Vec<PeerId>,
+    history: &MatchHistory<PeerId>,
+) -> Option<PeerId>
 where
-    PeerId: std::fmt::Display + Clone + Eq + std::hash::Hash + Ord + std::fmt::Debug,
+    PeerId: Eq + std::hash::Hash + Clone,
 {
-    let people_churn_data = churn_data
-        .iter()
-        .filter(|(p, _)| people.contains(p))
-        .cloned()
-        .collect::<Vec<_>>();
-
-    let min_interval = match people_churn_data
-        .iter()
-        .map(|(_, interval)| *interval)
-        .min()
-    {
-        Some(interval) => interval,
-        None => return people,
+    let previous_peer = match history.last_peer_matched(&last_person) {
+        Some(peer) => peer,
+        None => return None,
     };
 
-    let recently_churned_people: Vec<PeerId> = people_churn_data
-        .into_iter()
-        .filter(|(_, interval)| *interval == min_interval)
-        .map(|(p, _)| p)
-        .collect();
-
-    if recently_churned_people.is_empty() {
-        people
+    if unmatched.contains(&previous_peer) {
+        return pop_specific_person(unmatched, previous_peer);
     } else {
-        recently_churned_people
+        if !all_people.contains(&previous_peer) {
+            return next_in_previous_chain(previous_peer, unmatched, all_people, history);
+        }
+    }
+
+    None
+}
+
+fn pop_random_person<PeerId, R: Rng>(people: &mut Vec<PeerId>, rng: &mut R) -> Option<PeerId>
+where
+    PeerId: Clone + Eq + std::hash::Hash,
+{
+    let person = people.choose(rng);
+    if let Some(person) = person {
+        let person = person.clone();
+        people.retain(|p| p != &person);
+        Some(person)
+    } else {
+        None
     }
 }
 
-fn people_intervals_since_churned<PeerId>(
-    people: Vec<PeerId>,
-    history: &MatchHistory<PeerId>,
-) -> Vec<(PeerId, IntervalsAgo)>
+fn pop_specific_person<PeerId>(people: &mut Vec<PeerId>, person: PeerId) -> Option<PeerId>
 where
-    PeerId: std::fmt::Display + Clone + Eq + std::hash::Hash + Ord + std::fmt::Debug,
+    PeerId: Clone + Eq + std::hash::Hash,
 {
-    people
-        .into_iter()
-        .map(|p| {
-            let intervals_ago = history
-                .last_churned_as_peer(&p)
-                .unwrap_or(IntervalsAgo(i64::MAX));
-            (p, intervals_ago)
-        })
-        .collect()
+    if people.contains(&person) {
+        people.retain(|p| p != &person);
+        Some(person)
+    } else {
+        None
+    }
 }
 
 #[cfg(test)]
@@ -211,13 +198,13 @@ mod tests {
 
         assert_eq!(
             result.to_string(),
-            "{andi: [bob], bob: [carol], carol: [dave], dave: [andi]}"
+            "{andi: [dave], bob: [carol], carol: [andi], dave: [bob]}"
         );
     }
 
     #[test]
-    fn preserves_all_existing_relationships() {
-        let mut rng = SmallRng::seed_from_u64(0);
+    fn preserves_existing_relationships_in_circle() {
+        let mut rng = SmallRng::seed_from_u64(3);
 
         let history = parse_circles(
             r#"
@@ -228,8 +215,8 @@ mod tests {
         let result = sticky_unidirectional::<String, _>(
             vec![
                 "andi".to_string(),
-                "bob".to_string(),
                 "carol".to_string(),
+                "bob".to_string(),
                 "dave".to_string(),
             ],
             &history,

@@ -13,7 +13,6 @@ pub struct MatchHistory<PeerId> {
     last_matched: HashMap<(PeerId, PeerId), IntervalsAgo>,
 }
 
-#[allow(dead_code)] // Consumed once the rotated-pairs algorithm uses it.
 impl<PeerId> MatchHistory<PeerId>
 where
     PeerId: Eq + std::hash::Hash + Clone,
@@ -33,30 +32,6 @@ where
     /// How many intervals ago `a` and `b` were last matched, if ever.
     pub fn last_matched(&self, a: &PeerId, b: &PeerId) -> Option<IntervalsAgo> {
         self.last_matched.get(&(a.clone(), b.clone())).copied()
-    }
-
-    pub fn last_churned_as_peer(&self, peer: &PeerId) -> Option<IntervalsAgo> {
-        let most_recent_record = match self.most_recent_record_as_peer(peer) {
-            Some(record) => record,
-            None => return None,
-        };
-
-        let last_person = &most_recent_record.0.0;
-
-        let next_most_recent_record = self
-            .last_matched
-            .iter()
-            .filter(|((record_person, record_peer), _)| {
-                record_peer == peer && record_person != last_person
-            })
-            .min_by_key(|(_, intervals_ago)| *intervals_ago);
-
-        let next_most_recent_record = match next_most_recent_record {
-            Some(record) => record,
-            None => return None,
-        };
-
-        Some(*next_most_recent_record.1)
     }
 
     pub fn last_peer_matched(&self, person: &PeerId) -> Option<PeerId> {
@@ -80,16 +55,6 @@ where
         self.last_matched
             .iter()
             .filter(|((a, _), _)| a == person)
-            .min_by_key(|(_, intervals_ago)| *intervals_ago)
-    }
-
-    fn most_recent_record_as_peer(
-        &self,
-        peer: &PeerId,
-    ) -> Option<(&(PeerId, PeerId), &IntervalsAgo)> {
-        self.last_matched
-            .iter()
-            .filter(|((_, b), _)| b == peer)
             .min_by_key(|(_, intervals_ago)| *intervals_ago)
     }
 }
@@ -138,21 +103,5 @@ mod tests {
             history.last_peer_matched(&"andi".to_string()),
             Some("carol".to_string())
         );
-    }
-
-    // last_churned_as_peer
-
-    #[test]
-    fn last_churned_as_peer_returns_none_with_no_data() {
-        let history: MatchHistory<String> = MatchHistory::new();
-        assert_eq!(history.last_churned_as_peer(&"bob".to_string()), None);
-    }
-
-    #[test]
-    fn last_churned_as_peer_returns_none_if_never_churned() {
-        let mut history: MatchHistory<String> = MatchHistory::new();
-        history.record("andi".to_string(), "bob".to_string(), IntervalsAgo(1));
-
-        assert_eq!(history.last_churned_as_peer(&"bob".to_string()), None);
     }
 }
