@@ -7,7 +7,7 @@ export default function NewRole() {
   const handleSubmit = async (data: RoleFormData): Promise<void> => {
     console.log("handling form result", data);
     //return getApi()
-    //  .api.createNewRole(data) // Todo: check createNewROle to Api.ts (see createCalendarEvent for model)
+    //  .api.createNewRole(data)
     //  .then((response) => {
     //    handleAppEvents(response.data);
     //    navigate("/peer_roles");
@@ -15,7 +15,7 @@ export default function NewRole() {
     //  .catch((error) => {
     //    console.error("Error creating role:", error);
     //  });
-  }; //
+  }; // This can be used once the api has been set up
 
   return (
     <Container>

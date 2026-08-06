@@ -13,8 +13,6 @@ interface PeerRolesFormProps {
   onSubmit: (data: RoleFormData) => Promise<void>;
 }
 
-// Todo: add NewRole and PeerRolesTable to Api.ts
-
 const defaultRole: RoleFormData = {
   id: -1,
   name: "",
