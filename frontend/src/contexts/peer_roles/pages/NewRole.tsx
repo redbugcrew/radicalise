@@ -1,22 +1,25 @@
-import PeerRolesTable from "../components/PeerRolesTable";
+import { Container, Title, Stack } from "@mantine/core";
 import RoleForm from "../components/RoleForm";
+import type { NewRole } from "../../../api/Api"; //Todo: add NewRole to Api.ts (see CalanderEvent for model)
+import { handleAppEvents, useAppSelector } from "../../../store";
+import { getApi } from "../../../api";
+import { useNavigate } from "react-router-dom";
 
 export default function NewRole() {
-  const peerRoles = PeerRolesTable;
+  const peerRoles = useAppSelector((state) => state.peerRoles);
+  const navigate = useNavigate();
 
-  //  const navigate = useNavigate();
-
-  //  const handleSubmit = async (data: CalendarEvent): Promise<void> => {
-  //    return getApi()
-  //      .api.createCalendarEvent(data)
-  //      .then((response) => {
-  //        handleAppEvents(response.data);
-  //        navigate("/events");
-  //      })
-  //      .catch((error) => {
-  //        console.error("Error creating event:", error);
-  //      });
-  //  };
+  const handleSubmit = async (data: NewRole): Promise<void> => {
+    return getApi()
+      .api.createNewRole(data) // Todo: add createNewROle to Api.ts (see createCalendarEvent for model)
+      .then((response) => {
+        handleAppEvents(response.data);
+        navigate("/peer_roles");
+      })
+      .catch((error) => {
+        console.error("Error creating role:", error);
+      });
+  };
 
   return (
     <Container>

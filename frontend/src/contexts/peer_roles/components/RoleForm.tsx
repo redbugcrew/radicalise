@@ -1,6 +1,5 @@
 import { useForm } from "@mantine/form";
 import { Button, Select, Stack, Textarea, TextInput } from "@mantine/core";
-import { LinksInput } from "../../../components";
 
 interface RoleFormData {
   id: number;
@@ -11,13 +10,13 @@ interface RoleFormData {
 }
 
 interface PeerRolesFormProps {
-  value?: NewRole | null;
-  peerRoles?: PeerRolesTable[];
+  value?: NewRole | null; //Todo: add NewRole to Api.ts (see CalanderEvent for model)
+  peerRoles?: PeerRolesTable[]; //Todo: add PeerRolesTable to Api.ts (see example EventsTemplate)
   submitText?: string;
   onSubmit: (data: NewRole) => Promise<void>;
 }
 
-// Todo: add NewRole and PeerRolesTable to Api.ts
+// Todo: add NewRole and PeerRolesTable to Api.ts 
 
 const defaultRole: RoleFormData = {
   id: -1,
