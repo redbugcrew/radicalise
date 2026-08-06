@@ -2,8 +2,8 @@ use rand::Rng;
 use rand::seq::IteratorRandom;
 
 use super::super::match_results::MatchResults;
-use super::MatchHistory;
 use super::remove_person;
+use super::{IntervalsAgo, MatchHistory};
 
 pub fn rotated_pairs<PeerId, R: Rng>(
     people: Vec<PeerId>,
@@ -52,7 +52,7 @@ where
     let least_recent = candidates
         .iter()
         .map(|p| history.last_matched(person, p))
-        .min_by_key(|last| last.unwrap_or(i64::MIN))?;
+        .max_by_key(|last| last.unwrap_or(IntervalsAgo(i64::MAX)))?;
 
     candidates
         .iter()
@@ -149,9 +149,9 @@ mod tests {
         let mut rng = SmallRng::seed_from_u64(0);
         let mut history = MatchHistory::<String>::new();
 
-        history.record("andi".to_string(), "bob".to_string(), 3);
-        history.record("andi".to_string(), "carol".to_string(), 1);
-        history.record("andi".to_string(), "dave".to_string(), 2);
+        history.record("andi".to_string(), "bob".to_string(), IntervalsAgo(1));
+        history.record("andi".to_string(), "carol".to_string(), IntervalsAgo(3));
+        history.record("andi".to_string(), "dave".to_string(), IntervalsAgo(2));
 
         let result = rotated_pairs::<String, _>(
             vec![
@@ -175,8 +175,8 @@ mod tests {
         let mut rng = SmallRng::seed_from_u64(3); // picks andi first
         let mut history = MatchHistory::<String>::new();
 
-        history.record("andi".to_string(), "carol".to_string(), 1);
-        history.record("andi".to_string(), "dave".to_string(), 2);
+        history.record("andi".to_string(), "carol".to_string(), IntervalsAgo(1));
+        history.record("andi".to_string(), "dave".to_string(), IntervalsAgo(2));
 
         let result = rotated_pairs::<String, _>(
             vec![

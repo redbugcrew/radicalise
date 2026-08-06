@@ -37,6 +37,8 @@ where
 
 #[cfg(test)]
 mod tests {
+    use crate::peer_roles::algorithms::IntervalsAgo;
+
     use super::*;
     use rand::SeedableRng;
     use rand::rngs::SmallRng;
@@ -59,8 +61,8 @@ mod tests {
                 continue;
             }
             let b = rest[0].trim().to_string();
-            if let Ok(interval_id) = rest[1].trim().parse::<i64>() {
-                history.record(a, b, interval_id);
+            if let Ok(intervals_ago) = rest[1].trim().parse::<i64>() {
+                history.record(a, b, IntervalsAgo(intervals_ago));
             }
         }
 
@@ -126,14 +128,14 @@ mod tests {
 
         let history = parse(
             r#"
-                andi->bob: 1
                 andi->bob: 2
-                bob->carol: 1
-                bob->fred: 2
-                carol->dave: 1
+                andi->bob: 1
+                bob->carol: 2
+                bob->fred: 1
                 carol->dave: 2
-                dave->andi: 1
+                carol->dave: 1
                 dave->andi: 2
+                dave->andi: 1
             "#,
         );
 

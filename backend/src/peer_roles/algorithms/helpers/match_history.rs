@@ -1,11 +1,16 @@
 use std::collections::HashMap;
 
-/// Pairwise record of the most recent interval in which two people were matched
-/// for a given peer role. A missing pair means they have never been matched.
+/// Number of intervals since a pair was matched. Larger means longer ago; a
+/// never-matched pair is represented by the absence of an entry.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct IntervalsAgo(pub i64);
+
+/// Pairwise record of how many intervals ago two people were matched for a given
+/// peer role. A missing pair means they have never been matched.
 #[allow(dead_code)] // Constructed/consumed once the rotated-pairs algorithm uses it.
 #[derive(Debug, Clone)]
 pub struct MatchHistory<PeerId> {
-    last_matched: HashMap<(PeerId, PeerId), i64>,
+    last_matched: HashMap<(PeerId, PeerId), IntervalsAgo>,
 }
 
 #[allow(dead_code)] // Consumed once the rotated-pairs algorithm uses it.
@@ -19,15 +24,15 @@ where
         }
     }
 
-    /// Record that `a` and `b` were matched in `interval_id`, keeping the most
-    /// recent (highest) interval for the pair. Stored symmetrically.
-    pub fn record(&mut self, a: PeerId, b: PeerId, interval_id: i64) {
-        Self::record_directed(&mut self.last_matched, a.clone(), b.clone(), interval_id);
-        Self::record_directed(&mut self.last_matched, b, a, interval_id);
+    /// Record that `a` and `b` were matched `intervals_ago` intervals ago,
+    /// keeping the most recent (smallest) value for the pair. Stored symmetrically.
+    pub fn record(&mut self, a: PeerId, b: PeerId, intervals_ago: IntervalsAgo) {
+        Self::record_directed(&mut self.last_matched, a.clone(), b.clone(), intervals_ago);
+        Self::record_directed(&mut self.last_matched, b, a, intervals_ago);
     }
 
-    /// The interval in which `a` and `b` were last matched, if ever.
-    pub fn last_matched(&self, a: &PeerId, b: &PeerId) -> Option<i64> {
+    /// How many intervals ago `a` and `b` were last matched, if ever.
+    pub fn last_matched(&self, a: &PeerId, b: &PeerId) -> Option<IntervalsAgo> {
         self.last_matched.get(&(a.clone(), b.clone())).copied()
     }
 
@@ -38,21 +43,21 @@ where
     }
 
     fn record_directed(
-        map: &mut HashMap<(PeerId, PeerId), i64>,
+        map: &mut HashMap<(PeerId, PeerId), IntervalsAgo>,
         a: PeerId,
         b: PeerId,
-        interval_id: i64,
+        intervals_ago: IntervalsAgo,
     ) {
         map.entry((a, b))
-            .and_modify(|existing| *existing = (*existing).max(interval_id))
-            .or_insert(interval_id);
+            .and_modify(|existing| *existing = (*existing).min(intervals_ago))
+            .or_insert(intervals_ago);
     }
 
-    fn most_recent_record(&self, person: &PeerId) -> Option<(&(PeerId, PeerId), &i64)> {
+    fn most_recent_record(&self, person: &PeerId) -> Option<(&(PeerId, PeerId), &IntervalsAgo)> {
         self.last_matched
             .iter()
             .filter(|((a, _), _)| a == person)
-            .max_by_key(|(_, interval)| *interval)
+            .min_by_key(|(_, intervals_ago)| *intervals_ago)
     }
 }
 
@@ -81,7 +86,7 @@ mod tests {
     fn returns_peer_for_one_match() {
         let mut history: MatchHistory<String> = MatchHistory::new();
 
-        history.record("andi".to_string(), "bob".to_string(), 1);
+        history.record("andi".to_string(), "bob".to_string(), IntervalsAgo(1));
 
         assert_eq!(
             history.last_peer_matched(&"andi".to_string()),
@@ -93,8 +98,8 @@ mod tests {
     fn returns_most_recent_peer_for_multiple_matches() {
         let mut history: MatchHistory<String> = MatchHistory::new();
 
-        history.record("andi".to_string(), "bob".to_string(), 1);
-        history.record("andi".to_string(), "carol".to_string(), 2);
+        history.record("andi".to_string(), "bob".to_string(), IntervalsAgo(2));
+        history.record("andi".to_string(), "carol".to_string(), IntervalsAgo(1));
 
         assert_eq!(
             history.last_peer_matched(&"andi".to_string()),

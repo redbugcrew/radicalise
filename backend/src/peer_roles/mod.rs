@@ -58,7 +58,7 @@ async fn assign_interval_peer_role(
     );
 
     let history = if peer_role.distribution_type.requires_match_history() {
-        Some(load_match_history(peer_role.id, pool).await?)
+        Some(load_match_history(peer_role.id, interval.id, pool).await?)
     } else {
         None
     };

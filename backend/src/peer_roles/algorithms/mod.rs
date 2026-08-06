@@ -6,7 +6,7 @@ mod random_pairs;
 mod rotated_pairs;
 mod sticky_unidirectional;
 
-pub use helpers::match_history::MatchHistory;
+pub use helpers::match_history::{IntervalsAgo, MatchHistory};
 pub use random_pairs::random_pairs;
 pub use rotated_pairs::rotated_pairs;
 pub use sticky_unidirectional::sticky_unidirectional;
