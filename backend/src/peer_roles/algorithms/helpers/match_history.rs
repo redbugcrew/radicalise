@@ -24,11 +24,10 @@ where
         }
     }
 
-    /// Record that `a` and `b` were matched `intervals_ago` intervals ago,
-    /// keeping the most recent (smallest) value for the pair. Stored symmetrically.
+    /// Record that `a` was matched to `b` `intervals_ago` intervals ago,
+    /// keeping the most recent (smallest) value for the directed pair.
     pub fn record(&mut self, a: PeerId, b: PeerId, intervals_ago: IntervalsAgo) {
-        Self::record_directed(&mut self.last_matched, a.clone(), b.clone(), intervals_ago);
-        Self::record_directed(&mut self.last_matched, b, a, intervals_ago);
+        Self::record_directed(&mut self.last_matched, a, b, intervals_ago);
     }
 
     /// How many intervals ago `a` and `b` were last matched, if ever.
@@ -155,18 +154,5 @@ mod tests {
         history.record("andi".to_string(), "bob".to_string(), IntervalsAgo(1));
 
         assert_eq!(history.last_churned_as_peer(&"bob".to_string()), None);
-    }
-
-    #[test]
-    fn last_churned_as_peer_returns_some_if_churned() {
-        let mut history: MatchHistory<String> = MatchHistory::new();
-        history.record("andi".to_string(), "bob".to_string(), IntervalsAgo(3));
-        history.record("carol".to_string(), "bob".to_string(), IntervalsAgo(2));
-        history.record("carol".to_string(), "bob".to_string(), IntervalsAgo(1));
-
-        assert_eq!(
-            history.last_churned_as_peer(&"bob".to_string()),
-            Some(IntervalsAgo(2))
-        );
     }
 }

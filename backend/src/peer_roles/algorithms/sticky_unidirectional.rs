@@ -16,10 +16,6 @@ where
 {
     let churn_data = people_intervals_since_churned(people.clone(), history);
 
-    // Print the churn data
-    println!("History: {:?}", history);
-    println!("Churn data: {:?}", churn_data);
-
     let mut unmatched = VecDeque::from(people);
     let mut result_chain = Vec::<PeerId>::new();
 
@@ -30,7 +26,6 @@ where
     result_chain.push(last_person.clone());
 
     while let Some(person) = select_next_person(last_person.clone(), &mut unmatched, history) {
-        println!("Selected person: {:?}", person);
         last_person = person;
         result_chain.push(last_person.clone());
     }
@@ -47,7 +42,6 @@ where
     PeerId: std::fmt::Display + Clone + Eq + std::hash::Hash + Ord + std::fmt::Debug,
 {
     let previous_peer = history.last_peer_matched(&last_person);
-    println!("Previous peer for {:?}: {:?}", last_person, previous_peer);
 
     // If previous peer is in the unmatches list then return it
     if let Some(peer) = previous_peer {
@@ -217,7 +211,7 @@ mod tests {
 
         assert_eq!(
             result.to_string(),
-            "{andi: [dave], bob: [carol], carol: [andi], dave: [bob]}"
+            "{andi: [bob], bob: [carol], carol: [dave], dave: [andi]}"
         );
     }
 
