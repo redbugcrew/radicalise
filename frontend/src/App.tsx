@@ -50,6 +50,7 @@ import "@mantine/dates/styles.css";
 import "@mantine/notifications/styles.css";
 import { Circles, EditCircle, NewCircle } from "./contexts/circles";
 import { PeerRoles } from "./contexts/peer_roles";
+//import NewRole from "./contexts/peer_roles/pages/NewRole";
 
 function withStore(
   func: (store: AppStore) => any,
@@ -130,6 +131,10 @@ const router = createBrowserRouter([
       {
         path: "peer_roles",
         element: <PeerRoles />,
+      },
+      {
+        path: "peer_roles/new",
+        element: <NewRole />,
       },
       {
         path: "crews",
