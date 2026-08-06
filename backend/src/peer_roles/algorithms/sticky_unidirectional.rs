@@ -14,7 +14,7 @@ where
     let mut unmatched = people.clone();
     let mut result_chain = Vec::<PeerId>::new();
 
-    let mut person = match select_start_person(&mut unmatched, rng) {
+    let mut person = match select_start_person(&mut unmatched, history, rng) {
         Some(person) => person,
         None => return MatchResults::new(),
     };
@@ -32,11 +32,28 @@ where
     MatchResults::from_chain(result_chain)
 }
 
-fn select_start_person<PeerId, R: Rng>(unmatched: &mut Vec<PeerId>, rng: &mut R) -> Option<PeerId>
+fn select_start_person<PeerId, R: Rng>(
+    unmatched: &mut Vec<PeerId>,
+    history: &MatchHistory<PeerId>,
+    rng: &mut R,
+) -> Option<PeerId>
 where
     PeerId: std::fmt::Display + Clone + Eq + std::hash::Hash + Ord + std::fmt::Debug,
 {
-    return pop_random_person(unmatched, rng);
+    let candidates = only_people_in_last_round(history, unmatched);
+
+    let chosen = if candidates.is_empty() {
+        unmatched.choose(rng).clone()
+    } else {
+        candidates.choose(rng).clone()
+    };
+
+    let chosen = match chosen {
+        Some(person) => person.clone(),
+        None => return None,
+    };
+
+    pop_specific_person(unmatched, chosen)
 }
 
 fn select_next_person<PeerId, R: Rng>(
@@ -108,6 +125,22 @@ where
     }
 }
 
+fn only_people_in_last_round<PeerId>(
+    history: &MatchHistory<PeerId>,
+    unmatched: &mut Vec<PeerId>,
+) -> Vec<PeerId>
+where
+    PeerId: Clone + Eq + std::hash::Hash,
+{
+    let candidates: Vec<PeerId> = unmatched
+        .iter()
+        .filter(|person| history.has_match_in_previous_interval(person))
+        .cloned()
+        .collect();
+
+    candidates
+}
+
 #[cfg(test)]
 mod tests {
     use crate::peer_roles::algorithms::IntervalsAgo;
@@ -147,6 +180,21 @@ mod tests {
         }
 
         history
+    }
+
+    fn from_circle(circle: &str) -> String {
+        let parts: Vec<&str> = circle.split('>').map(|s| s.trim()).collect();
+        let mut result = String::from("{");
+        for i in 0..parts.len() {
+            let a = parts[i];
+            let b = parts[(i + 1) % parts.len()];
+            result.push_str(&format!("{}: [{}]", a, b));
+            if i < parts.len() - 1 {
+                result.push_str(", ");
+            }
+        }
+        result.push('}');
+        result
     }
 
     #[test]
@@ -223,9 +271,33 @@ mod tests {
             &mut rng,
         );
 
+        assert_eq!(result.to_string(), from_circle("andi > bob > carol > dave"));
+    }
+
+    #[test]
+    fn inserts_new_person_gracefully() {
+        let mut rng = SmallRng::seed_from_u64(3); // starting with andi
+
+        let history = parse_circles(
+            r#"
+                bob > carol > dave
+            "#,
+        );
+
+        let result = sticky_unidirectional::<String, _>(
+            vec![
+                "andi".to_string(),
+                "bob".to_string(),
+                "carol".to_string(),
+                "dave".to_string(),
+            ],
+            &history,
+            &mut rng,
+        );
+
         assert_eq!(
             result.to_string(),
-            "{andi: [bob], bob: [carol], carol: [dave], dave: [andi]}"
+            "{andi: [carol], bob: [andi], carol: [dave], dave: [bob]}"
         );
     }
 }

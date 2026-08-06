@@ -40,6 +40,12 @@ where
             .or(None)
     }
 
+    pub fn has_match_in_previous_interval(&self, person: &PeerId) -> bool {
+        self.last_matched
+            .iter()
+            .any(|((a, _), intervals_ago)| a == person && intervals_ago.0 == 1)
+    }
+
     fn record_directed(
         map: &mut HashMap<(PeerId, PeerId), IntervalsAgo>,
         a: PeerId,
