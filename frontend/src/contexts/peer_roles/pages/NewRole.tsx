@@ -11,7 +11,7 @@ export default function NewRole() {
 
   const handleSubmit = async (data: NewRole): Promise<void> => {
     return getApi()
-      .api.createNewRole(data) // Todo: add createNewROle to Api.ts (see createCalendarEvent for model)
+      .api.createNewRole(data) // Todo: check createNewROle to Api.ts (see createCalendarEvent for model)
       .then((response) => {
         handleAppEvents(response.data);
         navigate("/peer_roles");

@@ -75,7 +75,7 @@ export default function NewRoleForm({ value, peerRoles, submitText, onSubmit }: 
               key={form.key("peer_roles_table_id")}
               {...form.getInputProps("peer_roles_table_id")}
             />
-          )} // Todo: investigate peerRoles and form errors 
+          )} //TODO resolve errors
 
           <TextInput
             label="Name"
