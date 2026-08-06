@@ -23,22 +23,42 @@ where
     let mut unmatched = VecDeque::from(people);
     let mut result_chain = Vec::<PeerId>::new();
 
-    let mut maybe_person =
-        person_recently_churned(unmatched.iter().cloned().collect(), &churn_data, rng);
+    let mut last_person = match unmatched.pop_front() {
+        Some(person) => person,
+        None => return MatchResults::new(),
+    };
+    result_chain.push(last_person.clone());
 
-    while let Some(person) = maybe_person {
+    while let Some(person) = select_next_person(last_person.clone(), &mut unmatched, history) {
         println!("Selected person: {:?}", person);
-
-        // Take this person out of unmatched
-        unmatched.retain(|p| p != &person);
-
-        result_chain.push(person.clone());
-
-        maybe_person =
-            person_recently_churned(unmatched.iter().cloned().collect(), &churn_data, rng);
+        last_person = person;
+        result_chain.push(last_person.clone());
     }
 
     MatchResults::from_chain(result_chain)
+}
+
+fn select_next_person<PeerId>(
+    last_person: PeerId,
+    unmatched: &mut VecDeque<PeerId>,
+    history: &MatchHistory<PeerId>,
+) -> Option<PeerId>
+where
+    PeerId: std::fmt::Display + Clone + Eq + std::hash::Hash + Ord + std::fmt::Debug,
+{
+    let previous_peer = history.last_peer_matched(&last_person);
+    println!("Previous peer for {:?}: {:?}", last_person, previous_peer);
+
+    // If previous peer is in the unmatches list then return it
+    if let Some(peer) = previous_peer {
+        if unmatched.contains(&peer) {
+            unmatched.retain(|p| p != &peer);
+            return Some(peer);
+        }
+    }
+
+    // Otherwise return the next person in the unmatched list
+    unmatched.pop_front()
 }
 
 fn person_recently_churned<PeerId, R: Rng>(
@@ -202,14 +222,11 @@ mod tests {
     }
 
     #[test]
-    fn starts_from_person_recently_churned() {
+    fn preserves_all_existing_relationships() {
         let mut rng = SmallRng::seed_from_u64(0);
 
         let history = parse_circles(
             r#"
-                andi > bob > carol > dave
-                andi > bob > carol > dave
-                andi > bob > carol > dave
                 andi > bob > fred > carol > dave
             "#,
         );
@@ -227,7 +244,7 @@ mod tests {
 
         assert_eq!(
             result.to_string(),
-            "{bob: [carol], carol: [dave], dave: [andi], andi: [bob]}"
+            "{andi: [bob], bob: [carol], carol: [dave], dave: [andi]}"
         );
     }
 }
