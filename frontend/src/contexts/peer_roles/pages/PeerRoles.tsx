@@ -1,6 +1,5 @@
 import { Stack, Group, Title, ActionIcon } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
-//import { Anchor } from "@mantine/core";
 import { Anchor } from "../../../components";
 import PeerRolesTable from "../components/PeerRolesTable";
 
