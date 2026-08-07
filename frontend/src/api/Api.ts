@@ -19,6 +19,7 @@ export enum StartNextIntervalError {
 
 export enum PeerRoleDistributionType {
   RandomPairs = "RandomPairs",
+  RotatedPairs = "RotatedPairs",
 }
 
 export enum ParticipationIntention {
@@ -89,7 +90,7 @@ export type AppEvent =
   | {
       CirclesEvent: CirclesEvent;
     };
-    
+
 export interface CalendarEvent {
   attendances?: CalendarEventAttendance[] | null;
   description: string;
@@ -398,9 +399,8 @@ export interface PeerRole {
   name: string;
   /** @format int64 */
   project_id: number;
+  summary?: string | null;
 }
-
-//export interface NewRole {} //TODO: update details
 
 export type PeopleEvent = {
   PersonUpdated: Person;
@@ -632,7 +632,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 1.4.5
+ * @version 1.5.0
  * @license
  */
 export class Api<
@@ -1165,21 +1165,5 @@ export class Api<
         method: "GET",
         ...params,
       }),
-
-      ///**
-      // * No description
-      // *
-      // * @name CreateNewRole
-      // * @request POST:/api/peer_roles/new
-      // */
-      //createNewRole: (data: NewRole, params: RequestParams = {}) =>
-      //  this.request<AppEvent[], any>({
-      //    path: `/api/peer_roles/new`,
-      //    method: "POST",
-      //    body: data,
-      //    type: ContentType.Json,
-      //    format: "json",
-      //    ...params,
-      //  }), //TODO: check
   };
 }
