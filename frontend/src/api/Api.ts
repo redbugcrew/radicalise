@@ -89,7 +89,7 @@ export type AppEvent =
   | {
       CirclesEvent: CirclesEvent;
     };
-
+    
 export interface CalendarEvent {
   attendances?: CalendarEventAttendance[] | null;
   description: string;
@@ -399,6 +399,8 @@ export interface PeerRole {
   /** @format int64 */
   project_id: number;
 }
+
+//export interface NewRole {} //TODO: update details
 
 export type PeopleEvent = {
   PersonUpdated: Person;
@@ -1163,5 +1165,21 @@ export class Api<
         method: "GET",
         ...params,
       }),
+
+      ///**
+      // * No description
+      // *
+      // * @name CreateNewRole
+      // * @request POST:/api/peer_roles/new
+      // */
+      //createNewRole: (data: NewRole, params: RequestParams = {}) =>
+      //  this.request<AppEvent[], any>({
+      //    path: `/api/peer_roles/new`,
+      //    method: "POST",
+      //    body: data,
+      //    type: ContentType.Json,
+      //    format: "json",
+      //    ...params,
+      //  }), //TODO: check
   };
 }
