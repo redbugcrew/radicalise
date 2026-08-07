@@ -506,6 +506,7 @@ pub struct PeerRole {
     pub project_id: i64,
     pub circle_id: i64,
     pub distribution_type: PeerRoleDistributionType,
+    pub summary: String,
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
