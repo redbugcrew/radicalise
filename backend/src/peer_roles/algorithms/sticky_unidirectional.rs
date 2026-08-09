@@ -28,9 +28,14 @@ where
 
     println!("Starting with person: {}", person);
 
-    while let Some(next_person) =
-        select_next_person(person.clone(), &mut unmatched, &people, history, rng)
-    {
+    while let Some(next_person) = select_next_person(
+        person.clone(),
+        &mut unmatched,
+        &people,
+        history,
+        _constraint_edges,
+        rng,
+    ) {
         person = next_person;
         result_chain.push(person.clone());
     }
@@ -76,6 +81,7 @@ fn select_next_person<PeerId, R: Rng>(
     unmatched: &mut Vec<PeerId>,
     all_people: &Vec<PeerId>,
     history: &MatchHistory<PeerId>,
+    constraint_edges: Option<&[(PeerId, PeerId)]>,
     rng: &mut R,
 ) -> Option<PeerId>
 where
@@ -83,10 +89,19 @@ where
 {
     if let Some(peer) = next_in_previous_chain(last_person.clone(), unmatched, all_people, history)
     {
-        return Some(peer);
+        if !is_constrained_match(&last_person, &peer, constraint_edges) {
+            return Some(peer);
+        }
     }
 
-    return pop_random_person(unmatched, rng);
+    let allowed: Vec<PeerId> = unmatched
+        .iter()
+        .filter(|person| !is_constrained_match(&last_person, person, constraint_edges))
+        .cloned()
+        .collect();
+
+    let chosen = allowed.choose(rng).cloned()?;
+    pop_specific_person(unmatched, chosen)
 }
 
 fn next_in_previous_chain<PeerId>(
@@ -126,6 +141,23 @@ where
     } else {
         None
     }
+}
+
+fn is_constrained_match<PeerId>(
+    last_person: &PeerId,
+    candidate: &PeerId,
+    constraint_edges: Option<&[(PeerId, PeerId)]>,
+) -> bool
+where
+    PeerId: Eq + std::hash::Hash,
+{
+    let Some(edges) = constraint_edges else {
+        return false;
+    };
+
+    edges
+        .iter()
+        .any(|(a, b)| a == last_person && b == candidate || a == candidate && b == last_person)
 }
 
 fn pop_specific_person<PeerId>(people: &mut Vec<PeerId>, person: PeerId) -> Option<PeerId>
@@ -319,5 +351,36 @@ mod tests {
             result.to_string(),
             "{andi: [carol], bob: [andi], carol: [dave], dave: [bob]}"
         );
+    }
+
+    #[test]
+    fn avoids_matching_pairs_from_constraint_edges() {
+        let mut rng = SmallRng::seed_from_u64(0);
+
+        let result = sticky_unidirectional::<String, _>(
+            vec![
+                "andi".to_string(),
+                "bob".to_string(),
+                "carol".to_string(),
+                "dave".to_string(),
+            ],
+            &empty_history(),
+            Some(&[
+                ("andi".to_string(), "dave".to_string()),
+                ("dave".to_string(), "andi".to_string()),
+            ]),
+            &mut rng,
+        );
+
+        // Without constraints this seed produces andi > dave > bob > carol.
+        // We want to make sure andi and dave are not matched to each other.
+        for (person, peer) in result.edges() {
+            assert!(
+                !((person == "andi" && peer == "dave") || (person == "dave" && peer == "andi")),
+                "Expected constraint edge andi-dave to be avoided, got {} -> {}",
+                person,
+                peer
+            );
+        }
     }
 }
