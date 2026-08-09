@@ -30,6 +30,7 @@ where
 
     while let Some(next_person) = select_next_person(
         person.clone(),
+        result_chain.first().unwrap(),
         &mut unmatched,
         &people,
         history,
@@ -89,6 +90,7 @@ where
 
 fn select_next_person<PeerId, R: Rng>(
     last_person: PeerId,
+    first_person: &PeerId,
     unmatched: &mut Vec<PeerId>,
     all_people: &Vec<PeerId>,
     history: &MatchHistory<PeerId>,
@@ -110,6 +112,17 @@ where
         .filter(|person| !is_constrained_match(&last_person, person, constraint_edges))
         .cloned()
         .collect();
+
+    if allowed.len() == 2 {
+        let preferred = allowed
+            .iter()
+            .find(|person| !is_constrained_match(*person, first_person, constraint_edges))
+            .cloned();
+
+        if let Some(preferred) = preferred {
+            return pop_specific_person(unmatched, preferred);
+        }
+    }
 
     let chosen = allowed.choose(rng).cloned()?;
     pop_specific_person(unmatched, chosen)
