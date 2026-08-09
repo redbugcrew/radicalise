@@ -1,9 +1,52 @@
 use super::super::match_results::MatchResults;
 use super::helpers::match_history::MatchHistory;
 use rand::Rng;
+use rand::SeedableRng;
 use rand::seq::IndexedRandom;
 
+const MAX_RETRIES: usize = 10;
+
 pub fn sticky_unidirectional<PeerId, R: Rng>(
+    people: Vec<PeerId>,
+    history: &MatchHistory<PeerId>,
+    constraint_edges: Option<&[(PeerId, PeerId)]>,
+    rng: &mut R,
+) -> Result<MatchResults<PeerId>, super::PairingAlgorithmError>
+where
+    PeerId: std::fmt::Display + Clone + Eq + std::hash::Hash + Ord + std::fmt::Debug,
+{
+    // First attempt uses the caller's rng unchanged to preserve deterministic behaviour.
+    if let Ok(result) = try_sticky_unidirectional(
+        people.clone(),
+        history,
+        constraint_edges,
+        rng,
+    ) {
+        return Ok(result);
+    }
+
+    let base_seed = rng.next_u64();
+
+    for attempt in 1..=MAX_RETRIES {
+        let mut attempt_rng =
+            rand::rngs::SmallRng::seed_from_u64(base_seed.wrapping_add(attempt as u64));
+
+        if let Ok(result) = try_sticky_unidirectional(
+            people.clone(),
+            history,
+            constraint_edges,
+            &mut attempt_rng,
+        ) {
+            return Ok(result);
+        }
+    }
+
+    Err(super::PairingAlgorithmError::ConstraintViolation(
+        "Could not build a valid cycle after multiple attempts".to_string(),
+    ))
+}
+
+fn try_sticky_unidirectional<PeerId, R: Rng>(
     people: Vec<PeerId>,
     history: &MatchHistory<PeerId>,
     constraint_edges: Option<&[(PeerId, PeerId)]>,
@@ -59,6 +102,14 @@ where
                 person, first_person
             )));
         }
+    }
+
+    if result_chain.len() != people.len() {
+        return Err(super::PairingAlgorithmError::ConstraintViolation(format!(
+            "Could not match all people; only matched {} of {}",
+            result_chain.len(),
+            people.len()
+        )));
     }
 
     Ok(results)
@@ -403,6 +454,9 @@ mod tests {
 
     #[test]
     fn avoids_constrained_cycle_close() {
+        // Seed 7 used to build andi > bob > dave > carol and then fail because
+        // the closing edge carol > andi was constrained. With retries the
+        // algorithm should find a valid cycle that avoids the constraint.
         let mut rng = SmallRng::seed_from_u64(7);
 
         let result = sticky_unidirectional::<String, _>(
@@ -418,12 +472,73 @@ mod tests {
                 ("carol".to_string(), "andi".to_string()),
             ]),
             &mut rng,
-        );
+        )
+        .unwrap();
+
+        for (person, peer) in result.edges() {
+            assert!(
+                !((person == "andi" && peer == "carol")
+                    || (person == "carol" && peer == "andi")),
+                "Expected constraint edge andi-carol to be avoided, got {} -> {}",
+                person,
+                peer
+            );
+        }
+    }
+
+    #[test]
+    fn retries_find_valid_cycle_when_first_attempt_strands_people() {
+        // Two triangles (a,b,c) and (d,e,f) joined by limited cross-edges.
+        // Valid cycles exist, e.g. a > d > b > e > c > f > a, but some
+        // greedy choices can strand people. Retries should find a valid cycle.
+        let mut rng = SmallRng::seed_from_u64(1);
+
+        let result = sticky_unidirectional::<String, _>(
+            vec![
+                "a".to_string(),
+                "b".to_string(),
+                "c".to_string(),
+                "d".to_string(),
+                "e".to_string(),
+                "f".to_string(),
+            ],
+            &empty_history(),
+            Some(&[
+                ("a".to_string(), "b".to_string()),
+                ("b".to_string(), "a".to_string()),
+                ("b".to_string(), "c".to_string()),
+                ("c".to_string(), "b".to_string()),
+                ("a".to_string(), "c".to_string()),
+                ("c".to_string(), "a".to_string()),
+                ("d".to_string(), "e".to_string()),
+                ("e".to_string(), "d".to_string()),
+                ("e".to_string(), "f".to_string()),
+                ("f".to_string(), "e".to_string()),
+                ("d".to_string(), "f".to_string()),
+                ("f".to_string(), "d".to_string()),
+                ("c".to_string(), "d".to_string()),
+                ("d".to_string(), "c".to_string()),
+            ]),
+            &mut rng,
+        )
+        .unwrap();
+
+        let people_in_result: std::collections::HashSet<String> = result
+            .edges()
+            .iter()
+            .flat_map(|(a, b)| vec![a.clone(), b.clone()])
+            .collect();
+
+        let missing: Vec<&str> = ["a", "b", "c", "d", "e", "f"]
+            .into_iter()
+            .filter(|person| !people_in_result.contains(*person))
+            .collect();
 
         assert!(
-            result.is_err(),
-            "Expected constraint violation when closing cycle, got {:?}",
-            result
+            missing.is_empty(),
+            "Expected all people to be matched, but missing {:?}: {}",
+            missing,
+            result.to_string()
         );
     }
 }
