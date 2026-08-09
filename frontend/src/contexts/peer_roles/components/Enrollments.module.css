@@ -5,6 +5,10 @@
   align-items: stretch;
   row-gap: var(--mantine-spacing-md);
   column-gap: var(--mantine-spacing-xl);
+
+  @media (max-width: $mantine-breakpoint-xs) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .multiple_roles > * {
