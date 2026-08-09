@@ -1,0 +1,11 @@
+.multiple_roles {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  grid-template-rows: auto;
+  align-items: stretch;
+  row-gap: var(--mantine-spacing-md);
+  column-gap: var(--mantine-spacing-xl);
+}
+
+.multiple_roles > * {
+}

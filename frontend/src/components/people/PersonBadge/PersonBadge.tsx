@@ -4,7 +4,7 @@ import classes from "./PersonBadge.module.css";
 import Avatar from "../Avatar";
 import Anchor from "../../Anchor";
 
-interface PersonBadgeProps {
+export interface PersonBadgeProps {
   person: Person | null;
   me?: boolean;
   highlight?: boolean;

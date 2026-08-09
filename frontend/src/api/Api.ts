@@ -20,6 +20,7 @@ export enum StartNextIntervalError {
 export enum PeerRoleDistributionType {
   RandomPairs = "RandomPairs",
   RotatedPairs = "RotatedPairs",
+  StickyUnidirectional = "StickyUnidirectional",
 }
 
 export enum ParticipationIntention {
