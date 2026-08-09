@@ -6,9 +6,9 @@ use rand::seq::IndexedRandom;
 pub fn sticky_unidirectional<PeerId, R: Rng>(
     people: Vec<PeerId>,
     history: &MatchHistory<PeerId>,
-    _constraint_edges: Option<&[(PeerId, PeerId)]>,
+    constraint_edges: Option<&[(PeerId, PeerId)]>,
     rng: &mut R,
-) -> MatchResults<PeerId>
+) -> Result<MatchResults<PeerId>, super::PairingAlgorithmError>
 where
     PeerId: std::fmt::Display + Clone + Eq + std::hash::Hash + Ord + std::fmt::Debug,
 {
@@ -22,7 +22,7 @@ where
 
     let mut person = match select_start_person(&mut unmatched, history, rng) {
         Some(person) => person,
-        None => return MatchResults::new(),
+        None => return Ok(MatchResults::new()),
     };
     result_chain.push(person.clone());
 
@@ -33,7 +33,7 @@ where
         &mut unmatched,
         &people,
         history,
-        _constraint_edges,
+        constraint_edges,
         rng,
     ) {
         person = next_person;
@@ -49,7 +49,18 @@ where
             .join(" > ")
     );
 
-    MatchResults::from_chain(result_chain)
+    let results = MatchResults::from_chain(result_chain.clone());
+
+    if let Some(first_person) = result_chain.first() {
+        if is_constrained_match(&person, first_person, constraint_edges) {
+            return Err(super::PairingAlgorithmError::ConstraintViolation(format!(
+                "Could not build a cycle without using a constrained edge between {} and {}",
+                person, first_person
+            )));
+        }
+    }
+
+    Ok(results)
 }
 
 fn select_start_person<PeerId, R: Rng>(
@@ -127,20 +138,6 @@ where
     }
 
     None
-}
-
-fn pop_random_person<PeerId, R: Rng>(people: &mut Vec<PeerId>, rng: &mut R) -> Option<PeerId>
-where
-    PeerId: Clone + Eq + std::hash::Hash,
-{
-    let person = people.choose(rng);
-    if let Some(person) = person {
-        let person = person.clone();
-        people.retain(|p| p != &person);
-        Some(person)
-    } else {
-        None
-    }
 }
 
 fn is_constrained_match<PeerId>(
@@ -248,7 +245,8 @@ mod tests {
     fn returns_empty_matches_by_default() {
         let mut rng = SmallRng::seed_from_u64(0);
 
-        let result = sticky_unidirectional::<String, _>(vec![], &empty_history(), None, &mut rng);
+        let result =
+            sticky_unidirectional::<String, _>(vec![], &empty_history(), None, &mut rng).unwrap();
         assert!(result.edges().is_empty());
     }
 
@@ -261,7 +259,8 @@ mod tests {
             &empty_history(),
             None,
             &mut rng,
-        );
+        )
+        .unwrap();
         assert!(result.edges().is_empty());
     }
 
@@ -273,7 +272,8 @@ mod tests {
             &empty_history(),
             None,
             &mut rng,
-        );
+        )
+        .unwrap();
 
         assert_eq!(result.to_string(), "{andi: [bob], bob: [andi]}");
     }
@@ -292,7 +292,8 @@ mod tests {
             &empty_history(),
             None,
             &mut rng,
-        );
+        )
+        .unwrap();
 
         assert_eq!(
             result.to_string(),
@@ -320,7 +321,8 @@ mod tests {
             &history,
             None,
             &mut rng,
-        );
+        )
+        .unwrap();
 
         assert_eq!(result.to_string(), from_circle("andi > bob > carol > dave"));
     }
@@ -345,7 +347,8 @@ mod tests {
             &history,
             None,
             &mut rng,
-        );
+        )
+        .unwrap();
 
         assert_eq!(
             result.to_string(),
@@ -370,7 +373,8 @@ mod tests {
                 ("dave".to_string(), "andi".to_string()),
             ]),
             &mut rng,
-        );
+        )
+        .unwrap();
 
         // Without constraints this seed produces andi > dave > bob > carol.
         // We want to make sure andi and dave are not matched to each other.
@@ -382,5 +386,31 @@ mod tests {
                 peer
             );
         }
+    }
+
+    #[test]
+    fn avoids_constrained_cycle_close() {
+        let mut rng = SmallRng::seed_from_u64(7);
+
+        let result = sticky_unidirectional::<String, _>(
+            vec![
+                "andi".to_string(),
+                "bob".to_string(),
+                "carol".to_string(),
+                "dave".to_string(),
+            ],
+            &empty_history(),
+            Some(&[
+                ("andi".to_string(), "carol".to_string()),
+                ("carol".to_string(), "andi".to_string()),
+            ]),
+            &mut rng,
+        );
+
+        assert!(
+            result.is_err(),
+            "Expected constraint violation when closing cycle, got {:?}",
+            result
+        );
     }
 }

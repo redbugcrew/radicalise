@@ -171,7 +171,14 @@ async fn assign_interval_peer_role(
         peer_role
             .distribution_type
             .distribute(people, history.as_ref(), constraint_edges, &mut rng)
-    };
+    }
+    .map_err(|error| {
+        println!(
+            "Constraint violation while assigning peer role '{}': {}",
+            peer_role.name, error
+        );
+        AssignPeerRolesError::ConstraintViolation(error.to_string())
+    })?;
 
     println!(
         "Peer role '{}' (interval {}): {}",
