@@ -16,5 +16,5 @@ export default function PersonEnrollmentsForInterval({ subjectPersonId, interval
 
   const subjectEnrollments = involvingPerson(allEnrollments, subjectPersonId);
 
-  return <GroupedEnrollments enrollments={subjectEnrollments} viewerPersonId={viewerPersonId} roles={roles} people={people} />;
+  return <GroupedEnrollments enrollments={subjectEnrollments} subjectPersonId={subjectPersonId} viewerPersonId={viewerPersonId} roles={roles} people={people} />;
 }

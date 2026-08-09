@@ -1,13 +1,14 @@
-import { Stack, Group, Text, Grid, SimpleGrid } from "@mantine/core";
+import { Stack, Text } from "@mantine/core";
 import type { PeerEnrollment, PeerRole } from "../../../api/Api";
-import EnrollmentLine from "./EnrollmentLine";
 import type { PeerRolesObjectMap } from "../../../store/peer_roles";
 import type { PeopleObjectMap } from "../../../store/people";
 
 import classes from "./Enrollments.module.css";
+import GroupedEnrollmentLine from "./GroupedEnrollmentLine";
 
 interface GroupedEnrollmentsProps {
   enrollments: PeerEnrollment[];
+  subjectPersonId: number;
   viewerPersonId?: number | undefined;
   roles: PeerRolesObjectMap;
   people: PeopleObjectMap;
@@ -39,7 +40,7 @@ function groupByRole(enrollments: PeerEnrollment[], roles: PeerRolesObjectMap): 
   return unordered.sort((a, b) => a.role.id - b.role.id);
 }
 
-export default function GroupedEnrollments({ enrollments, viewerPersonId, roles, people }: GroupedEnrollmentsProps) {
+export default function GroupedEnrollments({ enrollments, subjectPersonId, viewerPersonId, roles, people }: GroupedEnrollmentsProps) {
   if (enrollments.length === 0) return null;
 
   const grouped = groupByRole(enrollments, roles);
@@ -53,12 +54,7 @@ export default function GroupedEnrollments({ enrollments, viewerPersonId, roles,
             {role.name}
           </Text>
           <Stack gap="sm">
-            {enrollments.map((enrollment: PeerEnrollment) => {
-              const role = roles[enrollment.peer_role_id];
-              if (!role) return null;
-
-              return <EnrollmentLine key={enrollment.id} enrollment={enrollment} role={role} people={people} viewerPersonId={viewerPersonId} />;
-            })}
+            <GroupedEnrollmentLine enrollments={enrollments} subjectPersonId={subjectPersonId} role={role} people={people} viewerPersonId={viewerPersonId} />
           </Stack>
         </>
       ))}
