@@ -1,7 +1,7 @@
 use sqlx::SqlitePool;
 
 use crate::{
-    peer_roles::algorithms::MatchHistory,
+    peer_roles::algorithms::{IntervalsAgo, MatchHistory},
     shared::entities::{IntervalId, PeerEnrollment, PersonId},
 };
 
@@ -41,6 +41,7 @@ pub async fn upsert_peer_enrollments(
 
 pub async fn load_match_history(
     peer_role_id: i64,
+    current_interval_id: i64,
     pool: &SqlitePool,
 ) -> Result<MatchHistory<i64>, sqlx::Error> {
     let rows = sqlx::query!(
@@ -57,7 +58,8 @@ pub async fn load_match_history(
 
     let mut history: MatchHistory<i64> = MatchHistory::new();
     for row in rows {
-        history.record(row.person_id, row.peer_id, row.last_interval);
+        let intervals_ago = IntervalsAgo(current_interval_id - row.last_interval);
+        history.record(row.person_id, row.peer_id, intervals_ago);
     }
 
     Ok(history)

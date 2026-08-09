@@ -4,15 +4,17 @@ use rand::Rng;
 mod helpers;
 mod random_pairs;
 mod rotated_pairs;
+mod sticky_unidirectional;
 
-pub use helpers::match_history::MatchHistory;
+pub use helpers::match_history::{IntervalsAgo, MatchHistory};
 pub use random_pairs::random_pairs;
 pub use rotated_pairs::rotated_pairs;
+pub use sticky_unidirectional::sticky_unidirectional;
 
 pub trait PairingAlgorithm {
     /// Whether this algorithm needs historical match data. The caller uses this
     /// to decide whether to fetch it before calling `distribute`.
-    fn requires_history(&self) -> bool;
+    fn requires_match_history(&self) -> bool;
 
     fn distribute<PeerId, R>(
         &self,
@@ -26,17 +28,18 @@ pub trait PairingAlgorithm {
 }
 
 impl PairingAlgorithm for PeerRoleDistributionType {
-    fn requires_history(&self) -> bool {
+    fn requires_match_history(&self) -> bool {
         match self {
             Self::RandomPairs => false,
             Self::RotatedPairs => true,
+            Self::StickyUnidirectional => true,
         }
     }
 
     fn distribute<PeerId, R>(
         &self,
         people: Vec<PeerId>,
-        history: Option<&MatchHistory<PeerId>>,
+        match_history: Option<&MatchHistory<PeerId>>,
         rng: &mut R,
     ) -> MatchResults<PeerId>
     where
@@ -45,7 +48,12 @@ impl PairingAlgorithm for PeerRoleDistributionType {
     {
         match self {
             Self::RandomPairs => random_pairs(people, rng),
-            Self::RotatedPairs => rotated_pairs(people, history.expect("History required"), rng),
+            Self::RotatedPairs => {
+                rotated_pairs(people, match_history.expect("History required"), rng)
+            }
+            Self::StickyUnidirectional => {
+                sticky_unidirectional(people, match_history.expect("History required"), rng)
+            }
         }
     }
 }
