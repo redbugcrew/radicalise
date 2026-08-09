@@ -1,5 +1,5 @@
 import { Stack, Text } from "@mantine/core";
-import type { PeerEnrollment, PeerRole } from "../../../api/Api";
+import type { PeerEnrollment, PeerRole, PeerRoleDistributionType } from "../../../api/Api";
 import type { PeerRolesObjectMap } from "../../../store/peer_roles";
 import type { PeopleObjectMap } from "../../../store/people";
 

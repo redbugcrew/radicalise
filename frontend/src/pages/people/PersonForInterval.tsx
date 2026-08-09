@@ -108,10 +108,10 @@ export default function PersonForInterval({ personIdNum, interval }: PersonForIn
               ))}
 
               <Card withBorder>
-                <Title order={2} size="h3">
+                <Title order={2} size="h3" mb="md">
                   Peer roles
                 </Title>
-                <PersonEnrollmentsForInterval person={person} intervalData={intervalData} viewerPersonId={viewerPersonId} />
+                <PersonEnrollmentsForInterval subjectPersonId={personIdNum} intervalData={intervalData} viewerPersonId={viewerPersonId} />
               </Card>
             </Stack>
           </Container>
