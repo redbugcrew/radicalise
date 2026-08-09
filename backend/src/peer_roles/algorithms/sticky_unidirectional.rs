@@ -11,6 +11,11 @@ pub fn sticky_unidirectional<PeerId, R: Rng>(
 where
     PeerId: std::fmt::Display + Clone + Eq + std::hash::Hash + Ord + std::fmt::Debug,
 {
+    print!(
+        "Running sticky unidirectional algorithm for {} people: ",
+        people.len()
+    );
+
     let mut unmatched = people.clone();
     let mut result_chain = Vec::<PeerId>::new();
 
@@ -28,6 +33,15 @@ where
         person = next_person;
         result_chain.push(person.clone());
     }
+
+    print!(
+        "Resulting chain: {}",
+        result_chain
+            .iter()
+            .map(|p| p.to_string())
+            .collect::<Vec<String>>()
+            .join(" > ")
+    );
 
     MatchResults::from_chain(result_chain)
 }
