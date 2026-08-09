@@ -5,7 +5,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 use crate::{
     auth::auth_backend::AuthSession,
     intervals::{events::IntervalsEvent, tasks::add_interval_implicit_involvements},
-    peer_roles::assign_interval_peer_roles,
+    peer_roles::{AssignPeerRolesError, assign_interval_peer_roles},
     realtime::RealtimeState,
     shared::{default_project_id, entities::Interval, events::AppEvent},
 };
@@ -124,7 +124,16 @@ async fn start_next_interval(
 
     match assign_interval_peer_roles(&next_interval, project_id.clone(), &pool).await {
         Ok(_) => (),
-        Err(_) => return StartNextIntervalError::CouldntSetUpInterval.into_response(),
+        Err(AssignPeerRolesError::ConstraintViolation(message)) => {
+            println!(
+                "Constraint violation while assigning peer roles: {}",
+                message
+            );
+            return StartNextIntervalError::CouldntSetUpInterval.into_response();
+        }
+        Err(AssignPeerRolesError::Database(_)) => {
+            return StartNextIntervalError::InternalServerError.into_response();
+        }
     };
 
     match repo::change_project_interval(project_id.clone(), next_interval.typed_id(), &pool).await {

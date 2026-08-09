@@ -20,6 +20,7 @@ pub trait PairingAlgorithm {
         &self,
         people: Vec<PeerId>,
         history: Option<&MatchHistory<PeerId>>,
+        constraint_edges: Option<&[(PeerId, PeerId)]>,
         rng: &mut R,
     ) -> MatchResults<PeerId>
     where
@@ -40,6 +41,7 @@ impl PairingAlgorithm for PeerRoleDistributionType {
         &self,
         people: Vec<PeerId>,
         match_history: Option<&MatchHistory<PeerId>>,
+        constraint_edges: Option<&[(PeerId, PeerId)]>,
         rng: &mut R,
     ) -> MatchResults<PeerId>
     where
@@ -47,13 +49,19 @@ impl PairingAlgorithm for PeerRoleDistributionType {
         R: Rng,
     {
         match self {
-            Self::RandomPairs => random_pairs(people, rng),
-            Self::RotatedPairs => {
-                rotated_pairs(people, match_history.expect("History required"), rng)
-            }
-            Self::StickyUnidirectional => {
-                sticky_unidirectional(people, match_history.expect("History required"), rng)
-            }
+            Self::RandomPairs => random_pairs(people, constraint_edges, rng),
+            Self::RotatedPairs => rotated_pairs(
+                people,
+                match_history.expect("History required"),
+                constraint_edges,
+                rng,
+            ),
+            Self::StickyUnidirectional => sticky_unidirectional(
+                people,
+                match_history.expect("History required"),
+                constraint_edges,
+                rng,
+            ),
         }
     }
 }

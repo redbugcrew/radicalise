@@ -6,6 +6,7 @@ use rand::seq::IndexedRandom;
 pub fn sticky_unidirectional<PeerId, R: Rng>(
     people: Vec<PeerId>,
     history: &MatchHistory<PeerId>,
+    _constraint_edges: Option<&[(PeerId, PeerId)]>,
     rng: &mut R,
 ) -> MatchResults<PeerId>
 where
@@ -215,7 +216,7 @@ mod tests {
     fn returns_empty_matches_by_default() {
         let mut rng = SmallRng::seed_from_u64(0);
 
-        let result = sticky_unidirectional::<String, _>(vec![], &empty_history(), &mut rng);
+        let result = sticky_unidirectional::<String, _>(vec![], &empty_history(), None, &mut rng);
         assert!(result.edges().is_empty());
     }
 
@@ -226,6 +227,7 @@ mod tests {
         let result = sticky_unidirectional::<String, _>(
             vec!["andi".to_string()],
             &empty_history(),
+            None,
             &mut rng,
         );
         assert!(result.edges().is_empty());
@@ -237,6 +239,7 @@ mod tests {
         let result = sticky_unidirectional::<String, _>(
             vec!["andi".to_string(), "bob".to_string()],
             &empty_history(),
+            None,
             &mut rng,
         );
 
@@ -255,6 +258,7 @@ mod tests {
                 "dave".to_string(),
             ],
             &empty_history(),
+            None,
             &mut rng,
         );
 
@@ -282,6 +286,7 @@ mod tests {
                 "dave".to_string(),
             ],
             &history,
+            None,
             &mut rng,
         );
 
@@ -306,6 +311,7 @@ mod tests {
                 "dave".to_string(),
             ],
             &history,
+            None,
             &mut rng,
         );
 
