@@ -68,6 +68,7 @@ async fn add_interval_circle_implicit_involvements(
         project_id.clone(),
         circle_id.clone(),
         previous_interval.typed_id(),
+        None,
         pool,
     )
     .await?;

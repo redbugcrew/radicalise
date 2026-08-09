@@ -10,7 +10,7 @@ use crate::{
         enrollments_repo::{load_match_history, upsert_peer_enrollments},
         peer_roles_repo::find_all_peer_roles,
     },
-    shared::entities::{CircleId, Interval, IntervalId, PeerRole, ProjectId},
+    shared::entities::{CircleId, Interval, IntervalId, InvolvementStatus, PeerRole, ProjectId},
 };
 
 mod algorithms;
@@ -135,6 +135,7 @@ async fn assign_interval_peer_role(
         ProjectId::new(peer_role.project_id),
         CircleId::new(peer_role.circle_id),
         IntervalId::new(interval.id),
+        Some(&[InvolvementStatus::Onboarding, InvolvementStatus::Active]),
         pool,
     )
     .await?;

@@ -276,6 +276,7 @@ pub async fn find_interval_involvement_data_for_circle(
         project_id.clone(),
         circle_id.clone(),
         interval_id.clone(),
+        None,
         pool,
     )
     .await?;

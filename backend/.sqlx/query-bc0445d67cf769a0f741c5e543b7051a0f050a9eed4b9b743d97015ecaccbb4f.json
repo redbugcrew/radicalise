@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "\n        SELECT id, name, summary, project_id, circle_id, distribution_type as \"distribution_type: PeerRoleDistributionType\"\n        FROM peer_roles\n        WHERE project_id = ?\n        ",
+  "query": "\n        SELECT id, name, summary, project_id, circle_id, distribution_type as \"distribution_type: PeerRoleDistributionType\", constrained_by_id\n        FROM peer_roles\n        WHERE project_id = ?\n        ",
   "describe": {
     "columns": [
       {
@@ -32,6 +32,11 @@
         "name": "distribution_type: PeerRoleDistributionType",
         "ordinal": 5,
         "type_info": "Text"
+      },
+      {
+        "name": "constrained_by_id",
+        "ordinal": 6,
+        "type_info": "Integer"
       }
     ],
     "parameters": {
@@ -43,8 +48,9 @@
       true,
       false,
       false,
-      false
+      false,
+      true
     ]
   },
-  "hash": "7ac991f1eb965539fdb11b3ee21faa0c9fa0ea163655306a03f2c65029c3a077"
+  "hash": "bc0445d67cf769a0f741c5e543b7051a0f050a9eed4b9b743d97015ecaccbb4f"
 }
