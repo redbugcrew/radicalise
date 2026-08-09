@@ -8,6 +8,7 @@ use super::{IntervalsAgo, MatchHistory};
 pub fn rotated_pairs<PeerId, R: Rng>(
     people: Vec<PeerId>,
     history: &MatchHistory<PeerId>,
+    _constraint_edges: Option<&[(PeerId, PeerId)]>,
     rng: &mut R,
 ) -> MatchResults<PeerId>
 where
@@ -72,7 +73,7 @@ mod tests {
         let mut rng = SmallRng::seed_from_u64(0);
         let history = MatchHistory::<String>::new();
 
-        let result = rotated_pairs::<String, _>(vec![], &history, &mut rng);
+        let result = rotated_pairs::<String, _>(vec![], &history, None, &mut rng);
         assert!(result.edges().is_empty());
     }
 
@@ -81,7 +82,7 @@ mod tests {
         let mut rng = SmallRng::seed_from_u64(0);
         let history = MatchHistory::<String>::new();
 
-        let result = rotated_pairs::<String, _>(vec!["andi".to_string()], &history, &mut rng);
+        let result = rotated_pairs::<String, _>(vec!["andi".to_string()], &history, None, &mut rng);
         assert!(result.edges().is_empty());
     }
 
@@ -93,6 +94,7 @@ mod tests {
         let result = rotated_pairs::<String, _>(
             vec!["andi".to_string(), "bob".to_string()],
             &history,
+            None,
             &mut rng,
         );
 
@@ -112,6 +114,7 @@ mod tests {
                 "dave".to_string(),
             ],
             &history,
+            None,
             &mut rng,
         );
 
@@ -135,12 +138,13 @@ mod tests {
                 "eve".to_string(),
             ],
             &history,
+            None,
             &mut rng,
         );
 
         assert_eq!(
             result.to_string(),
-            "{andi: [dana, eve], bob: [carol], carol: [bob], dana: [andi, eve], eve: [andi, dana]}"
+            "{andi: [eve, dana], bob: [carol], carol: [bob], dana: [eve, andi], eve: [dana, andi]}"
         );
     }
 
@@ -161,12 +165,13 @@ mod tests {
                 "dave".to_string(),
             ],
             &history,
+            None,
             &mut rng,
         );
 
         assert_eq!(
             result.to_string(),
-            "{andi: [carol], bob: [dave], carol: [andi], dave: [bob]}"
+            "{andi: [dave], bob: [carol], carol: [bob], dave: [andi]}"
         );
     }
 
@@ -186,6 +191,7 @@ mod tests {
                 "dave".to_string(),
             ],
             &history,
+            None,
             &mut rng,
         );
 

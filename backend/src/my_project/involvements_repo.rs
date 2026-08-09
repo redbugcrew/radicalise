@@ -1,4 +1,4 @@
-use sqlx::SqlitePool;
+use sqlx::{QueryBuilder, Sqlite, SqlitePool};
 
 use crate::{
     circles::repo::add_inside_circles,
@@ -9,7 +9,7 @@ use crate::{
     },
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, sqlx::FromRow)]
 pub struct CircleInvolvementRecord {
     pub id: i64,
     pub person_id: i64,
@@ -168,39 +168,52 @@ pub async fn find_all_circle_involvements(
     project_id: ProjectId,
     circle_id: CircleId,
     interval_id: IntervalId,
+    include_statuses: Option<&[InvolvementStatus]>,
     pool: &SqlitePool,
 ) -> Result<Vec<CircleInvolvement>, sqlx::Error> {
-    let records = sqlx::query_as!(
-        CircleInvolvementRecord,
+    let mut query_builder: QueryBuilder<Sqlite> = QueryBuilder::new(
         "SELECT
             circle_involvements.id AS id,
             person_id,
-            circles.project_id AS \"project_id: i64\",
+            circles.project_id,
             circle_id,
             interval_id,
-            status as \"status: InvolvementStatus\",
+            status,
             capacity_planning_visibility_circle_id,
             wellbeing,
             focus,
             capacity_score,
             capacity,
-            participation_intention as \"participation_intention: ParticipationIntention\",
-            opt_out_type as \"opt_out_type: OptOutType\",
+            participation_intention,
+            opt_out_type,
             opt_out_planned_return_date,
             intention_context,
             implicit_counter
         FROM circle_involvements
         INNER JOIN circles ON circle_involvements.circle_id = circles.id
         WHERE
-            project_id = ? AND
-            circles.id = ? AND
-            interval_id = ?",
-        project_id.id,
-        circle_id.id,
-        interval_id.id,
-    )
-    .fetch_all(pool)
-    .await?;
+            project_id = ",
+    );
+
+    query_builder.push_bind(project_id.id);
+    query_builder.push(" AND circles.id = ");
+    query_builder.push_bind(circle_id.id);
+    query_builder.push(" AND interval_id = ");
+    query_builder.push_bind(interval_id.id);
+
+    if let Some(statuses) = include_statuses {
+        query_builder.push(" AND status IN (");
+        let mut separated = query_builder.separated(", ");
+        for status in statuses.iter() {
+            separated.push_bind(status);
+        }
+        separated.push_unseparated(")");
+    }
+
+    let records = query_builder
+        .build_query_as::<CircleInvolvementRecord>()
+        .fetch_all(pool)
+        .await?;
 
     Ok(records.into_iter().map(Into::into).collect())
 }

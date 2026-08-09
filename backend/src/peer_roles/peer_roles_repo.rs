@@ -9,7 +9,7 @@ pub async fn find_all_peer_roles(
     let rows = sqlx::query_as!(
         PeerRole,
         r#"
-        SELECT id, name, summary, project_id, circle_id, distribution_type as "distribution_type: PeerRoleDistributionType"
+        SELECT id, name, summary, project_id, circle_id, distribution_type as "distribution_type: PeerRoleDistributionType", constrained_by_id
         FROM peer_roles
         WHERE project_id = ?
         "#,

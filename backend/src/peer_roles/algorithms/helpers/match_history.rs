@@ -34,6 +34,7 @@ where
         self.last_matched.get(&(a.clone(), b.clone())).copied()
     }
 
+    #[allow(dead_code)] // Kept for tests and future use; sticky_unidirectional now prefers last_matched.
     pub fn last_peer_matched(&self, person: &PeerId) -> Option<PeerId> {
         self.most_recent_record(person)
             .map(|((_, peer), _)| peer.clone())

@@ -11,6 +11,21 @@ pub use random_pairs::random_pairs;
 pub use rotated_pairs::rotated_pairs;
 pub use sticky_unidirectional::sticky_unidirectional;
 
+#[derive(Debug)]
+pub enum PairingAlgorithmError {
+    ConstraintViolation(String),
+}
+
+impl std::fmt::Display for PairingAlgorithmError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::ConstraintViolation(message) => write!(f, "{}", message),
+        }
+    }
+}
+
+impl std::error::Error for PairingAlgorithmError {}
+
 pub trait PairingAlgorithm {
     /// Whether this algorithm needs historical match data. The caller uses this
     /// to decide whether to fetch it before calling `distribute`.
@@ -20,8 +35,9 @@ pub trait PairingAlgorithm {
         &self,
         people: Vec<PeerId>,
         history: Option<&MatchHistory<PeerId>>,
+        constraint_edges: Option<&[(PeerId, PeerId)]>,
         rng: &mut R,
-    ) -> MatchResults<PeerId>
+    ) -> Result<MatchResults<PeerId>, PairingAlgorithmError>
     where
         PeerId: std::fmt::Display + Clone + Eq + std::hash::Hash + Ord + std::fmt::Debug,
         R: Rng;
@@ -40,20 +56,27 @@ impl PairingAlgorithm for PeerRoleDistributionType {
         &self,
         people: Vec<PeerId>,
         match_history: Option<&MatchHistory<PeerId>>,
+        constraint_edges: Option<&[(PeerId, PeerId)]>,
         rng: &mut R,
-    ) -> MatchResults<PeerId>
+    ) -> Result<MatchResults<PeerId>, PairingAlgorithmError>
     where
         PeerId: std::fmt::Display + Clone + Eq + std::hash::Hash + Ord + std::fmt::Debug,
         R: Rng,
     {
         match self {
-            Self::RandomPairs => random_pairs(people, rng),
-            Self::RotatedPairs => {
-                rotated_pairs(people, match_history.expect("History required"), rng)
-            }
-            Self::StickyUnidirectional => {
-                sticky_unidirectional(people, match_history.expect("History required"), rng)
-            }
+            Self::RandomPairs => Ok(random_pairs(people, constraint_edges, rng)),
+            Self::RotatedPairs => Ok(rotated_pairs(
+                people,
+                match_history.expect("History required"),
+                constraint_edges,
+                rng,
+            )),
+            Self::StickyUnidirectional => sticky_unidirectional(
+                people,
+                match_history.expect("History required"),
+                constraint_edges,
+                rng,
+            ),
         }
     }
 }

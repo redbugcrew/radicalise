@@ -93,7 +93,6 @@ interface PersonForIntervalProps {
 
 export default function PersonForInterval({ personIdNum, interval }: PersonForIntervalProps) {
   const person = useAppSelector((state) => state.people[personIdNum || -1]);
-  const viewerPersonId = useAppSelector((state) => state.me?.person_id);
 
   return (
     <WithIntervalData interval={interval}>
@@ -111,7 +110,7 @@ export default function PersonForInterval({ personIdNum, interval }: PersonForIn
                 <Title order={2} size="h3" mb="md">
                   Peer roles
                 </Title>
-                <PersonEnrollmentsForInterval subjectPersonId={personIdNum} intervalData={intervalData} viewerPersonId={viewerPersonId} />
+                <PersonEnrollmentsForInterval subjectPersonId={personIdNum} intervalData={intervalData} />
               </Card>
             </Stack>
           </Container>

@@ -508,6 +508,7 @@ pub struct PeerRole {
     pub circle_id: i64,
     pub distribution_type: PeerRoleDistributionType,
     pub summary: Option<String>,
+    pub constrained_by_id: Option<i64>,
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
