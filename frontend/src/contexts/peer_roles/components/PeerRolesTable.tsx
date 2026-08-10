@@ -11,7 +11,7 @@ export default function PeerRolesTable({ peerRoles }: PeerRolesTableProps) {
       <Table.Td>{role.name}</Table.Td>
       <Table.Td>{role.summary}</Table.Td>
       <Table.Td>{role.distribution_type}</Table.Td>
-      <Table.Td>edit</Table.Td>
+      {/* <Table.Td>edit</Table.Td> */}
     </Table.Tr>
   ));
 
@@ -22,7 +22,7 @@ export default function PeerRolesTable({ peerRoles }: PeerRolesTableProps) {
           <Table.Th>Role</Table.Th>
           <Table.Th>Summary</Table.Th>
           <Table.Th>Distribution</Table.Th>
-          <Table.Th>Actions</Table.Th>
+          {/* <Table.Th>Actions</Table.Th> */}
         </Table.Tr>
       </Table.Thead>
       <Table.Tbody>{rows}</Table.Tbody>
