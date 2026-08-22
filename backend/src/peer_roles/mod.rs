@@ -1,11 +1,17 @@
+use axum::{Extension, http::StatusCode, response::IntoResponse};
 use rand::rng;
-use sqlx::SqlitePool;
-use std::collections::{HashMap, HashSet};
+use sqlx::{SqlitePool, pool};
+use std::{
+    collections::{HashMap, HashSet},
+    eprintln, println,
+};
+use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     intervals::repo::mark_peer_roles_processed,
-    my_project::involvements_repo::find_all_circle_involvements,
+    my_project::{involvements_repo::find_all_circle_involvements, repo},
     peer_roles::{
+        self,
         algorithms::PairingAlgorithm,
         enrollments_repo::{load_match_history, upsert_peer_enrollments},
         peer_roles_repo::find_all_peer_roles,
@@ -17,6 +23,37 @@ mod algorithms;
 pub mod enrollments_repo;
 mod match_results;
 pub mod peer_roles_repo;
+
+pub fn router() -> OpenApiRouter {
+    OpenApiRouter::new().routes(routes!(create_new_role))
+}
+
+// Creating Peer Roles
+
+#[utoipa::path(
+    post,
+    path = "/",
+    request_body(content = PeerRole, content_type = "application/json"),
+    responses(
+        (status = 201, body =())
+    )
+)]
+async fn create_new_role(
+    Extension(pool): Extension<SqlitePool>,
+    axum::extract::Json(data): axum::Json<PeerRole>,
+) -> impl IntoResponse {
+    println!("Creating new role: {:?}", data);
+
+    //match peer_roles_repo::create_peer_role(&data, &pool).await {
+    //    Ok(peer_roles) => {}
+    //    Err(err) => {
+    //        eprintln!("failed to create role")
+    //    }
+    //}
+    (StatusCode::CREATED, ()).into_response()
+}
+
+// Assigning Peer Roles
 
 #[derive(Debug)]
 pub enum AssignPeerRolesError {

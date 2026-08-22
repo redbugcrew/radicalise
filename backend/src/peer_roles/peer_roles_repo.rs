@@ -1,6 +1,10 @@
-use sqlx::SqlitePool;
+use resend_rs::Resend;
+use sqlx::{SqlitePool, pool::maybe::MaybePoolConnection::PoolConnection};
 
-use crate::shared::entities::{PeerRole, PeerRoleDistributionType, ProjectId};
+use crate::{
+    peer_roles,
+    shared::entities::{PeerRole, PeerRoleDistributionType, ProjectId},
+};
 
 pub async fn find_all_peer_roles(
     project_id: ProjectId,
@@ -20,3 +24,15 @@ pub async fn find_all_peer_roles(
 
     Ok(rows)
 }
+
+//pub async fn create_peer_role(
+//    record: PeerRole,
+//    project_id: ProjectId,
+//    pool: &SqlitePool,
+//) -> Result<PeerRole, sqlx::Error> {
+//    let result = sqlx::query!(
+//       "INSERT INTO peer_roles (name)
+//        VALUES(?)"
+//    )
+//    return create_peer_role(result.last_insert_rowid(), pool).await;
+//}
