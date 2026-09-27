@@ -126,7 +126,8 @@ jobs:
           path: backend
 
       - name: Check sqlx prepare cache is up to date
-        run: "$HOME/.cargo/bin/sqlx" prepare --check -- --bin radicalise
+        run: |
+          "$HOME/.cargo/bin/sqlx" prepare --check -- --bin radicalise
 
   clippy:
     runs-on: ubuntu-latest
