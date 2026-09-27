@@ -50,7 +50,7 @@ export default function LinksInput({ placeholder, value, defaultValue, onChange,
     value: ensureEmptyLink(value),
     defaultValue: ensureEmptyLink(defaultValue),
     finalValue: undefined,
-    onChange: onChange as any,
+    onChange: onChange,
   })
 
   const lastLinkIsBlank: () => boolean = () => {

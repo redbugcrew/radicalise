@@ -11,7 +11,7 @@ import { actionFailure, actionSuccess, type ActionPromiseResult } from "../../..
 type ForgotPasswordResult = "sent" | "error"
 
 export default function ForgotPassword() {
-  let [result, setResult] = useState<ForgotPasswordResult | null>(null)
+  const [result, setResult] = useState<ForgotPasswordResult | null>(null)
 
   const onSubmit = ({ email }: ForgotPasswordFormData): Promise<ActionPromiseResult> => {
     return getApi()

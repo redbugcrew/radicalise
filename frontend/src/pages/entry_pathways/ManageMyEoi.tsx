@@ -58,7 +58,7 @@ export default function ManageMyEoi() {
 
     return getApi()
       .api.updateEoi(authToken, project.id, values)
-      .then((_) => {
+      .then(() => {
         setError(null)
         setAction("updated")
         setEoi(values)

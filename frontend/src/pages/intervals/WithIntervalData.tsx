@@ -58,18 +58,19 @@ export default function WithIntervalData({ interval, children }: WithIntervalDat
 
   const [intervalData, setIntervalData] = useState<CurrentIntervalState | null>(null)
 
-  if (!interval) return null
-
   const incrementCacheKey = () => {
     setCacheKey((prevKey) => prevKey + 1)
   }
 
-  const tableKey = `${interval.id}-${cacheKey}`
+  const tableKey = interval ? `${interval.id}-${cacheKey}` : "no-interval"
 
   useEffect(() => {
     if (!interval) {
       setIntervalData(null)
-    } else if (currentIntervalData?.interval.id === interval.id) {
+      return
+    }
+
+    if (currentIntervalData?.interval.id === interval.id) {
       setIntervalData(currentIntervalData)
     } else {
       console.log("fetching interval involvements from API")
@@ -87,7 +88,9 @@ export default function WithIntervalData({ interval, children }: WithIntervalDat
     }
 
     incrementCacheKey()
-  }, [interval.id, currentIntervalData])
+  }, [interval, currentIntervalData])
+
+  if (!interval) return null
 
   return children({ interval: interval, intervalData, key: tableKey, isCurrentInterval: interval.id === currentIntervalData?.interval.id })
 }

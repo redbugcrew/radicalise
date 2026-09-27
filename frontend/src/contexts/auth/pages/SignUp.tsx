@@ -6,12 +6,13 @@ import AuthLayout from "../components/AuthLayout"
 import LoginForm from "../components/LoginForm"
 import { Stack, Text } from "@mantine/core"
 import { Anchor } from "../../../components"
+import type { LoginFormData } from "../components/LoginForm"
 
 export default function SignUp() {
   const navigate = useNavigate()
   const location = useLocation()
 
-  const onSubmit = (values: any): Promise<ActionPromiseResult> => {
+  const onSubmit = (values: LoginFormData): Promise<ActionPromiseResult> => {
     return getApi()
       .api.signUp(values)
       .then((response) => {

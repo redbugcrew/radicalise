@@ -36,7 +36,7 @@ export default function MyAttendance({ event, readonly }: MyAttendanceSelectorPr
       })
   }
 
-  let myIntention = {
+  const myIntention = {
     intention: intention,
     onChange: (intention: AttendanceIntention | null) => onIntentionChange(event.id, intention),
   }

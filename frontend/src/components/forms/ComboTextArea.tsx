@@ -37,7 +37,7 @@ export default function ComboTextArea({ hints, ...props }: ComboTextAreaProps) {
         if (!hasContent) {
           setValue(optionValue)
         } else {
-          const content = value.replace(/[\s\.\n]*$/, "")
+          const content = value.replace(/[\s.\n]*$/, "")
 
           setValue(content + ". " + optionValue)
         }

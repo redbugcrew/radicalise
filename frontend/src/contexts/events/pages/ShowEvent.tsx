@@ -11,14 +11,13 @@ export default function ShowEvent() {
   const { eventId } = useParams<"eventId">()
   const eventIdNum = eventId ? parseInt(eventId, 10) : undefined
 
-  if (eventIdNum === undefined) return <div>Invalid Event ID</div>
-
-  const event = useAppSelector((state) => state.events.find((e) => e.id === eventIdNum))
-  if (!event) return <div>Event not found</div>
-
+  const event = useAppSelector((state) => (eventIdNum !== undefined ? state.events.find((e) => e.id === eventIdNum) : undefined))
   const eventTemplate = useAppSelector((state) =>
-    event.event_template_id ? state.eventTemplates.find((et) => et.id === event.event_template_id) : null,
+    event?.event_template_id ? state.eventTemplates.find((et) => et.id === event.event_template_id) : null,
   )
+
+  if (eventIdNum === undefined) return <div>Invalid Event ID</div>
+  if (!event) return <div>Event not found</div>
 
   const inPast = event.end_at ? isPast(event.end_at) : isPast(event.start_at)
 

@@ -7,7 +7,7 @@ import { DateTimePicker } from "@mantine/dates"
 interface CalendarEventFormData {
   id: number
   event_template_id: number | null
-  links?: any[] | null
+  links?: Link[] | null
   name: string | null
   summary: string
   description: string

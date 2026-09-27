@@ -19,7 +19,7 @@ export default function TokenOrRedirect({ children, redirectTo }: TokenOrRedirec
     } else {
       setToken(queryToken)
     }
-  }, [queryToken])
+  }, [queryToken, redirectTo, navigate])
 
   if (!token) return null
   return children(token)

@@ -86,6 +86,7 @@ function ParticipationFormForInterval({
       let results = {} as Record<keyof MyParticipationFormData, string | null>
 
       if (step === 0) {
+        // no validation on the first step
       }
       if (step === 1) {
         results = {

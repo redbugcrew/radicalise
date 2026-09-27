@@ -7,8 +7,8 @@ import { actionFailure, actionSuccess, type ActionPromiseResult } from "../../..
 import ResetPasswordForm from "../components/ResetPasswordForm"
 
 export default function ResetPassword() {
-  const [searchParams, _setSearchParams] = useSearchParams()
-  let navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
   const token = searchParams.get("token")
 
   if (!token) {

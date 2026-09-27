@@ -14,18 +14,29 @@ export default function MyParticipation() {
   const project = useAppSelector((state) => state.project)
   const circle = useAppSelector((state) => state.circles.rootCircles[0])
   const personId = useAppSelector((state) => state.me?.person_id)
-
+  const { intervalId } = useParams()
+  const intervalIdNumber = Number(intervalId)
   const navigate = useNavigate()
+  const api = getApi()
+
+  const interval = allIntervals.find((i) => i.id === intervalIdNumber)
+  const [involvement, setInvolvement] = useState<CircleInvolvement | null>(null)
+
+  useEffect(() => {
+    if (!interval || !circle) return
+    api.api
+      .myParticipation(interval.id, circle.id)
+      .then((response) => {
+        setInvolvement(response.data)
+      })
+      .catch((error) => {
+        console.error("Error fetching participation data:", error)
+      })
+  }, [api, interval, circle])
 
   if (!project) return <Text>Error: Project not found.</Text>
   if (!circle) return <Text>Error: Circle not found.</Text>
   if (!personId) return <Text>Error: Person ID not found.</Text>
-
-  const { intervalId } = useParams()
-  const intervalIdNumber = Number(intervalId)
-  const api = getApi()
-
-  const interval = allIntervals.find((i) => i.id === intervalIdNumber)
 
   if (!interval) {
     return <Text>Error: Interval not found.</Text>
@@ -35,18 +46,6 @@ export default function MyParticipation() {
   }
 
   const readOnly = intervalIdNumber < currentInterval.id
-
-  const [involvement, setInvolvement] = useState<CircleInvolvement | null>(null)
-  useEffect(() => {
-    api.api
-      .myParticipation(interval.id, circle.id)
-      .then((response) => {
-        setInvolvement(response.data)
-      })
-      .catch((error) => {
-        console.error("Error fetching participation data:", error)
-      })
-  }, [interval.id])
 
   if (readOnly && !involvement) {
     return <Text>Error: You were not participating in this interval.</Text>

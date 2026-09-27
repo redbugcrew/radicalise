@@ -100,7 +100,7 @@ export default function CrewParticipationControl({
   const hasConvenorVolunteers = orderedConvenorVolunteers.length > 0
   const noOverlap = Array.isArray(previousInvolvements) && !hasOverlappingPeople(previousInvolvements, formInvolvements)
 
-  let cardStyles = [styles.card]
+  const cardStyles = [styles.card]
   if (!hasPeople || !hasConvenorVolunteers) {
     cardStyles.push(styles.empty)
   } else if (noOverlap) {

@@ -10,14 +10,6 @@ export interface LoggedInOrNotProps {
 export default function MaybeLoggedIn({ children }: LoggedInOrNotProps) {
   const [loggedIn, setLoggedIn] = useState<boolean | null>(null)
 
-  const handleAuthFailure = () => {
-    checkLoginStatus()
-  }
-
-  useEffect(() => {
-    checkLoginStatus()
-  }, [])
-
   const checkLoginStatus = () => {
     getApi()
       .api.getCurrentUser()
@@ -35,6 +27,14 @@ export default function MaybeLoggedIn({ children }: LoggedInOrNotProps) {
         setLoggedIn(false)
       })
   }
+
+  const handleAuthFailure = () => {
+    checkLoginStatus()
+  }
+
+  useEffect(() => {
+    checkLoginStatus()
+  }, [])
 
   console.log("Logged in status is now:", loggedIn)
 

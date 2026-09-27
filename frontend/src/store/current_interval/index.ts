@@ -14,7 +14,7 @@ const currentIntervalSlice = createSlice({
       return action.payload
     },
     circleInvolvementUpdated: (state: CurrentIntervalState, action: PayloadAction<CircleInvolvement>) => {
-      let involvement = action.payload
+      const involvement = action.payload
       if (!state || !involvement) return state
 
       if (state.interval.id !== involvement.interval_id) return state
@@ -31,7 +31,7 @@ const currentIntervalSlice = createSlice({
       }
     },
     personIntervalDataChanged: (state: CurrentIntervalState, action: PayloadAction<PersonIntervalData>) => {
-      let payload = action.payload
+      const payload = action.payload
       if (!state || !payload) return state
 
       const person_id = payload.person_id

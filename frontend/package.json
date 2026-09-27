@@ -14,7 +14,7 @@
     "build": "tsc -b && vite build",
     "check-build": "tsc -b --noEmit",
     "ts:watch": "tsc --watch --noEmit",
-    "lint": "eslint .",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,js,json,css,md}\"",
     "format:write": "prettier --write \"src/**/*.{ts,tsx,js,json,css,md}\"",
     "preview": "vite preview",

@@ -26,7 +26,7 @@ export default function Layout() {
   const person_id = useAppSelector((state) => state.me?.person_id)
   const person = useAppSelector((state) => state.people[person_id || -1])
 
-  const {} = useWebSocket(getSocketUrl(), {
+  useWebSocket(getSocketUrl(), {
     share: true,
     onOpen: (event) => {
       console.log("WebSocket connection opened", event)

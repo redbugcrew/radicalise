@@ -11,14 +11,14 @@ type AvatarSelectProps = InputWrapperProps & {
   placeholder?: string
 }
 
-export function AvatarSelect({ value, defaultValue, onChange, placeholder, ...wrapperProps }: AvatarSelectProps) {
+export function AvatarSelect({ value, defaultValue, onChange, ...wrapperProps }: AvatarSelectProps) {
   const combobox = useCombobox({
     onDropdownClose: () => combobox.resetSelectedOption(),
   })
 
   const [controlValue, setControlValue] = useUncontrolled<number | null>({
-    value: value as number | null,
-    defaultValue: defaultValue as number | null,
+    value: value ?? null,
+    defaultValue: defaultValue ?? null,
     finalValue: null,
     onChange: onChange as any,
   })

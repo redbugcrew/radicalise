@@ -6,7 +6,7 @@ import { isValidEmail } from "../utilities/validators"
 interface EOIFormProps {
   project: Project
   eoi?: ExpressionOfInterest
-  actionName?: String
+  actionName?: string
   onSubmit: (values: ExpressionOfInterest) => Promise<void>
 }
 

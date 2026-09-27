@@ -6,10 +6,10 @@ import PersonEventAttendanceIcon from "./AttendanceIcon"
 import { isFuture } from "date-fns"
 
 export default function EventAttendeeTable({ event }: { event: CalendarEvent }) {
-  let people = useAppSelector((state) => state.people)
-  let mePersonId = useAppSelector((state) => state.me?.person_id)
-  let attendances: CalendarEventAttendance[] = event.attendances || []
-  let inFuture = isFuture(event.start_at)
+  const people = useAppSelector((state) => state.people)
+  const mePersonId = useAppSelector((state) => state.me?.person_id)
+  const attendances: CalendarEventAttendance[] = event.attendances || []
+  const inFuture = isFuture(event.start_at)
 
   return (
     <Table>

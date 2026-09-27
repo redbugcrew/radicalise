@@ -14,7 +14,7 @@ export default function Login() {
   const onSubmit = ({ email, password }: LoginFormData): Promise<ActionPromiseResult> => {
     return getApi()
       .api.login({ email, password })
-      .then((_) => {
+      .then(() => {
         navigate(searchParams.get("redirect") ?? "/")
         return actionSuccess()
       })

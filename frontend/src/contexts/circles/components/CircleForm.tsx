@@ -46,7 +46,7 @@ export default function CircleForm({ onSubmit, submitText, value, otherCircles =
       name: (value) => (value.trim() === "" ? "Name is required" : null),
       slug: (value) => {
         if (value.trim() === "") return "Slug is required"
-        if (!/^[a-z0-9\-]+$/.test(value)) return "Slug may only include lowercase letters, numbers, and hyphens"
+        if (!/^[a-z0-9-]+$/.test(value)) return "Slug may only include lowercase letters, numbers, and hyphens"
 
         return null
       },

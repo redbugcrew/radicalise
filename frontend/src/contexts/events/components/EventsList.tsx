@@ -17,7 +17,7 @@ export default function EventsList({ events, noDataMessage, showParticipantCount
     return <NoData>{noDataMessage || "No events found"}</NoData>
   }
 
-  let sortedEvents = sortEventsByStartDate(events)
+  const sortedEvents = sortEventsByStartDate(events)
 
   return (
     <Stack>

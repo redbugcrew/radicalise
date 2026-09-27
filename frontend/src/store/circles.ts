@@ -13,7 +13,7 @@ const circlesSlice = createSlice({
   reducers: {
     circlesLoaded: (state: CirclesState, action: PayloadAction<Circle[]>) => {
       const circles = action.payload
-      let result = {
+      const result = {
         ...state,
         rootCircles: circles,
       }
@@ -24,7 +24,7 @@ const circlesSlice = createSlice({
       const circle = action.payload
       const circles = upsertCircleInList(state.rootCircles, circle)
 
-      let result = {
+      const result = {
         ...state,
         rootCircles: circles,
       }

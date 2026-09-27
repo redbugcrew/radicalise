@@ -107,7 +107,7 @@ export function sortData<T>(data: T[], payload: sortDataPayload<T>, matchesFunct
 
       const compareFunc = payload.compare_override ?? compareValues
 
-      let result = compareFunc(valA, valB, payload.type_override)
+      const result = compareFunc(valA, valB, payload.type_override)
 
       if (payload.reversed) {
         return -result

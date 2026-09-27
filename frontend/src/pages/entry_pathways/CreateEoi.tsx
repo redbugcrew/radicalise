@@ -24,7 +24,7 @@ export default function CreateEoi() {
   const handleSubmit = (values: ExpressionOfInterest): Promise<void> => {
     return getApi()
       .api.createEoi(values)
-      .then((_) => {
+      .then(() => {
         setResult({ eoi: values, error: null })
       })
       .catch((error) => {

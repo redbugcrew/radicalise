@@ -29,7 +29,7 @@ export default function AttendanceSelector({ intention, onChange }: AttendanceSe
       onChange={onSelect}
       disabled={onChange && loading}
       data={possibleIntentions.map((intention) => ({ label: toTitleCase(intention), value: intention }))}
-      value={intention ?? (null as any)}
+      value={intention ?? undefined}
       color="blue"
     />
   )

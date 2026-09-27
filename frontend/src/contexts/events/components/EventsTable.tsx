@@ -33,15 +33,15 @@ function matchesFilter(item: CalendarEventRowData, lowerCaseQuery: string): bool
 export default function EventsTable({ events, noDataMessage }: EventsTableProps) {
   const currentPersonId = useAppSelector((state) => state.me?.person_id)
 
+  const [search, setSearch] = useState("")
+  const [sortBy, setSortBy] = useState<SortableEventField>("start_at")
+  const [reverseSortDirection, setReverseSortDirection] = useState(false)
+
   if (events.length === 0) {
     return <NoData>{noDataMessage || "No events found"}</NoData>
   }
 
   const rowData: CalendarEventRowData[] = buildAllRowData(events, currentPersonId)
-
-  const [search, setSearch] = useState("")
-  const [sortBy, setSortBy] = useState<SortableEventField>("start_at")
-  const [reverseSortDirection, setReverseSortDirection] = useState(false)
 
   const setSorting = (field: SortableEventField) => {
     const reversed = field === sortBy ? !reverseSortDirection : false
@@ -49,7 +49,7 @@ export default function EventsTable({ events, noDataMessage }: EventsTableProps)
     setSortBy(field)
   }
 
-  let sortedRowData = sortData<CalendarEventRowData>(
+  const sortedRowData = sortData<CalendarEventRowData>(
     rowData,
     {
       sortBy: sortBy,
