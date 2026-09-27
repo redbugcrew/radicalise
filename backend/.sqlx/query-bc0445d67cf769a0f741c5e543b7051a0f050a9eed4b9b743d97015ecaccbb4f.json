@@ -6,37 +6,79 @@
       {
         "name": "id",
         "ordinal": 0,
-        "type_info": "Integer"
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "peer_roles",
+            "name": "id"
+          }
+        }
       },
       {
         "name": "name",
         "ordinal": 1,
-        "type_info": "Text"
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "peer_roles",
+            "name": "name"
+          }
+        }
       },
       {
         "name": "summary",
         "ordinal": 2,
-        "type_info": "Text"
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "peer_roles",
+            "name": "summary"
+          }
+        }
       },
       {
         "name": "project_id",
         "ordinal": 3,
-        "type_info": "Integer"
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "peer_roles",
+            "name": "project_id"
+          }
+        }
       },
       {
         "name": "circle_id",
         "ordinal": 4,
-        "type_info": "Integer"
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "peer_roles",
+            "name": "circle_id"
+          }
+        }
       },
       {
         "name": "distribution_type: PeerRoleDistributionType",
         "ordinal": 5,
-        "type_info": "Text"
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "peer_roles",
+            "name": "distribution_type"
+          }
+        }
       },
       {
         "name": "constrained_by_id",
         "ordinal": 6,
-        "type_info": "Integer"
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "peer_roles",
+            "name": "constrained_by_id"
+          }
+        }
       }
     ],
     "parameters": {

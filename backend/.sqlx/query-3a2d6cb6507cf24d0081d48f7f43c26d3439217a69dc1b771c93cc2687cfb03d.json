@@ -6,82 +6,178 @@
       {
         "name": "id",
         "ordinal": 0,
-        "type_info": "Integer"
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "circle_involvements",
+            "name": "id"
+          }
+        }
       },
       {
         "name": "person_id",
         "ordinal": 1,
-        "type_info": "Integer"
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "circle_involvements",
+            "name": "person_id"
+          }
+        }
       },
       {
         "name": "project_id: i64",
         "ordinal": 2,
-        "type_info": "Null"
+        "type_info": "Null",
+        "origin": {
+          "Table": {
+            "table": "circles",
+            "name": "project_id"
+          }
+        }
       },
       {
         "name": "circle_id",
         "ordinal": 3,
-        "type_info": "Integer"
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "circle_involvements",
+            "name": "circle_id"
+          }
+        }
       },
       {
         "name": "interval_id",
         "ordinal": 4,
-        "type_info": "Integer"
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "circle_involvements",
+            "name": "interval_id"
+          }
+        }
       },
       {
         "name": "status: InvolvementStatus",
         "ordinal": 5,
-        "type_info": "Text"
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "circle_involvements",
+            "name": "status"
+          }
+        }
       },
       {
         "name": "capacity_planning_visibility_circle_id",
         "ordinal": 6,
-        "type_info": "Integer"
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "circle_involvements",
+            "name": "capacity_planning_visibility_circle_id"
+          }
+        }
       },
       {
         "name": "wellbeing",
         "ordinal": 7,
-        "type_info": "Text"
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "circle_involvements",
+            "name": "wellbeing"
+          }
+        }
       },
       {
         "name": "focus",
         "ordinal": 8,
-        "type_info": "Text"
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "circle_involvements",
+            "name": "focus"
+          }
+        }
       },
       {
         "name": "capacity_score",
         "ordinal": 9,
-        "type_info": "Integer"
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "circle_involvements",
+            "name": "capacity_score"
+          }
+        }
       },
       {
         "name": "capacity",
         "ordinal": 10,
-        "type_info": "Text"
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "circle_involvements",
+            "name": "capacity"
+          }
+        }
       },
       {
         "name": "participation_intention: ParticipationIntention",
         "ordinal": 11,
-        "type_info": "Text"
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "circle_involvements",
+            "name": "participation_intention"
+          }
+        }
       },
       {
         "name": "opt_out_type: OptOutType",
         "ordinal": 12,
-        "type_info": "Text"
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "circle_involvements",
+            "name": "opt_out_type"
+          }
+        }
       },
       {
         "name": "opt_out_planned_return_date",
         "ordinal": 13,
-        "type_info": "Text"
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "circle_involvements",
+            "name": "opt_out_planned_return_date"
+          }
+        }
       },
       {
         "name": "intention_context",
         "ordinal": 14,
-        "type_info": "Text"
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "circle_involvements",
+            "name": "intention_context"
+          }
+        }
       },
       {
         "name": "implicit_counter",
         "ordinal": 15,
-        "type_info": "Integer"
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "circle_involvements",
+            "name": "implicit_counter"
+          }
+        }
       }
     ],
     "parameters": {

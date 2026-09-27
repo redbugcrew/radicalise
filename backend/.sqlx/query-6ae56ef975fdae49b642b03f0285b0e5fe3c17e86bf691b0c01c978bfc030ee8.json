@@ -6,42 +6,90 @@
       {
         "name": "id",
         "ordinal": 0,
-        "type_info": "Integer"
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "entry_pathways",
+            "name": "id"
+          }
+        }
       },
       {
         "name": "project_id",
         "ordinal": 1,
-        "type_info": "Integer"
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "entry_pathways",
+            "name": "project_id"
+          }
+        }
       },
       {
         "name": "name",
         "ordinal": 2,
-        "type_info": "Text"
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "entry_pathways",
+            "name": "name"
+          }
+        }
       },
       {
         "name": "interest",
         "ordinal": 3,
-        "type_info": "Text"
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "entry_pathways",
+            "name": "interest"
+          }
+        }
       },
       {
         "name": "context",
         "ordinal": 4,
-        "type_info": "Text"
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "entry_pathways",
+            "name": "context"
+          }
+        }
       },
       {
         "name": "referral",
         "ordinal": 5,
-        "type_info": "Text"
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "entry_pathways",
+            "name": "referral"
+          }
+        }
       },
       {
         "name": "conflict_experience",
         "ordinal": 6,
-        "type_info": "Text"
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "entry_pathways",
+            "name": "conflict_experience"
+          }
+        }
       },
       {
         "name": "participant_connections",
         "ordinal": 7,
-        "type_info": "Text"
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "entry_pathways",
+            "name": "participant_connections"
+          }
+        }
       }
     ],
     "parameters": {

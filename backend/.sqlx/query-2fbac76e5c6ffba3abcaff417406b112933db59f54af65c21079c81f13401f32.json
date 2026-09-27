@@ -6,32 +6,68 @@
       {
         "name": "id",
         "ordinal": 0,
-        "type_info": "Integer"
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "crew_involvements",
+            "name": "id"
+          }
+        }
       },
       {
         "name": "person_id",
         "ordinal": 1,
-        "type_info": "Integer"
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "crew_involvements",
+            "name": "person_id"
+          }
+        }
       },
       {
         "name": "crew_id",
         "ordinal": 2,
-        "type_info": "Integer"
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "crew_involvements",
+            "name": "crew_id"
+          }
+        }
       },
       {
         "name": "interval_id",
         "ordinal": 3,
-        "type_info": "Integer"
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "crew_involvements",
+            "name": "interval_id"
+          }
+        }
       },
       {
         "name": "convenor",
         "ordinal": 4,
-        "type_info": "Bool"
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "crew_involvements",
+            "name": "convenor"
+          }
+        }
       },
       {
         "name": "volunteered_convenor",
         "ordinal": 5,
-        "type_info": "Bool"
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "crew_involvements",
+            "name": "volunteered_convenor"
+          }
+        }
       }
     ],
     "parameters": {
