@@ -42,7 +42,7 @@ pub async fn frontend_handler(uri: Uri) -> Result<Response<Body>, (StatusCode, S
         other => {
             // If the status is not OK or NOT_FOUND, return the response as is
             println!("Got other status: {}", other);
-            return Ok(res);
+            Ok(res)
         }
     }
 }
@@ -54,7 +54,7 @@ async fn serve_file(uri: Uri, spa_file_path_string: String) -> Result<Response<B
         Ok(res) => Ok(res.map(Body::new)),
         Err(err) => {
             println!("Error serving static file: {}", err);
-            return Err((StatusCode::INTERNAL_SERVER_ERROR, format!("Something went wrong: {}", err)));
+            Err((StatusCode::INTERNAL_SERVER_ERROR, format!("Something went wrong: {}", err)))
         }
     }
 }
@@ -67,7 +67,7 @@ async fn serve_dir(uri: Uri, static_dir: String) -> Result<Response<Body>, (Stat
         Ok(res) => Ok(res.map(Body::new)),
         Err(err) => {
             println!("Error serving static file: {}", err);
-            return Err((StatusCode::INTERNAL_SERVER_ERROR, format!("Something went wrong: {}", err)));
+            Err((StatusCode::INTERNAL_SERVER_ERROR, format!("Something went wrong: {}", err)))
         }
     }
 }

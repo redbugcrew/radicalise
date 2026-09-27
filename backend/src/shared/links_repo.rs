@@ -5,7 +5,7 @@ use crate::shared::entities::{Link, LinkWithOwner};
 pub fn hash_links_by_owner(links: Vec<LinkWithOwner>) -> HashMap<i64, Vec<Link>> {
     let mut map: HashMap<i64, Vec<Link>> = HashMap::new();
     for link in links {
-        map.entry(link.owner_id).or_insert_with(Vec::new).push(link.strip_owner());
+        map.entry(link.owner_id).or_default().push(link.strip_owner());
     }
     map
 }

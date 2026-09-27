@@ -75,7 +75,7 @@ async fn create_calendar_event_attendance(
         }
         Err(e) => {
             println!("error updating calender event attendance: {}", e);
-            return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
+            (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response()
         }
     }
 }

@@ -90,7 +90,7 @@ impl AuthnBackend for AppAuthBackend {
                     password: u.hashed_password.unwrap_or_default(),
                 })
             })
-            .map_err(|e| Error::AuthRepo(e))?;
+            .map_err(Error::AuthRepo)?;
 
         // Verifying the password is blocking and potentially slow, so we'll do so via
         // `spawn_blocking`.
@@ -114,7 +114,7 @@ impl AuthnBackend for AppAuthBackend {
                     password: u.hashed_password.unwrap_or_default(),
                 })
             })
-            .map_err(|e| Error::AuthRepo(e))
+            .map_err(Error::AuthRepo)
     }
 }
 

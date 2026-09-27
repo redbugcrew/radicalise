@@ -1,4 +1,5 @@
 use std::collections::{BTreeMap, VecDeque};
+use std::fmt::Display;
 
 #[derive(Debug)]
 pub struct MatchResults<PeerId> {
@@ -7,7 +8,7 @@ pub struct MatchResults<PeerId> {
 
 impl<PeerId> MatchResults<PeerId>
 where
-    PeerId: std::fmt::Display + Eq + std::hash::Hash + Ord + std::fmt::Debug + Clone,
+    PeerId: Display + Eq + std::hash::Hash + Ord + std::fmt::Debug + Clone,
 {
     pub fn new() -> Self {
         MatchResults { matches: BTreeMap::new() }
@@ -33,25 +34,13 @@ where
             }
         }
 
-        if let Some(last) = person {
-            if let Some(first) = first_person {
-                result.insert_one(last.clone(), first.clone());
-            }
+        if let Some(last) = person
+            && let Some(first) = first_person
+        {
+            result.insert_one(last.clone(), first.clone());
         }
 
         result
-    }
-
-    pub fn to_string(&self) -> String {
-        let entries: Vec<String> = self
-            .matches
-            .iter()
-            .map(|(person, matches)| {
-                let matches_str = matches.iter().map(|m| m.to_string()).collect::<Vec<String>>().join(", ");
-                format!("{}: [{}]", person, matches_str)
-            })
-            .collect();
-        format!("{{{}}}", entries.join(", "))
     }
 
     pub fn insert_reciprocal(&mut self, person: PeerId, peer: PeerId) {
@@ -79,11 +68,11 @@ where
     }
 
     pub fn insert_one(&mut self, person: PeerId, peer: PeerId) {
-        self.matches.entry(person).or_insert_with(Vec::new).push(peer);
+        self.matches.entry(person).or_default().push(peer);
     }
 
     pub fn insert_none(&mut self, person: PeerId) {
-        self.matches.entry(person).or_insert_with(Vec::new);
+        self.matches.entry(person).or_default();
     }
 
     fn group_members(&self, person: &PeerId) -> Vec<PeerId> {
@@ -95,6 +84,23 @@ where
             }
             None => vec![person.clone()],
         }
+    }
+}
+
+impl<PeerId> Display for MatchResults<PeerId>
+where
+    PeerId: Display + Eq + std::hash::Hash + Ord + std::fmt::Debug + Clone,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let entries: Vec<String> = self
+            .matches
+            .iter()
+            .map(|(person, matches)| {
+                let matches_str = matches.iter().map(|m| m.to_string()).collect::<Vec<String>>().join(", ");
+                format!("{}: [{}]", person, matches_str)
+            })
+            .collect();
+        write!(f, "{{{}}}", entries.join(", "))
     }
 }
 

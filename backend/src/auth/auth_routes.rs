@@ -133,7 +133,7 @@ async fn login(
         return Err(StatusCode::INTERNAL_SERVER_ERROR.into_response());
     }
 
-    return Ok((StatusCode::OK, axum::Json(LoginResponse { user_id: user.id })).into_response());
+    Ok((StatusCode::OK, axum::Json(LoginResponse { user_id: user.id })).into_response())
 }
 
 #[derive(ToSchema, Deserialize)]

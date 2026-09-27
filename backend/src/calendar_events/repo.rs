@@ -114,7 +114,7 @@ pub async fn list_calendar_events_with_attendances(project_id: ProjectId, pool: 
     let with_attendances = without_attendances
         .into_iter()
         .map(|event| CalendarEvent {
-            attendances: attendances_hash.get(&event.id).cloned().or_else(|| None),
+            attendances: attendances_hash.get(&event.id).cloned(),
             ..event
         })
         .collect::<Vec<CalendarEvent>>();

@@ -79,6 +79,7 @@ where
     with_history
 }
 
+#[allow(clippy::too_many_arguments)]
 fn build_best_cycle<PeerId, R: Rng>(
     first_person: &PeerId,
     path: &mut Vec<PeerId>,

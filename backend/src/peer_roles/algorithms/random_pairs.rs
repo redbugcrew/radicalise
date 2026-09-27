@@ -44,7 +44,7 @@ where
     results
 }
 
-fn find_one_match_for_person<PeerId, R: Rng>(person: &PeerId, unmatched: &Vec<PeerId>, rng: &mut R) -> Option<PeerId>
+fn find_one_match_for_person<PeerId, R: Rng>(person: &PeerId, unmatched: &[PeerId], rng: &mut R) -> Option<PeerId>
 where
     PeerId: std::fmt::Display + Clone + Eq + std::hash::Hash + Ord,
 {

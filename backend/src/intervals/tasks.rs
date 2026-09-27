@@ -64,9 +64,8 @@ async fn add_interval_circle_implicit_involvements(
     }
 
     for previous_involvement in previous_circle_involvements {
-        match previous_involvement.opt_out_type {
-            Some(OptOutType::Exit) => continue,
-            _ => {}
+        if let Some(OptOutType::Exit) = previous_involvement.opt_out_type {
+            continue;
         }
 
         let new_counter = match previous_involvement.participation_intention {
@@ -76,7 +75,7 @@ async fn add_interval_circle_implicit_involvements(
 
         let new_involvement = CircleInvolvement {
             id: -1, // -1 indicates a new record
-            person_id: previous_involvement.person_id.clone(),
+            person_id: previous_involvement.person_id,
             project_id: previous_involvement.project_id,
             circle_id: previous_involvement.circle_id,
             interval_id: interval.id,

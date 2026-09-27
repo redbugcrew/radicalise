@@ -174,12 +174,10 @@ pub async fn update_eoi(
 pub async fn delete_eoi(Extension(pool): Extension<SqlitePool>, Path((project_id, auth_token)): Path<(i64, String)>) -> impl IntoResponse {
     println!("Deleting EOI for project ID: {}, auth token: {}", project_id, auth_token);
     match repo::delete_eoi_record(&pool, auth_token, ProjectId::new(project_id)).await {
-        Ok(_) => {
-            return (StatusCode::OK, ());
-        }
+        Ok(_) => (StatusCode::OK, ()),
         Err(e) => {
             eprintln!("Failed to delete EOI: {}", e);
-            return (StatusCode::BAD_REQUEST, ());
+            (StatusCode::BAD_REQUEST, ())
         }
     }
 }
@@ -203,16 +201,14 @@ pub async fn get_eoi_by_auth_token(
 ) -> impl IntoResponse {
     let result = find_eoi_by_auth_token(ProjectId::new(project_id), &auth_token, &pool).await;
     match result {
-        Ok(Some(eoi)) => {
-            return (StatusCode::OK, Json(eoi)).into_response();
-        }
+        Ok(Some(eoi)) => (StatusCode::OK, Json(eoi)).into_response(),
         Ok(None) => {
             println!("No entry pathway found for auth token: {}", auth_token);
-            return (StatusCode::NOT_FOUND, ()).into_response();
+            (StatusCode::NOT_FOUND, ()).into_response()
         }
         Err(e) => {
             eprintln!("Failed to find entry pathway by auth token: {}", e);
-            return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
+            (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response()
         }
     }
 }
@@ -234,7 +230,7 @@ async fn send_notification_of_new_eoi(
                 "No EOI managing crew set for project ID {}, skipping notification email.",
                 project.id
             );
-            return Ok(());
+            Ok(())
         }
         Some(crew_id) => {
             let emails = find_crew_involved_emails(CrewId::new(crew_id), current_interval.typed_id(), pool).await?;
@@ -251,7 +247,7 @@ async fn send_notification_of_new_eoi(
 
             resend.emails.send(email).await?;
 
-            return Ok(());
+            Ok(())
         }
     }
 }

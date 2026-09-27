@@ -45,7 +45,7 @@ pub async fn update_my_involvements(
 ) -> Result<(), sqlx::Error> {
     let status: InvolvementStatus = calculate_status(input.participation_intention.clone(), input.opt_out_type.clone());
 
-    let interval = find_interval(interval_id.clone(), &pool).await?;
+    let interval = find_interval(interval_id.clone(), pool).await?;
     let interval_type = get_interval_type(interval);
 
     if interval_type == IntervalType::Past {
@@ -77,10 +77,10 @@ pub async fn update_my_involvements(
 
     if let Some(crew_involvements) = input.crew_involvements {
         // Update crew involvements
-        let impacted_crew_ids = repo::update_crew_involvements(person_id, interval_id.clone(), crew_involvements, &pool).await?;
+        let impacted_crew_ids = repo::update_crew_involvements(person_id, interval_id.clone(), crew_involvements, pool).await?;
 
         for crew_id in impacted_crew_ids {
-            update_convenor_if_needed(crew_id, interval_id.clone(), interval_type, &pool).await?;
+            update_convenor_if_needed(crew_id, interval_id.clone(), interval_type, pool).await?;
         }
     }
     Ok(())

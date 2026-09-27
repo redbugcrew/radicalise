@@ -39,7 +39,7 @@ async fn create_interval(
         Ok(response) => {
             let event = AppEvent::IntervalsEvent(IntervalsEvent::IntervalCreated(response));
             realtime_state.broadcast_app_event(Some(auth_session), event.clone()).await;
-            return (StatusCode::CREATED, Json(vec![event])).into_response();
+            (StatusCode::CREATED, Json(vec![event])).into_response()
         }
         Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
     }
@@ -118,7 +118,7 @@ async fn start_next_interval(
         Ok(_) => {
             let event = AppEvent::IntervalsEvent(IntervalsEvent::IntervalStarted(next_interval));
             realtime_state.broadcast_app_event(Some(auth_session), event.clone()).await;
-            return (StatusCode::OK, Json(vec![event])).into_response();
+            (StatusCode::OK, Json(vec![event])).into_response()
         }
         Err(_) => StartNextIntervalError::InternalServerError.into_response(),
     }

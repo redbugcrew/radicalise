@@ -35,6 +35,7 @@ pub async fn find_circle_invitation_by_token(token: String, pool: &SqlitePool) -
     Ok(invitation)
 }
 
+#[allow(clippy::too_many_arguments)]
 pub async fn upsert_circle_invitation(
     circle_id: CircleId,
     person_id: PersonId,

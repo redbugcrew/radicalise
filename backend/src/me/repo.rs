@@ -30,18 +30,17 @@ pub async fn find_interval_data_for_person(
 ) -> Result<PersonIntervalData, sqlx::Error> {
     let interval = find_interval(interval_id.clone(), pool).await?;
 
-    let circle_ids = find_all_circles_ids(project_id.clone(), &pool).await?;
+    let circle_ids = find_all_circles_ids(project_id.clone(), pool).await?;
 
     let circle_involvements_result =
-        find_interval_involvement_data_for_circles_and_person(person_id.clone(), circle_ids, interval_id.clone(), project_id, &pool)
-            .await?;
+        find_interval_involvement_data_for_circles_and_person(person_id.clone(), circle_ids, interval_id.clone(), project_id, pool).await?;
 
     let crew_involvements_result = find_all_crew_involvements(interval_id.clone(), pool).await?;
 
     let enrollments = find_peer_enrollments_for_interval_and_person(&interval_id, &person_id, pool).await?;
 
     let result = IntervalData {
-        interval: interval,
+        interval,
         circle_involvements: circle_involvements_result,
         crew_involvements: crew_involvements_result,
         peer_enrollments: enrollments,

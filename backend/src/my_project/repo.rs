@@ -123,9 +123,9 @@ pub async fn find_interval_involvement_data(
     project_id: ProjectId,
     pool: &SqlitePool,
 ) -> Result<IntervalInvolvementData, sqlx::Error> {
-    let circle_ids = find_all_circles_ids(project_id.clone(), &pool).await?;
+    let circle_ids = find_all_circles_ids(project_id.clone(), pool).await?;
 
-    let circle_involvements_result = find_interval_involvement_data_for_circles(circle_ids, interval_id.clone(), project_id, &pool).await?;
+    let circle_involvements_result = find_interval_involvement_data_for_circles(circle_ids, interval_id.clone(), project_id, pool).await?;
 
     let result = IntervalInvolvementData {
         interval_id: interval_id.id,

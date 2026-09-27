@@ -51,7 +51,7 @@ pub async fn find_event_attendance_by_person_and_event(
 }
 
 pub async fn attendances_for_calendar_events(
-    events: &Vec<CalendarEvent>,
+    events: &[CalendarEvent],
     pool: &SqlitePool,
 ) -> Result<Vec<CalendarEventAttendance>, sqlx::Error> {
     let event_ids: Vec<i64> = events.iter().map(|e| e.id).collect();
@@ -90,10 +90,7 @@ pub fn hash_attendances_by_event(attendances: Vec<CalendarEventAttendance>) -> H
     let mut attendances_hash: HashMap<i64, Vec<CalendarEventAttendance>> = HashMap::new();
 
     for attendance in attendances {
-        attendances_hash
-            .entry(attendance.calendar_event_id)
-            .or_insert_with(Vec::new)
-            .push(attendance);
+        attendances_hash.entry(attendance.calendar_event_id).or_default().push(attendance);
     }
 
     attendances_hash

@@ -47,7 +47,7 @@ async fn get_my_state(Extension(pool): Extension<SqlitePool>, auth_session: Auth
                 Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
             }
         }
-        None => return (StatusCode::UNAUTHORIZED, ()).into_response(),
+        None => (StatusCode::UNAUTHORIZED, ()).into_response(),
     }
 }
 
@@ -91,7 +91,7 @@ async fn my_participation(
                 Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
             }
         }
-        None => return (StatusCode::UNAUTHORIZED, ()).into_response(),
+        None => (StatusCode::UNAUTHORIZED, ()).into_response(),
     }
 }
 
@@ -154,8 +154,8 @@ async fn update_my_participation(
                 .await;
 
             let my_event = AppEvent::MeEvent(MeEvent::IntervalDataChanged(interval_data));
-            return (StatusCode::OK, Json(vec![my_event])).into_response();
+            (StatusCode::OK, Json(vec![my_event])).into_response()
         }
-        Err(_) => return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
+        Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
     }
 }

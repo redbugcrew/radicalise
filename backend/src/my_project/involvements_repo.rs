@@ -280,7 +280,7 @@ pub async fn upsert_circle_involvement(involvement: CircleInvolvementRecord, poo
     .await?;
 
     if result.rows_affected() == 0 {
-        return Err(sqlx::Error::RowNotFound);
+        Err(sqlx::Error::RowNotFound)
     } else {
         Ok(())
     }
@@ -313,7 +313,7 @@ pub async fn insert_circle_involvement(
     .await.map_err(InsertRecordError::from)?;
 
     if result.rows_affected() == 0 {
-        return Err(InsertRecordError::DatabaseError);
+        Err(InsertRecordError::DatabaseError)
     } else {
         let record = CircleInvolvementRecord {
             id: result.last_insert_rowid(),

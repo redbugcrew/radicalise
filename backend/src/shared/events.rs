@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
+#[allow(clippy::enum_variant_names)]
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
 pub enum AppEvent {
     MeEvent(crate::me::events::MeEvent),

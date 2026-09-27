@@ -82,7 +82,7 @@ pub async fn invite_person(
 
     // Find the circle
     println!("Finding circle with id: {:?}", input.circle_id);
-    let circle = find_circle_by_id(CircleId::new(input.circle_id), &pool).await.map_err(ctx_err)?;
+    let circle = find_circle_by_id(CircleId::new(input.circle_id), pool).await.map_err(ctx_err)?;
 
     let current_interval = interval;
 
@@ -97,7 +97,7 @@ pub async fn invite_person(
 
     let person = match existing_invitation {
         Some(invitation) => find_person_by_id(PersonId::new(invitation.person_id), pool).await.map_err(db_err)?,
-        None => insert_person_without_user(project_id.clone(), input.name.clone(), &pool)
+        None => insert_person_without_user(project_id.clone(), input.name.clone(), pool)
             .await
             .map_err(|err| match err {
                 InsertRecordError::RecordAlreadyExists => InvitePersonError::InputInvalid,
@@ -119,7 +119,7 @@ pub async fn invite_person(
         status: InvolvementStatus::Invited,
         ..Default::default()
     };
-    let involvement_record = match insert_circle_involvement(new_involvement.clone().into(), &pool).await {
+    let involvement_record = match insert_circle_involvement(new_involvement.clone().into(), pool).await {
         Ok(record) => record,
         Err(InsertRecordError::RecordAlreadyExists) => find_circle_involvement(
             project_id.clone(),

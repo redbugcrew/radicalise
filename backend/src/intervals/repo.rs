@@ -136,13 +136,13 @@ pub fn get_interval_type(interval: Interval) -> IntervalType {
         return IntervalType::Upcoming;
     }
 
-    if let Some(end_date) = end_date {
-        if end_date < today {
-            return IntervalType::Past;
-        }
+    if let Some(end_date) = end_date
+        && end_date < today
+    {
+        return IntervalType::Past;
     }
 
-    return IntervalType::Current;
+    IntervalType::Current
 }
 
 pub async fn mark_implicit_involvements_processed(interval_id: IntervalId, value: bool, pool: &SqlitePool) -> Result<(), sqlx::Error> {

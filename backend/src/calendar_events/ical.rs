@@ -44,9 +44,8 @@ fn parse_optional_naive_date_time(input: &Option<String>) -> Option<NaiveDateTim
 
 fn parse_naive_date_time(input: &str) -> NaiveDateTime {
     NaiveDateTime::parse_from_str(input, "%Y-%m-%d %H:%M:%S")
-        .map_err(|err| {
+        .inspect_err(|err| {
             eprintln!("Failed to parse date time '{}': {}", input, err);
-            err
         })
         .unwrap()
 }

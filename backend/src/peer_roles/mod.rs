@@ -168,7 +168,7 @@ async fn assign_interval_peer_role(
         AssignPeerRolesError::ConstraintViolation(error.to_string())
     })?;
 
-    println!("Peer role '{}' (interval {}): {}", peer_role.name, interval.id, results.to_string());
+    println!("Peer role '{}' (interval {}): {}", peer_role.name, interval.id, results);
 
     let edges = results.edges();
     upsert_peer_enrollments(interval.id, peer_role.id, edges.clone(), pool).await?;
