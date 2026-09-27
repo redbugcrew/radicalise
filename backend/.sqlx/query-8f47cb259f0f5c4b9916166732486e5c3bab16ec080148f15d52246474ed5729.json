@@ -1,0 +1,50 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO intervals (id, start_date, end_date, project_id)\n         VALUES (?, ?, ?, ?)\n         RETURNING id AS \"id!\", start_date, end_date",
+  "describe": {
+    "columns": [
+      {
+        "name": "id!",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "intervals",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "start_date",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "intervals",
+            "name": "start_date"
+          }
+        }
+      },
+      {
+        "name": "end_date",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "intervals",
+            "name": "end_date"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": [
+      null,
+      false,
+      false
+    ]
+  },
+  "hash": "8f47cb259f0f5c4b9916166732486e5c3bab16ec080148f15d52246474ed5729"
+}

@@ -1,0 +1,26 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        INSERT INTO calendar_events (\n                event_template_id, name, start_at, end_at, project_id,\n                location, summary, description\n            )\n        VALUES (?, ?, ?, ?, ?, ?, ?, ?)\n        RETURNING id AS \"id!\"\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id!",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "calendar_events",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 8
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "6dad453aa8e2ded69dd26b7463337872417aa99de58d4b2237e0e47057f0c13f"
+}

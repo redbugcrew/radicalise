@@ -1,0 +1,74 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        INSERT INTO people (project_id, display_name)\n        VALUES (?, ?)\n        RETURNING id AS \"id!\", project_id, display_name, about, avatar_id",
+  "describe": {
+    "columns": [
+      {
+        "name": "id!",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "people",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "project_id",
+        "ordinal": 1,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "people",
+            "name": "project_id"
+          }
+        }
+      },
+      {
+        "name": "display_name",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "people",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "name": "about",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "people",
+            "name": "about"
+          }
+        }
+      },
+      {
+        "name": "avatar_id",
+        "ordinal": 4,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "people",
+            "name": "avatar_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      null,
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "607d69c233f7e78740f88fb6d31dbdf49e1226123f03afa8ffc0a6d59adc57b1"
+}
