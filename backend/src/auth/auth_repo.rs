@@ -118,7 +118,7 @@ impl<'a> AuthRepo<'a> {
             AuthUser,
             "INSERT INTO users (email, hashed_password)
             VALUES (?, ?)
-            RETURNING id, email, hashed_password",
+            RETURNING id AS \"id!\", email, hashed_password",
             email,
             hashed_password
         )

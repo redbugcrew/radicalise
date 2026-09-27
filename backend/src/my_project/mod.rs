@@ -49,7 +49,7 @@ async fn get_project_state(
     auth_session: AuthSession,
     Extension(pool): Extension<SqlitePool>,
 ) -> impl IntoResponse {
-    let user_id = match auth_session.user {
+    let user_id = match auth_session.user().await {
         Some(user) => UserId::new(user.id),
         None => {
             eprintln!("Unauthorized access to get_project_state");
@@ -126,7 +126,7 @@ async fn get_interval_data(
         Err(e) => return db_error(e),
     };
 
-    let user_id = match auth_session.user {
+    let user_id = match auth_session.user().await {
         Some(user) => UserId::new(user.id),
         None => {
             eprintln!("Unauthorized access to get_project_state");

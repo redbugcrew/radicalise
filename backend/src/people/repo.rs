@@ -15,7 +15,7 @@ pub async fn insert_person_without_user(
         "
         INSERT INTO people (project_id, display_name)
         VALUES (?, ?)
-        RETURNING id, project_id, display_name, about, avatar_id",
+        RETURNING id AS \"id!\", project_id, display_name, about, avatar_id",
         project_id.id,
         display_name,
     )

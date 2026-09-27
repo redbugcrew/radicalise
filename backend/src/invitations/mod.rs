@@ -57,7 +57,7 @@ pub async fn invite_person(
 ) -> impl IntoResponse {
     println!("Inviting person: {:?}", input);
 
-    let current_user_id = match auth_session.user.clone() {
+    let current_user_id = match auth_session.user().await {
         Some(user) => UserId::new(user.id),
         None => return (StatusCode::UNAUTHORIZED, "Unauthorized").into_response(),
     };
@@ -183,7 +183,7 @@ pub async fn accept_invitation(
     Extension(pool): Extension<SqlitePool>,
     auth_session: AuthSession,
 ) -> impl IntoResponse {
-    let current_user_id = match auth_session.user.clone() {
+    let current_user_id = match auth_session.user().await {
         Some(user) => UserId::new(user.id),
         None => return (StatusCode::UNAUTHORIZED, "Unauthorized").into_response(),
     };

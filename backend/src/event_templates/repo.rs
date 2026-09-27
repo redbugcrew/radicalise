@@ -21,7 +21,7 @@ pub async fn insert_event_template_with_links(
         "
         INSERT INTO event_templates (name, project_id, summary, response_expectation)
         VALUES (?, ?, ?, ?)
-        RETURNING id, name
+        RETURNING id AS \"id!\", name
         ",
         data.name,
         project_id.id,
@@ -58,7 +58,7 @@ pub async fn update_event_template_with_links(
         UPDATE event_templates
         SET name = ?, summary = ?, response_expectation = ?
         WHERE id = ? AND project_id = ?
-        RETURNING id, name
+        RETURNING id AS \"id!\", name
         ",
         data.name,
         data.summary,

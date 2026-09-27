@@ -121,7 +121,7 @@ struct LoginResponse {
     request_body(content = Credentials, description = "Attempt to log in", content_type = "application/json")
 )]
 async fn login(
-    mut auth_session: AuthSession,
+    auth_session: AuthSession,
     Json(creds): Json<Credentials>,
 ) -> Result<Response<axum::body::Body>, Response<axum::body::Body>> {
     let user = match auth_session.authenticate(creds.clone()).await {
@@ -201,8 +201,8 @@ async fn sign_up(
     )
 )]
 async fn get_current_user(auth_session: AuthSession) -> impl IntoResponse {
-    match auth_session.user {
-        Some(ref user) => (
+    match auth_session.user().await {
+        Some(user) => (
             StatusCode::OK,
             Json(Some(LoginResponse { user_id: user.id })),
         )

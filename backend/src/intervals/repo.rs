@@ -33,7 +33,7 @@ pub async fn insert_interval(
         Interval,
         "INSERT INTO intervals (id, start_date, end_date, project_id)
          VALUES (?, ?, ?, ?)
-         RETURNING id, start_date, end_date",
+         RETURNING id AS \"id!\", start_date, end_date",
         next_id,
         interval.start_date,
         interval.end_date,

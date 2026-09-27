@@ -41,7 +41,7 @@ async fn get_my_state(
     Extension(pool): Extension<SqlitePool>,
     auth_session: AuthSession,
 ) -> impl IntoResponse {
-    match auth_session.user {
+    match auth_session.user().await {
         Some(user) => {
             let result =
                 repo::find_initial_data_for_user(default_project_id(), UserId::new(user.id), &pool)
@@ -73,7 +73,7 @@ async fn my_participation(
     Extension(pool): Extension<SqlitePool>,
     auth_session: AuthSession,
 ) -> impl IntoResponse {
-    match auth_session.user {
+    match auth_session.user().await {
         Some(user) => {
             let person_id =
                 find_person_id_for_user(default_project_id(), UserId::new(user.id), &pool).await;
@@ -130,7 +130,7 @@ async fn update_my_participation(
     auth_session: AuthSession,
     axum::extract::Json(input): axum::extract::Json<MyParticipationInput>,
 ) -> impl IntoResponse {
-    let user = match auth_session.user {
+    let user = match auth_session.user().await {
         Some(user) => user,
         None => return (StatusCode::UNAUTHORIZED, ()).into_response(),
     };

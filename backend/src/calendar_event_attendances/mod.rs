@@ -47,7 +47,7 @@ async fn create_calendar_event_attendance(
     Extension(pool): Extension<SqlitePool>,
     axum::extract::Json(input): axum::extract::Json<CreateAttendanceRequest>,
 ) -> impl IntoResponse {
-    let user_id = UserId::new(auth_session.user.clone().unwrap().id);
+    let user_id = UserId::new(auth_session.user().await.unwrap().id);
 
     let person =
         match find_person_by_user_id(user_id.clone(), crate::shared::default_project_id(), &pool)

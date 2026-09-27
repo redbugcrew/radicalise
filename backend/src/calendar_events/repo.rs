@@ -25,7 +25,7 @@ pub async fn insert_calendar_event_with_links(
                 location, summary, description
             )
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        RETURNING id
+        RETURNING id AS \"id!\"
         ",
         event_template_id,
         data.name,

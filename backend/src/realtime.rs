@@ -38,14 +38,14 @@ impl RealtimeState {
         auth_session: Option<AuthSession>,
         events: Vec<AppEvent>,
     ) {
-        let user_id = self.get_user_id_from_session(auth_session);
+        let user_id = self.get_user_id_from_session(auth_session).await;
         for event in events {
             self.broadcast_app_event_for_user(user_id, event).await;
         }
     }
 
     pub async fn broadcast_app_event(&self, auth_session: Option<AuthSession>, event: AppEvent) {
-        let user_id = self.get_user_id_from_session(auth_session);
+        let user_id = self.get_user_id_from_session(auth_session).await;
         self.broadcast_app_event_for_user(user_id, event).await;
     }
 
@@ -64,8 +64,11 @@ impl RealtimeState {
         }
     }
 
-    fn get_user_id_from_session(&self, session: Option<AuthSession>) -> Option<i64> {
-        session.map(|s| s.user.map(|u| u.id)).flatten()
+    async fn get_user_id_from_session(&self, session: Option<AuthSession>) -> Option<i64> {
+        match session {
+            Some(s) => s.user().await.map(|u| u.id),
+            None => None,
+        }
     }
 }
 
