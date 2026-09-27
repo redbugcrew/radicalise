@@ -39,6 +39,7 @@ struct ForgotPasswordRequest {
     ),
     request_body(content = ForgotPasswordRequest, description = "Forgot password request", content_type = "application/json")
 )]
+#[allow(clippy::result_large_err)]
 async fn forgot_password(
     Extension(pool): Extension<SqlitePool>,
     Extension(resend): Extension<resend_rs::Resend>,
@@ -89,6 +90,7 @@ struct ResetPasswordRequest {
     ),
     request_body(content = ResetPasswordRequest, description = "Reset password request", content_type = "application/json")
 )]
+#[allow(clippy::result_large_err)]
 async fn reset_password(
     Extension(pool): Extension<SqlitePool>,
     Json(payload): Json<ResetPasswordRequest>,
@@ -117,6 +119,7 @@ struct LoginResponse {
     ),
     request_body(content = Credentials, description = "Attempt to log in", content_type = "application/json")
 )]
+#[allow(clippy::result_large_err)]
 async fn login(
     auth_session: AuthSession,
     Json(creds): Json<Credentials>,
