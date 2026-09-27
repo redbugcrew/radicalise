@@ -1,8 +1,6 @@
 use std::collections::HashMap;
 
-use crate::shared::entities::{
-    AttendanceIntention, CalendarEvent, CalendarEventAttendance, PersonId,
-};
+use crate::shared::entities::{AttendanceIntention, CalendarEvent, CalendarEventAttendance, PersonId};
 use sqlx::{QueryBuilder, Row, Sqlite, SqlitePool};
 
 pub async fn upsert_event_attendance(
@@ -23,8 +21,7 @@ pub async fn upsert_event_attendance(
     .execute(pool)
     .await?;
 
-    let calendar_event =
-        find_event_attendance_by_person_and_event(calendar_event_id, person_id, pool).await?;
+    let calendar_event = find_event_attendance_by_person_and_event(calendar_event_id, person_id, pool).await?;
 
     match calendar_event {
         None => Err(sqlx::Error::RowNotFound),
@@ -54,7 +51,7 @@ pub async fn find_event_attendance_by_person_and_event(
 }
 
 pub async fn attendances_for_calendar_events(
-    events: &Vec<CalendarEvent>,
+    events: &[CalendarEvent],
     pool: &SqlitePool,
 ) -> Result<Vec<CalendarEventAttendance>, sqlx::Error> {
     let event_ids: Vec<i64> = events.iter().map(|e| e.id).collect();
@@ -89,16 +86,11 @@ pub async fn attendances_for_calendar_events(
     Ok(attendances)
 }
 
-pub fn hash_attendances_by_event(
-    attendances: Vec<CalendarEventAttendance>,
-) -> HashMap<i64, Vec<CalendarEventAttendance>> {
+pub fn hash_attendances_by_event(attendances: Vec<CalendarEventAttendance>) -> HashMap<i64, Vec<CalendarEventAttendance>> {
     let mut attendances_hash: HashMap<i64, Vec<CalendarEventAttendance>> = HashMap::new();
 
     for attendance in attendances {
-        attendances_hash
-            .entry(attendance.calendar_event_id)
-            .or_insert_with(Vec::new)
-            .push(attendance);
+        attendances_hash.entry(attendance.calendar_event_id).or_default().push(attendance);
     }
 
     attendances_hash

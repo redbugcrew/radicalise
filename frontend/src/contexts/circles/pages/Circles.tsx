@@ -1,11 +1,11 @@
-import { ActionIcon, Group, Stack, Title } from "@mantine/core";
-import { Anchor } from "../../../components";
-import { IconPlus } from "@tabler/icons-react";
-import { useAppSelector } from "../../../store";
-import CirclesTable from "../components/CirclesTable";
+import { ActionIcon, Group, Stack, Title } from "@mantine/core"
+import { Anchor } from "../../../components"
+import { IconPlus } from "@tabler/icons-react"
+import { useAppSelector } from "../../../store"
+import CirclesTable from "../components/CirclesTable"
 
 export default function Circles() {
-  const circles = useAppSelector((state) => state.circles.rootCircles || []);
+  const circles = useAppSelector((state) => state.circles.rootCircles || [])
 
   return (
     <Stack>
@@ -20,5 +20,5 @@ export default function Circles() {
 
       <CirclesTable circles={circles} />
     </Stack>
-  );
+  )
 }

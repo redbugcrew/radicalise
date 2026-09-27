@@ -6,27 +6,57 @@
       {
         "name": "id",
         "ordinal": 0,
-        "type_info": "Integer"
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "peer_enrollments",
+            "name": "id"
+          }
+        }
       },
       {
         "name": "peer_role_id",
         "ordinal": 1,
-        "type_info": "Integer"
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "peer_enrollments",
+            "name": "peer_role_id"
+          }
+        }
       },
       {
         "name": "interval_id",
         "ordinal": 2,
-        "type_info": "Integer"
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "peer_enrollments",
+            "name": "interval_id"
+          }
+        }
       },
       {
         "name": "person_id",
         "ordinal": 3,
-        "type_info": "Integer"
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "peer_enrollments",
+            "name": "person_id"
+          }
+        }
       },
       {
         "name": "peer_id",
         "ordinal": 4,
-        "type_info": "Integer"
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "peer_enrollments",
+            "name": "peer_id"
+          }
+        }
       }
     ],
     "parameters": {

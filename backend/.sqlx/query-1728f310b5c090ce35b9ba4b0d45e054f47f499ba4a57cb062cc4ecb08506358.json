@@ -6,12 +6,19 @@
       {
         "name": "person_id",
         "ordinal": 0,
-        "type_info": "Integer"
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "crew_involvements",
+            "name": "person_id"
+          }
+        }
       },
       {
         "name": "count: i64",
         "ordinal": 1,
-        "type_info": "Null"
+        "type_info": "Null",
+        "origin": "Expression"
       }
     ],
     "parameters": {

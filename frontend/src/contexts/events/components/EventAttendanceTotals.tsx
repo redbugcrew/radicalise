@@ -1,5 +1,5 @@
-import { Table } from "@mantine/core";
-import { AttendanceIntention, type CalendarEvent, type CalendarEventAttendance } from "../../../api/Api";
+import { Table } from "@mantine/core"
+import { AttendanceIntention, type CalendarEvent, type CalendarEventAttendance } from "../../../api/Api"
 
 export default function EventAttendanceTotals({ event }: { event: CalendarEvent }) {
   return (
@@ -19,10 +19,10 @@ export default function EventAttendanceTotals({ event }: { event: CalendarEvent 
         </Table.Tr>
       </Table.Tbody>
     </Table>
-  );
+  )
 }
 
 function countIntentions(attendances: CalendarEventAttendance[] | undefined | null, intention: AttendanceIntention): number {
-  if (!attendances) return 0;
-  return attendances.filter((attendance) => attendance.intention === intention).length;
+  if (!attendances) return 0
+  return attendances.filter((attendance) => attendance.intention === intention).length
 }

@@ -7,10 +7,7 @@ use crate::shared::{
     links_repo::{find_all_links_for_owner_type, hash_links_by_owner, update_links_for_owner},
 };
 
-pub async fn find_all_crews_with_links(
-    project_id: ProjectId,
-    pool: &SqlitePool,
-) -> Result<Vec<CrewWithLinks>, sqlx::Error> {
+pub async fn find_all_crews_with_links(project_id: ProjectId, pool: &SqlitePool) -> Result<Vec<CrewWithLinks>, sqlx::Error> {
     let crews = find_all_crews(project_id, pool).await?;
 
     let links = find_all_links_for_owner_type("crews".to_string(), pool).await?;
@@ -30,10 +27,7 @@ pub async fn find_all_crews_with_links(
     Ok(crews)
 }
 
-pub async fn find_all_crews(
-    project_id: ProjectId,
-    pool: &SqlitePool,
-) -> Result<Vec<Crew>, sqlx::Error> {
+pub async fn find_all_crews(project_id: ProjectId, pool: &SqlitePool) -> Result<Vec<Crew>, sqlx::Error> {
     sqlx::query_as!(
         Crew,
         "SELECT id, name, description, project_id FROM crews WHERE project_id = ?",
@@ -43,11 +37,7 @@ pub async fn find_all_crews(
     .await
 }
 
-pub async fn update_crew(
-    project_id: ProjectId,
-    crew: Crew,
-    pool: &SqlitePool,
-) -> Result<Crew, sqlx::Error> {
+pub async fn update_crew(project_id: ProjectId, crew: Crew, pool: &SqlitePool) -> Result<Crew, sqlx::Error> {
     sqlx::query_as!(
         Crew,
         "UPDATE crews SET name = ?, description = ? WHERE id = ? AND project_id = ? ",
@@ -62,11 +52,7 @@ pub async fn update_crew(
     Ok(crew)
 }
 
-pub async fn update_crew_with_links(
-    project_id: ProjectId,
-    crew: CrewWithLinks,
-    pool: &SqlitePool,
-) -> Result<CrewWithLinks, sqlx::Error> {
+pub async fn update_crew_with_links(project_id: ProjectId, crew: CrewWithLinks, pool: &SqlitePool) -> Result<CrewWithLinks, sqlx::Error> {
     let crew_result = update_crew(
         project_id,
         Crew {

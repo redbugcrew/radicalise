@@ -1,14 +1,14 @@
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { Person } from "../api/Api";
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
+import type { Person } from "../api/Api"
 
 export interface PeopleObjectMap {
-  [key: number]: Person;
+  [key: number]: Person
 }
 
-export type PeopleState = PeopleObjectMap;
+export type PeopleState = PeopleObjectMap
 
 export function mapPeopleIds(ids: number[], people: PeopleObjectMap): Person[] {
-  return ids.map((id) => people[id]);
+  return ids.map((id) => people[id])
 }
 
 const peopleSlice = createSlice({
@@ -16,23 +16,23 @@ const peopleSlice = createSlice({
   initialState: {} as PeopleState,
   reducers: {
     peopleLoaded: (_state: PeopleState, action: PayloadAction<Person[]>) => {
-      const people: PeopleObjectMap = {};
+      const people: PeopleObjectMap = {}
       action.payload.forEach((person) => {
-        people[person.id] = person;
-      });
-      return people;
+        people[person.id] = person
+      })
+      return people
     },
     personUpdated: (state: PeopleState, action: PayloadAction<Person>) => {
-      const person = action.payload;
-      state[person.id] = person;
-      return state;
+      const person = action.payload
+      state[person.id] = person
+      return state
     },
   },
-});
+})
 
 // `createSlice` automatically generated action creators with these names.
 // export them as named exports from this "slice" file
-export const { peopleLoaded, personUpdated } = peopleSlice.actions;
+export const { peopleLoaded, personUpdated } = peopleSlice.actions
 
 // Export the slice reducer as the default export
-export default peopleSlice.reducer;
+export default peopleSlice.reducer

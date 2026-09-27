@@ -11,24 +11,20 @@ use crate::{
     circles::repo::find_circle_by_id,
     invitations::{
         circle_invitations_repo::{
-            find_circle_invitation_by_email_and_circle_id, find_circle_invitation_by_token,
-            mark_circle_invitation_as_sent, update_circle_invitation_person_id,
-            upsert_circle_invitation,
+            find_circle_invitation_by_email_and_circle_id, find_circle_invitation_by_token, mark_circle_invitation_as_sent,
+            update_circle_invitation_person_id, upsert_circle_invitation,
         },
         emails::{InvitedToCircleEmailParams, invited_to_circle_email},
     },
     my_project::involvements_repo::{
-        delete_circle_involvement_by_id, find_circle_involvement, find_circle_involvement_by_id,
-        insert_circle_involvement, update_involvement_status,
+        delete_circle_involvement_by_id, find_circle_involvement, find_circle_involvement_by_id, insert_circle_involvement,
+        update_involvement_status,
     },
-    people::repo::{
-        delete_person, find_person_by_id, find_person_by_user_id, insert_person_without_user,
-        update_person_user_id,
-    },
+    people::repo::{delete_person, find_person_by_id, find_person_by_user_id, insert_person_without_user, update_person_user_id},
     repo_utilities::InsertRecordError,
     shared::entities::{
-        CircleId, CircleInvitation, CircleInvolvement, CircleInvolvementId, Interval,
-        InvolvementStatus, Person, PersonId, ProjectId, UserId,
+        CircleId, CircleInvitation, CircleInvolvement, CircleInvolvementId, Interval, InvolvementStatus, Person, PersonId, ProjectId,
+        UserId,
     },
 };
 
@@ -74,10 +70,7 @@ pub async fn invite_person(
     interval: Interval,
 ) -> Result<InvitePersonResult, InvitePersonError> {
     // Find the inviting person
-    println!(
-        "Finding inviting person for user_id: {:?}",
-        inviting_user_id
-    );
+    println!("Finding inviting person for user_id: {:?}", inviting_user_id);
     let inviting_person = find_person_by_user_id(inviting_user_id, project_id.clone(), pool)
         .await
         .map_err(ctx_err)?
@@ -85,15 +78,11 @@ pub async fn invite_person(
 
     // Find the project
     println!("Finding project with id: {:?}", project_id);
-    let project = find_project(project_id.clone(), pool)
-        .await
-        .map_err(ctx_err)?;
+    let project = find_project(project_id.clone(), pool).await.map_err(ctx_err)?;
 
     // Find the circle
     println!("Finding circle with id: {:?}", input.circle_id);
-    let circle = find_circle_by_id(CircleId::new(input.circle_id), &pool)
-        .await
-        .map_err(ctx_err)?;
+    let circle = find_circle_by_id(CircleId::new(input.circle_id), pool).await.map_err(ctx_err)?;
 
     let current_interval = interval;
 
@@ -102,19 +91,13 @@ pub async fn invite_person(
         "Looking up existing invitation for email: {:?}, circle_id: {:?}",
         input.email, input.circle_id
     );
-    let existing_invitation = find_circle_invitation_by_email_and_circle_id(
-        CircleId::new(circle.id),
-        input.email.clone(),
-        pool,
-    )
-    .await
-    .map_err(db_err)?;
+    let existing_invitation = find_circle_invitation_by_email_and_circle_id(CircleId::new(circle.id), input.email.clone(), pool)
+        .await
+        .map_err(db_err)?;
 
     let person = match existing_invitation {
-        Some(invitation) => find_person_by_id(PersonId::new(invitation.person_id), pool)
-            .await
-            .map_err(db_err)?,
-        None => insert_person_without_user(project_id.clone(), input.name.clone(), &pool)
+        Some(invitation) => find_person_by_id(PersonId::new(invitation.person_id), pool).await.map_err(db_err)?,
+        None => insert_person_without_user(project_id.clone(), input.name.clone(), pool)
             .await
             .map_err(|err| match err {
                 InsertRecordError::RecordAlreadyExists => InvitePersonError::InputInvalid,
@@ -136,24 +119,23 @@ pub async fn invite_person(
         status: InvolvementStatus::Invited,
         ..Default::default()
     };
-    let involvement_record =
-        match insert_circle_involvement(new_involvement.clone().into(), &pool).await {
-            Ok(record) => record,
-            Err(InsertRecordError::RecordAlreadyExists) => find_circle_involvement(
-                project_id.clone(),
-                CircleId::new(circle.id),
-                PersonId::new(person.id),
-                current_interval.typed_id(),
-                pool,
-            )
-            .await
-            .map_err(db_err)?
-            .ok_or(InvitePersonError::DatabaseError)?
-            .into(),
-            Err(InsertRecordError::DatabaseError) => {
-                return Err(db_err(InsertRecordError::DatabaseError));
-            }
-        };
+    let involvement_record = match insert_circle_involvement(new_involvement.clone().into(), pool).await {
+        Ok(record) => record,
+        Err(InsertRecordError::RecordAlreadyExists) => find_circle_involvement(
+            project_id.clone(),
+            CircleId::new(circle.id),
+            PersonId::new(person.id),
+            current_interval.typed_id(),
+            pool,
+        )
+        .await
+        .map_err(db_err)?
+        .ok_or(InvitePersonError::DatabaseError)?
+        .into(),
+        Err(InsertRecordError::DatabaseError) => {
+            return Err(db_err(InsertRecordError::DatabaseError));
+        }
+    };
 
     // Create the circle invitation
     println!(
@@ -197,9 +179,7 @@ pub async fn invite_person(
 
     // Mark the invitation as sent
     println!("Marking invitation {:?} as sent", circle_invitation.id);
-    mark_circle_invitation_as_sent(circle_invitation.id, pool)
-        .await
-        .map_err(db_err)?;
+    mark_circle_invitation_as_sent(circle_invitation.id, pool).await.map_err(db_err)?;
 
     Ok(InvitePersonResult {
         person,
@@ -219,8 +199,7 @@ pub async fn accept_invitation(
     accepting_user_id: UserId,
     interval: Interval,
 ) -> Result<(), AcceptInvitationError> {
-    let mut context =
-        load_accept_invitation_context(token, accepting_user_id.clone(), interval, pool).await?;
+    let mut context = load_accept_invitation_context(token, accepting_user_id.clone(), interval, pool).await?;
 
     let data_changed = reconcile_person(
         &context.user_person,
@@ -245,10 +224,7 @@ pub async fn accept_invitation(
     };
 
     reconcile_involvement(
-        context
-            .invitation
-            .circle_involvement_id
-            .map(CircleInvolvementId::new),
+        context.invitation.circle_involvement_id.map(CircleInvolvementId::new),
         CircleId::new(context.invitation.circle_id),
         &context.current_interval,
         &context.invitation_person,
@@ -293,10 +269,9 @@ async fn load_accept_invitation_context(
     let current_interval = interval;
 
     // Find the existing person for this user in the project, if any
-    let user_person =
-        find_person_by_user_id(accepting_user_id, ProjectId::new(circle.project_id), pool)
-            .await
-            .map_err(handle_accept_database_error)?;
+    let user_person = find_person_by_user_id(accepting_user_id, ProjectId::new(circle.project_id), pool)
+        .await
+        .map_err(handle_accept_database_error)?;
 
     // Find the person for the invitation
     let invitation_person = find_person_by_id(PersonId::new(invitation.person_id), pool)
@@ -410,10 +385,7 @@ async fn reconcile_involvement(
     // If our involvement is Invited or Exiting, move it to Onboarding
     match involvement.status {
         InvolvementStatus::Invited | InvolvementStatus::Exiting => {
-            println!(
-                "Updating involvement status from {:?} to Onboarding",
-                involvement.status
-            );
+            println!("Updating involvement status from {:?} to Onboarding", involvement.status);
             update_involvement_status(involvement.typed_id(), InvolvementStatus::Onboarding, pool)
                 .await
                 .map_err(handle_accept_database_error)?;
@@ -444,23 +416,16 @@ mod tests {
             .connect("sqlite::memory:")
             .await
             .expect("Failed to create in-memory database");
-        sqlx::migrate!()
-            .run(&pool)
-            .await
-            .expect("Failed to run migrations");
+        sqlx::migrate!().run(&pool).await.expect("Failed to run migrations");
 
-        sqlx::query!(
-            "INSERT INTO users (email, hashed_password) VALUES ('test@example.com', 'hashed')"
-        )
-        .execute(&pool)
-        .await
-        .expect("Failed to insert test user");
-        sqlx::query!(
-            "INSERT INTO people (display_name, project_id, user_id) VALUES ('Test Inviter', 1, 1)"
-        )
-        .execute(&pool)
-        .await
-        .expect("Failed to insert test person");
+        sqlx::query!("INSERT INTO users (email, hashed_password) VALUES ('test@example.com', 'hashed')")
+            .execute(&pool)
+            .await
+            .expect("Failed to insert test user");
+        sqlx::query!("INSERT INTO people (display_name, project_id, user_id) VALUES ('Test Inviter', 1, 1)")
+            .execute(&pool)
+            .await
+            .expect("Failed to insert test person");
         sqlx::query!(
             "INSERT INTO intervals (id, start_date, end_date, project_id) VALUES (1, date('now', '-1 day'), date('now', '+30 days'), 1)"
         )
@@ -488,15 +453,7 @@ mod tests {
             circle_id: 1,
             message: None,
         };
-        let result = invite_person(
-            &pool,
-            &email_sender,
-            &input,
-            UserId::new(1),
-            ProjectId::new(1),
-            interval_1(),
-        )
-        .await;
+        let result = invite_person(&pool, &email_sender, &input, UserId::new(1), ProjectId::new(1), interval_1()).await;
         assert!(result.is_ok());
         assert_eq!(email_sender.sent_emails.lock().unwrap().len(), 1);
     }
@@ -512,35 +469,11 @@ mod tests {
             message: Some("Welcome!".to_string()),
         };
 
-        let first_result = invite_person(
-            &pool,
-            &email_sender,
-            &input,
-            UserId::new(1),
-            ProjectId::new(1),
-            interval_1(),
-        )
-        .await;
-        assert!(
-            first_result.is_ok(),
-            "first invite_person failed: {:?}",
-            first_result.err()
-        );
+        let first_result = invite_person(&pool, &email_sender, &input, UserId::new(1), ProjectId::new(1), interval_1()).await;
+        assert!(first_result.is_ok(), "first invite_person failed: {:?}", first_result.err());
 
-        let second_result = invite_person(
-            &pool,
-            &email_sender,
-            &input,
-            UserId::new(1),
-            ProjectId::new(1),
-            interval_1(),
-        )
-        .await;
-        assert!(
-            second_result.is_ok(),
-            "second invite_person failed: {:?}",
-            second_result.err()
-        );
+        let second_result = invite_person(&pool, &email_sender, &input, UserId::new(1), ProjectId::new(1), interval_1()).await;
+        assert!(second_result.is_ok(), "second invite_person failed: {:?}", second_result.err());
 
         let invitation_count = sqlx::query!(
             "SELECT COUNT(*) as count FROM circle_invitations WHERE invitee_email = ? AND circle_id = ?",
@@ -560,13 +493,7 @@ mod tests {
     #[tokio::test]
     async fn accept_invitation_with_invalid_token_returns_error() {
         let pool = setup_db().await;
-        let result = accept_invitation(
-            &pool,
-            "dummy-token".to_string(),
-            UserId::new(1),
-            interval_1(),
-        )
-        .await;
+        let result = accept_invitation(&pool, "dummy-token".to_string(), UserId::new(1), interval_1()).await;
         assert!(result.is_err());
     }
 
@@ -582,29 +509,15 @@ mod tests {
         };
 
         // Invite the person
-        let invite_result = invite_person(
-            &pool,
-            &email_sender,
-            &input,
-            UserId::new(1),
-            ProjectId::new(1),
-            interval_1(),
-        )
-        .await;
-        assert!(
-            invite_result.is_ok(),
-            "invite_person failed: {:?}",
-            invite_result.err()
-        );
+        let invite_result = invite_person(&pool, &email_sender, &input, UserId::new(1), ProjectId::new(1), interval_1()).await;
+        assert!(invite_result.is_ok(), "invite_person failed: {:?}", invite_result.err());
         assert_eq!(email_sender.sent_emails.lock().unwrap().len(), 1);
 
         // Simulate signup: create a user with the same email as the invitee
-        sqlx::query!(
-            "INSERT INTO users (email, hashed_password) VALUES ('invitee@example.com', 'hashed')"
-        )
-        .execute(&pool)
-        .await
-        .expect("Failed to insert invitee user");
+        sqlx::query!("INSERT INTO users (email, hashed_password) VALUES ('invitee@example.com', 'hashed')")
+            .execute(&pool)
+            .await
+            .expect("Failed to insert invitee user");
 
         let new_user = sqlx::query!("SELECT id FROM users WHERE email = 'invitee@example.com'")
             .fetch_one(&pool)
@@ -612,37 +525,23 @@ mod tests {
             .expect("Failed to find new user");
 
         // Retrieve the invitation token
-        let invitation_row = sqlx::query!(
-            "SELECT id, invitation_token FROM circle_invitations WHERE invitee_email = 'invitee@example.com'"
-        )
-        .fetch_one(&pool)
-        .await
-        .expect("Failed to find circle invitation");
+        let invitation_row =
+            sqlx::query!("SELECT id, invitation_token FROM circle_invitations WHERE invitee_email = 'invitee@example.com'")
+                .fetch_one(&pool)
+                .await
+                .expect("Failed to find circle invitation");
         let invitation_id = invitation_row.id;
         let invitation_token = invitation_row.invitation_token;
 
         // Accept the invitation as the newly signed-up user
-        let accept_result = accept_invitation(
-            &pool,
-            invitation_token,
-            UserId::new(new_user.id),
-            interval_1(),
-        )
-        .await;
-        assert!(
-            accept_result.is_ok(),
-            "accept_invitation failed: {:?}",
-            accept_result.err()
-        );
+        let accept_result = accept_invitation(&pool, invitation_token, UserId::new(new_user.id), interval_1()).await;
+        assert!(accept_result.is_ok(), "accept_invitation failed: {:?}", accept_result.err());
 
         // Verify the person record is linked to the new user
-        let person_row = sqlx::query!(
-            "SELECT id, user_id FROM people WHERE user_id = ?",
-            new_user.id
-        )
-        .fetch_one(&pool)
-        .await
-        .expect("No person record found for the new user");
+        let person_row = sqlx::query!("SELECT id, user_id FROM people WHERE user_id = ?", new_user.id)
+            .fetch_one(&pool)
+            .await
+            .expect("No person record found for the new user");
 
         // Verify a circle_involvement exists for this person in the correct circle and current interval, in Onboarding status
         let involvement_row = sqlx::query!(
@@ -665,13 +564,10 @@ mod tests {
         );
 
         // Verify the invitation record has been deleted after acceptance
-        let deleted_invitation = sqlx::query!(
-            "SELECT id FROM circle_invitations WHERE id = ?",
-            invitation_id
-        )
-        .fetch_optional(&pool)
-        .await
-        .expect("Failed to check deleted circle invitation");
+        let deleted_invitation = sqlx::query!("SELECT id FROM circle_invitations WHERE id = ?", invitation_id)
+            .fetch_optional(&pool)
+            .await
+            .expect("Failed to check deleted circle invitation");
 
         assert!(
             deleted_invitation.is_none(),
@@ -691,12 +587,10 @@ mod tests {
         };
 
         // Insert interval 2
-        sqlx::query!(
-            "INSERT INTO intervals (id, start_date, end_date, project_id) VALUES (2, '2026-04-01', '2026-06-30', 1)"
-        )
-        .execute(&pool)
-        .await
-        .expect("Failed to insert interval 2");
+        sqlx::query!("INSERT INTO intervals (id, start_date, end_date, project_id) VALUES (2, '2026-04-01', '2026-06-30', 1)")
+            .execute(&pool)
+            .await
+            .expect("Failed to insert interval 2");
 
         let interval_2 = Interval {
             id: 2,
@@ -705,28 +599,14 @@ mod tests {
         };
 
         // Invite the person in interval 1
-        let invite_result = invite_person(
-            &pool,
-            &email_sender,
-            &input,
-            UserId::new(1),
-            ProjectId::new(1),
-            interval_1(),
-        )
-        .await;
-        assert!(
-            invite_result.is_ok(),
-            "invite_person failed: {:?}",
-            invite_result.err()
-        );
+        let invite_result = invite_person(&pool, &email_sender, &input, UserId::new(1), ProjectId::new(1), interval_1()).await;
+        assert!(invite_result.is_ok(), "invite_person failed: {:?}", invite_result.err());
 
         // Simulate signup: create a user with the same email as the invitee
-        sqlx::query!(
-            "INSERT INTO users (email, hashed_password) VALUES ('invitee@example.com', 'hashed')"
-        )
-        .execute(&pool)
-        .await
-        .expect("Failed to insert invitee user");
+        sqlx::query!("INSERT INTO users (email, hashed_password) VALUES ('invitee@example.com', 'hashed')")
+            .execute(&pool)
+            .await
+            .expect("Failed to insert invitee user");
 
         let new_user = sqlx::query!("SELECT id FROM users WHERE email = 'invitee@example.com'")
             .fetch_one(&pool)
@@ -734,36 +614,21 @@ mod tests {
             .expect("Failed to find new user");
 
         // Retrieve the invitation token
-        let invitation_row = sqlx::query!(
-            "SELECT invitation_token FROM circle_invitations WHERE invitee_email = 'invitee@example.com'"
-        )
-        .fetch_one(&pool)
-        .await
-        .expect("Failed to find circle invitation");
+        let invitation_row = sqlx::query!("SELECT invitation_token FROM circle_invitations WHERE invitee_email = 'invitee@example.com'")
+            .fetch_one(&pool)
+            .await
+            .expect("Failed to find circle invitation");
         let invitation_token = invitation_row.invitation_token;
 
         // Accept the invitation as the newly signed-up user, but in interval 2
-        let accept_result = accept_invitation(
-            &pool,
-            invitation_token,
-            UserId::new(new_user.id),
-            interval_2,
-        )
-        .await;
-        assert!(
-            accept_result.is_ok(),
-            "accept_invitation failed: {:?}",
-            accept_result.err()
-        );
+        let accept_result = accept_invitation(&pool, invitation_token, UserId::new(new_user.id), interval_2).await;
+        assert!(accept_result.is_ok(), "accept_invitation failed: {:?}", accept_result.err());
 
         // Verify the person record is linked to the new user
-        let person_row = sqlx::query!(
-            "SELECT id, user_id FROM people WHERE user_id = ?",
-            new_user.id
-        )
-        .fetch_one(&pool)
-        .await
-        .expect("No person record found for the new user");
+        let person_row = sqlx::query!("SELECT id, user_id FROM people WHERE user_id = ?", new_user.id)
+            .fetch_one(&pool)
+            .await
+            .expect("No person record found for the new user");
 
         // Verify a circle_involvement exists in interval 2 for this person, in Onboarding status
         let involvement_row = sqlx::query!(
@@ -790,18 +655,15 @@ mod tests {
         let email_sender = MockEmailSender::new();
 
         // Create the accepter user and their existing person in project 1.
-        sqlx::query!(
-            "INSERT INTO users (email, hashed_password) VALUES ('accepter@example.com', 'hashed')"
-        )
-        .execute(&pool)
-        .await
-        .expect("Failed to insert accepter user");
+        sqlx::query!("INSERT INTO users (email, hashed_password) VALUES ('accepter@example.com', 'hashed')")
+            .execute(&pool)
+            .await
+            .expect("Failed to insert accepter user");
 
-        let accepter_user =
-            sqlx::query!("SELECT id FROM users WHERE email = 'accepter@example.com'")
-                .fetch_one(&pool)
-                .await
-                .expect("Failed to find accepter user");
+        let accepter_user = sqlx::query!("SELECT id FROM users WHERE email = 'accepter@example.com'")
+            .fetch_one(&pool)
+            .await
+            .expect("Failed to find accepter user");
 
         sqlx::query!(
             "INSERT INTO people (display_name, project_id, user_id) VALUES ('Existing Accepter Person', 1, ?)",
@@ -811,11 +673,10 @@ mod tests {
         .await
         .expect("Failed to insert accepter person");
 
-        let accepter_person =
-            sqlx::query!("SELECT id FROM people WHERE user_id = ?", accepter_user.id)
-                .fetch_one(&pool)
-                .await
-                .expect("Failed to find accepter person");
+        let accepter_person = sqlx::query!("SELECT id FROM people WHERE user_id = ?", accepter_user.id)
+            .fetch_one(&pool)
+            .await
+            .expect("Failed to find accepter person");
 
         // Invite a different email into circle 1.
         let input = InvitePersonRequest {
@@ -825,67 +686,37 @@ mod tests {
             message: None,
         };
 
-        let invite_result = invite_person(
-            &pool,
-            &email_sender,
-            &input,
-            UserId::new(1),
-            ProjectId::new(1),
-            interval_1(),
-        )
-        .await;
-        assert!(
-            invite_result.is_ok(),
-            "invite_person failed: {:?}",
-            invite_result.err()
-        );
+        let invite_result = invite_person(&pool, &email_sender, &input, UserId::new(1), ProjectId::new(1), interval_1()).await;
+        assert!(invite_result.is_ok(), "invite_person failed: {:?}", invite_result.err());
 
         // Capture the placeholder person created by invitation flow.
-        let invitation_row = sqlx::query!(
-            "SELECT id, person_id, invitation_token FROM circle_invitations WHERE invitee_email = 'invitee@example.com'"
-        )
-        .fetch_one(&pool)
-        .await
-        .expect("Failed to find circle invitation");
+        let invitation_row =
+            sqlx::query!("SELECT id, person_id, invitation_token FROM circle_invitations WHERE invitee_email = 'invitee@example.com'")
+                .fetch_one(&pool)
+                .await
+                .expect("Failed to find circle invitation");
         let placeholder_person_id = invitation_row.person_id;
 
         // Accept with the existing accepter user (different email from invitation).
-        let accept_result = accept_invitation(
-            &pool,
-            invitation_row.invitation_token,
-            UserId::new(accepter_user.id),
-            interval_1(),
-        )
-        .await;
-        assert!(
-            accept_result.is_ok(),
-            "accept_invitation failed: {:?}",
-            accept_result.err()
-        );
+        let accept_result = accept_invitation(&pool, invitation_row.invitation_token, UserId::new(accepter_user.id), interval_1()).await;
+        assert!(accept_result.is_ok(), "accept_invitation failed: {:?}", accept_result.err());
 
         // Invitation should be deleted after acceptance.
-        let deleted_invitation = sqlx::query!(
-            "SELECT id FROM circle_invitations WHERE id = ?",
-            invitation_row.id
-        )
-        .fetch_optional(&pool)
-        .await
-        .expect("Failed to check deleted circle invitation");
+        let deleted_invitation = sqlx::query!("SELECT id FROM circle_invitations WHERE id = ?", invitation_row.id)
+            .fetch_optional(&pool)
+            .await
+            .expect("Failed to check deleted circle invitation");
         assert!(
             deleted_invitation.is_none(),
             "Expected circle invitation to be deleted after acceptance"
         );
 
         // Placeholder person should be deleted during reconciliation.
-        let placeholder_person =
-            sqlx::query!("SELECT id FROM people WHERE id = ?", placeholder_person_id)
-                .fetch_optional(&pool)
-                .await
-                .expect("Failed to check placeholder person");
-        assert!(
-            placeholder_person.is_none(),
-            "Expected placeholder invited person to be deleted"
-        );
+        let placeholder_person = sqlx::query!("SELECT id FROM people WHERE id = ?", placeholder_person_id)
+            .fetch_optional(&pool)
+            .await
+            .expect("Failed to check placeholder person");
+        assert!(placeholder_person.is_none(), "Expected placeholder invited person to be deleted");
 
         // The accepter should now have an onboarding involvement in circle 1, interval 1.
         let accepter_involvement = sqlx::query!(

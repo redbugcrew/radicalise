@@ -1,14 +1,14 @@
-import { Group, Stack, Title } from "@mantine/core";
-import { IntervalSelector } from "../../components";
-import { useAppSelector } from "../../store";
-import PeopleForInterval from "./PeopleForInterval";
-import { useSelectedInterval } from "../intervals/WithIntervalData";
-import { useCurrentInterval } from "../../store/current_interval";
+import { Group, Stack, Title } from "@mantine/core"
+import { IntervalSelector } from "../../components"
+import { useAppSelector } from "../../store"
+import PeopleForInterval from "./PeopleForInterval"
+import { useSelectedInterval } from "../intervals/WithIntervalData"
+import { useCurrentInterval } from "../../store/current_interval"
 
 export default function People() {
-  const intervals = useAppSelector((state) => state.intervals);
-  const selectedInterval = useSelectedInterval();
-  const currentInterval = useCurrentInterval();
+  const intervals = useAppSelector((state) => state.intervals)
+  const selectedInterval = useSelectedInterval()
+  const currentInterval = useCurrentInterval()
 
   return (
     <Stack>
@@ -23,5 +23,5 @@ export default function People() {
       <IntervalSelector intervals={intervals} selectedInterval={selectedInterval} currentInterval={currentInterval} />
       {selectedInterval && <PeopleForInterval interval={selectedInterval} key={selectedInterval.id} />}
     </Stack>
-  );
+  )
 }

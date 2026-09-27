@@ -16,12 +16,7 @@ impl ResendEmailSender {
 
 impl EmailSender for ResendEmailSender {
     async fn send_email(&self, email: CreateEmailBaseOptions) -> Result<(), String> {
-        self.resend
-            .emails
-            .send(email)
-            .await
-            .map(|_| ())
-            .map_err(|e| e.to_string())
+        self.resend.emails.send(email).await.map(|_| ()).map_err(|e| e.to_string())
     }
 }
 

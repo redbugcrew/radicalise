@@ -1,10 +1,10 @@
-import { Container, Paper, Title, Text } from "@mantine/core";
-import classes from "../Auth.module.css";
+import { Container, Paper, Title, Text } from "@mantine/core"
+import classes from "../Auth.module.css"
 
 interface AuthLayoutProps {
-  children: React.ReactNode;
-  title: string;
-  description?: string;
+  children: React.ReactNode
+  title: string
+  description?: string
 }
 
 export default function AuthLayout({ children, title, description }: AuthLayoutProps) {
@@ -23,5 +23,5 @@ export default function AuthLayout({ children, title, description }: AuthLayoutP
         {children}
       </Paper>
     </Container>
-  );
+  )
 }

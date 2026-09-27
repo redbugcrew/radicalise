@@ -1,22 +1,24 @@
-import { Container, Stack, Title, Box, Group } from "@mantine/core";
-import { useParams } from "react-router-dom";
-import { useAppSelector } from "../../store";
-import type { EntryPathway } from "../../api/Api";
-import { Anchor } from "../../components";
-import { IconArrowLeft } from "@tabler/icons-react";
-import EntryPathwayFields from "../../components/entry_pathways/EntryPathwayFields";
+import { Container, Stack, Title, Box, Group } from "@mantine/core"
+import { useParams } from "react-router-dom"
+import { useAppSelector } from "../../store"
+import type { EntryPathway } from "../../api/Api"
+import { Anchor } from "../../components"
+import { IconArrowLeft } from "@tabler/icons-react"
+import EntryPathwayFields from "../../components/entry_pathways/EntryPathwayFields"
 
 export default function DisplayEntryPathway() {
-  const { entryPathwayId } = useParams<"entryPathwayId">();
-  const entryPathwayIdNum = parseInt(entryPathwayId || "", 10);
-  const entryPathway: EntryPathway | undefined = useAppSelector((state) => state.entryPathways.find((entryPathway) => entryPathway.id === entryPathwayIdNum));
+  const { entryPathwayId } = useParams<"entryPathwayId">()
+  const entryPathwayIdNum = parseInt(entryPathwayId || "", 10)
+  const entryPathway: EntryPathway | undefined = useAppSelector((state) =>
+    state.entryPathways.find((entryPathway) => entryPathway.id === entryPathwayIdNum),
+  )
 
   if (!entryPathway) {
     return (
       <Container>
         <Title order={2}>Entry Pathway not found</Title>
       </Container>
-    );
+    )
   }
 
   return (
@@ -34,5 +36,5 @@ export default function DisplayEntryPathway() {
         </Anchor>
       </Stack>
     </Container>
-  );
+  )
 }

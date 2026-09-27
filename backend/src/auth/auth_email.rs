@@ -4,17 +4,12 @@ use resend_rs::{
 };
 use urlencoding::encode;
 
-pub async fn reset_password_email(
-    resend: &Resend,
-    email: String,
-    token: String,
-) -> Result<CreateEmailResponse, resend_rs::Error> {
+pub async fn reset_password_email(resend: &Resend, email: String, token: String) -> Result<CreateEmailResponse, resend_rs::Error> {
     let from = "RADicalise <noreply@radicalise.radhousing.org>";
     let to = [email];
     let subject = "Reset your RADicalise password";
 
-    let base_url =
-        std::env::var("BASE_URL").unwrap_or_else(|_| "http://localhost:5173".to_string());
+    let base_url = std::env::var("BASE_URL").unwrap_or_else(|_| "http://localhost:5173".to_string());
 
     let html_content = format!(
         "<p>Please click the link below to reset your password.</p><p><a href=\"{}/auth/reset_password?token={}\">Reset Password</a></p>",

@@ -10,16 +10,12 @@ use tower_http::services::{ServeDir, ServeFile};
 const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 lazy_static! {
-    pub static ref FRONTEND_PATH: String =
-        env::var("FRONTEND_PATH").unwrap_or_else(|_| "../frontend/dist".to_string());
+    pub static ref FRONTEND_PATH: String = env::var("FRONTEND_PATH").unwrap_or_else(|_| "../frontend/dist".to_string());
 }
 
 pub async fn frontend_handler(uri: Uri) -> Result<Response<Body>, (StatusCode, String)> {
     if uri.path().starts_with("/api") {
-        println!(
-            "API call detected, not serving static files for URI: {}",
-            uri
-        );
+        println!("API call detected, not serving static files for URI: {}", uri);
         return Err((StatusCode::NOT_FOUND, "API endpoint not found".to_string()));
     }
 
@@ -46,25 +42,19 @@ pub async fn frontend_handler(uri: Uri) -> Result<Response<Body>, (StatusCode, S
         other => {
             // If the status is not OK or NOT_FOUND, return the response as is
             println!("Got other status: {}", other);
-            return Ok(res);
+            Ok(res)
         }
     }
 }
 
-async fn serve_file(
-    uri: Uri,
-    spa_file_path_string: String,
-) -> Result<Response<Body>, (StatusCode, String)> {
+async fn serve_file(uri: Uri, spa_file_path_string: String) -> Result<Response<Body>, (StatusCode, String)> {
     let req = Request::builder().uri(uri).body(Body::empty()).unwrap();
 
     match ServeFile::new(spa_file_path_string).oneshot(req).await {
         Ok(res) => Ok(res.map(Body::new)),
         Err(err) => {
             println!("Error serving static file: {}", err);
-            return Err((
-                StatusCode::INTERNAL_SERVER_ERROR,
-                format!("Something went wrong: {}", err),
-            ));
+            Err((StatusCode::INTERNAL_SERVER_ERROR, format!("Something went wrong: {}", err)))
         }
     }
 }
@@ -77,10 +67,7 @@ async fn serve_dir(uri: Uri, static_dir: String) -> Result<Response<Body>, (Stat
         Ok(res) => Ok(res.map(Body::new)),
         Err(err) => {
             println!("Error serving static file: {}", err);
-            return Err((
-                StatusCode::INTERNAL_SERVER_ERROR,
-                format!("Something went wrong: {}", err),
-            ));
+            Err((StatusCode::INTERNAL_SERVER_ERROR, format!("Something went wrong: {}", err)))
         }
     }
 }

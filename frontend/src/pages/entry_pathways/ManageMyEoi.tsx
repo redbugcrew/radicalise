@@ -1,42 +1,42 @@
-import { Container, Title, Text, Stack, Card, Button } from "@mantine/core";
-import { useContext, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { getApi } from "../../api";
-import type { EoiError, ExpressionOfInterest } from "../../api/Api";
-import { ProjectContext } from "../PublicWithProject";
-import { EOIForm } from "../../components";
+import { Container, Title, Text, Stack, Card, Button } from "@mantine/core"
+import { useContext, useEffect, useState } from "react"
+import { useNavigate, useParams } from "react-router-dom"
+import { getApi } from "../../api"
+import type { EoiError, ExpressionOfInterest } from "../../api/Api"
+import { ProjectContext } from "../PublicWithProject"
+import { EOIForm } from "../../components"
 
 export default function ManageMyEoi() {
-  const { authToken } = useParams<"authToken">();
-  const project = useContext(ProjectContext);
-  const [eoi, setEoi] = useState<ExpressionOfInterest | null | undefined>(undefined);
-  const [error, setError] = useState<EoiError | null>(null);
-  const [action, setAction] = useState<"updated" | null>(null);
-  const navigate = useNavigate();
+  const { authToken } = useParams<"authToken">()
+  const project = useContext(ProjectContext)
+  const [eoi, setEoi] = useState<ExpressionOfInterest | null | undefined>(undefined)
+  const [error, setError] = useState<EoiError | null>(null)
+  const [action, setAction] = useState<"updated" | null>(null)
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (!authToken) {
-      console.error("No auth token provided in the URL parameters.");
-      return;
+      console.error("No auth token provided in the URL parameters.")
+      return
     }
 
     getApi()
       .api.getEoiByAuthToken(authToken, project.id)
       .then((response) => {
         if (response.status === 200) {
-          console.log("EOI data:", response.data);
-          setEoi(response.data);
-          setError(null);
+          console.log("EOI data:", response.data)
+          setEoi(response.data)
+          setError(null)
         }
       })
       .catch((error) => {
-        console.error("Error fetching EOI data:", error);
-        setEoi(null);
-      });
-  }, [authToken]);
+        console.error("Error fetching EOI data:", error)
+        setEoi(null)
+      })
+  }, [authToken])
 
   if (eoi === undefined) {
-    return <Container></Container>;
+    return <Container></Container>
   }
 
   if (eoi === null) {
@@ -47,48 +47,48 @@ export default function ManageMyEoi() {
           <Text>There was an error fetching your expression of interest.</Text>
         </Stack>
       </Container>
-    );
+    )
   }
 
   const handleSubmit = async (values: ExpressionOfInterest): Promise<void> => {
     if (!authToken) {
-      console.error("No auth token provided for updating EOI.");
-      return;
+      console.error("No auth token provided for updating EOI.")
+      return
     }
 
     return getApi()
       .api.updateEoi(authToken, project.id, values)
-      .then((_) => {
-        setError(null);
-        setAction("updated");
-        setEoi(values);
-        window.scrollTo({ top: 0, behavior: "smooth" });
+      .then(() => {
+        setError(null)
+        setAction("updated")
+        setEoi(values)
+        window.scrollTo({ top: 0, behavior: "smooth" })
       })
       .catch((error) => {
         if (error.response?.status === 400) {
-          const errorEnum = error.response.data as EoiError;
-          setError(errorEnum);
-          window.scrollTo({ top: 0, behavior: "smooth" });
+          const errorEnum = error.response.data as EoiError
+          setError(errorEnum)
+          window.scrollTo({ top: 0, behavior: "smooth" })
         }
-      });
-  };
+      })
+  }
 
   const handleDelete = async (): Promise<void> => {
     if (!authToken) {
-      console.error("No auth token provided for deleting EOI.");
-      return;
+      console.error("No auth token provided for deleting EOI.")
+      return
     }
 
     return getApi()
       .api.deleteEoi(authToken, project.id)
       .then(() => {
-        navigate("../interest");
+        navigate("../interest")
       })
       .catch((error) => {
-        console.error("Error deleting EOI:", error);
+        console.error("Error deleting EOI:", error)
         // setError({ type: "delete_error", message: "Failed to delete the expression of interest." });
-      });
-  };
+      })
+  }
 
   return (
     <Container pt="lg" pb="xl">
@@ -120,7 +120,10 @@ export default function ManageMyEoi() {
 
         <Stack align="flex-start">
           <Title order={3}>Delete your submission</Title>
-          <Text>If you delete your submission, your data will be permanently removed and cannot be recovered. You can always re-submit later if you change your mind.</Text>
+          <Text>
+            If you delete your submission, your data will be permanently removed and cannot be recovered. You can always re-submit later if
+            you change your mind.
+          </Text>
           <Button color="red" onClick={handleDelete}>
             Delete
           </Button>
@@ -133,5 +136,5 @@ export default function ManageMyEoi() {
         </Stack>
       </Stack>
     </Container>
-  );
+  )
 }

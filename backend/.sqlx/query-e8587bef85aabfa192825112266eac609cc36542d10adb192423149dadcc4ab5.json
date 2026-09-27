@@ -6,47 +6,101 @@
       {
         "name": "id",
         "ordinal": 0,
-        "type_info": "Integer"
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "calendar_events",
+            "name": "id"
+          }
+        }
       },
       {
         "name": "event_template_id",
         "ordinal": 1,
-        "type_info": "Integer"
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "calendar_events",
+            "name": "event_template_id"
+          }
+        }
       },
       {
         "name": "name",
         "ordinal": 2,
-        "type_info": "Text"
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "calendar_events",
+            "name": "name"
+          }
+        }
       },
       {
         "name": "summary",
         "ordinal": 3,
-        "type_info": "Text"
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "calendar_events",
+            "name": "summary"
+          }
+        }
       },
       {
         "name": "description",
         "ordinal": 4,
-        "type_info": "Text"
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "calendar_events",
+            "name": "description"
+          }
+        }
       },
       {
         "name": "location",
         "ordinal": 5,
-        "type_info": "Text"
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "calendar_events",
+            "name": "location"
+          }
+        }
       },
       {
         "name": "start_at: String",
         "ordinal": 6,
-        "type_info": "Datetime"
+        "type_info": "Datetime",
+        "origin": {
+          "Table": {
+            "table": "calendar_events",
+            "name": "start_at"
+          }
+        }
       },
       {
         "name": "end_at: String",
         "ordinal": 7,
-        "type_info": "Datetime"
+        "type_info": "Datetime",
+        "origin": {
+          "Table": {
+            "table": "calendar_events",
+            "name": "end_at"
+          }
+        }
       },
       {
         "name": "response_expectation: EventResponseExpectation",
         "ordinal": 8,
-        "type_info": "Text"
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event_templates",
+            "name": "response_expectation"
+          }
+        }
       }
     ],
     "parameters": {

@@ -15,7 +15,7 @@ pub async fn insert_person_without_user(
         "
         INSERT INTO people (project_id, display_name)
         VALUES (?, ?)
-        RETURNING id, project_id, display_name, about, avatar_id",
+        RETURNING id AS \"id!\", project_id, display_name, about, avatar_id",
         project_id.id,
         display_name,
     )
@@ -43,10 +43,7 @@ pub async fn update_person(input: Person, pool: &SqlitePool) -> Result<Person, s
     find_person_by_id(input.typed_id(), pool).await
 }
 
-pub async fn find_person_by_id(
-    person_id: PersonId,
-    pool: &SqlitePool,
-) -> Result<Person, sqlx::Error> {
+pub async fn find_person_by_id(person_id: PersonId, pool: &SqlitePool) -> Result<Person, sqlx::Error> {
     sqlx::query_as!(
         Person,
         "
@@ -60,11 +57,7 @@ pub async fn find_person_by_id(
     .await
 }
 
-pub async fn find_person_by_user_id(
-    user_id: UserId,
-    project_id: ProjectId,
-    pool: &SqlitePool,
-) -> Result<Option<Person>, sqlx::Error> {
+pub async fn find_person_by_user_id(user_id: UserId, project_id: ProjectId, pool: &SqlitePool) -> Result<Option<Person>, sqlx::Error> {
     sqlx::query_as!(
         Person,
         "
@@ -80,10 +73,7 @@ pub async fn find_person_by_user_id(
     .await
 }
 
-pub async fn find_person_by_calendar_token(
-    calendar_token: &str,
-    pool: &SqlitePool,
-) -> Result<Person, sqlx::Error> {
+pub async fn find_person_by_calendar_token(calendar_token: &str, pool: &SqlitePool) -> Result<Person, sqlx::Error> {
     let result = sqlx::query_as!(
         Person,
         "
@@ -100,10 +90,7 @@ pub async fn find_person_by_calendar_token(
     Ok(result)
 }
 
-pub async fn find_all_people(
-    project_id: ProjectId,
-    pool: &SqlitePool,
-) -> Result<Vec<Person>, sqlx::Error> {
+pub async fn find_all_people(project_id: ProjectId, pool: &SqlitePool) -> Result<Vec<Person>, sqlx::Error> {
     sqlx::query_as!(
         Person,
         "
@@ -116,11 +103,7 @@ pub async fn find_all_people(
     .await
 }
 
-pub async fn find_crew_involved_emails(
-    crew_id: CrewId,
-    interval_id: IntervalId,
-    pool: &SqlitePool,
-) -> Result<Vec<String>, sqlx::Error> {
+pub async fn find_crew_involved_emails(crew_id: CrewId, interval_id: IntervalId, pool: &SqlitePool) -> Result<Vec<String>, sqlx::Error> {
     let rows = sqlx::query!(
         "SELECT email
         FROM users
@@ -137,25 +120,15 @@ pub async fn find_crew_involved_emails(
 }
 
 pub async fn delete_person(person_id: PersonId, pool: &SqlitePool) -> Result<(), sqlx::Error> {
-    sqlx::query!("DELETE FROM people WHERE id = ?", person_id.id)
-        .execute(pool)
-        .await?;
+    sqlx::query!("DELETE FROM people WHERE id = ?", person_id.id).execute(pool).await?;
 
     Ok(())
 }
 
-pub async fn update_person_user_id(
-    person_id: PersonId,
-    user_id: UserId,
-    pool: &SqlitePool,
-) -> Result<(), sqlx::Error> {
-    sqlx::query!(
-        "UPDATE people SET user_id = ? WHERE id = ?",
-        user_id.id,
-        person_id.id
-    )
-    .execute(pool)
-    .await?;
+pub async fn update_person_user_id(person_id: PersonId, user_id: UserId, pool: &SqlitePool) -> Result<(), sqlx::Error> {
+    sqlx::query!("UPDATE people SET user_id = ? WHERE id = ?", user_id.id, person_id.id)
+        .execute(pool)
+        .await?;
 
     Ok(())
 }

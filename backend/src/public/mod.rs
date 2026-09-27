@@ -22,10 +22,7 @@ pub fn router() -> OpenApiRouter {
     ), params(
             ("project_slug" = String, Path, description = "Project slug")
         ),)]
-async fn get_project_by_slug(
-    Path(project_slug): Path<String>,
-    Extension(pool): Extension<SqlitePool>,
-) -> impl IntoResponse {
+async fn get_project_by_slug(Path(project_slug): Path<String>, Extension(pool): Extension<SqlitePool>) -> impl IntoResponse {
     let project_result = find_project_by_slug(project_slug, &pool).await;
 
     match project_result {

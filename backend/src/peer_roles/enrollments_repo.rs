@@ -39,11 +39,7 @@ pub async fn upsert_peer_enrollments(
     Ok(())
 }
 
-pub async fn load_match_history(
-    peer_role_id: i64,
-    current_interval_id: i64,
-    pool: &SqlitePool,
-) -> Result<MatchHistory<i64>, sqlx::Error> {
+pub async fn load_match_history(peer_role_id: i64, current_interval_id: i64, pool: &SqlitePool) -> Result<MatchHistory<i64>, sqlx::Error> {
     let rows = sqlx::query!(
         r#"
         SELECT person_id AS "person_id!: i64", peer_id AS "peer_id!: i64", MAX(interval_id) AS "last_interval!: i64"
@@ -65,10 +61,7 @@ pub async fn load_match_history(
     Ok(history)
 }
 
-pub async fn find_peer_enrollments_for_interval(
-    interval_id: &IntervalId,
-    pool: &SqlitePool,
-) -> Result<Vec<PeerEnrollment>, sqlx::Error> {
+pub async fn find_peer_enrollments_for_interval(interval_id: &IntervalId, pool: &SqlitePool) -> Result<Vec<PeerEnrollment>, sqlx::Error> {
     let enrollments = sqlx::query_as!(
         PeerEnrollment,
         "SELECT * FROM peer_enrollments WHERE interval_id = ?",

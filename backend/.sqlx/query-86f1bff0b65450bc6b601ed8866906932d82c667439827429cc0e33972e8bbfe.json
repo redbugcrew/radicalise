@@ -6,27 +6,57 @@
       {
         "name": "id",
         "ordinal": 0,
-        "type_info": "Integer"
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "calendar_event_attendances",
+            "name": "id"
+          }
+        }
       },
       {
         "name": "person_id",
         "ordinal": 1,
-        "type_info": "Integer"
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "calendar_event_attendances",
+            "name": "person_id"
+          }
+        }
       },
       {
         "name": "calendar_event_id",
         "ordinal": 2,
-        "type_info": "Integer"
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "calendar_event_attendances",
+            "name": "calendar_event_id"
+          }
+        }
       },
       {
         "name": "intention: AttendanceIntention",
         "ordinal": 3,
-        "type_info": "Text"
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "calendar_event_attendances",
+            "name": "intention"
+          }
+        }
       },
       {
         "name": "actual",
         "ordinal": 4,
-        "type_info": "Bool"
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "calendar_event_attendances",
+            "name": "actual"
+          }
+        }
       }
     ],
     "parameters": {

@@ -71,12 +71,7 @@ impl PairingAlgorithm for PeerRoleDistributionType {
                 constraint_edges,
                 rng,
             )),
-            Self::StickyUnidirectional => sticky_unidirectional(
-                people,
-                match_history.expect("History required"),
-                constraint_edges,
-                rng,
-            ),
+            Self::StickyUnidirectional => sticky_unidirectional(people, match_history.expect("History required"), constraint_edges, rng),
         }
     }
 }

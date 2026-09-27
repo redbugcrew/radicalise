@@ -21,35 +21,21 @@ pub fn router() -> OpenApiRouter {
         (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
     )
 )]
-async fn recompute_implicit_involvements(
-    Extension(pool): Extension<SqlitePool>,
-) -> impl IntoResponse {
-    let intervals = find_all_intervals(default_project_id(), &pool)
-        .await
-        .unwrap();
+async fn recompute_implicit_involvements(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse {
+    let intervals = find_all_intervals(default_project_id(), &pool).await.unwrap();
 
     let circles = find_all_circles(default_project_id(), &pool).await.unwrap();
 
     for circle in &circles {
         println!("Recomputing implicit involvements for circle {}", circle.id);
 
-        set_implicit_counter_to_zero(circle.typed_id(), &pool)
-            .await
-            .unwrap();
+        set_implicit_counter_to_zero(circle.typed_id(), &pool).await.unwrap();
     }
 
     for interval in intervals {
-        println!(
-            "Recomputing implicit involvements for interval {}",
-            interval.id
-        );
-        if let Err(e) =
-            add_interval_implicit_involvements(&interval, default_project_id(), true, &pool).await
-        {
-            eprintln!(
-                "Error recomputing implicit involvements for interval {}: {:?}",
-                interval.id, e
-            );
+        println!("Recomputing implicit involvements for interval {}", interval.id);
+        if let Err(e) = add_interval_implicit_involvements(&interval, default_project_id(), true, &pool).await {
+            eprintln!("Error recomputing implicit involvements for interval {}: {:?}", interval.id, e);
         }
     }
 

@@ -77,10 +77,7 @@ impl AuthnBackend for AppAuthBackend {
     type Credentials = Credentials;
     type Error = Error;
 
-    async fn authenticate(
-        &self,
-        creds: Self::Credentials,
-    ) -> Result<Option<Self::User>, Self::Error> {
+    async fn authenticate(&self, creds: Self::Credentials) -> Result<Option<Self::User>, Self::Error> {
         let repo = AuthRepo::new(&self.db);
 
         let user: Option<Self::User> = repo
@@ -93,7 +90,7 @@ impl AuthnBackend for AppAuthBackend {
                     password: u.hashed_password.unwrap_or_default(),
                 })
             })
-            .map_err(|e| Error::AuthRepo(e))?;
+            .map_err(Error::AuthRepo)?;
 
         // Verifying the password is blocking and potentially slow, so we'll do so via
         // `spawn_blocking`.
@@ -117,7 +114,7 @@ impl AuthnBackend for AppAuthBackend {
                     password: u.hashed_password.unwrap_or_default(),
                 })
             })
-            .map_err(|e| Error::AuthRepo(e))
+            .map_err(Error::AuthRepo)
     }
 }
 

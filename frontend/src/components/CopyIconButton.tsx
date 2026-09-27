@@ -1,10 +1,10 @@
-import { ActionIcon, CopyButton, Group, Text } from "@mantine/core";
-import { IconClipboard, IconClipboardCheck } from "@tabler/icons-react";
+import { ActionIcon, CopyButton, Group, Text } from "@mantine/core"
+import { IconClipboard, IconClipboardCheck } from "@tabler/icons-react"
 
 interface CopyIconButtonProps {
-  value: string;
-  prompt?: string;
-  successText?: string;
+  value: string
+  prompt?: string
+  successText?: string
 }
 
 export default function CopyIconButton({ value, prompt, successText }: CopyIconButtonProps) {
@@ -20,5 +20,5 @@ export default function CopyIconButton({ value, prompt, successText }: CopyIconB
         </Group>
       )}
     </CopyButton>
-  );
+  )
 }

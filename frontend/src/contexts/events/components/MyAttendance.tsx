@@ -1,27 +1,27 @@
-import { getApi } from "../../../api";
-import type { AttendanceIntention, CalendarEvent } from "../../../api/Api";
-import { PersonBadge } from "../../../components";
-import { handleAppEvents, useAppSelector } from "../../../store";
-import AttendanceSelector from "./AttendanceSelector";
+import { getApi } from "../../../api"
+import type { AttendanceIntention, CalendarEvent } from "../../../api/Api"
+import { PersonBadge } from "../../../components"
+import { handleAppEvents, useAppSelector } from "../../../store"
+import AttendanceSelector from "./AttendanceSelector"
 
 interface MyAttendanceSelectorProps {
-  event: CalendarEvent;
-  readonly?: boolean;
+  event: CalendarEvent
+  readonly?: boolean
 }
 
 export default function MyAttendance({ event, readonly }: MyAttendanceSelectorProps) {
-  const currentPerson = useAppSelector((state) => state.me?.person_id && state.people[state.me?.person_id]);
+  const currentPerson = useAppSelector((state) => state.me?.person_id && state.people[state.me?.person_id])
 
-  if (!currentPerson) return null;
+  if (!currentPerson) return null
 
-  const intention = intentionForEvent(currentPerson.id, event);
+  const intention = intentionForEvent(currentPerson.id, event)
 
   if (readonly) {
-    return <PersonBadge person={currentPerson} textOverride={intention ? intention : "No Response"} />;
+    return <PersonBadge person={currentPerson} textOverride={intention ? intention : "No Response"} />
   }
 
   const onIntentionChange = async (eventId: number, intention: AttendanceIntention | null): Promise<void> => {
-    console.log(`Event ID: ${eventId}, New Intention: ${intention}`);
+    console.log(`Event ID: ${eventId}, New Intention: ${intention}`)
 
     getApi()
       .api.createCalendarEventAttendance({
@@ -29,23 +29,23 @@ export default function MyAttendance({ event, readonly }: MyAttendanceSelectorPr
         intention: intention,
       })
       .then((response) => {
-        handleAppEvents(response.data);
+        handleAppEvents(response.data)
       })
       .catch((error) => {
-        console.error("Failed to update attendance intention:", error);
-      });
-  };
+        console.error("Failed to update attendance intention:", error)
+      })
+  }
 
-  let myIntention = {
+  const myIntention = {
     intention: intention,
     onChange: (intention: AttendanceIntention | null) => onIntentionChange(event.id, intention),
-  };
+  }
 
-  return <AttendanceSelector {...myIntention} />;
+  return <AttendanceSelector {...myIntention} />
 }
 
 function intentionForEvent(personId: number, event: CalendarEvent): AttendanceIntention | null | undefined {
-  if (!event.attendances) return undefined;
-  const attendancesForPerson = event.attendances.find((attendance) => attendance.person_id === personId);
-  return attendancesForPerson?.intention;
+  if (!event.attendances) return undefined
+  const attendancesForPerson = event.attendances.find((attendance) => attendance.person_id === personId)
+  return attendancesForPerson?.intention
 }

@@ -21,7 +21,7 @@ pub async fn insert_event_template_with_links(
         "
         INSERT INTO event_templates (name, project_id, summary, response_expectation)
         VALUES (?, ?, ?, ?)
-        RETURNING id, name
+        RETURNING id AS \"id!\", name
         ",
         data.name,
         project_id.id,
@@ -31,13 +31,7 @@ pub async fn insert_event_template_with_links(
     .fetch_one(pool)
     .await?;
 
-    let links = update_links_for_owner(
-        rec.id,
-        "event_templates".to_string(),
-        data.links.clone(),
-        pool,
-    )
-    .await?;
+    let links = update_links_for_owner(rec.id, "event_templates".to_string(), data.links.clone(), pool).await?;
 
     Ok(EventTemplate {
         id: rec.id,
@@ -58,7 +52,7 @@ pub async fn update_event_template_with_links(
         UPDATE event_templates
         SET name = ?, summary = ?, response_expectation = ?
         WHERE id = ? AND project_id = ?
-        RETURNING id, name
+        RETURNING id AS \"id!\", name
         ",
         data.name,
         data.summary,
@@ -69,13 +63,7 @@ pub async fn update_event_template_with_links(
     .fetch_one(pool)
     .await?;
 
-    let links = update_links_for_owner(
-        rec.id,
-        "event_templates".to_string(),
-        data.links.clone(),
-        pool,
-    )
-    .await?;
+    let links = update_links_for_owner(rec.id, "event_templates".to_string(), data.links.clone(), pool).await?;
 
     Ok(EventTemplate {
         links: Some(links.unwrap_or_default()),
@@ -83,10 +71,7 @@ pub async fn update_event_template_with_links(
     })
 }
 
-pub async fn find_all_event_templates(
-    project_id: ProjectId,
-    pool: &SqlitePool,
-) -> Result<Vec<EventTemplate>, sqlx::Error> {
+pub async fn find_all_event_templates(project_id: ProjectId, pool: &SqlitePool) -> Result<Vec<EventTemplate>, sqlx::Error> {
     let rows = find_all_event_template_rows(project_id, pool).await?;
 
     let links = find_all_links_for_owner_type("event_templates".to_string(), pool).await?;
@@ -106,10 +91,7 @@ pub async fn find_all_event_templates(
     Ok(event_templates)
 }
 
-async fn find_all_event_template_rows(
-    project_id: ProjectId,
-    pool: &SqlitePool,
-) -> Result<Vec<EventTemplateRow>, sqlx::Error> {
+async fn find_all_event_template_rows(project_id: ProjectId, pool: &SqlitePool) -> Result<Vec<EventTemplateRow>, sqlx::Error> {
     let rows = sqlx::query_as!(
         EventTemplateRow,
         "

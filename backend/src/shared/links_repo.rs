@@ -5,17 +5,12 @@ use crate::shared::entities::{Link, LinkWithOwner};
 pub fn hash_links_by_owner(links: Vec<LinkWithOwner>) -> HashMap<i64, Vec<Link>> {
     let mut map: HashMap<i64, Vec<Link>> = HashMap::new();
     for link in links {
-        map.entry(link.owner_id)
-            .or_insert_with(Vec::new)
-            .push(link.strip_owner());
+        map.entry(link.owner_id).or_default().push(link.strip_owner());
     }
     map
 }
 
-pub async fn find_all_links_for_owner_type(
-    owner_type: String,
-    pool: &sqlx::SqlitePool,
-) -> Result<Vec<LinkWithOwner>, sqlx::Error> {
+pub async fn find_all_links_for_owner_type(owner_type: String, pool: &sqlx::SqlitePool) -> Result<Vec<LinkWithOwner>, sqlx::Error> {
     sqlx::query_as!(
         LinkWithOwner,
         "SELECT id, link_type, url, label, owner_id, owner_type
@@ -27,11 +22,7 @@ pub async fn find_all_links_for_owner_type(
     .await
 }
 
-pub async fn find_all_links_for_owner(
-    owner_id: i64,
-    owner_type: String,
-    pool: &sqlx::SqlitePool,
-) -> Result<Vec<Link>, sqlx::Error> {
+pub async fn find_all_links_for_owner(owner_id: i64, owner_type: String, pool: &sqlx::SqlitePool) -> Result<Vec<Link>, sqlx::Error> {
     sqlx::query_as!(
         Link,
         "SELECT link_type, url, label
@@ -57,13 +48,9 @@ pub async fn update_links_for_owner(
     let mut transaction = pool.begin().await?;
 
     // First, delete existing links for the owner
-    sqlx::query!(
-        "DELETE FROM links WHERE owner_id = ? AND owner_type = ?",
-        owner_id,
-        owner_type
-    )
-    .execute(&mut *transaction)
-    .await?;
+    sqlx::query!("DELETE FROM links WHERE owner_id = ? AND owner_type = ?", owner_id, owner_type)
+        .execute(&mut *transaction)
+        .await?;
 
     // Then, insert the new links
     for link in links {

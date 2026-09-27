@@ -1,20 +1,20 @@
-import { Button, PasswordInput, Stack, TextInput } from "@mantine/core";
-import { useForm } from "@mantine/form";
-import { isValidEmail } from "../../../utilities/validators";
-import { DisplayActionResult, useOnSubmitWithResult, type ActionPromiseResult } from "../../../components/ActionResult";
+import { Button, PasswordInput, Stack, TextInput } from "@mantine/core"
+import { useForm } from "@mantine/form"
+import { isValidEmail } from "../../../utilities/validators"
+import { DisplayActionResult, useOnSubmitWithResult, type ActionPromiseResult } from "../../../components/ActionResult"
 
 export interface LoginFormData {
-  email: string;
-  password: string;
+  email: string
+  password: string
 }
 
 interface LoginFormProps {
-  onSubmit: (values: LoginFormData) => Promise<ActionPromiseResult>;
-  submitText?: string;
+  onSubmit: (values: LoginFormData) => Promise<ActionPromiseResult>
+  submitText?: string
 }
 
 export default function LoginForm({ onSubmit, submitText = "Sign in" }: LoginFormProps) {
-  const [actionResult, onSubmitWithResult] = useOnSubmitWithResult<LoginFormData>(onSubmit);
+  const [actionResult, onSubmitWithResult] = useOnSubmitWithResult<LoginFormData>(onSubmit)
 
   const form = useForm<LoginFormData>({
     mode: "controlled",
@@ -27,7 +27,7 @@ export default function LoginForm({ onSubmit, submitText = "Sign in" }: LoginFor
       email: (value) => (isValidEmail(value) ? null : "Invalid email"),
       password: (value) => (value.length >= 6 ? null : "Password must be at least 6 characters long"),
     },
-  });
+  })
 
   return (
     <form onSubmit={form.onSubmit(onSubmitWithResult)}>
@@ -44,5 +44,5 @@ export default function LoginForm({ onSubmit, submitText = "Sign in" }: LoginFor
         </Button>
       </Stack>
     </form>
-  );
+  )
 }

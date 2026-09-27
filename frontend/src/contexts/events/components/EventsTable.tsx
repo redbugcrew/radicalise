@@ -1,59 +1,65 @@
-import { Stack, Table } from "@mantine/core";
-import { AttendanceIntention, type CalendarEvent, type CalendarEventAttendance } from "../../../api/Api";
-import { Anchor, NoData } from "../../../components";
-import React from "react";
-import { DateText } from "../../../components/TimeRangeText";
-import { useState } from "react";
-import { SearchField, SortableTh, sortData } from "../../../components/SortableTable/SortableTable";
-import { format, isFuture } from "date-fns";
-import { useAppSelector } from "../../../store";
-import PersonEventAttendanceIcon from "./AttendanceIcon";
+import { Stack, Table } from "@mantine/core"
+import { AttendanceIntention, type CalendarEvent, type CalendarEventAttendance } from "../../../api/Api"
+import { Anchor, NoData } from "../../../components"
+import React from "react"
+import { DateText } from "../../../components/TimeRangeText"
+import { useState } from "react"
+import { SearchField, SortableTh, sortData } from "../../../components/SortableTable/SortableTable"
+import { format, isFuture } from "date-fns"
+import { useAppSelector } from "../../../store"
+import PersonEventAttendanceIcon from "./AttendanceIcon"
 
 interface EventsTableProps {
-  events: CalendarEvent[];
-  noDataMessage?: React.ReactNode;
+  events: CalendarEvent[]
+  noDataMessage?: React.ReactNode
 }
 
 interface CalendarEventRowData {
-  id: number;
-  start_at: string;
-  name: string;
-  yourAttendance: CalendarEventAttendance | undefined;
-  going: number;
-  notGoing: number;
-  attended: number;
+  id: number
+  start_at: string
+  name: string
+  yourAttendance: CalendarEventAttendance | undefined
+  going: number
+  notGoing: number
+  attended: number
 }
 
-type SortableEventField = keyof CalendarEventRowData;
+type SortableEventField = keyof CalendarEventRowData
 
 function matchesFilter(item: CalendarEventRowData, lowerCaseQuery: string): boolean {
-  return item.name.toLowerCase().includes(lowerCaseQuery) || searchableDateString(item.start_at).includes(lowerCaseQuery);
+  return item.name.toLowerCase().includes(lowerCaseQuery) || searchableDateString(item.start_at).includes(lowerCaseQuery)
 }
 
 export default function EventsTable({ events, noDataMessage }: EventsTableProps) {
-  const currentPersonId = useAppSelector((state) => state.me?.person_id);
+  const currentPersonId = useAppSelector((state) => state.me?.person_id)
+
+  const [search, setSearch] = useState("")
+  const [sortBy, setSortBy] = useState<SortableEventField>("start_at")
+  const [reverseSortDirection, setReverseSortDirection] = useState(false)
 
   if (events.length === 0) {
-    return <NoData>{noDataMessage || "No events found"}</NoData>;
+    return <NoData>{noDataMessage || "No events found"}</NoData>
   }
 
-  const rowData: CalendarEventRowData[] = buildAllRowData(events, currentPersonId);
-
-  const [search, setSearch] = useState("");
-  const [sortBy, setSortBy] = useState<SortableEventField>("start_at");
-  const [reverseSortDirection, setReverseSortDirection] = useState(false);
+  const rowData: CalendarEventRowData[] = buildAllRowData(events, currentPersonId)
 
   const setSorting = (field: SortableEventField) => {
-    const reversed = field === sortBy ? !reverseSortDirection : false;
-    setReverseSortDirection(reversed);
-    setSortBy(field);
-  };
+    const reversed = field === sortBy ? !reverseSortDirection : false
+    setReverseSortDirection(reversed)
+    setSortBy(field)
+  }
 
-  let sortedRowData = sortData<CalendarEventRowData>(
+  const sortedRowData = sortData<CalendarEventRowData>(
     rowData,
-    { sortBy: sortBy, reversed: reverseSortDirection, type_override: sortBy === "start_at" ? "string-date" : undefined, compare_override: sortBy === "yourAttendance" ? compareAttendances : null, search: search },
+    {
+      sortBy: sortBy,
+      reversed: reverseSortDirection,
+      type_override: sortBy === "start_at" ? "string-date" : undefined,
+      compare_override: sortBy === "yourAttendance" ? compareAttendances : null,
+      search: search,
+    },
     matchesFilter,
-  );
+  )
 
   return (
     <Stack align="stretch">
@@ -68,17 +74,40 @@ export default function EventsTable({ events, noDataMessage }: EventsTableProps)
               Name
             </SortableTh>
             {currentPersonId && (
-              <SortableTh right sorted={sortBy == "yourAttendance"} reversed={reverseSortDirection} onSort={() => setSorting("yourAttendance")}>
+              <SortableTh
+                right
+                sorted={sortBy == "yourAttendance"}
+                reversed={reverseSortDirection}
+                onSort={() => setSorting("yourAttendance")}
+              >
                 You
               </SortableTh>
             )}
-            <SortableTh right abbreviated="Go" sorted={sortBy == "going"} reversed={reverseSortDirection} onSort={() => setSorting("going")}>
+            <SortableTh
+              right
+              abbreviated="Go"
+              sorted={sortBy == "going"}
+              reversed={reverseSortDirection}
+              onSort={() => setSorting("going")}
+            >
               Going
             </SortableTh>
-            <SortableTh right abbreviated="Ap" sorted={sortBy == "notGoing"} reversed={reverseSortDirection} onSort={() => setSorting("notGoing")}>
+            <SortableTh
+              right
+              abbreviated="Ap"
+              sorted={sortBy == "notGoing"}
+              reversed={reverseSortDirection}
+              onSort={() => setSorting("notGoing")}
+            >
               Apologies
             </SortableTh>
-            <SortableTh right abbreviated="At" sorted={sortBy == "attended"} reversed={reverseSortDirection} onSort={() => setSorting("attended")}>
+            <SortableTh
+              right
+              abbreviated="At"
+              sorted={sortBy == "attended"}
+              reversed={reverseSortDirection}
+              onSort={() => setSorting("attended")}
+            >
               Attended
             </SortableTh>
           </Table.Tr>
@@ -111,29 +140,29 @@ export default function EventsTable({ events, noDataMessage }: EventsTableProps)
         </Table.Tbody>
       </Table>
     </Stack>
-  );
+  )
 }
 
 function personAttendance(event: CalendarEvent, personId: number): CalendarEventAttendance | undefined {
-  return event.attendances?.find((attendance) => attendance.person_id === personId);
+  return event.attendances?.find((attendance) => attendance.person_id === personId)
 }
 
 function countIntentions(attendances: CalendarEventAttendance[] | undefined | null, intention: AttendanceIntention): number {
-  if (!attendances) return 0;
-  return attendances.filter((attendance) => attendance.intention === intention).length;
+  if (!attendances) return 0
+  return attendances.filter((attendance) => attendance.intention === intention).length
 }
 
 function countAttended(attendances: CalendarEventAttendance[] | undefined | null): number {
-  if (!attendances) return 0;
-  return attendances.filter((attendance) => attendance.actual === true).length;
+  if (!attendances) return 0
+  return attendances.filter((attendance) => attendance.actual === true).length
 }
 
 function searchableDateString(date: string): string {
-  return format(date, "MMMM d, yyyy").toLowerCase();
+  return format(date, "MMMM d, yyyy").toLowerCase()
 }
 
 function buildAllRowData(events: CalendarEvent[], currentPersonId: number | null | undefined): CalendarEventRowData[] {
-  return events.map((event) => buildRowData(event, currentPersonId));
+  return events.map((event) => buildRowData(event, currentPersonId))
 }
 
 function buildRowData(event: CalendarEvent, currentPersonId: number | null | undefined): CalendarEventRowData {
@@ -145,15 +174,15 @@ function buildRowData(event: CalendarEvent, currentPersonId: number | null | und
     going: countIntentions(event.attendances, AttendanceIntention.Going),
     notGoing: countIntentions(event.attendances, AttendanceIntention.NotGoing),
     attended: countAttended(event.attendances),
-  };
+  }
 }
 
 function compareAttendances(a: CalendarEventAttendance | undefined, b: CalendarEventAttendance | undefined): number {
-  return compareBools(a?.actual, b?.actual);
+  return compareBools(a?.actual, b?.actual)
 }
 
 function compareBools(a: boolean | undefined | null, b: boolean | undefined | null): number {
-  const asAsInt = a ? 1 : 0;
-  const bsAsInt = b ? 1 : 0;
-  return bsAsInt - asAsInt;
+  const asAsInt = a ? 1 : 0
+  const bsAsInt = b ? 1 : 0
+  return bsAsInt - asAsInt
 }

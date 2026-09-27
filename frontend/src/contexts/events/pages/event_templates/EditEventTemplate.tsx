@@ -1,15 +1,15 @@
-import { Container, Title, Stack } from "@mantine/core";
-import EventTemplateForm from "../../components/event_templates/EventTemplateForm";
-import type { EventTemplate } from "../../../../api/Api";
-import { useNavigate, useParams } from "react-router-dom";
-import { handleAppEvents, useAppSelector } from "../../../../store";
-import { getApi } from "../../../../api";
+import { Container, Title, Stack } from "@mantine/core"
+import EventTemplateForm from "../../components/event_templates/EventTemplateForm"
+import type { EventTemplate } from "../../../../api/Api"
+import { useNavigate, useParams } from "react-router-dom"
+import { handleAppEvents, useAppSelector } from "../../../../store"
+import { getApi } from "../../../../api"
 
 export default function EditEventTemplate() {
-  const { templateId } = useParams<"templateId">();
-  const templateIdNum = templateId ? parseInt(templateId, 10) : undefined;
-  const template = useAppSelector((state) => state.eventTemplates.find((t) => t.id === templateIdNum));
-  const navigate = useNavigate();
+  const { templateId } = useParams<"templateId">()
+  const templateIdNum = templateId ? parseInt(templateId, 10) : undefined
+  const template = useAppSelector((state) => state.eventTemplates.find((t) => t.id === templateIdNum))
+  const navigate = useNavigate()
 
   if (!templateIdNum || !template) {
     return (
@@ -17,20 +17,20 @@ export default function EditEventTemplate() {
         <Title order={2}>Event Template not found</Title>
         <p>The event template you are trying to edit does not exist.</p>
       </Container>
-    );
+    )
   }
 
   const handleSubmit = async (data: EventTemplate): Promise<void> => {
     return getApi()
       .api.updateEventTemplate(templateIdNum.toString(), data)
       .then((response) => {
-        handleAppEvents(response.data);
-        navigate("/events/event_templates");
+        handleAppEvents(response.data)
+        navigate("/events/event_templates")
       })
       .catch((error) => {
-        console.error("Error updating event template:", error);
-      });
-  };
+        console.error("Error updating event template:", error)
+      })
+  }
 
   return (
     <Container>
@@ -39,5 +39,5 @@ export default function EditEventTemplate() {
         <EventTemplateForm onSubmit={handleSubmit} value={template} />
       </Stack>
     </Container>
-  );
+  )
 }

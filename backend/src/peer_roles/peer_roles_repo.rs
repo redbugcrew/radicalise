@@ -2,10 +2,7 @@ use sqlx::SqlitePool;
 
 use crate::shared::entities::{PeerRole, PeerRoleDistributionType, ProjectId};
 
-pub async fn find_all_peer_roles(
-    project_id: ProjectId,
-    pool: &SqlitePool,
-) -> Result<Vec<PeerRole>, sqlx::Error> {
+pub async fn find_all_peer_roles(project_id: ProjectId, pool: &SqlitePool) -> Result<Vec<PeerRole>, sqlx::Error> {
     let rows = sqlx::query_as!(
         PeerRole,
         r#"

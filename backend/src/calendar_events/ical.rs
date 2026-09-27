@@ -4,8 +4,7 @@ use icalendar::{Calendar, Component, Event, EventLike};
 use crate::shared::entities::CalendarEvent;
 
 lazy_static! {
-    pub static ref BASE_URL: String =
-        std::env::var("BASE_URL").unwrap_or_else(|_| "http://localhost:5173".to_string());
+    pub static ref BASE_URL: String = std::env::var("BASE_URL").unwrap_or_else(|_| "http://localhost:5173".to_string());
 }
 
 pub fn get_ical_string(name: String, events: Vec<CalendarEvent>) -> String {
@@ -45,9 +44,8 @@ fn parse_optional_naive_date_time(input: &Option<String>) -> Option<NaiveDateTim
 
 fn parse_naive_date_time(input: &str) -> NaiveDateTime {
     NaiveDateTime::parse_from_str(input, "%Y-%m-%d %H:%M:%S")
-        .map_err(|err| {
+        .inspect_err(|err| {
             eprintln!("Failed to parse date time '{}': {}", input, err);
-            err
         })
         .unwrap()
 }

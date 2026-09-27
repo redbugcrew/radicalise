@@ -1,29 +1,25 @@
-import { useForm } from "@mantine/form";
-import { Button, Stack, TextInput } from "@mantine/core";
+import { useForm } from "@mantine/form"
+import { Button, Stack, TextInput } from "@mantine/core"
 
 export interface RoleFormData {
-  id: number;
-  name: string | null;
-  summary: string;
+  id: number
+  name: string | null
+  summary: string
 }
 
 interface PeerRolesFormProps {
-  value?: RoleFormData | null; //Todo: add NewRole to Api.ts (see CalanderEvent for model)
-  submitText?: string;
-  onSubmit: (data: RoleFormData) => Promise<void>;
+  value?: RoleFormData | null //Todo: add NewRole to Api.ts (see CalanderEvent for model)
+  submitText?: string
+  onSubmit: (data: RoleFormData) => Promise<void>
 }
 
 const defaultRole: RoleFormData = {
   id: -1,
   name: "",
   summary: "",
-};
+}
 
-export default function NewRoleForm({
-  value,
-  submitText,
-  onSubmit,
-}: PeerRolesFormProps) {
+export default function NewRoleForm({ value, submitText, onSubmit }: PeerRolesFormProps) {
   const form = useForm<RoleFormData>({
     mode: "controlled",
     initialValues: {
@@ -31,17 +27,12 @@ export default function NewRoleForm({
       ...value,
     },
     validate: {
-      name: (value) =>
-        value && value.trim().length > 0 ? null : "Name is required",
+      name: (value) => (value && value.trim().length > 0 ? null : "Name is required"),
     },
-  });
+  })
 
   return (
-    <form
-      onSubmit={form.onSubmit(onSubmit, (errors) =>
-        console.log("Form submission errors:", errors),
-      )}
-    >
+    <form onSubmit={form.onSubmit(onSubmit, (errors) => console.log("Form submission errors:", errors))}>
       <Stack gap="lg">
         <Stack gap="md">
           <TextInput
@@ -63,5 +54,5 @@ export default function NewRoleForm({
         </Button>
       </Stack>
     </form>
-  );
+  )
 }

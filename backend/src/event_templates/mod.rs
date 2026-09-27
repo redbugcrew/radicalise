@@ -38,12 +38,8 @@ async fn create_event_template(
 
     match repo::insert_event_template_with_links(&data, default_project_id(), &pool).await {
         Ok(event_template) => {
-            let event = AppEvent::EventTemplatesEvent(EventTemplatesEvent::EventTemplateUpdated(
-                event_template,
-            ));
-            realtime_state
-                .broadcast_app_event(Some(auth_session), event.clone())
-                .await;
+            let event = AppEvent::EventTemplatesEvent(EventTemplatesEvent::EventTemplateUpdated(event_template));
+            realtime_state.broadcast_app_event(Some(auth_session), event.clone()).await;
             (StatusCode::OK, Json(vec![event])).into_response()
         }
         Err(err) => {
@@ -69,19 +65,12 @@ async fn update_event_template(
     auth_session: AuthSession,
     axum::extract::Json(data): axum::extract::Json<EventTemplate>,
 ) -> impl IntoResponse {
-    println!(
-        "Updating event template with ID {}: {:?}",
-        event_template_id, data
-    );
+    println!("Updating event template with ID {}: {:?}", event_template_id, data);
 
     match repo::update_event_template_with_links(&data, default_project_id(), &pool).await {
         Ok(event_template) => {
-            let event = AppEvent::EventTemplatesEvent(EventTemplatesEvent::EventTemplateUpdated(
-                event_template,
-            ));
-            realtime_state
-                .broadcast_app_event(Some(auth_session), event.clone())
-                .await;
+            let event = AppEvent::EventTemplatesEvent(EventTemplatesEvent::EventTemplateUpdated(event_template));
+            realtime_state.broadcast_app_event(Some(auth_session), event.clone()).await;
             (StatusCode::OK, Json(vec![event])).into_response()
         }
         Err(err) => {

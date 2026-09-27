@@ -56,33 +56,21 @@ async fn main() {
     struct ApiDoc;
 
     // CONFIG PARAMS
-    let base_url =
-        std::env::var("BASE_URL").unwrap_or_else(|_| "http://localhost:5173".to_string());
+    let base_url = std::env::var("BASE_URL").unwrap_or_else(|_| "http://localhost:5173".to_string());
 
     // CORS
     let cors = CorsLayer::new()
         .allow_origin(base_url.parse::<header::HeaderValue>().unwrap())
-        .allow_methods([
-            Method::GET,
-            Method::POST,
-            Method::PUT,
-            Method::DELETE,
-            Method::OPTIONS,
-        ])
+        .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE, Method::OPTIONS])
         .allow_headers([header::AUTHORIZATION, header::ACCEPT, header::CONTENT_TYPE])
         .allow_credentials(true);
 
     // DATABASE
-    let pool = prepare_database()
-        .await
-        .expect("Failed to prepare database");
+    let pool = prepare_database().await.expect("Failed to prepare database");
 
     // SESSION MANAGEMENT
     let session_store = SqliteStore::new(pool.clone());
-    session_store
-        .migrate()
-        .await
-        .expect("Failed to migrate session store");
+    session_store.migrate().await.expect("Failed to migrate session store");
     let session_layer = SessionManagerLayer::new(session_store)
         .with_secure(false)
         .with_expiry(Expiry::OnInactivity(Duration::days(30)));
@@ -93,8 +81,7 @@ async fn main() {
     let realtime_state = RealtimeState::new();
 
     // EMAIL
-    let resend_key =
-        env::var("RESEND_API_KEY").unwrap_or_else(|_| "YOUR-RESEND-KEY-HERE".to_string());
+    let resend_key = env::var("RESEND_API_KEY").unwrap_or_else(|_| "YOUR-RESEND-KEY-HERE".to_string());
 
     let client = reqwest::Client::builder()
         .user_agent("Radicalise/1.0")

@@ -1,33 +1,33 @@
-import { Container, Title } from "@mantine/core";
-import { handleAppEvents, useAppSelector } from "../store";
-import { ProjectForm } from "../components";
-import type { Project } from "../api/Api";
-import { getApi } from "../api";
-import { useNavigate } from "react-router-dom";
-import { crewsArrayFromObjectMap } from "../store/crews";
+import { Container, Title } from "@mantine/core"
+import { handleAppEvents, useAppSelector } from "../store"
+import { ProjectForm } from "../components"
+import type { Project } from "../api/Api"
+import { getApi } from "../api"
+import { useNavigate } from "react-router-dom"
+import { crewsArrayFromObjectMap } from "../store/crews"
 
 export default function EditProject() {
-  const project = useAppSelector((state) => state.project);
-  const crews = useAppSelector((state) => crewsArrayFromObjectMap(state.crews));
-  const navigate = useNavigate();
+  const project = useAppSelector((state) => state.project)
+  const crews = useAppSelector((state) => crewsArrayFromObjectMap(state.crews))
+  const navigate = useNavigate()
 
-  if (!project) return <Container>Error: Project not found</Container>;
+  if (!project) return <Container>Error: Project not found</Container>
 
   const onSubmit = (values: Project) => {
     getApi()
       .api.updateProject(values)
       .then((response) => {
         if (response.status === 200) {
-          handleAppEvents(response.data);
-          navigate("/");
+          handleAppEvents(response.data)
+          navigate("/")
         } else {
-          console.error("Failed to update project:", response);
+          console.error("Failed to update project:", response)
         }
       })
       .catch((error) => {
-        console.error("Error updating project:", error);
-      });
-  };
+        console.error("Error updating project:", error)
+      })
+  }
 
   return (
     <Container>
@@ -37,5 +37,5 @@ export default function EditProject() {
       </Title>
       <ProjectForm project={project} crews={crews} onSubmit={onSubmit} />
     </Container>
-  );
+  )
 }

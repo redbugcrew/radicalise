@@ -1,0 +1,38 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        UPDATE event_templates\n        SET name = ?, summary = ?, response_expectation = ?\n        WHERE id = ? AND project_id = ?\n        RETURNING id AS \"id!\", name\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id!",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "event_templates",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "name",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event_templates",
+            "name": "name"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 5
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "9884a9142528bc4064a2655a5da358193cabe7097ccc067c0337b38467173fdb"
+}

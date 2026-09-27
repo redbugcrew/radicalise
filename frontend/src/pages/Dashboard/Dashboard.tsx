@@ -1,54 +1,54 @@
-import { Button, Card, Container, Title, Stack, Text, Badge, Group, Collapse } from "@mantine/core";
-import { useNavigate } from "react-router-dom";
-import { useAppSelector } from "../../store";
-import { AttendanceIntention, type CalendarEvent, type CircleInvolvement, type CrewInvolvement, type Interval } from "../../api/Api";
-import DateText from "../../components/DateText";
-import classes from "./Dashboard.module.css";
-import { CrewsList, LinksStack } from "../../components";
-import { compareStrings } from "../../utilities/comparison";
-import { isFuture } from "date-fns";
-import EventsList from "../../contexts/events/components/EventsList";
-import { IconCalendar } from "@tabler/icons-react";
-import { useDisclosure } from "@mantine/hooks";
-import CopyIconButton from "../../components/CopyIconButton";
-import { getApiUrl } from "../../api";
-import { useNextInterval } from "../../store/intervals";
-import { useCurrentInterval } from "../../store/current_interval";
-import { forPerson } from "../../store/current_interval/crew_involvements";
-import { circleInvolvementforCircleAndPerson } from "../../store/current_interval/circle_involvements";
-import WithIntervalData from "../intervals/WithIntervalData";
-import { PersonEnrollmentsForInterval } from "../../contexts/peer_roles";
+import { Button, Card, Container, Title, Stack, Text, Badge, Group, Collapse } from "@mantine/core"
+import { useNavigate } from "react-router-dom"
+import { useAppSelector } from "../../store"
+import { AttendanceIntention, type CalendarEvent, type CircleInvolvement, type CrewInvolvement, type Interval } from "../../api/Api"
+import DateText from "../../components/DateText"
+import classes from "./Dashboard.module.css"
+import { CrewsList, LinksStack } from "../../components"
+import { compareStrings } from "../../utilities/comparison"
+import { isFuture } from "date-fns"
+import EventsList from "../../contexts/events/components/EventsList"
+import { IconCalendar } from "@tabler/icons-react"
+import { useDisclosure } from "@mantine/hooks"
+import CopyIconButton from "../../components/CopyIconButton"
+import { getApiUrl } from "../../api"
+import { useNextInterval } from "../../store/intervals"
+import { useCurrentInterval } from "../../store/current_interval"
+import { forPerson } from "../../store/current_interval/crew_involvements"
+import { circleInvolvementforCircleAndPerson } from "../../store/current_interval/circle_involvements"
+import WithIntervalData from "../intervals/WithIntervalData"
+import { PersonEnrollmentsForInterval } from "../../contexts/peer_roles"
 
 function ParticipationBadge({ involvement }: { involvement: CircleInvolvement | null }) {
-  if (!involvement) return <Badge color="gray">No intention</Badge>;
+  if (!involvement) return <Badge color="gray">No intention</Badge>
 
-  const { participation_intention, opt_out_type } = involvement;
+  const { participation_intention, opt_out_type } = involvement
 
   switch (participation_intention) {
     case "OptIn":
-      return <Badge color="green">Participating</Badge>;
+      return <Badge color="green">Participating</Badge>
     case "OptOut":
       switch (opt_out_type) {
         case "Hiatus":
-          return <Badge color="orange">On Hiatus</Badge>;
+          return <Badge color="orange">On Hiatus</Badge>
         case "Exit":
-          return <Badge color="red">Exiting</Badge>;
+          return <Badge color="red">Exiting</Badge>
         default:
-          return <Badge color="red">Opt-out</Badge>;
+          return <Badge color="red">Opt-out</Badge>
       }
     default:
-      return <Badge color="gray">No intention</Badge>;
+      return <Badge color="gray">No intention</Badge>
   }
 }
 
 interface MyIntervalPartipationCardProps {
-  interval: Interval;
-  circleInvolvement: CircleInvolvement | null;
-  current: boolean;
+  interval: Interval
+  circleInvolvement: CircleInvolvement | null
+  current: boolean
 }
 
 function MyIntervalPartipationCard({ interval, circleInvolvement, current = true }: MyIntervalPartipationCardProps) {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   return (
     <Card withBorder className={circleInvolvement ? "" : classes.unplanned}>
@@ -68,42 +68,45 @@ function MyIntervalPartipationCard({ interval, circleInvolvement, current = true
         {current ? "Update" : "Plan"} your participation
       </Button>
     </Card>
-  );
+  )
 }
 
 function MyCrews({ personId, myInvolvements }: { personId: number; myInvolvements: CrewInvolvement[] }) {
-  const people = useAppSelector((state) => state.people);
-  const crews = useAppSelector((state) => state.crews);
-  const allCrewInvolvements = useAppSelector((state) => state.currentInterval?.crew_involvements || []);
+  const people = useAppSelector((state) => state.people)
+  const crews = useAppSelector((state) => state.crews)
+  const allCrewInvolvements = useAppSelector((state) => state.currentInterval?.crew_involvements || [])
 
   const myCrews = myInvolvements
     .map((involvement) => crews[involvement.crew_id])
     .filter(Boolean)
-    .sort(compareStrings("name"));
+    .sort(compareStrings("name"))
 
-  if (myCrews.length === 0) return null;
+  if (myCrews.length === 0) return null
 
   return (
     <Stack>
       <Title order={2}>My Crews</Title>
       <CrewsList involvements={allCrewInvolvements} people={people} crews={myCrews} highlightPersonId={personId} />
     </Stack>
-  );
+  )
 }
 
 function SubscribeDetails({ calendarToken }: { calendarToken: string }) {
-  let apiUrl = getApiUrl();
+  let apiUrl = getApiUrl()
   if (apiUrl === "/") {
-    apiUrl = window.location.origin;
+    apiUrl = window.location.origin
   }
-  apiUrl = apiUrl.replace(/\/?$/, "");
+  apiUrl = apiUrl.replace(/\/?$/, "")
 
-  const calendarUrl = `${apiUrl}/api/public/${calendarToken}/calendar.ics`;
+  const calendarUrl = `${apiUrl}/api/public/${calendarToken}/calendar.ics`
 
   return (
     <Card mb="md">
       <Title order={3}>Subscribe your calendar</Title>
-      <Text>To have a live subscription to your calendar events, copy the URL below, and in your calendar application, add it as a new subscription.</Text>
+      <Text>
+        To have a live subscription to your calendar events, copy the URL below, and in your calendar application, add it as a new
+        subscription.
+      </Text>
       <Group mt="md" wrap="nowrap" justify="flex-start">
         <CopyIconButton value={calendarUrl} />
         <Text
@@ -119,13 +122,13 @@ function SubscribeDetails({ calendarToken }: { calendarToken: string }) {
         </Text>
       </Group>
     </Card>
-  );
+  )
 }
 
 function MyEvents({ personId }: { personId: number }) {
-  const events = useAppSelector((state) => myUpcomingEvents(state.events, personId));
-  const [opened, { toggle }] = useDisclosure(false);
-  const calendarToken = useAppSelector((state) => state.me?.calendar_token);
+  const events = useAppSelector((state) => myUpcomingEvents(state.events, personId))
+  const [opened, { toggle }] = useDisclosure(false)
+  const calendarToken = useAppSelector((state) => state.me?.calendar_token)
 
   return (
     <Stack gap="md">
@@ -146,40 +149,40 @@ function MyEvents({ personId }: { personId: number }) {
         <EventsList events={events} noDataMessage="No upcoming events found" />
       </Stack>
     </Stack>
-  );
+  )
 }
 
 function MyPeerRoles({ personId }: { personId: number }) {
-  const intervalData = useAppSelector((state) => state.currentInterval);
+  const intervalData = useAppSelector((state) => state.currentInterval)
 
-  const hasEnrollments = !!intervalData?.circle_involvements;
-  if (!hasEnrollments) return null;
+  const hasEnrollments = !!intervalData?.circle_involvements
+  if (!hasEnrollments) return null
 
   return (
     <Stack gap="md">
       <Title order={2}>My Peer Roles</Title>
       <PersonEnrollmentsForInterval subjectPersonId={personId} viewerPersonId={personId} intervalData={intervalData} />
     </Stack>
-  );
+  )
 }
 
 export default function Dashboard() {
-  const myData = useAppSelector((state) => state.me);
-  const project = useAppSelector((state) => state.project);
-  const circleId = useAppSelector((state) => state.circles.rootCircles[0]?.id);
-  const currentIntervalData = useAppSelector((state) => state.currentInterval);
-  const currentInterval = useCurrentInterval();
-  const nextInterval = useNextInterval();
+  const myData = useAppSelector((state) => state.me)
+  const project = useAppSelector((state) => state.project)
+  const circleId = useAppSelector((state) => state.circles.rootCircles[0]?.id)
+  const currentIntervalData = useAppSelector((state) => state.currentInterval)
+  const currentInterval = useCurrentInterval()
+  const nextInterval = useNextInterval()
 
   if (!myData || !project || !circleId) {
-    return <Text>Error: Data not found.</Text>;
+    return <Text>Error: Data not found.</Text>
   }
 
-  const personId = myData.person_id;
+  const personId = myData.person_id
 
-  const myCurrentCircle = circleInvolvementforCircleAndPerson(currentIntervalData?.circle_involvements, circleId, personId);
+  const myCurrentCircle = circleInvolvementforCircleAndPerson(currentIntervalData?.circle_involvements, circleId, personId)
 
-  const myCurrentCrewInvolvements = forPerson(currentIntervalData?.crew_involvements || [], personId);
+  const myCurrentCrewInvolvements = forPerson(currentIntervalData?.crew_involvements || [], personId)
 
   return (
     <Container>
@@ -188,13 +191,18 @@ export default function Dashboard() {
       </Title>
       <Stack gap="lg">
         <Stack gap="md">
-          {myCurrentCircle && currentInterval && <MyIntervalPartipationCard interval={currentInterval} circleInvolvement={myCurrentCircle} current={true} />}
+          {myCurrentCircle && currentInterval && (
+            <MyIntervalPartipationCard interval={currentInterval} circleInvolvement={myCurrentCircle} current={true} />
+          )}
 
           <WithIntervalData interval={nextInterval}>
             {({ intervalData: nextIntervalData }) => {
-              const myNextCircle = circleInvolvementforCircleAndPerson(nextIntervalData?.circle_involvements, circleId, personId);
+              const myNextCircle = circleInvolvementforCircleAndPerson(nextIntervalData?.circle_involvements, circleId, personId)
 
-              return (myCurrentCircle || myNextCircle) && nextInterval && <MyIntervalPartipationCard interval={nextInterval} circleInvolvement={myNextCircle} current={false} />;
+              return (
+                (myCurrentCircle || myNextCircle) &&
+                nextInterval && <MyIntervalPartipationCard interval={nextInterval} circleInvolvement={myNextCircle} current={false} />
+              )
             }}
           </WithIntervalData>
         </Stack>
@@ -207,20 +215,22 @@ export default function Dashboard() {
         </Stack>
       </Stack>
     </Container>
-  );
+  )
 }
 
 function myUpcomingEvents(events: CalendarEvent[], personId: number | null | undefined): CalendarEvent[] {
-  if (!personId) return [];
+  if (!personId) return []
   return events.filter((event) => {
-    const attendances = event.attendances || [];
-    const intentions = [AttendanceIntention.Going, AttendanceIntention.Uncertain];
-    const isParticipant = attendances.some((attendance) => attendance.person_id === personId && attendance.intention && intentions.includes(attendance.intention));
-    const isFutureEvent = isFutureOrStillInProgress(event);
-    return isParticipant && isFutureEvent;
-  });
+    const attendances = event.attendances || []
+    const intentions = [AttendanceIntention.Going, AttendanceIntention.Uncertain]
+    const isParticipant = attendances.some(
+      (attendance) => attendance.person_id === personId && attendance.intention && intentions.includes(attendance.intention),
+    )
+    const isFutureEvent = isFutureOrStillInProgress(event)
+    return isParticipant && isFutureEvent
+  })
 }
 
 function isFutureOrStillInProgress(event: CalendarEvent): boolean {
-  return (event.end_at && isFuture(event.end_at)) || isFuture(event.start_at);
+  return (event.end_at && isFuture(event.end_at)) || isFuture(event.start_at)
 }

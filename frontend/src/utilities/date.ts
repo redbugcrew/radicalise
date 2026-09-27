@@ -1,8 +1,8 @@
-import { parseISO } from "date-fns";
+import { parseISO } from "date-fns"
 
 export function dateStringToDateTime(dateString: string | null): Date | null {
-  if (!dateString) return null;
-  return parseISO(dateString);
+  if (!dateString) return null
+  return parseISO(dateString)
 }
 
-export const formDateFormat = "MMMM d, yyy";
+export const formDateFormat = "MMMM d, yyy"

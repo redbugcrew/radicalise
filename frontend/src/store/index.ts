@@ -1,19 +1,31 @@
-import { useDispatch, useSelector, useStore } from "react-redux";
-import { configureStore } from "@reduxjs/toolkit";
-import projectReducer, { projectLoaded, projectUpdated } from "./project";
-import circlesReducer, { circlesLoaded, circleUpdated } from "./circles";
-import peopleReducer, { peopleLoaded, personUpdated } from "./people";
-import intervalsReducer, { intervalsLoaded, intervalCreated } from "./intervals";
-import currentIntervalReducer, { circleInvolvementUpdated, currentIntervalLoaded, personIntervalDataChanged } from "./current_interval";
-import crewsReducer, { crewsLoaded, crewUpdated } from "./crews";
-import entryPathwaysReducer, { entryPathwaysLoaded, entryPathwayUpdated } from "./entry_pathways";
-import eventTemplatesReducer, { eventTemplatesLoaded, eventTemplateUpdated } from "./event_templates";
-import eventsReducer, { eventsLoaded, eventUpdated, singleAttendanceUpdate } from "./events";
-import meReducer, { meLoaded } from "./me";
-import peerRolesReducer, { peerRolesLoaded } from "./peer_roles";
-import { getApi } from "../api";
-import { redirect } from "react-router-dom";
-import type { AppEvent, CalendarEventAttendancesEvent, CalendarEventsEvent, ProjectEvent, CrewsEvent, EntryPathwayEvent, EventTemplatesEvent, IntervalsEvent, MeEvent, PeopleEvent, CirclesEvent } from "../api/Api";
+import { useDispatch, useSelector, useStore } from "react-redux"
+import { configureStore } from "@reduxjs/toolkit"
+import projectReducer, { projectLoaded, projectUpdated } from "./project"
+import circlesReducer, { circlesLoaded, circleUpdated } from "./circles"
+import peopleReducer, { peopleLoaded, personUpdated } from "./people"
+import intervalsReducer, { intervalsLoaded, intervalCreated } from "./intervals"
+import currentIntervalReducer, { circleInvolvementUpdated, currentIntervalLoaded, personIntervalDataChanged } from "./current_interval"
+import crewsReducer, { crewsLoaded, crewUpdated } from "./crews"
+import entryPathwaysReducer, { entryPathwaysLoaded, entryPathwayUpdated } from "./entry_pathways"
+import eventTemplatesReducer, { eventTemplatesLoaded, eventTemplateUpdated } from "./event_templates"
+import eventsReducer, { eventsLoaded, eventUpdated, singleAttendanceUpdate } from "./events"
+import meReducer, { meLoaded } from "./me"
+import peerRolesReducer, { peerRolesLoaded } from "./peer_roles"
+import { getApi } from "../api"
+import { redirect } from "react-router-dom"
+import type {
+  AppEvent,
+  CalendarEventAttendancesEvent,
+  CalendarEventsEvent,
+  ProjectEvent,
+  CrewsEvent,
+  EntryPathwayEvent,
+  EventTemplatesEvent,
+  IntervalsEvent,
+  MeEvent,
+  PeopleEvent,
+  CirclesEvent,
+} from "../api/Api"
 
 const store = configureStore({
   reducer: {
@@ -29,15 +41,15 @@ const store = configureStore({
     events: eventsReducer,
     peerRoles: peerRolesReducer,
   },
-});
+})
 
-export type AppStore = typeof store;
-export type RootState = ReturnType<AppStore["getState"]>;
-export type AppDispatch = AppStore["dispatch"];
+export type AppStore = typeof store
+export type RootState = ReturnType<AppStore["getState"]>
+export type AppDispatch = AppStore["dispatch"]
 
-export const useAppDispatch = useDispatch.withTypes<AppDispatch>();
-export const useAppSelector = useSelector.withTypes<RootState>();
-export const useAppStore = useStore.withTypes<AppStore>();
+export const useAppDispatch = useDispatch.withTypes<AppDispatch>()
+export const useAppSelector = useSelector.withTypes<RootState>()
+export const useAppStore = useStore.withTypes<AppStore>()
 
 // const initialDataLoaded = (data: any) => ({
 //   type: "initialDataLoaded",
@@ -48,168 +60,168 @@ async function loadProjectData(store: AppStore, api: ReturnType<typeof getApi>):
   return api.api
     .getProjectState()
     .then((response) => {
-      store.dispatch(circlesLoaded(response.data.circles));
-      store.dispatch(peopleLoaded(response.data.people));
-      store.dispatch(crewsLoaded(response.data.crews));
-      store.dispatch(intervalsLoaded(response.data.intervals));
-      store.dispatch(currentIntervalLoaded(response.data.current_interval_data));
-      store.dispatch(entryPathwaysLoaded(response.data.entry_pathways));
-      store.dispatch(projectLoaded(response.data.project));
-      store.dispatch(eventTemplatesLoaded(response.data.event_templates));
-      store.dispatch(eventsLoaded(response.data.calendar_events));
-      store.dispatch(peerRolesLoaded(response.data.peer_roles));
+      store.dispatch(circlesLoaded(response.data.circles))
+      store.dispatch(peopleLoaded(response.data.people))
+      store.dispatch(crewsLoaded(response.data.crews))
+      store.dispatch(intervalsLoaded(response.data.intervals))
+      store.dispatch(currentIntervalLoaded(response.data.current_interval_data))
+      store.dispatch(entryPathwaysLoaded(response.data.entry_pathways))
+      store.dispatch(projectLoaded(response.data.project))
+      store.dispatch(eventTemplatesLoaded(response.data.event_templates))
+      store.dispatch(eventsLoaded(response.data.calendar_events))
+      store.dispatch(peerRolesLoaded(response.data.peer_roles))
 
-      return null;
+      return null
     })
     .catch((error) => {
       if (error.response.status === 401) {
-        console.error("Unauthorized:", error);
-        return redirect("/auth/login");
+        console.error("Unauthorized:", error)
+        return redirect("/auth/login")
       } else {
-        console.error("Error loading initial data:", error);
-        return null;
+        console.error("Error loading initial data:", error)
+        return null
       }
-    });
+    })
 }
 
 async function loadMeData(store: AppStore, api: ReturnType<typeof getApi>): Promise<Response | null> {
   return api.api
     .getMyState()
     .then((response) => {
-      store.dispatch(meLoaded(response.data));
-      return null;
+      store.dispatch(meLoaded(response.data))
+      return null
     })
     .catch((error) => {
       if (error.response.status === 401) {
-        console.error("Unauthorized:", error);
-        return redirect("/auth/login");
+        console.error("Unauthorized:", error)
+        return redirect("/auth/login")
       } else {
-        console.error("Error loading 'me' data:", error);
-        return null;
+        console.error("Error loading 'me' data:", error)
+        return null
       }
-    });
+    })
 }
 
 export async function loadInitialData(store: AppStore) {
-  const api = getApi();
+  const api = getApi()
 
-  const dataHasLoaded = store.getState().project;
+  const dataHasLoaded = store.getState().project
 
   if (!dataHasLoaded) {
-    console.log("Loading initial data from API...");
-    return loadMeData(store, api).then(() => loadProjectData(store, api));
+    console.log("Loading initial data from API...")
+    return loadMeData(store, api).then(() => loadProjectData(store, api))
   }
-  return null;
+  return null
 }
 
 export async function handleMeEvent(event: MeEvent) {
   if (event.IntervalDataChanged) {
-    store.dispatch(personIntervalDataChanged(event.IntervalDataChanged));
+    store.dispatch(personIntervalDataChanged(event.IntervalDataChanged))
   }
 }
 
 export async function handleIntervalsEvent(event: IntervalsEvent) {
   if ("IntervalCreated" in event && event.IntervalCreated) {
-    store.dispatch(intervalCreated(event.IntervalCreated));
+    store.dispatch(intervalCreated(event.IntervalCreated))
   } else if ("IntervalStarted" in event && event.IntervalStarted) {
     // For simplicity, we'll just reload all interval data when an interval starts
-    loadProjectData(store, getApi());
+    loadProjectData(store, getApi())
   }
 }
 
 export async function handleCrewsEvent(event: CrewsEvent) {
   if (event.CrewUpdated) {
-    store.dispatch(crewUpdated(event.CrewUpdated));
+    store.dispatch(crewUpdated(event.CrewUpdated))
   }
 }
 
 export async function handleProjectEvent(event: ProjectEvent) {
   if ("ProjectUpdated" in event && event.ProjectUpdated) {
-    store.dispatch(projectUpdated(event.ProjectUpdated));
+    store.dispatch(projectUpdated(event.ProjectUpdated))
   } else if ("CircleInvolvementUpdated" in event && event.CircleInvolvementUpdated) {
-    store.dispatch(circleInvolvementUpdated(event.CircleInvolvementUpdated));
+    store.dispatch(circleInvolvementUpdated(event.CircleInvolvementUpdated))
   }
 }
 
 export async function handlePeopleEvent(event: PeopleEvent) {
   if (event.PersonUpdated) {
-    store.dispatch(personUpdated(event.PersonUpdated));
+    store.dispatch(personUpdated(event.PersonUpdated))
   }
 }
 
 export async function handleEntryPathwayEvent(event: EntryPathwayEvent) {
   if (event.EntryPathwayUpdated) {
-    store.dispatch(entryPathwayUpdated(event.EntryPathwayUpdated));
+    store.dispatch(entryPathwayUpdated(event.EntryPathwayUpdated))
   }
 }
 
 export async function handleEventTemplatesEvent(event: EventTemplatesEvent) {
   if (event.EventTemplateUpdated) {
-    store.dispatch(eventTemplateUpdated(event.EventTemplateUpdated));
+    store.dispatch(eventTemplateUpdated(event.EventTemplateUpdated))
   }
 }
 
 export async function handleEventsEvent(event: CalendarEventsEvent) {
   if (event.CalendarEventUpdated) {
-    store.dispatch(eventUpdated(event.CalendarEventUpdated));
+    store.dispatch(eventUpdated(event.CalendarEventUpdated))
   }
 }
 
 export async function handleCalendarEventAttendancesEvent(event: CalendarEventAttendancesEvent) {
   if (event.CalendarEventAttendanceUpdated) {
-    store.dispatch(singleAttendanceUpdate(event.CalendarEventAttendanceUpdated));
+    store.dispatch(singleAttendanceUpdate(event.CalendarEventAttendanceUpdated))
   }
 }
 
 export async function handleCirclesEvent(event: CirclesEvent) {
   if (event.CircleUpdated) {
-    store.dispatch(circleUpdated(event.CircleUpdated));
+    store.dispatch(circleUpdated(event.CircleUpdated))
   }
 }
 
 export async function handleAppEvent(event: AppEvent) {
-  console.log("Handling AppEvent:", event);
+  console.log("Handling AppEvent:", event)
 
   if ("MeEvent" in event && event.MeEvent) {
-    handleMeEvent(event.MeEvent);
+    handleMeEvent(event.MeEvent)
   } else if ("IntervalsEvent" in event && event.IntervalsEvent) {
-    handleIntervalsEvent(event.IntervalsEvent);
+    handleIntervalsEvent(event.IntervalsEvent)
   } else if ("CrewsEvent" in event && event.CrewsEvent) {
-    handleCrewsEvent(event.CrewsEvent);
+    handleCrewsEvent(event.CrewsEvent)
   } else if ("ProjectEvent" in event && event.ProjectEvent) {
-    handleProjectEvent(event.ProjectEvent);
+    handleProjectEvent(event.ProjectEvent)
   } else if ("PeopleEvent" in event && event.PeopleEvent) {
-    handlePeopleEvent(event.PeopleEvent);
+    handlePeopleEvent(event.PeopleEvent)
   } else if ("EntryPathwayEvent" in event && event.EntryPathwayEvent) {
-    handleEntryPathwayEvent(event.EntryPathwayEvent);
+    handleEntryPathwayEvent(event.EntryPathwayEvent)
   } else if ("EventTemplatesEvent" in event && event.EventTemplatesEvent) {
-    handleEventTemplatesEvent(event.EventTemplatesEvent);
+    handleEventTemplatesEvent(event.EventTemplatesEvent)
   } else if ("CalendarEventsEvent" in event && event.CalendarEventsEvent) {
-    handleEventsEvent(event.CalendarEventsEvent);
+    handleEventsEvent(event.CalendarEventsEvent)
   } else if ("CalendarEventAttendancesEvent" in event && event.CalendarEventAttendancesEvent) {
-    handleCalendarEventAttendancesEvent(event.CalendarEventAttendancesEvent);
+    handleCalendarEventAttendancesEvent(event.CalendarEventAttendancesEvent)
   } else if ("CirclesEvent" in event && event.CirclesEvent) {
-    handleCirclesEvent(event.CirclesEvent);
+    handleCirclesEvent(event.CirclesEvent)
   } else {
-    console.warn("Unknown event type:", event);
+    console.warn("Unknown event type:", event)
   }
 }
 
 export async function handleAppEvents(events: AppEvent[]) {
-  events.forEach(handleAppEvent);
+  events.forEach(handleAppEvent)
 }
 
 export interface OwnedAppEvent {
-  author_id: number;
-  event: AppEvent;
+  author_id: number
+  event: AppEvent
 }
 
 export async function handleOwnedAppEvent(current_user_id: number, event: OwnedAppEvent) {
   if (event.author_id !== current_user_id) {
-    handleAppEvent(event.event);
+    handleAppEvent(event.event)
   } else {
-    console.log("Ignoring event authored by the current user:", event.author_id);
+    console.log("Ignoring event authored by the current user:", event.author_id)
   }
 }
 
-export default store;
+export default store

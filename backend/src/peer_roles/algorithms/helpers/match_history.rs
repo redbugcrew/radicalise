@@ -36,9 +36,7 @@ where
 
     #[allow(dead_code)] // Kept for tests and future use; sticky_unidirectional now prefers last_matched.
     pub fn last_peer_matched(&self, person: &PeerId) -> Option<PeerId> {
-        self.most_recent_record(person)
-            .map(|((_, peer), _)| peer.clone())
-            .or(None)
+        self.most_recent_record(person).map(|((_, peer), _)| peer.clone()).or(None)
     }
 
     pub fn has_match_in_previous_interval(&self, person: &PeerId) -> bool {
@@ -47,12 +45,7 @@ where
             .any(|((a, _), intervals_ago)| a == person && intervals_ago.0 == 1)
     }
 
-    fn record_directed(
-        map: &mut HashMap<(PeerId, PeerId), IntervalsAgo>,
-        a: PeerId,
-        b: PeerId,
-        intervals_ago: IntervalsAgo,
-    ) {
+    fn record_directed(map: &mut HashMap<(PeerId, PeerId), IntervalsAgo>, a: PeerId, b: PeerId, intervals_ago: IntervalsAgo) {
         map.entry((a, b))
             .and_modify(|existing| *existing = (*existing).min(intervals_ago))
             .or_insert(intervals_ago);
@@ -93,10 +86,7 @@ mod tests {
 
         history.record("andi".to_string(), "bob".to_string(), IntervalsAgo(1));
 
-        assert_eq!(
-            history.last_peer_matched(&"andi".to_string()),
-            Some("bob".to_string())
-        );
+        assert_eq!(history.last_peer_matched(&"andi".to_string()), Some("bob".to_string()));
     }
 
     #[test]
@@ -106,9 +96,6 @@ mod tests {
         history.record("andi".to_string(), "bob".to_string(), IntervalsAgo(2));
         history.record("andi".to_string(), "carol".to_string(), IntervalsAgo(1));
 
-        assert_eq!(
-            history.last_peer_matched(&"andi".to_string()),
-            Some("carol".to_string())
-        );
+        assert_eq!(history.last_peer_matched(&"andi".to_string()), Some("carol".to_string()));
     }
 }

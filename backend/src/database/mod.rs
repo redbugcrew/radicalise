@@ -2,13 +2,12 @@ use sqlx::{Pool, Sqlite, SqlitePool, sqlite::SqliteConnectOptions};
 use std::env;
 
 lazy_static! {
-    pub static ref DATABASE_URL: String =
-        env::var("DATABASE_URL").unwrap_or_else(|_| if cfg!(test) {
-            "sqlite:radicalise-test.sqlite"
-        } else {
-            "sqlite:radicalise.sqlite"
-        }
-        .to_string());
+    pub static ref DATABASE_URL: String = env::var("DATABASE_URL").unwrap_or_else(|_| if cfg!(test) {
+        "sqlite:radicalise-test.sqlite"
+    } else {
+        "sqlite:radicalise.sqlite"
+    }
+    .to_string());
 }
 
 pub async fn prepare_database() -> anyhow::Result<Pool<Sqlite>> {
@@ -19,9 +18,7 @@ pub async fn prepare_database() -> anyhow::Result<Pool<Sqlite>> {
     println!("Using database file: {}", filename);
 
     // create database if it does not exist
-    let options = SqliteConnectOptions::new()
-        .filename(filename)
-        .create_if_missing(true);
+    let options = SqliteConnectOptions::new().filename(filename).create_if_missing(true);
 
     // prepare connection pool
     let pool = SqlitePool::connect_with(options).await?;

@@ -22,10 +22,7 @@ pub async fn find_circle_invitation_by_email_and_circle_id(
     .await
 }
 
-pub async fn find_circle_invitation_by_token(
-    token: String,
-    pool: &SqlitePool,
-) -> Result<CircleInvitation, sqlx::Error> {
+pub async fn find_circle_invitation_by_token(token: String, pool: &SqlitePool) -> Result<CircleInvitation, sqlx::Error> {
     let invitation = sqlx::query_as::<_, CircleInvitation>(
         r#"
         SELECT * FROM circle_invitations
@@ -38,6 +35,7 @@ pub async fn find_circle_invitation_by_token(
     Ok(invitation)
 }
 
+#[allow(clippy::too_many_arguments)]
 pub async fn upsert_circle_invitation(
     circle_id: CircleId,
     person_id: PersonId,
@@ -79,11 +77,7 @@ pub async fn upsert_circle_invitation(
     Ok(result)
 }
 
-pub async fn update_circle_invitation_person_id(
-    invitation_id: i64,
-    person_id: PersonId,
-    pool: &SqlitePool,
-) -> Result<(), sqlx::Error> {
+pub async fn update_circle_invitation_person_id(invitation_id: i64, person_id: PersonId, pool: &SqlitePool) -> Result<(), sqlx::Error> {
     sqlx::query!(
         "UPDATE circle_invitations SET person_id = ? WHERE id = ?",
         person_id.id,
@@ -95,10 +89,7 @@ pub async fn update_circle_invitation_person_id(
     Ok(())
 }
 
-pub async fn mark_circle_invitation_as_sent(
-    invitation_id: i64,
-    pool: &SqlitePool,
-) -> Result<(), sqlx::Error> {
+pub async fn mark_circle_invitation_as_sent(invitation_id: i64, pool: &SqlitePool) -> Result<(), sqlx::Error> {
     sqlx::query(
         r#"
         UPDATE circle_invitations
@@ -112,10 +103,7 @@ pub async fn mark_circle_invitation_as_sent(
     Ok(())
 }
 
-pub async fn delete_circle_invitation(
-    invitation_id: i64,
-    pool: &SqlitePool,
-) -> Result<(), sqlx::Error> {
+pub async fn delete_circle_invitation(invitation_id: i64, pool: &SqlitePool) -> Result<(), sqlx::Error> {
     sqlx::query!("DELETE FROM circle_invitations WHERE id = ?", invitation_id)
         .execute(pool)
         .await?;

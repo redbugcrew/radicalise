@@ -1,13 +1,8 @@
-import {
-  Navigate,
-  RouterProvider,
-  createBrowserRouter,
-  type LoaderFunction,
-} from "react-router-dom";
-import { Provider as ReduxProvider } from "react-redux";
-import store, { loadInitialData, type AppStore } from "./store";
-import { MantineProvider } from "@mantine/core";
-import { Notifications } from "@mantine/notifications";
+import { Navigate, RouterProvider, createBrowserRouter, type LoaderFunction } from "react-router-dom"
+import { Provider as ReduxProvider } from "react-redux"
+import store, { loadInitialData, type AppStore } from "./store"
+import { MantineProvider } from "@mantine/core"
+import { Notifications } from "@mantine/notifications"
 import {
   EditPerson,
   CreateEoi,
@@ -28,9 +23,9 @@ import {
   Dev,
   InvitePerson,
   AcceptInvitation,
-} from "./pages";
-import { buildRoutes as buildAuthRoutes } from "./contexts/auth";
-import { theme } from "./theme";
+} from "./pages"
+import { buildRoutes as buildAuthRoutes } from "./contexts/auth"
+import { theme } from "./theme"
 import {
   EditEventTemplate,
   Events,
@@ -41,26 +36,23 @@ import {
   EditEvent,
   UpcomingEvents,
   AllEvents,
-} from "./contexts/events";
+} from "./contexts/events"
 
 // Import styles of packages that you've installed.
 // All packages except `@mantine/hooks` require styles imports
-import "@mantine/core/styles.css";
-import "@mantine/dates/styles.css";
-import "@mantine/notifications/styles.css";
-import { Circles, EditCircle, NewCircle } from "./contexts/circles";
-import { PeerRoles } from "./contexts/peer_roles";
-import NewRole from "./contexts/peer_roles/pages/NewRole";
+import "@mantine/core/styles.css"
+import "@mantine/dates/styles.css"
+import "@mantine/notifications/styles.css"
+import { Circles, EditCircle, NewCircle } from "./contexts/circles"
+import { PeerRoles } from "./contexts/peer_roles"
+import NewRole from "./contexts/peer_roles/pages/NewRole"
 //import NewRole from "./contexts/peer_roles/pages/NewRole";
 
-function withStore(
-  func: (store: AppStore) => any,
-  store: AppStore,
-): LoaderFunction<any> {
+function withStore(func: (store: AppStore) => any, store: AppStore): LoaderFunction<any> {
   const wrappedFunc: LoaderFunction<any> = async () => {
-    return func(store);
-  };
-  return wrappedFunc;
+    return func(store)
+  }
+  return wrappedFunc
 }
 
 const router = createBrowserRouter([
@@ -236,7 +228,7 @@ const router = createBrowserRouter([
       },
     ],
   },
-]);
+])
 
 function App() {
   return (
@@ -246,7 +238,7 @@ function App() {
         <RouterProvider router={router} />
       </ReduxProvider>
     </MantineProvider>
-  );
+  )
 }
 
-export default App;
+export default App

@@ -1,22 +1,22 @@
-import { IconArrowLeft } from "@tabler/icons-react";
-import { Box, Button, Center, Group, Stack, TextInput } from "@mantine/core";
-import classes from "./ForgotPasswordForm.module.css";
-import { useForm } from "@mantine/form";
-import { Anchor } from "../../../../components";
-import { isValidEmail } from "../../../../utilities/validators";
-import { DisplayActionResult, useOnSubmitWithResult, type ActionPromiseResult } from "../../../../components/ActionResult";
+import { IconArrowLeft } from "@tabler/icons-react"
+import { Box, Button, Center, Group, Stack, TextInput } from "@mantine/core"
+import classes from "./ForgotPasswordForm.module.css"
+import { useForm } from "@mantine/form"
+import { Anchor } from "../../../../components"
+import { isValidEmail } from "../../../../utilities/validators"
+import { DisplayActionResult, useOnSubmitWithResult, type ActionPromiseResult } from "../../../../components/ActionResult"
 
 export interface ForgotPasswordFormData {
-  email: string;
+  email: string
 }
 
 export interface ForgotPasswordFormProps {
-  onSubmit: (data: ForgotPasswordFormData) => Promise<ActionPromiseResult>;
-  backLink?: string;
+  onSubmit: (data: ForgotPasswordFormData) => Promise<ActionPromiseResult>
+  backLink?: string
 }
 
 export default function ForgotPasswordForm({ onSubmit, backLink }: ForgotPasswordFormProps) {
-  const [actionResult, onSubmitWithResult] = useOnSubmitWithResult<ForgotPasswordFormData>(onSubmit);
+  const [actionResult, onSubmitWithResult] = useOnSubmitWithResult<ForgotPasswordFormData>(onSubmit)
 
   const form = useForm<ForgotPasswordFormData>({
     mode: "controlled",
@@ -27,7 +27,7 @@ export default function ForgotPasswordForm({ onSubmit, backLink }: ForgotPasswor
     validate: {
       email: (value) => (isValidEmail(value) ? null : "Invalid email"),
     },
-  });
+  })
 
   return (
     <form onSubmit={form.onSubmit(onSubmitWithResult)}>
@@ -52,5 +52,5 @@ export default function ForgotPasswordForm({ onSubmit, backLink }: ForgotPasswor
         </Group>
       </Stack>
     </form>
-  );
+  )
 }

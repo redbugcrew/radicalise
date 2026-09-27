@@ -25,11 +25,7 @@ where
     let mut visited: usize = 0;
 
     for start in start_candidates {
-        let mut unmatched: Vec<PeerId> = people
-            .iter()
-            .filter(|p| *p != &start)
-            .cloned()
-            .collect();
+        let mut unmatched: Vec<PeerId> = people.iter().filter(|p| *p != &start).cloned().collect();
         let mut path = vec![start.clone()];
 
         build_best_cycle(
@@ -61,11 +57,7 @@ where
     }
 }
 
-fn ordered_start_candidates<PeerId, R: Rng>(
-    people: &[PeerId],
-    history: &MatchHistory<PeerId>,
-    rng: &mut R,
-) -> Vec<PeerId>
+fn ordered_start_candidates<PeerId, R: Rng>(people: &[PeerId], history: &MatchHistory<PeerId>, rng: &mut R) -> Vec<PeerId>
 where
     PeerId: Clone + Eq + std::hash::Hash + Ord + std::fmt::Debug,
 {
@@ -87,6 +79,7 @@ where
     with_history
 }
 
+#[allow(clippy::too_many_arguments)]
 fn build_best_cycle<PeerId, R: Rng>(
     first_person: &PeerId,
     path: &mut Vec<PeerId>,
@@ -125,13 +118,7 @@ where
     }
 
     let last = path.last().unwrap().clone();
-    let candidates = ordered_candidates(
-        &last,
-        unmatched,
-        history,
-        constraint_edges,
-        rng,
-    );
+    let candidates = ordered_candidates(&last, unmatched, history, constraint_edges, rng);
 
     for candidate in candidates {
         path.push(candidate.clone());
@@ -192,27 +179,18 @@ where
     from_last_interval
 }
 
-fn historical_edges_in_cycle<PeerId>(
-    path: &[PeerId],
-    first_person: &PeerId,
-    history: &MatchHistory<PeerId>,
-) -> usize
+fn historical_edges_in_cycle<PeerId>(path: &[PeerId], first_person: &PeerId, history: &MatchHistory<PeerId>) -> usize
 where
     PeerId: Clone + Eq + std::hash::Hash,
 {
     let mut count = historical_edges_in_path(path, history);
-    if path.len() >= 2
-        && history.last_matched(path.last().unwrap(), first_person) == Some(IntervalsAgo(1))
-    {
+    if path.len() >= 2 && history.last_matched(path.last().unwrap(), first_person) == Some(IntervalsAgo(1)) {
         count += 1;
     }
     count
 }
 
-fn historical_edges_in_path<PeerId>(
-    path: &[PeerId],
-    history: &MatchHistory<PeerId>,
-) -> usize
+fn historical_edges_in_path<PeerId>(path: &[PeerId], history: &MatchHistory<PeerId>) -> usize
 where
     PeerId: Clone + Eq + std::hash::Hash,
 {
@@ -224,11 +202,7 @@ where
         .count()
 }
 
-fn is_constrained_match<PeerId>(
-    last_person: &PeerId,
-    candidate: &PeerId,
-    constraint_edges: Option<&[(PeerId, PeerId)]>,
-) -> bool
+fn is_constrained_match<PeerId>(last_person: &PeerId, candidate: &PeerId, constraint_edges: Option<&[(PeerId, PeerId)]>) -> bool
 where
     PeerId: Eq + std::hash::Hash,
 {
@@ -265,11 +239,7 @@ mod tests {
         MatchHistory::new()
     }
 
-    pub fn add_circle_to_history(
-        history: &mut MatchHistory<String>,
-        circle: Vec<&str>,
-        intervals_ago: IntervalsAgo,
-    ) {
+    pub fn add_circle_to_history(history: &mut MatchHistory<String>, circle: Vec<&str>, intervals_ago: IntervalsAgo) {
         for i in 0..circle.len() {
             let a = circle[i].to_string();
             let b = circle[(i + 1) % circle.len()].to_string();
@@ -280,10 +250,7 @@ mod tests {
     #[allow(dead_code)] // Kept for future tests; current tests build history directly.
     fn parse_circles(data: &str) -> MatchHistory<String> {
         let mut history = MatchHistory::new();
-        let lines = data
-            .lines()
-            .map(|line| line.trim())
-            .filter(|line| !line.is_empty());
+        let lines = data.lines().map(|line| line.trim()).filter(|line| !line.is_empty());
 
         for (index, line) in lines.enumerate() {
             let parts: Vec<&str> = line.split('>').map(|s| s.trim()).collect();
@@ -299,8 +266,7 @@ mod tests {
     fn returns_empty_matches_by_default() {
         let mut rng = SmallRng::seed_from_u64(0);
 
-        let result =
-            sticky_unidirectional::<String, _>(vec![], &empty_history(), None, &mut rng).unwrap();
+        let result = sticky_unidirectional::<String, _>(vec![], &empty_history(), None, &mut rng).unwrap();
         assert!(result.edges().is_empty());
     }
 
@@ -308,26 +274,15 @@ mod tests {
     fn return_empty_matches_if_theres_only_one_person() {
         let mut rng = SmallRng::seed_from_u64(0);
 
-        let result = sticky_unidirectional::<String, _>(
-            vec!["andi".to_string()],
-            &empty_history(),
-            None,
-            &mut rng,
-        )
-        .unwrap();
+        let result = sticky_unidirectional::<String, _>(vec!["andi".to_string()], &empty_history(), None, &mut rng).unwrap();
         assert!(result.edges().is_empty());
     }
 
     #[test]
     fn matches_two_people_with_no_history() {
         let mut rng = SmallRng::seed_from_u64(0);
-        let result = sticky_unidirectional::<String, _>(
-            vec!["andi".to_string(), "bob".to_string()],
-            &empty_history(),
-            None,
-            &mut rng,
-        )
-        .unwrap();
+        let result =
+            sticky_unidirectional::<String, _>(vec!["andi".to_string(), "bob".to_string()], &empty_history(), None, &mut rng).unwrap();
 
         assert_eq!(result.to_string(), "{andi: [bob], bob: [andi]}");
     }
@@ -337,23 +292,15 @@ mod tests {
         let mut rng = SmallRng::seed_from_u64(0);
 
         let result = sticky_unidirectional::<String, _>(
-            vec![
-                "andi".to_string(),
-                "bob".to_string(),
-                "carol".to_string(),
-                "dave".to_string(),
-            ],
+            vec!["andi".to_string(), "bob".to_string(), "carol".to_string(), "dave".to_string()],
             &empty_history(),
             None,
             &mut rng,
         )
         .unwrap();
 
-        let people_in_result: std::collections::HashSet<String> = result
-            .edges()
-            .iter()
-            .flat_map(|(a, b)| vec![a.clone(), b.clone()])
-            .collect();
+        let people_in_result: std::collections::HashSet<String> =
+            result.edges().iter().flat_map(|(a, b)| vec![a.clone(), b.clone()]).collect();
 
         assert_eq!(people_in_result.len(), 4);
         assert!(people_in_result.contains("andi"));
@@ -367,27 +314,17 @@ mod tests {
         let mut rng = SmallRng::seed_from_u64(3);
 
         let mut history = empty_history();
-        add_circle_to_history(
-            &mut history,
-            vec!["andi", "bob", "fred", "carol", "dave"],
-            IntervalsAgo(1),
-        );
+        add_circle_to_history(&mut history, vec!["andi", "bob", "fred", "carol", "dave"], IntervalsAgo(1));
 
         let result = sticky_unidirectional::<String, _>(
-            vec![
-                "andi".to_string(),
-                "carol".to_string(),
-                "bob".to_string(),
-                "dave".to_string(),
-            ],
+            vec!["andi".to_string(), "carol".to_string(), "bob".to_string(), "dave".to_string()],
             &history,
             None,
             &mut rng,
         )
         .unwrap();
 
-        let edges: std::collections::HashSet<(String, String)> =
-            result.edges().iter().cloned().collect();
+        let edges: std::collections::HashSet<(String, String)> = result.edges().iter().cloned().collect();
 
         // Historical edges among current people: andi>bob, carol>dave, dave>andi.
         // Because fred is missing, a 4-cycle cannot keep all three, but it
@@ -398,10 +335,7 @@ mod tests {
             ("dave".to_string(), "andi".to_string()),
         ];
 
-        let preserved = historical_edges
-            .iter()
-            .filter(|edge| edges.contains(edge))
-            .count();
+        let preserved = historical_edges.iter().filter(|edge| edges.contains(edge)).count();
 
         assert!(
             preserved >= 2,
@@ -416,35 +350,22 @@ mod tests {
         let mut rng = SmallRng::seed_from_u64(3); // starting with andi
 
         let mut history = empty_history();
-        add_circle_to_history(
-            &mut history,
-            vec!["bob", "carol", "dave"],
-            IntervalsAgo(1),
-        );
+        add_circle_to_history(&mut history, vec!["bob", "carol", "dave"], IntervalsAgo(1));
 
         let result = sticky_unidirectional::<String, _>(
-            vec![
-                "andi".to_string(),
-                "bob".to_string(),
-                "carol".to_string(),
-                "dave".to_string(),
-            ],
+            vec!["andi".to_string(), "bob".to_string(), "carol".to_string(), "dave".to_string()],
             &history,
             None,
             &mut rng,
         )
         .unwrap();
 
-        let people_in_result: std::collections::HashSet<String> = result
-            .edges()
-            .iter()
-            .flat_map(|(a, b)| vec![a.clone(), b.clone()])
-            .collect();
+        let people_in_result: std::collections::HashSet<String> =
+            result.edges().iter().flat_map(|(a, b)| vec![a.clone(), b.clone()]).collect();
 
         assert!(people_in_result.contains("andi"), "New person andi should be matched");
 
-        let edges: std::collections::HashSet<(String, String)> =
-            result.edges().iter().cloned().collect();
+        let edges: std::collections::HashSet<(String, String)> = result.edges().iter().cloned().collect();
 
         // Historical edges among current people: bob>carol, carol>dave, dave>bob.
         let historical_edges = [
@@ -453,10 +374,7 @@ mod tests {
             ("dave".to_string(), "bob".to_string()),
         ];
 
-        let preserved = historical_edges
-            .iter()
-            .filter(|edge| edges.contains(edge))
-            .count();
+        let preserved = historical_edges.iter().filter(|edge| edges.contains(edge)).count();
 
         assert!(
             preserved >= 2,
@@ -471,17 +389,9 @@ mod tests {
         let mut rng = SmallRng::seed_from_u64(0);
 
         let result = sticky_unidirectional::<String, _>(
-            vec![
-                "andi".to_string(),
-                "bob".to_string(),
-                "carol".to_string(),
-                "dave".to_string(),
-            ],
+            vec!["andi".to_string(), "bob".to_string(), "carol".to_string(), "dave".to_string()],
             &empty_history(),
-            Some(&[
-                ("andi".to_string(), "dave".to_string()),
-                ("dave".to_string(), "andi".to_string()),
-            ]),
+            Some(&[("andi".to_string(), "dave".to_string()), ("dave".to_string(), "andi".to_string())]),
             &mut rng,
         )
         .unwrap();
@@ -506,25 +416,16 @@ mod tests {
         let mut rng = SmallRng::seed_from_u64(7);
 
         let result = sticky_unidirectional::<String, _>(
-            vec![
-                "andi".to_string(),
-                "bob".to_string(),
-                "carol".to_string(),
-                "dave".to_string(),
-            ],
+            vec!["andi".to_string(), "bob".to_string(), "carol".to_string(), "dave".to_string()],
             &empty_history(),
-            Some(&[
-                ("andi".to_string(), "carol".to_string()),
-                ("carol".to_string(), "andi".to_string()),
-            ]),
+            Some(&[("andi".to_string(), "carol".to_string()), ("carol".to_string(), "andi".to_string())]),
             &mut rng,
         )
         .unwrap();
 
         for (person, peer) in result.edges() {
             assert!(
-                !((person == "andi" && peer == "carol")
-                    || (person == "carol" && peer == "andi")),
+                !((person == "andi" && peer == "carol") || (person == "carol" && peer == "andi")),
                 "Expected constraint edge andi-carol to be avoided, got {} -> {}",
                 person,
                 peer
@@ -569,11 +470,8 @@ mod tests {
         )
         .unwrap();
 
-        let people_in_result: std::collections::HashSet<String> = result
-            .edges()
-            .iter()
-            .flat_map(|(a, b)| vec![a.clone(), b.clone()])
-            .collect();
+        let people_in_result: std::collections::HashSet<String> =
+            result.edges().iter().flat_map(|(a, b)| vec![a.clone(), b.clone()]).collect();
 
         let missing: Vec<&str> = ["a", "b", "c", "d", "e", "f"]
             .into_iter()

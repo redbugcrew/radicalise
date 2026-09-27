@@ -6,7 +6,13 @@
       {
         "name": "calendar_token",
         "ordinal": 0,
-        "type_info": "Text"
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "calendar_token"
+          }
+        }
       }
     ],
     "parameters": {

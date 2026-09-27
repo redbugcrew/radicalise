@@ -1,66 +1,75 @@
-import { Alert, Input, Stack, Title } from "@mantine/core";
-import { forCrew } from "../../store/current_interval/crew_involvements";
-import type { PeopleObjectMap } from "../../store/people";
-import type { CrewInvolvement } from "../../api/Api";
-import { useUncontrolled } from "@mantine/hooks";
-import { IconScale } from "@tabler/icons-react";
-import CrewParticipationControl, { type CrewParticipationControlData } from "./CrewParticipationControl";
-import type { CrewWithLinks } from "../../store/crews";
+import { Alert, Input, Stack, Title } from "@mantine/core"
+import { forCrew } from "../../store/current_interval/crew_involvements"
+import type { PeopleObjectMap } from "../../store/people"
+import type { CrewInvolvement } from "../../api/Api"
+import { useUncontrolled } from "@mantine/hooks"
+import { IconScale } from "@tabler/icons-react"
+import CrewParticipationControl, { type CrewParticipationControlData } from "./CrewParticipationControl"
+import type { CrewWithLinks } from "../../store/crews"
 
 interface GetInputPropsReturnType {
-  onChange: any;
-  value?: any;
-  defaultValue?: any;
-  checked?: any;
-  defaultChecked?: any;
-  error?: any;
-  onFocus?: any;
-  onBlur?: any;
+  onChange: any
+  value?: any
+  defaultValue?: any
+  checked?: any
+  defaultChecked?: any
+  error?: any
+  onFocus?: any
+  onBlur?: any
 }
 
 type CrewParticipationsInputProps = GetInputPropsReturnType & {
-  personId: number;
-  intervalId: number;
-  crews: CrewWithLinks[];
-  people: PeopleObjectMap;
-  disabled?: boolean;
-  crewInvolvements: CrewInvolvement[];
-  previousInvolvements?: CrewInvolvement[] | null | undefined;
-};
+  personId: number
+  intervalId: number
+  crews: CrewWithLinks[]
+  people: PeopleObjectMap
+  disabled?: boolean
+  crewInvolvements: CrewInvolvement[]
+  previousInvolvements?: CrewInvolvement[] | null | undefined
+}
 
 function upsertData(arr: CrewInvolvement[], record: CrewInvolvement): CrewInvolvement[] {
-  const result = removeData(arr, record);
-  result.push(record);
-  return result;
+  const result = removeData(arr, record)
+  result.push(record)
+  return result
 }
 
 function removeData(arr: CrewInvolvement[], record: CrewInvolvement): CrewInvolvement[] {
-  return arr.filter((item) => item.crew_id !== record.crew_id);
+  return arr.filter((item) => item.crew_id !== record.crew_id)
 }
 
 function toggleData(arr: CrewInvolvement[], record: CrewInvolvement, checked: boolean): CrewInvolvement[] {
   if (checked) {
-    return upsertData(arr, record);
+    return upsertData(arr, record)
   }
-  return removeData(arr, record);
+  return removeData(arr, record)
 }
 
 function toControlData(data: CrewInvolvement[], crewId: number): CrewParticipationControlData {
-  const record = data.find((item) => item.crew_id === crewId);
+  const record = data.find((item) => item.crew_id === crewId)
   return {
     participating: !!record,
     convenor: record?.convenor || false,
     volunteered_convenor: record?.volunteered_convenor || false,
-  };
+  }
 }
 
-export default function CrewParticipationsInput({ crews, personId, intervalId, people, disabled, crewInvolvements, previousInvolvements, ...rest }: CrewParticipationsInputProps) {
+export default function CrewParticipationsInput({
+  crews,
+  personId,
+  intervalId,
+  people,
+  disabled,
+  crewInvolvements,
+  previousInvolvements,
+  ...rest
+}: CrewParticipationsInputProps) {
   const [value, setValue] = useUncontrolled<CrewInvolvement[]>({
     value: rest.value,
     defaultValue: rest.defaultValue,
     finalValue: [],
     onChange: rest.onChange,
-  });
+  })
 
   const handleChange = (crewId: number, itemValue: CrewParticipationControlData) => {
     if (!disabled) {
@@ -71,22 +80,22 @@ export default function CrewParticipationsInput({ crews, personId, intervalId, p
         interval_id: intervalId,
         convenor: false,
         volunteered_convenor: itemValue.volunteered_convenor,
-      };
-      const existingRecord = value.find((item) => item.crew_id === crewId);
+      }
+      const existingRecord = value.find((item) => item.crew_id === crewId)
 
       const newRecord: CrewInvolvement = {
         ...defaultRecord,
         ...existingRecord,
         convenor: itemValue.convenor,
         volunteered_convenor: itemValue.volunteered_convenor,
-      };
-      const newValue = toggleData(value, newRecord, itemValue.participating);
-      setValue(newValue);
+      }
+      const newValue = toggleData(value, newRecord, itemValue.participating)
+      setValue(newValue)
     }
-  };
+  }
 
   if (crews.length === 0) {
-    return <Title order={4}>No crews available. Please create a crew first.</Title>;
+    return <Title order={4}>No crews available. Please create a crew first.</Title>
   }
 
   return (
@@ -114,5 +123,5 @@ export default function CrewParticipationsInput({ crews, personId, intervalId, p
         )}
       </Stack>
     </Input.Wrapper>
-  );
+  )
 }

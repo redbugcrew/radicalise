@@ -1,10 +1,10 @@
-import { Container, Stack, Title, Text } from "@mantine/core";
-import { useAppSelector } from "../../store";
-import { Anchor, EntryPathwaysTable } from "../../components";
+import { Container, Stack, Title, Text } from "@mantine/core"
+import { useAppSelector } from "../../store"
+import { Anchor, EntryPathwaysTable } from "../../components"
 
 export default function EntryPathways() {
-  const entryPathways = useAppSelector((state) => state.entryPathways);
-  const projectSlug = useAppSelector((state) => state.project?.slug);
+  const entryPathways = useAppSelector((state) => state.entryPathways)
+  const projectSlug = useAppSelector((state) => state.project?.slug)
 
   return (
     <Container>
@@ -22,5 +22,5 @@ export default function EntryPathways() {
         </Stack>
       </Stack>
     </Container>
-  );
+  )
 }

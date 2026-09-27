@@ -39,6 +39,7 @@ struct ForgotPasswordRequest {
     ),
     request_body(content = ForgotPasswordRequest, description = "Forgot password request", content_type = "application/json")
 )]
+#[allow(clippy::result_large_err)]
 async fn forgot_password(
     Extension(pool): Extension<SqlitePool>,
     Extension(resend): Extension<resend_rs::Resend>,
@@ -46,10 +47,7 @@ async fn forgot_password(
 ) -> Result<Response<axum::body::Body>, Response<axum::body::Body>> {
     let repo = AuthRepo::new(&pool);
 
-    let user = repo
-        .user_for_email(payload.email.clone())
-        .await
-        .map_err(repo_error_handler)?;
+    let user = repo.user_for_email(payload.email.clone()).await.map_err(repo_error_handler)?;
 
     if let Some(user) = user {
         let password_reset_token = Uuid::new_v4().to_string();
@@ -92,6 +90,7 @@ struct ResetPasswordRequest {
     ),
     request_body(content = ResetPasswordRequest, description = "Reset password request", content_type = "application/json")
 )]
+#[allow(clippy::result_large_err)]
 async fn reset_password(
     Extension(pool): Extension<SqlitePool>,
     Json(payload): Json<ResetPasswordRequest>,
@@ -120,8 +119,9 @@ struct LoginResponse {
     ),
     request_body(content = Credentials, description = "Attempt to log in", content_type = "application/json")
 )]
+#[allow(clippy::result_large_err)]
 async fn login(
-    mut auth_session: AuthSession,
+    auth_session: AuthSession,
     Json(creds): Json<Credentials>,
 ) -> Result<Response<axum::body::Body>, Response<axum::body::Body>> {
     let user = match auth_session.authenticate(creds.clone()).await {
@@ -136,11 +136,7 @@ async fn login(
         return Err(StatusCode::INTERNAL_SERVER_ERROR.into_response());
     }
 
-    return Ok((
-        StatusCode::OK,
-        axum::Json(LoginResponse { user_id: user.id }),
-    )
-        .into_response());
+    Ok((StatusCode::OK, axum::Json(LoginResponse { user_id: user.id })).into_response())
 }
 
 #[derive(ToSchema, Deserialize)]
@@ -175,10 +171,7 @@ impl SignUpRequest {
         (status = BAD_REQUEST, body = String)
     )
 )]
-async fn sign_up(
-    Extension(pool): Extension<SqlitePool>,
-    Json(data): Json<SignUpRequest>,
-) -> impl IntoResponse {
+async fn sign_up(Extension(pool): Extension<SqlitePool>, Json(data): Json<SignUpRequest>) -> impl IntoResponse {
     // Validate the incoming data
     if let Err(err) = data.validate() {
         return (StatusCode::BAD_REQUEST, err).into_response();
@@ -201,12 +194,8 @@ async fn sign_up(
     )
 )]
 async fn get_current_user(auth_session: AuthSession) -> impl IntoResponse {
-    match auth_session.user {
-        Some(ref user) => (
-            StatusCode::OK,
-            Json(Some(LoginResponse { user_id: user.id })),
-        )
-            .into_response(),
+    match auth_session.user().await {
+        Some(user) => (StatusCode::OK, Json(Some(LoginResponse { user_id: user.id }))).into_response(),
         None => (StatusCode::OK, Json::<Option<LoginResponse>>(None)).into_response(),
     }
 }
@@ -214,21 +203,15 @@ async fn get_current_user(auth_session: AuthSession) -> impl IntoResponse {
 fn repo_error_handler(error: AuthRepoError) -> Response<axum::body::Body> {
     let result = match error {
         crate::auth::auth_repo::AuthRepoError::UserNotFound => (StatusCode::UNAUTHORIZED, ()),
-        crate::auth::auth_repo::AuthRepoError::DatabaseError => {
-            (StatusCode::INTERNAL_SERVER_ERROR, ())
-        }
+        crate::auth::auth_repo::AuthRepoError::DatabaseError => (StatusCode::INTERNAL_SERVER_ERROR, ()),
     };
     result.into_response()
 }
 
 fn repo_insert_error_handler(error: AuthRepoInsertError) -> Response<axum::body::Body> {
     let result = match error {
-        crate::auth::auth_repo::AuthRepoInsertError::EmailAlreadyExists => {
-            (StatusCode::BAD_REQUEST, "Email already exists")
-        }
-        crate::auth::auth_repo::AuthRepoInsertError::DatabaseError => {
-            (StatusCode::INTERNAL_SERVER_ERROR, "Database error")
-        }
+        crate::auth::auth_repo::AuthRepoInsertError::EmailAlreadyExists => (StatusCode::BAD_REQUEST, "Email already exists"),
+        crate::auth::auth_repo::AuthRepoInsertError::DatabaseError => (StatusCode::INTERNAL_SERVER_ERROR, "Database error"),
     };
     result.into_response()
 }

@@ -41,11 +41,7 @@ impl From<sqlx::Error> for AssignPeerRolesError {
     }
 }
 
-pub async fn assign_interval_peer_roles(
-    interval: &Interval,
-    project_id: ProjectId,
-    pool: &SqlitePool,
-) -> Result<(), AssignPeerRolesError> {
+pub async fn assign_interval_peer_roles(interval: &Interval, project_id: ProjectId, pool: &SqlitePool) -> Result<(), AssignPeerRolesError> {
     println!("Assigning peer roles for interval {}", interval.id);
 
     let peer_roles = find_all_peer_roles(project_id, pool).await?;
@@ -85,10 +81,7 @@ fn order_peer_roles(roles: Vec<PeerRole>) -> Result<Vec<PeerRole>, String> {
         temp_mark: &mut HashSet<i64>,
     ) -> Result<(), String> {
         if temp_mark.contains(&id) {
-            return Err(format!(
-                "Cycle detected in peer role constraints at role {}",
-                id
-            ));
+            return Err(format!("Cycle detected in peer role constraints at role {}", id));
         }
 
         if visited.contains(&id) {
@@ -100,10 +93,7 @@ fn order_peer_roles(roles: Vec<PeerRole>) -> Result<Vec<PeerRole>, String> {
         if let Some(role) = by_id.get(&id) {
             if let Some(constraint_id) = role.constrained_by_id {
                 if !by_id.contains_key(&constraint_id) {
-                    return Err(format!(
-                        "Peer role {} is constrained by non-existent role {}",
-                        id, constraint_id
-                    ));
+                    return Err(format!("Peer role {} is constrained by non-existent role {}", id, constraint_id));
                 }
 
                 visit(constraint_id, by_id, ordered, visited, temp_mark)?;
@@ -174,19 +164,11 @@ async fn assign_interval_peer_role(
             .distribute(people, history.as_ref(), constraint_edges, &mut rng)
     }
     .map_err(|error| {
-        println!(
-            "Constraint violation while assigning peer role '{}': {}",
-            peer_role.name, error
-        );
+        println!("Constraint violation while assigning peer role '{}': {}", peer_role.name, error);
         AssignPeerRolesError::ConstraintViolation(error.to_string())
     })?;
 
-    println!(
-        "Peer role '{}' (interval {}): {}",
-        peer_role.name,
-        interval.id,
-        results.to_string()
-    );
+    println!("Peer role '{}' (interval {}): {}", peer_role.name, interval.id, results);
 
     let edges = results.edges();
     upsert_peer_enrollments(interval.id, peer_role.id, edges.clone(), pool).await?;

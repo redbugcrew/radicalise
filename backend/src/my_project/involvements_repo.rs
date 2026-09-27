@@ -4,8 +4,8 @@ use crate::{
     circles::repo::add_inside_circles,
     repo_utilities::InsertRecordError,
     shared::entities::{
-        Circle, CircleId, CircleInvolvement, CircleInvolvementId, IntervalId, InvolvementStatus,
-        OptOutType, ParticipationIntention, PersonId, ProjectId,
+        Circle, CircleId, CircleInvolvement, CircleInvolvementId, IntervalId, InvolvementStatus, OptOutType, ParticipationIntention,
+        PersonId, ProjectId,
     },
 };
 
@@ -63,20 +63,10 @@ impl From<CircleInvolvement> for CircleInvolvementRecord {
             circle_id: involvement.circle_id,
             interval_id: involvement.interval_id,
             status: involvement.status,
-            capacity_planning_visibility_circle_id: involvement
-                .capacity_planning_visibility_circle_id,
-            wellbeing: involvement
-                .capacity_planning
-                .as_ref()
-                .and_then(|cp| cp.wellbeing.clone()),
-            focus: involvement
-                .capacity_planning
-                .as_ref()
-                .and_then(|cp| cp.focus.clone()),
-            capacity: involvement
-                .capacity_planning
-                .as_ref()
-                .and_then(|cp| cp.capacity.clone()),
+            capacity_planning_visibility_circle_id: involvement.capacity_planning_visibility_circle_id,
+            wellbeing: involvement.capacity_planning.as_ref().and_then(|cp| cp.wellbeing.clone()),
+            focus: involvement.capacity_planning.as_ref().and_then(|cp| cp.focus.clone()),
+            capacity: involvement.capacity_planning.as_ref().and_then(|cp| cp.capacity.clone()),
             capacity_score: involvement.capacity_score,
             participation_intention: involvement.participation_intention,
             opt_out_type: involvement.opt_out_type,
@@ -130,10 +120,7 @@ pub async fn find_circle_involvement(
     Ok(record.map(Into::into))
 }
 
-pub async fn find_circle_involvement_by_id(
-    id: CircleInvolvementId,
-    pool: &SqlitePool,
-) -> Result<CircleInvolvement, sqlx::Error> {
+pub async fn find_circle_involvement_by_id(id: CircleInvolvementId, pool: &SqlitePool) -> Result<CircleInvolvement, sqlx::Error> {
     let record = sqlx::query_as!(
         CircleInvolvementRecord,
         "SELECT
@@ -210,10 +197,7 @@ pub async fn find_all_circle_involvements(
         separated.push_unseparated(")");
     }
 
-    let records = query_builder
-        .build_query_as::<CircleInvolvementRecord>()
-        .fetch_all(pool)
-        .await?;
+    let records = query_builder.build_query_as::<CircleInvolvementRecord>().fetch_all(pool).await?;
 
     Ok(records.into_iter().map(Into::into).collect())
 }
@@ -262,10 +246,7 @@ pub async fn find_all_circle_involvements_for_person(
     Ok(records.into_iter().map(Into::into).collect())
 }
 
-pub async fn upsert_circle_involvement(
-    involvement: CircleInvolvementRecord,
-    pool: &SqlitePool,
-) -> Result<(), sqlx::Error> {
+pub async fn upsert_circle_involvement(involvement: CircleInvolvementRecord, pool: &SqlitePool) -> Result<(), sqlx::Error> {
     let result = sqlx::query!(
         "INSERT INTO circle_involvements (person_id, circle_id, interval_id, status, capacity_planning_visibility_circle_id, wellbeing, focus, capacity_score, capacity, participation_intention, opt_out_type, opt_out_planned_return_date,
         intention_context)
@@ -299,7 +280,7 @@ pub async fn upsert_circle_involvement(
     .await?;
 
     if result.rows_affected() == 0 {
-        return Err(sqlx::Error::RowNotFound);
+        Err(sqlx::Error::RowNotFound)
     } else {
         Ok(())
     }
@@ -332,7 +313,7 @@ pub async fn insert_circle_involvement(
     .await.map_err(InsertRecordError::from)?;
 
     if result.rows_affected() == 0 {
-        return Err(InsertRecordError::DatabaseError);
+        Err(InsertRecordError::DatabaseError)
     } else {
         let record = CircleInvolvementRecord {
             id: result.last_insert_rowid(),
@@ -392,10 +373,7 @@ pub async fn delete_implicit_circle_involvements(
     Ok(())
 }
 
-pub async fn delete_circle_involvement_by_id(
-    involvement_id: CircleInvolvementId,
-    pool: &SqlitePool,
-) -> Result<(), sqlx::Error> {
+pub async fn delete_circle_involvement_by_id(involvement_id: CircleInvolvementId, pool: &SqlitePool) -> Result<(), sqlx::Error> {
     sqlx::query!(
         "DELETE FROM circle_involvements
         WHERE id = ?",
@@ -425,10 +403,7 @@ pub async fn update_involvement_status(
     Ok(())
 }
 
-pub async fn set_implicit_counter_to_zero(
-    circle_id: CircleId,
-    pool: &SqlitePool,
-) -> Result<(), sqlx::Error> {
+pub async fn set_implicit_counter_to_zero(circle_id: CircleId, pool: &SqlitePool) -> Result<(), sqlx::Error> {
     sqlx::query!(
         "UPDATE circle_involvements
         SET implicit_counter = 0

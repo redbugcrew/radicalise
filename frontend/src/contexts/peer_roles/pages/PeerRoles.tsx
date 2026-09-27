@@ -1,9 +1,9 @@
-import { Stack, Group, Title } from "@mantine/core";
-import PeerRolesTable from "../components/PeerRolesTable";
-import { useAppSelector } from "../../../store";
+import { Stack, Group, Title } from "@mantine/core"
+import PeerRolesTable from "../components/PeerRolesTable"
+import { useAppSelector } from "../../../store"
 
 export default function PeerRoles() {
-  const peerRoles = useAppSelector((state) => state.peerRoles);
+  const peerRoles = useAppSelector((state) => state.peerRoles)
 
   return (
     <Stack>
@@ -17,5 +17,5 @@ export default function PeerRoles() {
       </Group>
       <PeerRolesTable peerRoles={Object.values(peerRoles)} />
     </Stack>
-  );
+  )
 }

@@ -360,9 +360,7 @@ mod tests {
 
     #[test]
     fn has_expired_checks_expiry_against_supplied_time() {
-        let now = DateTime::parse_from_rfc3339("2026-01-02T00:00:00Z")
-            .unwrap()
-            .with_timezone(&Utc);
+        let now = DateTime::parse_from_rfc3339("2026-01-02T00:00:00Z").unwrap().with_timezone(&Utc);
 
         assert!(invitation("2026-01-01T23:59:59Z").has_expired(now));
         assert!(invitation("2026-01-02T00:00:00Z").has_expired(now));

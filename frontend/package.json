@@ -14,7 +14,9 @@
     "build": "tsc -b && vite build",
     "check-build": "tsc -b --noEmit",
     "ts:watch": "tsc --watch --noEmit",
-    "lint": "eslint .",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,json,css,md}\"",
+    "format:write": "prettier --write \"src/**/*.{ts,tsx,js,json,css,md}\"",
     "preview": "vite preview",
     "swagger": "npx swagger-typescript-api generate --path http://localhost:8200/api-docs/openapi.json --output src/api --http-client fetch --clean"
   },
@@ -51,6 +53,7 @@
     "postcss": "^8.5.5",
     "postcss-preset-mantine": "^1.17.0",
     "postcss-simple-vars": "^7.0.1",
+    "prettier": "^3.9.9",
     "swagger-typescript-api": "^13.2.16",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.30.1",

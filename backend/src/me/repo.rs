@@ -5,10 +5,7 @@ use utoipa::ToSchema;
 use crate::{
     circles::repo::find_all_circles_ids,
     intervals::repo::find_interval,
-    my_project::repo::{
-        IntervalData, find_all_crew_involvements,
-        find_interval_involvement_data_for_circles_and_person,
-    },
+    my_project::repo::{IntervalData, find_all_crew_involvements, find_interval_involvement_data_for_circles_and_person},
     peer_roles::enrollments_repo::find_peer_enrollments_for_interval_and_person,
     shared::entities::{CrewId, CrewInvolvement, IntervalId, Person, PersonId, ProjectId, UserId},
 };
@@ -33,24 +30,17 @@ pub async fn find_interval_data_for_person(
 ) -> Result<PersonIntervalData, sqlx::Error> {
     let interval = find_interval(interval_id.clone(), pool).await?;
 
-    let circle_ids = find_all_circles_ids(project_id.clone(), &pool).await?;
+    let circle_ids = find_all_circles_ids(project_id.clone(), pool).await?;
 
-    let circle_involvements_result = find_interval_involvement_data_for_circles_and_person(
-        person_id.clone(),
-        circle_ids,
-        interval_id.clone(),
-        project_id,
-        &pool,
-    )
-    .await?;
+    let circle_involvements_result =
+        find_interval_involvement_data_for_circles_and_person(person_id.clone(), circle_ids, interval_id.clone(), project_id, pool).await?;
 
     let crew_involvements_result = find_all_crew_involvements(interval_id.clone(), pool).await?;
 
-    let enrollments =
-        find_peer_enrollments_for_interval_and_person(&interval_id, &person_id, pool).await?;
+    let enrollments = find_peer_enrollments_for_interval_and_person(&interval_id, &person_id, pool).await?;
 
     let result = IntervalData {
-        interval: interval,
+        interval,
         circle_involvements: circle_involvements_result,
         crew_involvements: crew_involvements_result,
         peer_enrollments: enrollments,
@@ -62,20 +52,15 @@ pub async fn find_interval_data_for_person(
     })
 }
 
-pub async fn find_initial_data_for_user(
-    project_id: ProjectId,
-    user_id: UserId,
-    pool: &SqlitePool,
-) -> Result<MyInitialData, sqlx::Error> {
+pub async fn find_initial_data_for_user(project_id: ProjectId, user_id: UserId, pool: &SqlitePool) -> Result<MyInitialData, sqlx::Error> {
     let person = find_person_for_user(project_id.clone(), user_id.clone(), pool).await?;
     let person_id = person.typed_id();
 
-    let calendar_token =
-        if let Some(token) = find_calendar_token_for_user(user_id.clone(), pool).await? {
-            Some(token)
-        } else {
-            create_calendar_token_for_user(user_id, pool).await?
-        };
+    let calendar_token = if let Some(token) = find_calendar_token_for_user(user_id.clone(), pool).await? {
+        Some(token)
+    } else {
+        create_calendar_token_for_user(user_id, pool).await?
+    };
 
     Ok(MyInitialData {
         person_id: person_id.id,
@@ -100,10 +85,7 @@ pub async fn update_crew_involvements(
         }
     }
 
-    let crew_ids: Vec<CrewId> = involvements
-        .iter()
-        .map(|i| CrewId::new(i.crew_id))
-        .collect();
+    let crew_ids: Vec<CrewId> = involvements.iter().map(|i| CrewId::new(i.crew_id)).collect();
 
     // Involvements to remove
     let to_remove: Vec<CrewInvolvement> = existing
@@ -142,17 +124,13 @@ pub async fn find_my_crew_involvements(
     .await
 }
 
-pub async fn delete_crew_involvements(
-    involvements: Vec<CrewInvolvement>,
-    pool: &SqlitePool,
-) -> Result<(), sqlx::Error> {
+pub async fn delete_crew_involvements(involvements: Vec<CrewInvolvement>, pool: &SqlitePool) -> Result<(), sqlx::Error> {
     if involvements.is_empty() {
         println!("No crew involvements to delete");
         return Ok(()); // Nothing to delete
     }
 
-    let mut query_builder: QueryBuilder<Sqlite> =
-        QueryBuilder::new("DELETE FROM crew_involvements WHERE id IN (");
+    let mut query_builder: QueryBuilder<Sqlite> = QueryBuilder::new("DELETE FROM crew_involvements WHERE id IN (");
     let mut separated = query_builder.separated(", ");
     for value_type in involvements.iter() {
         separated.push_bind(value_type.id);
@@ -164,10 +142,7 @@ pub async fn delete_crew_involvements(
     Ok(())
 }
 
-pub async fn upsert_crew_involvements(
-    involvements: Vec<CrewInvolvement>,
-    pool: &SqlitePool,
-) -> Result<(), sqlx::Error> {
+pub async fn upsert_crew_involvements(involvements: Vec<CrewInvolvement>, pool: &SqlitePool) -> Result<(), sqlx::Error> {
     if involvements.is_empty() {
         return Ok(()); // Nothing to add
     }
@@ -196,11 +171,7 @@ pub async fn upsert_crew_involvements(
     Ok(())
 }
 
-pub async fn find_person_for_user(
-    project_id: ProjectId,
-    user_id: UserId,
-    pool: &SqlitePool,
-) -> Result<Person, sqlx::Error> {
+pub async fn find_person_for_user(project_id: ProjectId, user_id: UserId, pool: &SqlitePool) -> Result<Person, sqlx::Error> {
     sqlx::query_as!(
         Person,
         "SELECT id, project_id, display_name, about, avatar_id
@@ -213,10 +184,7 @@ pub async fn find_person_for_user(
     .await
 }
 
-pub async fn find_calendar_token_for_user(
-    user_id: UserId,
-    pool: &SqlitePool,
-) -> Result<Option<String>, sqlx::Error> {
+pub async fn find_calendar_token_for_user(user_id: UserId, pool: &SqlitePool) -> Result<Option<String>, sqlx::Error> {
     sqlx::query!(
         "SELECT calendar_token
         FROM users
@@ -228,10 +196,7 @@ pub async fn find_calendar_token_for_user(
     .map(|record| record.calendar_token)
 }
 
-pub async fn create_calendar_token_for_user(
-    user_id: UserId,
-    pool: &SqlitePool,
-) -> Result<Option<String>, sqlx::Error> {
+pub async fn create_calendar_token_for_user(user_id: UserId, pool: &SqlitePool) -> Result<Option<String>, sqlx::Error> {
     let token = uuid::Uuid::new_v4().to_string();
     sqlx::query!(
         "UPDATE users
@@ -246,11 +211,7 @@ pub async fn create_calendar_token_for_user(
     Ok(Some(token))
 }
 
-pub async fn find_person_id_for_user(
-    project_id: ProjectId,
-    user_id: UserId,
-    pool: &SqlitePool,
-) -> Result<PersonId, sqlx::Error> {
+pub async fn find_person_id_for_user(project_id: ProjectId, user_id: UserId, pool: &SqlitePool) -> Result<PersonId, sqlx::Error> {
     sqlx::query_as!(
         PersonId,
         "
