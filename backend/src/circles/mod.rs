@@ -17,9 +17,7 @@ pub mod events;
 pub mod repo;
 
 pub fn router() -> OpenApiRouter {
-    OpenApiRouter::new()
-        .routes(routes!(create_circle))
-        .routes(routes!(update_circle))
+    OpenApiRouter::new().routes(routes!(create_circle)).routes(routes!(update_circle))
 }
 
 #[utoipa::path(
@@ -99,17 +97,11 @@ async fn update_circle(
     }
 }
 
-async fn broadcast_circle_update_event(
-    auth_session: AuthSession,
-    realtime_state: &RealtimeState,
-    circle: Circle,
-) -> AppEvent {
+async fn broadcast_circle_update_event(auth_session: AuthSession, realtime_state: &RealtimeState, circle: Circle) -> AppEvent {
     let event = AppEvent::CirclesEvent(CirclesEvent::CircleUpdated(circle));
     let realtime_state = realtime_state.clone();
 
-    realtime_state
-        .broadcast_app_event(Some(auth_session), event.clone())
-        .await;
+    realtime_state.broadcast_app_event(Some(auth_session), event.clone()).await;
 
     event
 }

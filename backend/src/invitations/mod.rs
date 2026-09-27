@@ -91,17 +91,12 @@ pub async fn invite_person(
             return (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error").into_response();
         }
         Err(InvitePersonError::EmailError) => {
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "Failed to send invitation email",
-            )
-                .into_response();
+            return (StatusCode::INTERNAL_SERVER_ERROR, "Failed to send invitation email").into_response();
         }
     };
 
     let person_updated_event = PeopleEvent::PersonUpdated(result.person.clone());
-    let involvement_updated_event =
-        ProjectEvent::CircleInvolvementUpdated(result.circle_involvement.clone());
+    let involvement_updated_event = ProjectEvent::CircleInvolvementUpdated(result.circle_involvement.clone());
     let app_events = vec![
         AppEvent::PeopleEvent(person_updated_event),
         AppEvent::ProjectEvent(involvement_updated_event),
@@ -110,9 +105,7 @@ pub async fn invite_person(
         events: app_events.clone(),
         person: result.person,
     };
-    realtime_state
-        .broadcast_app_events(Some(auth_session), app_events.clone())
-        .await;
+    realtime_state.broadcast_app_events(Some(auth_session), app_events.clone()).await;
 
     (StatusCode::OK, Json(response)).into_response()
 }
@@ -136,10 +129,7 @@ pub struct CircleInvitationDetails {
         ("token" = String, Path, description = "Invitation token")
     )
 )]
-pub async fn get_invitation(
-    Path(token): Path<String>,
-    Extension(pool): Extension<SqlitePool>,
-) -> impl IntoResponse {
+pub async fn get_invitation(Path(token): Path<String>, Extension(pool): Extension<SqlitePool>) -> impl IntoResponse {
     let invitation = match find_circle_invitation_by_token(token, &pool).await {
         Ok(invitation) => invitation,
         Err(_) => return (StatusCode::NOT_FOUND, ()).into_response(),
@@ -195,9 +185,7 @@ pub async fn accept_invitation(
         }
     };
 
-    match invitatations_service::accept_invitation(&pool, token, current_user_id, current_interval)
-        .await
-    {
+    match invitatations_service::accept_invitation(&pool, token, current_user_id, current_interval).await {
         Ok(_) => (StatusCode::OK, ()).into_response(),
         Err(invitatations_service::AcceptInvitationError::InvitationExpired) => {
             (StatusCode::BAD_REQUEST, "Invitation has expired").into_response()

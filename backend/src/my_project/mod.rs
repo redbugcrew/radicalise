@@ -45,10 +45,7 @@ pub fn router() -> OpenApiRouter {
         (status = NOT_FOUND, description = "Project was not found", body = ()),
         (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
     ),)]
-async fn get_project_state(
-    auth_session: AuthSession,
-    Extension(pool): Extension<SqlitePool>,
-) -> impl IntoResponse {
+async fn get_project_state(auth_session: AuthSession, Extension(pool): Extension<SqlitePool>) -> impl IntoResponse {
     let user_id = match auth_session.user().await {
         Some(user) => UserId::new(user.id),
         None => {
@@ -77,22 +74,12 @@ async fn get_project_state(
     // Fetch the circles for this person
     let current_interval_id = initial_data.current_interval_data.interval.typed_id();
 
-    let my_circles = match involvements_repo::find_circles_for_person_in_interval(
-        person.typed_id(),
-        current_interval_id,
-        &pool,
-    )
-    .await
-    {
+    let my_circles = match involvements_repo::find_circles_for_person_in_interval(person.typed_id(), current_interval_id, &pool).await {
         Ok(circles) => circles,
         Err(e) => return db_error(e),
     };
 
-    let initial_data = strip_data::strip_private_data_from_initial_data(
-        &initial_data,
-        &my_circles,
-        &person.typed_id(),
-    );
+    let initial_data = strip_data::strip_private_data_from_initial_data(&initial_data, &my_circles, &person.typed_id());
 
     (StatusCode::OK, Json(initial_data)).into_response()
 }
@@ -141,22 +128,13 @@ async fn get_interval_data(
         Err(e) => return db_error(e),
     };
 
-    let my_circles = match involvements_repo::find_circles_for_person_in_interval(
-        person.typed_id(),
-        interval_data.interval.typed_id(),
-        &pool,
-    )
-    .await
-    {
-        Ok(circles) => circles,
-        Err(e) => return db_error(e),
-    };
+    let my_circles =
+        match involvements_repo::find_circles_for_person_in_interval(person.typed_id(), interval_data.interval.typed_id(), &pool).await {
+            Ok(circles) => circles,
+            Err(e) => return db_error(e),
+        };
 
-    let interval_data = strip_data::strip_private_data_from_interval_data(
-        &interval_data,
-        &my_circles,
-        &person.typed_id(),
-    );
+    let interval_data = strip_data::strip_private_data_from_interval_data(&interval_data, &my_circles, &person.typed_id());
 
     (StatusCode::OK, Json(interval_data)).into_response()
 }
@@ -179,9 +157,7 @@ pub async fn update_project(
     match repo::update_project_with_links(input, default_project_id(), &pool).await {
         Ok(response) => {
             let event = AppEvent::ProjectEvent(ProjectEvent::ProjectUpdated(response));
-            realtime_state
-                .broadcast_app_event(Some(auth_session), event.clone())
-                .await;
+            realtime_state.broadcast_app_event(Some(auth_session), event.clone()).await;
             (StatusCode::OK, Json(vec![event])).into_response()
         }
         Err(e) => db_error(e),

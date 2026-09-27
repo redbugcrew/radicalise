@@ -33,11 +33,7 @@ impl RealtimeState {
         }
     }
 
-    pub async fn broadcast_app_events(
-        &self,
-        auth_session: Option<AuthSession>,
-        events: Vec<AppEvent>,
-    ) {
+    pub async fn broadcast_app_events(&self, auth_session: Option<AuthSession>, events: Vec<AppEvent>) {
         let user_id = self.get_user_id_from_session(auth_session).await;
         for event in events {
             self.broadcast_app_event_for_user(user_id, event).await;
@@ -50,16 +46,10 @@ impl RealtimeState {
     }
 
     pub async fn broadcast_app_event_for_user(&self, user_id: Option<i64>, event: AppEvent) {
-        match self.broadcast_tx.lock().await.send(AuthoredAppEvent {
-            author_id: user_id,
-            event,
-        }) {
+        match self.broadcast_tx.lock().await.send(AuthoredAppEvent { author_id: user_id, event }) {
             Ok(_) => {}
             Err(error) => {
-                eprintln!(
-                    "No realtime message sent, could be no connections: {}",
-                    error
-                );
+                eprintln!("No realtime message sent, could be no connections: {}", error);
             }
         }
     }
@@ -72,10 +62,7 @@ impl RealtimeState {
     }
 }
 
-pub async fn handler(
-    ws: WebSocketUpgrade,
-    Extension(realtime_state): Extension<RealtimeState>,
-) -> Response {
+pub async fn handler(ws: WebSocketUpgrade, Extension(realtime_state): Extension<RealtimeState>) -> Response {
     ws.on_upgrade(|socket| handle_socket(socket, realtime_state))
 }
 
@@ -107,10 +94,7 @@ async fn recv_from_client(mut client_rx: SplitStream<WebSocket>) {
     }
 }
 
-async fn recv_broadcast(
-    client_tx_mutex: Arc<Mutex<SplitSink<WebSocket, Message>>>,
-    mut broadcast_rx: Receiver<AuthoredAppEvent>,
-) {
+async fn recv_broadcast(client_tx_mutex: Arc<Mutex<SplitSink<WebSocket, Message>>>, mut broadcast_rx: Receiver<AuthoredAppEvent>) {
     while let Ok(msg) = broadcast_rx.recv().await {
         let mut client_tx = client_tx_mutex.lock().await;
 

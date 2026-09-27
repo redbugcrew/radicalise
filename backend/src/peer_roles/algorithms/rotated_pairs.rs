@@ -41,12 +41,7 @@ where
 
 /// Pick the peer that `person` least recently matched with. People never matched
 /// with count as least recent; ties are broken randomly.
-fn least_recent_match<PeerId, R: Rng>(
-    person: &PeerId,
-    candidates: &[PeerId],
-    history: &MatchHistory<PeerId>,
-    rng: &mut R,
-) -> Option<PeerId>
+fn least_recent_match<PeerId, R: Rng>(person: &PeerId, candidates: &[PeerId], history: &MatchHistory<PeerId>, rng: &mut R) -> Option<PeerId>
 where
     PeerId: Clone + Eq + std::hash::Hash,
 {
@@ -91,12 +86,7 @@ mod tests {
         let mut rng = SmallRng::seed_from_u64(0);
         let history = MatchHistory::<String>::new();
 
-        let result = rotated_pairs::<String, _>(
-            vec!["andi".to_string(), "bob".to_string()],
-            &history,
-            None,
-            &mut rng,
-        );
+        let result = rotated_pairs::<String, _>(vec!["andi".to_string(), "bob".to_string()], &history, None, &mut rng);
 
         assert_eq!(result.to_string(), "{andi: [bob], bob: [andi]}");
     }
@@ -107,21 +97,13 @@ mod tests {
         let history = MatchHistory::<String>::new();
 
         let result = rotated_pairs::<String, _>(
-            vec![
-                "andi".to_string(),
-                "bob".to_string(),
-                "carol".to_string(),
-                "dave".to_string(),
-            ],
+            vec!["andi".to_string(), "bob".to_string(), "carol".to_string(), "dave".to_string()],
             &history,
             None,
             &mut rng,
         );
 
-        assert_eq!(
-            result.to_string(),
-            "{andi: [dave], bob: [carol], carol: [bob], dave: [andi]}"
-        );
+        assert_eq!(result.to_string(), "{andi: [dave], bob: [carol], carol: [bob], dave: [andi]}");
     }
 
     #[test]
@@ -158,21 +140,13 @@ mod tests {
         history.record("andi".to_string(), "dave".to_string(), IntervalsAgo(2));
 
         let result = rotated_pairs::<String, _>(
-            vec![
-                "andi".to_string(),
-                "bob".to_string(),
-                "carol".to_string(),
-                "dave".to_string(),
-            ],
+            vec!["andi".to_string(), "bob".to_string(), "carol".to_string(), "dave".to_string()],
             &history,
             None,
             &mut rng,
         );
 
-        assert_eq!(
-            result.to_string(),
-            "{andi: [dave], bob: [carol], carol: [bob], dave: [andi]}"
-        );
+        assert_eq!(result.to_string(), "{andi: [dave], bob: [carol], carol: [bob], dave: [andi]}");
     }
 
     #[test]
@@ -184,20 +158,12 @@ mod tests {
         history.record("andi".to_string(), "dave".to_string(), IntervalsAgo(2));
 
         let result = rotated_pairs::<String, _>(
-            vec![
-                "andi".to_string(),
-                "bob".to_string(),
-                "carol".to_string(),
-                "dave".to_string(),
-            ],
+            vec!["andi".to_string(), "bob".to_string(), "carol".to_string(), "dave".to_string()],
             &history,
             None,
             &mut rng,
         );
 
-        assert_eq!(
-            result.to_string(),
-            "{andi: [bob], bob: [andi], carol: [dave], dave: [carol]}"
-        );
+        assert_eq!(result.to_string(), "{andi: [bob], bob: [andi], carol: [dave], dave: [carol]}");
     }
 }

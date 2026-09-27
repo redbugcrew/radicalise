@@ -11,9 +11,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     auth::auth_backend::AuthSession,
-    calendar_event_attendances::{
-        events::CalendarEventAttendancesEvent, repo::upsert_event_attendance,
-    },
+    calendar_event_attendances::{events::CalendarEventAttendancesEvent, repo::upsert_event_attendance},
     people::repo::find_person_by_user_id,
     realtime::RealtimeState,
     shared::{
@@ -49,42 +47,29 @@ async fn create_calendar_event_attendance(
 ) -> impl IntoResponse {
     let user_id = UserId::new(auth_session.user().await.unwrap().id);
 
-    let person =
-        match find_person_by_user_id(user_id.clone(), crate::shared::default_project_id(), &pool)
-            .await
-        {
-            Ok(Some(person)) => person,
-            Ok(None) => {
-                println!("no person found for user_id {:?}", user_id);
-                return (StatusCode::NOT_FOUND, ()).into_response();
-            }
-            Err(e) => {
-                println!("error finding person for user_id {:?}: {}", user_id, e);
-                return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
-            }
-        };
+    let person = match find_person_by_user_id(user_id.clone(), crate::shared::default_project_id(), &pool).await {
+        Ok(Some(person)) => person,
+        Ok(None) => {
+            println!("no person found for user_id {:?}", user_id);
+            return (StatusCode::NOT_FOUND, ()).into_response();
+        }
+        Err(e) => {
+            println!("error finding person for user_id {:?}: {}", user_id, e);
+            return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
+        }
+    };
 
     println!(
         "updating calendar event attendance with: intention: {:?}, calendar_event_id:{}, person_id: {}",
         input.intention, input.calendar_event_id, person.id
     );
 
-    let result = upsert_event_attendance(
-        input.calendar_event_id,
-        input.intention,
-        person.typed_id(),
-        &pool,
-    )
-    .await;
+    let result = upsert_event_attendance(input.calendar_event_id, input.intention, person.typed_id(), &pool).await;
 
     match result {
         Ok(attendance) => {
-            let event = AppEvent::CalendarEventAttendancesEvent(
-                CalendarEventAttendancesEvent::CalendarEventAttendanceUpdated(attendance),
-            );
-            realtime_state
-                .broadcast_app_event(Some(auth_session), event.clone())
-                .await;
+            let event = AppEvent::CalendarEventAttendancesEvent(CalendarEventAttendancesEvent::CalendarEventAttendanceUpdated(attendance));
+            realtime_state.broadcast_app_event(Some(auth_session), event.clone()).await;
 
             (StatusCode::CREATED, Json(vec![event])).into_response()
         }

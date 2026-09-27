@@ -28,10 +28,7 @@ where
                 remove_person(&peer, &mut unmatched);
             }
             None => {
-                println!(
-                    " No match found for person: {:?}, this person to an existing pair",
-                    person
-                );
+                println!(" No match found for person: {:?}, this person to an existing pair", person);
                 match people.choose(rng).cloned() {
                     Some(existing_peer) => {
                         results.join_group(existing_peer.clone(), person.clone());
@@ -47,19 +44,11 @@ where
     results
 }
 
-fn find_one_match_for_person<PeerId, R: Rng>(
-    person: &PeerId,
-    unmatched: &Vec<PeerId>,
-    rng: &mut R,
-) -> Option<PeerId>
+fn find_one_match_for_person<PeerId, R: Rng>(person: &PeerId, unmatched: &Vec<PeerId>, rng: &mut R) -> Option<PeerId>
 where
     PeerId: std::fmt::Display + Clone + Eq + std::hash::Hash + Ord,
 {
-    unmatched
-        .iter()
-        .filter(|&p| p != person)
-        .choose(rng)
-        .cloned()
+    unmatched.iter().filter(|&p| p != person).choose(rng).cloned()
 }
 
 #[cfg(test)]
@@ -78,8 +67,7 @@ mod tests {
     #[test]
     fn matches_two_people() {
         let mut rng = SmallRng::seed_from_u64(0);
-        let result =
-            random_pairs::<String, _>(vec!["andi".to_string(), "bob".to_string()], None, &mut rng);
+        let result = random_pairs::<String, _>(vec!["andi".to_string(), "bob".to_string()], None, &mut rng);
 
         assert_eq!(result.to_string(), "{andi: [bob], bob: [andi]}");
     }
@@ -88,20 +76,12 @@ mod tests {
     fn matches_four_people() {
         let mut rng = SmallRng::seed_from_u64(0);
         let result = random_pairs::<String, _>(
-            vec![
-                "andi".to_string(),
-                "bob".to_string(),
-                "carol".to_string(),
-                "dave".to_string(),
-            ],
+            vec!["andi".to_string(), "bob".to_string(), "carol".to_string(), "dave".to_string()],
             None,
             &mut rng,
         );
 
-        assert_eq!(
-            result.to_string(),
-            "{andi: [carol], bob: [dave], carol: [andi], dave: [bob]}"
-        );
+        assert_eq!(result.to_string(), "{andi: [carol], bob: [dave], carol: [andi], dave: [bob]}");
     }
 
     #[test]

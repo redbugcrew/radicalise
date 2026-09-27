@@ -58,11 +58,7 @@ impl<'a> AuthRepo<'a> {
         .map_err(log_and_return_db_error)
     }
 
-    pub async fn set_password_reset_token(
-        &self,
-        user_id: i64,
-        token: String,
-    ) -> Result<(), AuthRepoError> {
+    pub async fn set_password_reset_token(&self, user_id: i64, token: String) -> Result<(), AuthRepoError> {
         sqlx::query!(
             "UPDATE users
             SET password_reset_token = ?, password_reset_token_issued_at = datetime('now')
@@ -109,11 +105,7 @@ impl<'a> AuthRepo<'a> {
         }
     }
 
-    pub async fn insert_user(
-        &self,
-        email: String,
-        hashed_password: String,
-    ) -> Result<AuthUser, AuthRepoInsertError> {
+    pub async fn insert_user(&self, email: String, hashed_password: String) -> Result<AuthUser, AuthRepoInsertError> {
         sqlx::query_as!(
             AuthUser,
             "INSERT INTO users (email, hashed_password)
@@ -136,8 +128,7 @@ fn log_and_return_db_error(error: sqlx::Error) -> AuthRepoError {
 fn log_and_return_db_insert_error(error: sqlx::Error) -> AuthRepoInsertError {
     eprintln!("Database error: {}", error);
 
-    if matches!(error, sqlx::Error::Database(db_err) if db_err.message().contains("UNIQUE constraint failed"))
-    {
+    if matches!(error, sqlx::Error::Database(db_err) if db_err.message().contains("UNIQUE constraint failed")) {
         AuthRepoInsertError::EmailAlreadyExists
     } else {
         AuthRepoInsertError::DatabaseError

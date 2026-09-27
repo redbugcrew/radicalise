@@ -37,15 +37,10 @@ pub fn router() -> OpenApiRouter {
         (status = NOT_FOUND, description = "Project was not found", body = ()),
         (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
     ),)]
-async fn get_my_state(
-    Extension(pool): Extension<SqlitePool>,
-    auth_session: AuthSession,
-) -> impl IntoResponse {
+async fn get_my_state(Extension(pool): Extension<SqlitePool>, auth_session: AuthSession) -> impl IntoResponse {
     match auth_session.user().await {
         Some(user) => {
-            let result =
-                repo::find_initial_data_for_user(default_project_id(), UserId::new(user.id), &pool)
-                    .await;
+            let result = repo::find_initial_data_for_user(default_project_id(), UserId::new(user.id), &pool).await;
 
             match result {
                 Ok(initial_data) => (StatusCode::OK, Json(initial_data)).into_response(),
@@ -75,8 +70,7 @@ async fn my_participation(
 ) -> impl IntoResponse {
     match auth_session.user().await {
         Some(user) => {
-            let person_id =
-                find_person_id_for_user(default_project_id(), UserId::new(user.id), &pool).await;
+            let person_id = find_person_id_for_user(default_project_id(), UserId::new(user.id), &pool).await;
             if person_id.is_err() {
                 return (StatusCode::NOT_FOUND, ()).into_response();
             }
@@ -89,14 +83,7 @@ async fn my_participation(
                 person_id, interval_id, circle_id
             );
 
-            let result = find_circle_involvement(
-                default_project_id(),
-                circle_id,
-                person_id,
-                interval_id,
-                &pool,
-            )
-            .await;
+            let result = find_circle_involvement(default_project_id(), circle_id, person_id, interval_id, &pool).await;
 
             match result {
                 Ok(Some(data)) => (StatusCode::OK, Json(data)).into_response(),
@@ -135,26 +122,21 @@ async fn update_my_participation(
         None => return (StatusCode::UNAUTHORIZED, ()).into_response(),
     };
 
-    let person_id =
-        match find_person_id_for_user(default_project_id(), UserId::new(user.id), &pool).await {
-            Ok(person_id) => person_id,
-            Err(_) => return (StatusCode::NOT_FOUND, ()).into_response(),
-        };
+    let person_id = match find_person_id_for_user(default_project_id(), UserId::new(user.id), &pool).await {
+        Ok(person_id) => person_id,
+        Err(_) => return (StatusCode::NOT_FOUND, ()).into_response(),
+    };
 
     let interval_id = IntervalId::new(interval_id);
 
-    let circles =
-        match find_circles_for_person_in_interval(person_id.clone(), interval_id.clone(), &pool)
-            .await
-        {
-            Ok(circles) => circles,
-            Err(_) => return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
-        };
+    let circles = match find_circles_for_person_in_interval(person_id.clone(), interval_id.clone(), &pool).await {
+        Ok(circles) => circles,
+        Err(_) => return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
+    };
 
     let project_id = default_project_id();
 
-    let update_result =
-        update_my_involvements(person_id.clone(), interval_id.clone(), input, &pool).await;
+    let update_result = update_my_involvements(person_id.clone(), interval_id.clone(), input, &pool).await;
 
     if update_result.is_err() {
         eprintln!("Error updating my involvements: {:?}", update_result.err());
@@ -162,14 +144,11 @@ async fn update_my_participation(
     }
 
     // Fetch the updated involvement to return
-    let output_result =
-        repo::find_interval_data_for_person(project_id, person_id.clone(), interval_id, &pool)
-            .await;
+    let output_result = repo::find_interval_data_for_person(project_id, person_id.clone(), interval_id, &pool).await;
     match output_result {
         Ok(interval_data) => {
             let public_interval_data = strip_private_data(&interval_data, &circles, &person_id);
-            let public_event =
-                AppEvent::MeEvent(MeEvent::IntervalDataChanged(public_interval_data));
+            let public_event = AppEvent::MeEvent(MeEvent::IntervalDataChanged(public_interval_data));
             realtime_state
                 .broadcast_app_event_for_user(Some(user.id), public_event.clone())
                 .await;

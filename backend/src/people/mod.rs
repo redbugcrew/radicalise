@@ -40,9 +40,7 @@ pub async fn update_person(
     match repo::update_person(input, &pool).await {
         Ok(response) => {
             let event = AppEvent::PeopleEvent(PeopleEvent::PersonUpdated(response));
-            realtime_state
-                .broadcast_app_event(Some(auth_session), event.clone())
-                .await;
+            realtime_state.broadcast_app_event(Some(auth_session), event.clone()).await;
             (StatusCode::OK, Json(vec![event])).into_response()
         }
         Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),

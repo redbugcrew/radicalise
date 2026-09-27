@@ -10,9 +10,7 @@ where
     PeerId: std::fmt::Display + Eq + std::hash::Hash + Ord + std::fmt::Debug + Clone,
 {
     pub fn new() -> Self {
-        MatchResults {
-            matches: BTreeMap::new(),
-        }
+        MatchResults { matches: BTreeMap::new() }
     }
 
     pub fn from_chain(chain: Vec<PeerId>) -> Self {
@@ -49,11 +47,7 @@ where
             .matches
             .iter()
             .map(|(person, matches)| {
-                let matches_str = matches
-                    .iter()
-                    .map(|m| m.to_string())
-                    .collect::<Vec<String>>()
-                    .join(", ");
+                let matches_str = matches.iter().map(|m| m.to_string()).collect::<Vec<String>>().join(", ");
                 format!("{}: [{}]", person, matches_str)
             })
             .collect();
@@ -80,17 +74,12 @@ where
     pub fn edges(&self) -> Vec<(PeerId, PeerId)> {
         self.matches
             .iter()
-            .flat_map(|(person, peers)| {
-                peers.iter().map(move |peer| (person.clone(), peer.clone()))
-            })
+            .flat_map(|(person, peers)| peers.iter().map(move |peer| (person.clone(), peer.clone())))
             .collect()
     }
 
     pub fn insert_one(&mut self, person: PeerId, peer: PeerId) {
-        self.matches
-            .entry(person)
-            .or_insert_with(Vec::new)
-            .push(peer);
+        self.matches.entry(person).or_insert_with(Vec::new).push(peer);
     }
 
     pub fn insert_none(&mut self, person: PeerId) {

@@ -2,11 +2,7 @@ use sqlx::SqlitePool;
 
 use crate::shared::entities::{EntryPathway, ExpressionOfInterest, ProjectId};
 
-pub async fn create_eoi(
-    record: ExpressionOfInterest,
-    auth_token: String,
-    pool: &SqlitePool,
-) -> Result<EntryPathway, sqlx::Error> {
+pub async fn create_eoi(record: ExpressionOfInterest, auth_token: String, pool: &SqlitePool) -> Result<EntryPathway, sqlx::Error> {
     let result = sqlx::query!(
         "INSERT INTO entry_pathways (project_id, name, email, interest, context, referral, conflict_experience, participant_connections, auth_token)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -26,10 +22,7 @@ pub async fn create_eoi(
     return find_entry_pathway(result.last_insert_rowid(), pool).await;
 }
 
-pub async fn update_eoi(
-    record: ExpressionOfInterest,
-    pool: &SqlitePool,
-) -> Result<EntryPathway, sqlx::Error> {
+pub async fn update_eoi(record: ExpressionOfInterest, pool: &SqlitePool) -> Result<EntryPathway, sqlx::Error> {
     sqlx::query!(
         "UPDATE entry_pathways
         SET name = ?, email = ?, interest = ?, context = ?, referral = ?, conflict_experience = ?, participant_connections = ?
@@ -49,11 +42,7 @@ pub async fn update_eoi(
     return find_entry_pathway(record.id, pool).await;
 }
 
-pub async fn delete_eoi_record(
-    pool: &SqlitePool,
-    auth_token: String,
-    project_id: ProjectId,
-) -> Result<(), sqlx::Error> {
+pub async fn delete_eoi_record(pool: &SqlitePool, auth_token: String, project_id: ProjectId) -> Result<(), sqlx::Error> {
     sqlx::query!(
         "DELETE FROM entry_pathways
         WHERE auth_token = ? AND project_id = ?",
@@ -97,10 +86,7 @@ pub async fn find_eoi_by_auth_token(
     .await
 }
 
-pub async fn find_all_entry_pathways_for_project(
-    project_id: ProjectId,
-    pool: &SqlitePool,
-) -> Result<Vec<EntryPathway>, sqlx::Error> {
+pub async fn find_all_entry_pathways_for_project(project_id: ProjectId, pool: &SqlitePool) -> Result<Vec<EntryPathway>, sqlx::Error> {
     let eois = sqlx::query_as!(
         EntryPathway,
         "SELECT id, project_id, name, interest, context, referral, conflict_experience, participant_connections FROM entry_pathways WHERE project_id = ?",

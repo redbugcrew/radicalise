@@ -4,45 +4,22 @@ use crate::{
     shared::entities::{Circle, CircleInvolvement, PersonId},
 };
 
-pub fn strip_private_data(
-    data: &PersonIntervalData,
-    viewer_circles: &Vec<Circle>,
-    person_id: &PersonId,
-) -> PersonIntervalData {
+pub fn strip_private_data(data: &PersonIntervalData, viewer_circles: &Vec<Circle>, person_id: &PersonId) -> PersonIntervalData {
     let mut result = data.clone();
-    result.data.circle_involvements = strip_private_data_from_circle_involvements_datas(
-        &data.data.circle_involvements,
-        viewer_circles,
-        person_id,
-    );
+    result.data.circle_involvements =
+        strip_private_data_from_circle_involvements_datas(&data.data.circle_involvements, viewer_circles, person_id);
     result
 }
 
-pub fn strip_private_data_from_initial_data(
-    data: &InitialData,
-    viewer_circles: &Vec<Circle>,
-    person_id: &PersonId,
-) -> InitialData {
+pub fn strip_private_data_from_initial_data(data: &InitialData, viewer_circles: &Vec<Circle>, person_id: &PersonId) -> InitialData {
     let mut result = data.clone();
-    result.current_interval_data = strip_private_data_from_interval_data(
-        &data.current_interval_data,
-        viewer_circles,
-        person_id,
-    );
+    result.current_interval_data = strip_private_data_from_interval_data(&data.current_interval_data, viewer_circles, person_id);
     result
 }
 
-pub fn strip_private_data_from_interval_data(
-    data: &IntervalData,
-    viewer_circles: &Vec<Circle>,
-    person_id: &PersonId,
-) -> IntervalData {
+pub fn strip_private_data_from_interval_data(data: &IntervalData, viewer_circles: &Vec<Circle>, person_id: &PersonId) -> IntervalData {
     let mut result = data.clone();
-    result.circle_involvements = strip_private_data_from_circle_involvements_datas(
-        &data.circle_involvements,
-        viewer_circles,
-        person_id,
-    );
+    result.circle_involvements = strip_private_data_from_circle_involvements_datas(&data.circle_involvements, viewer_circles, person_id);
     result
 }
 
@@ -72,24 +49,18 @@ fn strip_private_data_from_circle_involvements(
 ) -> Vec<CircleInvolvement> {
     involvement
         .iter()
-        .map(
-            |inv| match can_see_capacity_planning(inv, viewer_circles, person_id) {
-                true => inv.clone(),
-                false => {
-                    let mut result = inv.clone();
-                    result.capacity_planning = None;
-                    result
-                }
-            },
-        )
+        .map(|inv| match can_see_capacity_planning(inv, viewer_circles, person_id) {
+            true => inv.clone(),
+            false => {
+                let mut result = inv.clone();
+                result.capacity_planning = None;
+                result
+            }
+        })
         .collect()
 }
 
-fn can_see_capacity_planning(
-    involvement: &CircleInvolvement,
-    viewer_circles: &Vec<Circle>,
-    person_id: &PersonId,
-) -> bool {
+fn can_see_capacity_planning(involvement: &CircleInvolvement, viewer_circles: &Vec<Circle>, person_id: &PersonId) -> bool {
     // Return true if being viewed by the owner
     if involvement.person_id == person_id.id {
         return true;

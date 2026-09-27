@@ -9,11 +9,7 @@ pub enum IntervalType {
     Past,
 }
 
-pub async fn insert_interval(
-    interval: Interval,
-    project_id: ProjectId,
-    pool: &SqlitePool,
-) -> Result<Interval, sqlx::Error> {
+pub async fn insert_interval(interval: Interval, project_id: ProjectId, pool: &SqlitePool) -> Result<Interval, sqlx::Error> {
     let mut transaction = pool.begin().await?;
 
     let last_id = sqlx::query!(
@@ -51,10 +47,7 @@ pub async fn insert_interval(
     })
 }
 
-pub async fn find_all_intervals(
-    project_id: ProjectId,
-    pool: &SqlitePool,
-) -> Result<Vec<Interval>, sqlx::Error> {
+pub async fn find_all_intervals(project_id: ProjectId, pool: &SqlitePool) -> Result<Vec<Interval>, sqlx::Error> {
     sqlx::query_as!(
         Interval,
         "SELECT id, start_date, end_date
@@ -68,10 +61,7 @@ pub async fn find_all_intervals(
     .await
 }
 
-pub async fn find_interval(
-    interval_id: IntervalId,
-    pool: &SqlitePool,
-) -> Result<Interval, sqlx::Error> {
+pub async fn find_interval(interval_id: IntervalId, pool: &SqlitePool) -> Result<Interval, sqlx::Error> {
     sqlx::query_as!(
         Interval,
         "SELECT id, start_date, end_date FROM intervals WHERE id = ?",
@@ -81,10 +71,7 @@ pub async fn find_interval(
     .await
 }
 
-pub async fn find_current_interval(
-    project_id: ProjectId,
-    pool: &SqlitePool,
-) -> Result<Interval, sqlx::Error> {
+pub async fn find_current_interval(project_id: ProjectId, pool: &SqlitePool) -> Result<Interval, sqlx::Error> {
     sqlx::query_as!(
         Interval,
         "SELECT intervals.id, intervals.start_date, intervals.end_date
@@ -158,11 +145,7 @@ pub fn get_interval_type(interval: Interval) -> IntervalType {
     return IntervalType::Current;
 }
 
-pub async fn mark_implicit_involvements_processed(
-    interval_id: IntervalId,
-    value: bool,
-    pool: &SqlitePool,
-) -> Result<(), sqlx::Error> {
+pub async fn mark_implicit_involvements_processed(interval_id: IntervalId, value: bool, pool: &SqlitePool) -> Result<(), sqlx::Error> {
     sqlx::query!(
         "UPDATE intervals
          SET processed_implicit_involvements = ?
@@ -176,11 +159,7 @@ pub async fn mark_implicit_involvements_processed(
     Ok(())
 }
 
-pub async fn mark_peer_roles_processed(
-    interval_id: IntervalId,
-    value: bool,
-    pool: &SqlitePool,
-) -> Result<(), sqlx::Error> {
+pub async fn mark_peer_roles_processed(interval_id: IntervalId, value: bool, pool: &SqlitePool) -> Result<(), sqlx::Error> {
     sqlx::query!(
         "UPDATE intervals
          SET processed_peer_roles = ?
@@ -198,11 +177,7 @@ pub fn parse_date_only(date_str: &str) -> Option<chrono::NaiveDate> {
     chrono::NaiveDate::parse_from_str(date_str, "%Y-%m-%d").ok()
 }
 
-pub async fn change_project_interval(
-    project_id: ProjectId,
-    new_interval_id: IntervalId,
-    pool: &SqlitePool,
-) -> Result<(), sqlx::Error> {
+pub async fn change_project_interval(project_id: ProjectId, new_interval_id: IntervalId, pool: &SqlitePool) -> Result<(), sqlx::Error> {
     sqlx::query!(
         "UPDATE projects
          SET current_interval_id = ?

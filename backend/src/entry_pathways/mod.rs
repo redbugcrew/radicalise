@@ -55,18 +55,10 @@ pub async fn create_eoi(
         }
     };
 
-    let current_interval = match crate::intervals::repo::find_current_interval(
-        ProjectId::new(submission.project_id),
-        &pool,
-    )
-    .await
-    {
+    let current_interval = match crate::intervals::repo::find_current_interval(ProjectId::new(submission.project_id), &pool).await {
         Ok(interval) => interval,
         Err(e) => {
-            eprintln!(
-                "Failed to find current interval for project ID {}: {}",
-                submission.project_id, e
-            );
+            eprintln!("Failed to find current interval for project ID {}: {}", submission.project_id, e);
             return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
         }
     };
@@ -100,8 +92,7 @@ pub async fn create_eoi(
         }
         Err(e) => {
             if is_constraint_violation(&e) {
-                return (StatusCode::BAD_REQUEST, Json(EoiError::EmailAlreadyExists))
-                    .into_response();
+                return (StatusCode::BAD_REQUEST, Json(EoiError::EmailAlreadyExists)).into_response();
             }
 
             eprintln!("Failed to create EOI: {}", e);
@@ -158,8 +149,7 @@ pub async fn update_eoi(
         }
         Err(e) => {
             if is_constraint_violation(&e) {
-                return (StatusCode::BAD_REQUEST, Json(EoiError::EmailAlreadyExists))
-                    .into_response();
+                return (StatusCode::BAD_REQUEST, Json(EoiError::EmailAlreadyExists)).into_response();
             }
 
             eprintln!("Failed to create EOI: {}", e);
@@ -181,14 +171,8 @@ pub async fn update_eoi(
         (status = BAD_REQUEST, body = ()),
     )
 )]
-pub async fn delete_eoi(
-    Extension(pool): Extension<SqlitePool>,
-    Path((project_id, auth_token)): Path<(i64, String)>,
-) -> impl IntoResponse {
-    println!(
-        "Deleting EOI for project ID: {}, auth token: {}",
-        project_id, auth_token
-    );
+pub async fn delete_eoi(Extension(pool): Extension<SqlitePool>, Path((project_id, auth_token)): Path<(i64, String)>) -> impl IntoResponse {
+    println!("Deleting EOI for project ID: {}, auth token: {}", project_id, auth_token);
     match repo::delete_eoi_record(&pool, auth_token, ProjectId::new(project_id)).await {
         Ok(_) => {
             return (StatusCode::OK, ());
@@ -233,14 +217,9 @@ pub async fn get_eoi_by_auth_token(
     }
 }
 
-async fn broadcast_entry_pathway_updated(
-    entry_pathway: &EntryPathway,
-    realtime_state: &RealtimeState,
-) {
+async fn broadcast_entry_pathway_updated(entry_pathway: &EntryPathway, realtime_state: &RealtimeState) {
     let event = events::EntryPathwayEvent::EntryPathwayUpdated(entry_pathway.clone());
-    realtime_state
-        .broadcast_app_event(None, AppEvent::EntryPathwayEvent(event))
-        .await;
+    realtime_state.broadcast_app_event(None, AppEvent::EntryPathwayEvent(event)).await;
 }
 
 async fn send_notification_of_new_eoi(
@@ -258,9 +237,7 @@ async fn send_notification_of_new_eoi(
             return Ok(());
         }
         Some(crew_id) => {
-            let emails =
-                find_crew_involved_emails(CrewId::new(crew_id), current_interval.typed_id(), pool)
-                    .await?;
+            let emails = find_crew_involved_emails(CrewId::new(crew_id), current_interval.typed_id(), pool).await?;
 
             if emails.is_empty() {
                 println!(

@@ -1,13 +1,9 @@
 use sqlx::SqlitePool;
 
 use crate::{
-    calendar_event_attendances::repo::{
-        attendances_for_calendar_events, hash_attendances_by_event,
-    },
+    calendar_event_attendances::repo::{attendances_for_calendar_events, hash_attendances_by_event},
     shared::{
-        entities::{
-            CalendarEvent, CalendarEventId, EventResponseExpectation, Link, PersonId, ProjectId,
-        },
+        entities::{CalendarEvent, CalendarEventId, EventResponseExpectation, Link, PersonId, ProjectId},
         links_repo::{find_all_links_for_owner_type, hash_links_by_owner, update_links_for_owner},
     },
 };
@@ -39,13 +35,7 @@ pub async fn insert_calendar_event_with_links(
     .fetch_one(pool)
     .await?;
 
-    let links = update_links_for_owner(
-        rec.id,
-        "calendar_event".to_string(),
-        data.links.clone(),
-        pool,
-    )
-    .await?;
+    let links = update_links_for_owner(rec.id, "calendar_event".to_string(), data.links.clone(), pool).await?;
 
     let mut result = data.clone();
     result.id = rec.id;
@@ -79,13 +69,7 @@ pub async fn update_calendar_event_with_links(
     .execute(pool)
     .await?;
 
-    let links = update_links_for_owner(
-        event_id.id,
-        "calendar_event".to_string(),
-        data.links.clone(),
-        pool,
-    )
-    .await?;
+    let links = update_links_for_owner(event_id.id, "calendar_event".to_string(), data.links.clone(), pool).await?;
 
     let mut result = data.clone();
     result.links = links;
@@ -122,10 +106,7 @@ impl CalendarEventRow {
     }
 }
 
-pub async fn list_calendar_events_with_attendances(
-    project_id: ProjectId,
-    pool: &SqlitePool,
-) -> Result<Vec<CalendarEvent>, sqlx::Error> {
+pub async fn list_calendar_events_with_attendances(project_id: ProjectId, pool: &SqlitePool) -> Result<Vec<CalendarEvent>, sqlx::Error> {
     let without_attendances = list_calendar_events(project_id.clone(), pool).await?;
     let attendances = attendances_for_calendar_events(&without_attendances, pool).await?;
     let attendances_hash = hash_attendances_by_event(attendances);
@@ -141,10 +122,7 @@ pub async fn list_calendar_events_with_attendances(
     Ok(with_attendances)
 }
 
-pub async fn list_calendar_events(
-    project_id: ProjectId,
-    pool: &SqlitePool,
-) -> Result<Vec<CalendarEvent>, sqlx::Error> {
+pub async fn list_calendar_events(project_id: ProjectId, pool: &SqlitePool) -> Result<Vec<CalendarEvent>, sqlx::Error> {
     let rows = list_calendar_event_rows(project_id, pool).await?;
 
     let links = find_all_links_for_owner_type("calendar_event".to_string(), pool).await?;
@@ -152,11 +130,7 @@ pub async fn list_calendar_events(
 
     let calendar_events: Vec<CalendarEvent> = rows
         .into_iter()
-        .map(|row| {
-            row.to_calendar_event(Some(
-                links_hash.get(&row.id).cloned().unwrap_or_else(Vec::new),
-            ))
-        })
+        .map(|row| row.to_calendar_event(Some(links_hash.get(&row.id).cloned().unwrap_or_else(Vec::new))))
         .collect();
 
     Ok(calendar_events)
@@ -169,10 +143,7 @@ pub async fn list_calendar_events_person_attending(
 ) -> Result<Vec<CalendarEvent>, sqlx::Error> {
     let rows = list_calendar_event_rows_person_attending(project_id, person_id, pool).await?;
 
-    let calendar_events: Vec<CalendarEvent> = rows
-        .into_iter()
-        .map(|row| row.to_calendar_event(None))
-        .collect();
+    let calendar_events: Vec<CalendarEvent> = rows.into_iter().map(|row| row.to_calendar_event(None)).collect();
 
     Ok(calendar_events)
 }
@@ -213,10 +184,7 @@ async fn list_calendar_event_rows_person_attending(
     Ok(rows)
 }
 
-async fn list_calendar_event_rows(
-    project_id: ProjectId,
-    pool: &SqlitePool,
-) -> Result<Vec<CalendarEventRow>, sqlx::Error> {
+async fn list_calendar_event_rows(project_id: ProjectId, pool: &SqlitePool) -> Result<Vec<CalendarEventRow>, sqlx::Error> {
     let rows = sqlx::query_as!(
         CalendarEventRow,
         r#"

@@ -38,9 +38,7 @@ async fn create_interval(
     match repo::insert_interval(interval, default_project_id(), &pool).await {
         Ok(response) => {
             let event = AppEvent::IntervalsEvent(IntervalsEvent::IntervalCreated(response));
-            realtime_state
-                .broadcast_app_event(Some(auth_session), event.clone())
-                .await;
+            realtime_state.broadcast_app_event(Some(auth_session), event.clone()).await;
             return (StatusCode::CREATED, Json(vec![event])).into_response();
         }
         Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
@@ -58,20 +56,10 @@ enum StartNextIntervalError {
 impl IntoResponse for StartNextIntervalError {
     fn into_response(self) -> axum::response::Response {
         match self {
-            Self::CurrentIntervalNotFound => {
-                (StatusCode::BAD_REQUEST, "Current interval not found").into_response()
-            }
-            Self::NextIntervalNotFound => {
-                (StatusCode::BAD_REQUEST, "Next interval not found").into_response()
-            }
-            Self::CouldntSetUpInterval => (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "Couldn't set up interval",
-            )
-                .into_response(),
-            Self::InternalServerError => {
-                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error").into_response()
-            }
+            Self::CurrentIntervalNotFound => (StatusCode::BAD_REQUEST, "Current interval not found").into_response(),
+            Self::NextIntervalNotFound => (StatusCode::BAD_REQUEST, "Next interval not found").into_response(),
+            Self::CouldntSetUpInterval => (StatusCode::INTERNAL_SERVER_ERROR, "Couldn't set up interval").into_response(),
+            Self::InternalServerError => (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error").into_response(),
         }
     }
 }
@@ -100,13 +88,7 @@ async fn start_next_interval(
         }
     };
 
-    let next_interval = match repo::find_next_interval(
-        project_id.clone(),
-        current_interval.typed_id(),
-        &pool,
-    )
-    .await
-    {
+    let next_interval = match repo::find_next_interval(project_id.clone(), current_interval.typed_id(), &pool).await {
         Ok(Some(interval)) => interval,
         Ok(None) => {
             return StartNextIntervalError::NextIntervalNotFound.into_response();
@@ -116,8 +98,7 @@ async fn start_next_interval(
         }
     };
 
-    match add_interval_implicit_involvements(&next_interval, project_id.clone(), false, &pool).await
-    {
+    match add_interval_implicit_involvements(&next_interval, project_id.clone(), false, &pool).await {
         Ok(_) => (),
         Err(_) => return StartNextIntervalError::CouldntSetUpInterval.into_response(),
     };
@@ -125,10 +106,7 @@ async fn start_next_interval(
     match assign_interval_peer_roles(&next_interval, project_id.clone(), &pool).await {
         Ok(_) => (),
         Err(AssignPeerRolesError::ConstraintViolation(message)) => {
-            println!(
-                "Constraint violation while assigning peer roles: {}",
-                message
-            );
+            println!("Constraint violation while assigning peer roles: {}", message);
             return StartNextIntervalError::CouldntSetUpInterval.into_response();
         }
         Err(AssignPeerRolesError::Database(_)) => {
@@ -139,9 +117,7 @@ async fn start_next_interval(
     match repo::change_project_interval(project_id.clone(), next_interval.typed_id(), &pool).await {
         Ok(_) => {
             let event = AppEvent::IntervalsEvent(IntervalsEvent::IntervalStarted(next_interval));
-            realtime_state
-                .broadcast_app_event(Some(auth_session), event.clone())
-                .await;
+            realtime_state.broadcast_app_event(Some(auth_session), event.clone()).await;
             return (StatusCode::OK, Json(vec![event])).into_response();
         }
         Err(_) => StartNextIntervalError::InternalServerError.into_response(),

@@ -13,10 +13,7 @@ pub struct InvitedToCircleEmailParams {
     pub message: Option<String>,
 }
 
-pub fn invited_to_circle_email(
-    to_address: String,
-    params: InvitedToCircleEmailParams,
-) -> CreateEmailBaseOptions {
+pub fn invited_to_circle_email(to_address: String, params: InvitedToCircleEmailParams) -> CreateEmailBaseOptions {
     let to = [to_address];
     let subject = "You're invited to join a project on RADicalise";
 
@@ -38,9 +35,7 @@ pub fn invited_to_circle_email(
         <p>To accept the invitation, click <a href=\"{url}\">here</a>.</p>",
         name = params.invitee_name,
         inviter = params.inviter_name,
-        project = params
-            .project_name
-            .unwrap_or_else(|| "their project".to_string()),
+        project = params.project_name.unwrap_or_else(|| "their project".to_string()),
         message_html = message_html,
         url = manage_eoi_url,
     );

@@ -77,10 +77,7 @@ impl AuthnBackend for AppAuthBackend {
     type Credentials = Credentials;
     type Error = Error;
 
-    async fn authenticate(
-        &self,
-        creds: Self::Credentials,
-    ) -> Result<Option<Self::User>, Self::Error> {
+    async fn authenticate(&self, creds: Self::Credentials) -> Result<Option<Self::User>, Self::Error> {
         let repo = AuthRepo::new(&self.db);
 
         let user: Option<Self::User> = repo
