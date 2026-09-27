@@ -15,55 +15,6 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./backend
-    env:
-      SQLX_OFFLINE: true
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential libssl-dev pkg-config
-
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Cache cargo registry
-        uses: actions/cache@v4
-        with:
-          path: ~/.cargo/registry
-          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('backend/Cargo.lock') }}
-
-      - name: Cache cargo index
-        uses: actions/cache@v4
-        with:
-          path: ~/.cargo/git
-          key: ${{ runner.os }}-cargo-git-${{ hashFiles('backend/Cargo.lock') }}
-
-      - name: Cache cargo build
-        uses: actions/cache@v4
-        with:
-          path: backend/target
-          key: ${{ runner.os }}-cargo-build-${{ hashFiles('backend/Cargo.lock') }}
-
-      - name: Build backend
-        run: cargo build --locked
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: cargo-build-artifacts
-          path: |
-            backend/target
-            backend/Cargo.lock
-          retention-days: 1
-
   prepare-database:
     runs-on: ubuntu-latest
     defaults:
@@ -88,7 +39,8 @@ jobs:
 
       - name: Install sqlx-cli
         run: |
-          if ! command -v sqlx &>/dev/null; then
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+          if [[ ! -x "$HOME/.cargo/bin/sqlx" ]]; then
             cargo install sqlx-cli --version 0.8.3 --no-default-features --features native-tls,sqlite
           fi
 
@@ -122,7 +74,7 @@ jobs:
         run: cargo fmt --all -- --check
 
   sqlx-prepare:
-    needs: [build, prepare-database]
+    needs: prepare-database
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -136,6 +88,24 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('backend/Cargo.lock') }}
+
+      - name: Cache cargo index
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-git-${{ hashFiles('backend/Cargo.lock') }}
+
+      - name: Cache cargo build
+        uses: actions/cache@v4
+        with:
+          path: backend/target
+          key: ${{ runner.os }}-cargo-build-${{ hashFiles('backend/Cargo.lock') }}
+
       - name: Cache sqlx-cli
         uses: actions/cache@v4
         with:
@@ -144,15 +114,10 @@ jobs:
 
       - name: Install sqlx-cli
         run: |
-          if ! command -v sqlx &>/dev/null; then
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+          if [[ ! -x "$HOME/.cargo/bin/sqlx" ]]; then
             cargo install sqlx-cli --version 0.8.3 --no-default-features --features native-tls,sqlite
           fi
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: cargo-build-artifacts
-          path: backend
 
       - name: Download database artifact
         uses: actions/download-artifact@v4
@@ -164,7 +129,6 @@ jobs:
         run: cargo sqlx prepare --check -- --bin radicalise
 
   clippy:
-    needs: build
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -185,17 +149,29 @@ jobs:
         with:
           components: clippy
 
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
+      - name: Cache cargo registry
+        uses: actions/cache@v4
         with:
-          name: cargo-build-artifacts
-          path: backend
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('backend/Cargo.lock') }}
+
+      - name: Cache cargo index
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-git-${{ hashFiles('backend/Cargo.lock') }}
+
+      - name: Cache cargo build
+        uses: actions/cache@v4
+        with:
+          path: backend/target
+          key: ${{ runner.os }}-cargo-build-${{ hashFiles('backend/Cargo.lock') }}
 
       - name: Run clippy
         run: cargo clippy -- -D warnings
 
   test:
-    needs: [build, prepare-database]
+    needs: prepare-database
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -214,11 +190,23 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
+      - name: Cache cargo registry
+        uses: actions/cache@v4
         with:
-          name: cargo-build-artifacts
-          path: backend
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('backend/Cargo.lock') }}
+
+      - name: Cache cargo index
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-git-${{ hashFiles('backend/Cargo.lock') }}
+
+      - name: Cache cargo build
+        uses: actions/cache@v4
+        with:
+          path: backend/target
+          key: ${{ runner.os }}-cargo-build-${{ hashFiles('backend/Cargo.lock') }}
 
       - name: Download database artifact
         uses: actions/download-artifact@v4
