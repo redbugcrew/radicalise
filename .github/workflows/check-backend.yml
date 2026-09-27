@@ -31,13 +31,18 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y sqlite3
 
-      - name: Install sqlx-cli
-        uses: taiki-e/cache-cargo-install-action@v1
+      - name: Cache sqlx-cli
+        uses: actions/cache@v4
         with:
-          tool: sqlx-cli
-          version: 0.8.3
-          locked: true
-          features: native-tls,sqlite
+          path: ~/.cargo/bin/sqlx
+          key: ${{ runner.os }}-sqlx-cli-0.8.3-native-tls-sqlite
+
+      - name: Install sqlx-cli
+        run: |
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+          if [[ ! -x "$HOME/.cargo/bin/sqlx" ]]; then
+            cargo install sqlx-cli --version 0.8.3 --no-default-features --features native-tls,sqlite
+          fi
 
       - name: Create database and run migrations
         run: |
@@ -101,13 +106,18 @@ jobs:
           path: backend/target
           key: ${{ runner.os }}-cargo-build-${{ hashFiles('backend/Cargo.lock') }}
 
-      - name: Install sqlx-cli
-        uses: taiki-e/cache-cargo-install-action@v1
+      - name: Cache sqlx-cli
+        uses: actions/cache@v4
         with:
-          tool: sqlx-cli
-          version: 0.8.3
-          locked: true
-          features: native-tls,sqlite
+          path: ~/.cargo/bin/sqlx
+          key: ${{ runner.os }}-sqlx-cli-0.8.3-native-tls-sqlite
+
+      - name: Install sqlx-cli
+        run: |
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+          if [[ ! -x "$HOME/.cargo/bin/sqlx" ]]; then
+            cargo install sqlx-cli --version 0.8.3 --no-default-features --features native-tls,sqlite
+          fi
 
       - name: Download database artifact
         uses: actions/download-artifact@v4
