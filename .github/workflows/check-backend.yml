@@ -16,7 +16,6 @@ env:
 
 jobs:
   build:
-    needs: sqlx-prepare
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -83,6 +82,7 @@ jobs:
         run: cargo fmt --all -- --check
 
   sqlx-prepare:
+    needs: build
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -109,6 +109,12 @@ jobs:
 
       - name: Install sqlx-cli
         run: cargo install sqlx-cli --version 0.8.3 --no-default-features --features native-tls,sqlite
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: cargo-build-artifacts
+          path: backend
 
       - name: Create database and run migrations
         run: |
