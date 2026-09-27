@@ -64,6 +64,43 @@ jobs:
             backend/Cargo.lock
           retention-days: 1
 
+  prepare-database:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    env:
+      DATABASE_URL: sqlite://${{ github.workspace }}/backend/radicalise-test.db
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sqlite3
+
+      - name: Cache sqlx-cli
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/sqlx
+          key: ${{ runner.os }}-sqlx-cli-0.8.3-native-tls-sqlite
+
+      - name: Install sqlx-cli
+        run: cargo install sqlx-cli --version 0.8.3 --no-default-features --features native-tls,sqlite
+
+      - name: Create database and run migrations
+        run: |
+          sqlite3 "${{ github.workspace }}/backend/radicalise-test.db" "VACUUM;"
+          sqlx migrate run
+
+      - name: Upload database artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: database-artifact
+          path: backend/radicalise-test.db
+          retention-days: 1
+
   format:
     runs-on: ubuntu-latest
     defaults:
@@ -82,7 +119,7 @@ jobs:
         run: cargo fmt --all -- --check
 
   sqlx-prepare:
-    needs: build
+    needs: [build, prepare-database]
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -95,11 +132,6 @@ jobs:
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
-
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y sqlite3
 
       - name: Cache sqlx-cli
         uses: actions/cache@v4
@@ -116,10 +148,11 @@ jobs:
           name: cargo-build-artifacts
           path: backend
 
-      - name: Create database and run migrations
-        run: |
-          sqlite3 "${{ github.workspace }}/backend/radicalise-test.db" "VACUUM;"
-          sqlx migrate run
+      - name: Download database artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: database-artifact
+          path: backend
 
       - name: Check sqlx prepare cache is up to date
         run: cargo sqlx prepare --check -- --bin radicalise
@@ -156,13 +189,13 @@ jobs:
         run: cargo clippy -- -D warnings
 
   test:
-    needs: build
+    needs: [build, prepare-database]
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./backend
     env:
-      SQLX_OFFLINE: true
+      DATABASE_URL: sqlite://${{ github.workspace }}/backend/radicalise-test.db
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -179,6 +212,12 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: cargo-build-artifacts
+          path: backend
+
+      - name: Download database artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: database-artifact
           path: backend
 
       - name: Run cargo tests
