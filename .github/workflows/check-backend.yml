@@ -15,6 +15,55 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    env:
+      SQLX_OFFLINE: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libssl-dev pkg-config
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('backend/Cargo.lock') }}
+
+      - name: Cache cargo index
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-git-${{ hashFiles('backend/Cargo.lock') }}
+
+      - name: Cache cargo build
+        uses: actions/cache@v4
+        with:
+          path: backend/target
+          key: ${{ runner.os }}-cargo-build-${{ hashFiles('backend/Cargo.lock') }}
+
+      - name: Build backend
+        run: cargo build --locked
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: cargo-build-artifacts
+          path: |
+            backend/target
+            backend/Cargo.lock
+          retention-days: 1
+
   format:
     runs-on: ubuntu-latest
     defaults:
@@ -32,11 +81,34 @@ jobs:
       - name: Check formatting
         run: cargo fmt --all -- --check
 
-  clippy:
+  sqlx-prepare:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./backend
+    env:
+      DATABASE_URL: sqlite://radicalise-test.db
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install sqlx-cli
+        run: cargo install sqlx-cli --no-default-features --features native-tls,sqlite
+
+      - name: Check sqlx prepare cache is up to date
+        run: cargo sqlx prepare --check
+
+  clippy:
+    needs: build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    env:
+      SQLX_OFFLINE: true
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -51,32 +123,23 @@ jobs:
         with:
           components: clippy
 
-      - name: Cache cargo registry
-        uses: actions/cache@v4
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
         with:
-          path: ~/.cargo/registry
-          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('backend/Cargo.lock') }}
-
-      - name: Cache cargo index
-        uses: actions/cache@v4
-        with:
-          path: ~/.cargo/git
-          key: ${{ runner.os }}-cargo-git-${{ hashFiles('backend/Cargo.lock') }}
-
-      - name: Cache cargo build
-        uses: actions/cache@v4
-        with:
-          path: backend/target
-          key: ${{ runner.os }}-cargo-build-${{ hashFiles('backend/Cargo.lock') }}
+          name: cargo-build-artifacts
+          path: backend
 
       - name: Run clippy
         run: cargo clippy -- -D warnings
 
   test:
+    needs: build
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./backend
+    env:
+      SQLX_OFFLINE: true
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -89,23 +152,11 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Cache cargo registry
-        uses: actions/cache@v4
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
         with:
-          path: ~/.cargo/registry
-          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('backend/Cargo.lock') }}
-
-      - name: Cache cargo index
-        uses: actions/cache@v4
-        with:
-          path: ~/.cargo/git
-          key: ${{ runner.os }}-cargo-git-${{ hashFiles('backend/Cargo.lock') }}
-
-      - name: Cache cargo build
-        uses: actions/cache@v4
-        with:
-          path: backend/target
-          key: ${{ runner.os }}-cargo-build-${{ hashFiles('backend/Cargo.lock') }}
+          name: cargo-build-artifacts
+          path: backend
 
       - name: Run cargo tests
         run: cargo test --locked
