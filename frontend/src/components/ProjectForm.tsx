@@ -1,43 +1,47 @@
-import { useForm } from "@mantine/form";
-import { Button, Fieldset, Select, Stack, Switch, Textarea, TextInput } from "@mantine/core";
-import type { Project, CrewWithLinks, Link } from "../api/Api";
-import LinksInput, { linksValidator } from "./links/LinksInput/LinksInput";
+import { useForm } from "@mantine/form"
+import { Button, Fieldset, Select, Stack, Switch, Textarea, TextInput } from "@mantine/core"
+import type { Project, CrewWithLinks, Link } from "../api/Api"
+import LinksInput, { linksValidator } from "./links/LinksInput/LinksInput"
 
 interface ProjectFormProps {
-  project: Project;
-  crews: CrewWithLinks[];
+  project: Project
+  crews: CrewWithLinks[]
 
-  onSubmit: (values: Project) => void;
+  onSubmit: (values: Project) => void
 }
 
 interface ProjectFormValues {
-  description?: string | null;
-  eoi_description?: string | null;
-  eoi_managing_crew_id: string | null;
-  feature_eoi: boolean;
-  id: number;
-  links: Link[];
-  name?: string | null;
-  noun_name?: string | null;
-  slug?: string | null;
+  description?: string | null
+  eoi_description?: string | null
+  eoi_managing_crew_id: string | null
+  feature_eoi: boolean
+  id: number
+  links: Link[]
+  name?: string | null
+  noun_name?: string | null
+  slug?: string | null
 }
 
 function convertProjectToFormValues(input: Project): ProjectFormValues {
-  const crew_id = input.eoi_managing_crew_id !== null && input.eoi_managing_crew_id !== undefined ? input.eoi_managing_crew_id.toString() : null;
+  const crew_id =
+    input.eoi_managing_crew_id !== null && input.eoi_managing_crew_id !== undefined ? input.eoi_managing_crew_id.toString() : null
 
   return {
     ...input,
     eoi_managing_crew_id: crew_id,
-  };
+  }
 }
 
 function convertFormValuesToProject(input: ProjectFormValues): Project {
-  const crew_id = input.eoi_managing_crew_id !== null && input.eoi_managing_crew_id !== undefined ? parseInt(input.eoi_managing_crew_id.toString(), 10) : null;
+  const crew_id =
+    input.eoi_managing_crew_id !== null && input.eoi_managing_crew_id !== undefined
+      ? parseInt(input.eoi_managing_crew_id.toString(), 10)
+      : null
 
   return {
     ...input,
     eoi_managing_crew_id: crew_id,
-  } as any;
+  } as any
 }
 
 export default function ProjectForm({ project, crews, onSubmit }: ProjectFormProps) {
@@ -50,14 +54,16 @@ export default function ProjectForm({ project, crews, onSubmit }: ProjectFormPro
       slug: (value) => (!value || /^[a-z0-9\-]+$/.test(value) ? null : "Slug may only include lowercase letters, numbers, and hyphens"),
       links: linksValidator,
     },
-  });
+  })
 
-  let crewOptionsData = [{ value: "", label: "None" }].concat(crews.map((crew) => ({ value: crew.id.toString(), label: crew.name || "Unnamed Crew" })));
+  let crewOptionsData = [{ value: "", label: "None" }].concat(
+    crews.map((crew) => ({ value: crew.id.toString(), label: crew.name || "Unnamed Crew" })),
+  )
 
   const internalOnSubmit = (values: ProjectFormValues) => {
-    const project = convertFormValuesToProject(values);
-    onSubmit(project);
-  };
+    const project = convertFormValuesToProject(values)
+    onSubmit(project)
+  }
 
   return (
     <form onSubmit={form.onSubmit(internalOnSubmit)}>
@@ -73,9 +79,20 @@ export default function ProjectForm({ project, crews, onSubmit }: ProjectFormPro
               <Switch label="Enable" {...form.getInputProps("feature_eoi", { type: "checkbox" })} />
               {form.values.feature_eoi && (
                 <Stack gap="md">
-                  <Textarea label="EOI Description" rows={5} placeholder="Description for EOI" key="eoi_description" {...form.getInputProps("eoi_description")} />
+                  <Textarea
+                    label="EOI Description"
+                    rows={5}
+                    placeholder="Description for EOI"
+                    key="eoi_description"
+                    {...form.getInputProps("eoi_description")}
+                  />
 
-                  <Select label="Managing Crew" data={crewOptionsData} key="eoi_managing_crew_id" {...form.getInputProps("eoi_managing_crew_id")} />
+                  <Select
+                    label="Managing Crew"
+                    data={crewOptionsData}
+                    key="eoi_managing_crew_id"
+                    {...form.getInputProps("eoi_managing_crew_id")}
+                  />
                 </Stack>
               )}
             </Stack>
@@ -84,5 +101,5 @@ export default function ProjectForm({ project, crews, onSubmit }: ProjectFormPro
         <Button type="submit">Submit</Button>
       </Stack>
     </form>
-  );
+  )
 }

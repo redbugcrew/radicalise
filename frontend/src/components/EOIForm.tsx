@@ -1,13 +1,13 @@
-import { Button, Card, Stack, TextInput, Textarea, Title, Text, List, LoadingOverlay } from "@mantine/core";
-import { useForm } from "@mantine/form";
-import type { Project, ExpressionOfInterest } from "../api/Api";
-import { isValidEmail } from "../utilities/validators";
+import { Button, Card, Stack, TextInput, Textarea, Title, Text, List, LoadingOverlay } from "@mantine/core"
+import { useForm } from "@mantine/form"
+import type { Project, ExpressionOfInterest } from "../api/Api"
+import { isValidEmail } from "../utilities/validators"
 
 interface EOIFormProps {
-  project: Project;
-  eoi?: ExpressionOfInterest;
-  actionName?: String;
-  onSubmit: (values: ExpressionOfInterest) => Promise<void>;
+  project: Project
+  eoi?: ExpressionOfInterest
+  actionName?: String
+  onSubmit: (values: ExpressionOfInterest) => Promise<void>
 }
 
 export default function EOIForm({ onSubmit, project, eoi, actionName }: EOIFormProps) {
@@ -28,10 +28,10 @@ export default function EOIForm({ onSubmit, project, eoi, actionName }: EOIFormP
       name: (value) => (value ? null : "Name is required"),
       email: (value) => (isValidEmail(value) ? null : "Invalid email"),
     },
-  });
+  })
 
-  const noun_name = project.noun_name ?? "the project";
-  const name = project.name ?? "project";
+  const noun_name = project.noun_name ?? "the project"
+  const name = project.name ?? "project"
 
   return (
     <form onSubmit={form.onSubmit(onSubmit)}>
@@ -40,7 +40,13 @@ export default function EOIForm({ onSubmit, project, eoi, actionName }: EOIFormP
         <Stack gap="md">
           <TextInput label="Name" placeholder="How would you like us to refer to you?" {...form.getInputProps("name")} />
 
-          <Textarea label="Interest" description={`What interests you about participating in ${noun_name}?`} placeholder="Your message" rows={6} {...form.getInputProps("interest")} />
+          <Textarea
+            label="Interest"
+            description={`What interests you about participating in ${noun_name}?`}
+            placeholder="Your message"
+            rows={6}
+            {...form.getInputProps("interest")}
+          />
 
           <Textarea
             label="Context"
@@ -49,7 +55,12 @@ export default function EOIForm({ onSubmit, project, eoi, actionName }: EOIFormP
             rows={6}
             {...form.getInputProps("context")}
           />
-          <Textarea rows={2} label="How did you hear about us?" description={`Where did you hear about the ${noun_name}?`} {...form.getInputProps("referral")} />
+          <Textarea
+            rows={2}
+            label="How did you hear about us?"
+            description={`Where did you hear about the ${noun_name}?`}
+            {...form.getInputProps("referral")}
+          />
 
           <Textarea
             rows={3}
@@ -59,7 +70,12 @@ export default function EOIForm({ onSubmit, project, eoi, actionName }: EOIFormP
             {...form.getInputProps("conflict_experience")}
           />
 
-          <Textarea rows={2} label="Participant connections" description={`Are there any connections to other ${name} participants that you'd like to tell us about?`} {...form.getInputProps("participant_connections")} />
+          <Textarea
+            rows={2}
+            label="Participant connections"
+            description={`Are there any connections to other ${name} participants that you'd like to tell us about?`}
+            {...form.getInputProps("participant_connections")}
+          />
 
           <TextInput
             label="Email"
@@ -75,12 +91,14 @@ export default function EOIForm({ onSubmit, project, eoi, actionName }: EOIFormP
             <List>
               <List.Item>
                 <Text>
-                  <strong>Email address:</strong> Used to send you an automated email with links allowing you to edit or delete your expression of interest.
+                  <strong>Email address:</strong> Used to send you an automated email with links allowing you to edit or delete your
+                  expression of interest.
                 </Text>
               </List.Item>
               <List.Item>
                 <Text>
-                  <strong>Other fields:</strong> Displayed to all current and future participants in the project so that they can opt-in to following up on your interest.
+                  <strong>Other fields:</strong> Displayed to all current and future participants in the project so that they can opt-in to
+                  following up on your interest.
                 </Text>
               </List.Item>
             </List>
@@ -88,12 +106,14 @@ export default function EOIForm({ onSubmit, project, eoi, actionName }: EOIFormP
             <List>
               <List.Item>
                 <Text>
-                  <strong>You request deletion:</strong> If you decide to withdraw your expression of interest using the provided link, all of your data will be permanently deleted.
+                  <strong>You request deletion:</strong> If you decide to withdraw your expression of interest using the provided link, all
+                  of your data will be permanently deleted.
                 </Text>
               </List.Item>
               <List.Item>
                 <Text>
-                  <strong>You're invited:</strong> If you are invited to participate in the project, your expression of interest will be deleted.
+                  <strong>You're invited:</strong> If you are invited to participate in the project, your expression of interest will be
+                  deleted.
                 </Text>
               </List.Item>
               <List.Item>
@@ -109,5 +129,5 @@ export default function EOIForm({ onSubmit, project, eoi, actionName }: EOIFormP
         </Button>
       </Stack>
     </form>
-  );
+  )
 }

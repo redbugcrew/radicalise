@@ -1,11 +1,11 @@
-import { useForm } from "@mantine/form";
-import { Button, NativeSelect, Stack, TextInput } from "@mantine/core";
-import { EventResponseExpectation, type EventTemplate } from "../../../../api/Api";
-import { LinksInput } from "../../../../components";
+import { useForm } from "@mantine/form"
+import { Button, NativeSelect, Stack, TextInput } from "@mantine/core"
+import { EventResponseExpectation, type EventTemplate } from "../../../../api/Api"
+import { LinksInput } from "../../../../components"
 
 interface EventTemplateFormProps {
-  value?: EventTemplate | null;
-  onSubmit: (data: EventTemplate) => Promise<void>;
+  value?: EventTemplate | null
+  onSubmit: (data: EventTemplate) => Promise<void>
 }
 
 const defaultInitialValue: EventTemplate = {
@@ -14,7 +14,7 @@ const defaultInitialValue: EventTemplate = {
   summary: "",
   response_expectation: EventResponseExpectation.Welcome,
   links: [],
-};
+}
 
 export default function EventTemplateForm({ value, onSubmit }: EventTemplateFormProps) {
   const form = useForm<EventTemplate>({
@@ -23,7 +23,7 @@ export default function EventTemplateForm({ value, onSubmit }: EventTemplateForm
     validate: {
       name: (value) => (value && value.trim().length > 0 ? null : "Name is required"),
     },
-  });
+  })
 
   return (
     <form onSubmit={form.onSubmit(onSubmit, (errors) => console.log("Form submission errors:", errors))}>
@@ -64,5 +64,5 @@ export default function EventTemplateForm({ value, onSubmit }: EventTemplateForm
         </Button>
       </Stack>
     </form>
-  );
+  )
 }

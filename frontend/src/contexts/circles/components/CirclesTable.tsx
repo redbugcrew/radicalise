@@ -1,13 +1,13 @@
-import { Table } from "@mantine/core";
-import type { Circle } from "../../../api/Api";
-import { Anchor } from "../../../components";
+import { Table } from "@mantine/core"
+import type { Circle } from "../../../api/Api"
+import { Anchor } from "../../../components"
 
 interface CirclesTableProps {
-  circles: Circle[] | null;
+  circles: Circle[] | null
 }
 
 function CirclesTableRow({ circle }: { circle: Circle }) {
-  if (!circle) return null;
+  if (!circle) return null
 
   return (
     <Table.Tr key={circle.id}>
@@ -16,11 +16,11 @@ function CirclesTableRow({ circle }: { circle: Circle }) {
         <Anchor href={`${circle.slug}/edit`}>Edit</Anchor>
       </Table.Td>
     </Table.Tr>
-  );
+  )
 }
 
 export default function CirclesTable({ circles }: CirclesTableProps) {
-  if (circles === null) return null;
+  if (circles === null) return null
 
   return (
     <Table>
@@ -38,5 +38,5 @@ export default function CirclesTable({ circles }: CirclesTableProps) {
         ))}
       </Table.Tbody>
     </Table>
-  );
+  )
 }

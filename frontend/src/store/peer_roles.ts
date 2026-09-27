@@ -1,8 +1,8 @@
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { PeerRole } from "../api/Api";
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
+import type { PeerRole } from "../api/Api"
 
 export interface PeerRolesObjectMap {
-  [key: number]: PeerRole;
+  [key: number]: PeerRole
 }
 
 const peerRolesSlice = createSlice({
@@ -10,16 +10,16 @@ const peerRolesSlice = createSlice({
   initialState: {} as PeerRolesObjectMap,
   reducers: {
     peerRolesLoaded: (_state: PeerRolesObjectMap, action: PayloadAction<PeerRole[]>) => {
-      const newState: PeerRolesObjectMap = {};
+      const newState: PeerRolesObjectMap = {}
       action.payload.forEach((peerRole) => {
-        newState[peerRole.id] = peerRole;
-      });
-      return newState;
+        newState[peerRole.id] = peerRole
+      })
+      return newState
     },
   },
-});
+})
 
-export const { peerRolesLoaded } = peerRolesSlice.actions;
+export const { peerRolesLoaded } = peerRolesSlice.actions
 
 // Export the slice reducer as the default export
-export default peerRolesSlice.reducer;
+export default peerRolesSlice.reducer

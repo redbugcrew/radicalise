@@ -1,4 +1,4 @@
-import { Card, Stack } from "@mantine/core";
+import { Card, Stack } from "@mantine/core"
 
 export default function NoData({ children }: { children: React.ReactNode }) {
   return (
@@ -7,5 +7,5 @@ export default function NoData({ children }: { children: React.ReactNode }) {
         {children}
       </Card>
     </Stack>
-  );
+  )
 }

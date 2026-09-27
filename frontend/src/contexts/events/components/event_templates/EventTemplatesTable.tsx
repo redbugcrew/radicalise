@@ -1,13 +1,13 @@
-import { Table } from "@mantine/core";
-import type { EventTemplate } from "../../../../api/Api";
-import { Anchor } from "../../../../components";
+import { Table } from "@mantine/core"
+import type { EventTemplate } from "../../../../api/Api"
+import { Anchor } from "../../../../components"
 
 interface EventTemplatesTableProps {
-  eventTemplates: EventTemplate[];
+  eventTemplates: EventTemplate[]
 }
 
 function EventTemplateTableRow({ template }: { template: EventTemplate }) {
-  if (!template) return null;
+  if (!template) return null
 
   return (
     <Table.Tr key={template.id}>
@@ -17,12 +17,10 @@ function EventTemplateTableRow({ template }: { template: EventTemplate }) {
         <Anchor href={`${template.id}/edit`}>Edit</Anchor>
       </Table.Td>
     </Table.Tr>
-  );
+  )
 }
 
-export default function EventTemplatesTable({
-  eventTemplates,
-}: EventTemplatesTableProps) {
+export default function EventTemplatesTable({ eventTemplates }: EventTemplatesTableProps) {
   return (
     <Table>
       <Table.Thead>
@@ -38,5 +36,5 @@ export default function EventTemplatesTable({
         ))}
       </Table.Tbody>
     </Table>
-  );
+  )
 }

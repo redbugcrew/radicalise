@@ -1,18 +1,18 @@
-import { Card, Group, Stack, Title } from "@mantine/core";
-import type { CalendarEvent } from "../../../../api/Api";
-import styles from "./EventCard.module.css";
-import { Anchor, LinksStack, TimeRangeText } from "../../../../components";
-import MyAttendance from "../MyAttendance";
-import EventAttendanceTotals from "../EventAttendanceTotals";
+import { Card, Group, Stack, Title } from "@mantine/core"
+import type { CalendarEvent } from "../../../../api/Api"
+import styles from "./EventCard.module.css"
+import { Anchor, LinksStack, TimeRangeText } from "../../../../components"
+import MyAttendance from "../MyAttendance"
+import EventAttendanceTotals from "../EventAttendanceTotals"
 
 interface EventCardProps {
-  event: CalendarEvent;
-  showParticipantCounts?: boolean;
-  interactive?: boolean;
+  event: CalendarEvent
+  showParticipantCounts?: boolean
+  interactive?: boolean
 }
 
 export default function EventCard({ event, showParticipantCounts, interactive }: EventCardProps) {
-  const cardStyles = [styles.card];
+  const cardStyles = [styles.card]
 
   const card = (
     <Card className={cardStyles.join(" ")}>
@@ -33,15 +33,15 @@ export default function EventCard({ event, showParticipantCounts, interactive }:
         </Stack>
       </Card.Section>
     </Card>
-  );
+  )
 
   if (interactive) {
-    return card;
+    return card
   } else {
     return (
       <Anchor href={`/events/${event.id}`} className={styles.cardLink}>
         {card}
       </Anchor>
-    );
+    )
   }
 }

@@ -1,36 +1,36 @@
-import { Group, Text } from "@mantine/core";
-import type { Person } from "../../../api/Api";
-import classes from "./PersonBadge.module.css";
-import Avatar from "../Avatar";
-import Anchor from "../../Anchor";
+import { Group, Text } from "@mantine/core"
+import type { Person } from "../../../api/Api"
+import classes from "./PersonBadge.module.css"
+import Avatar from "../Avatar"
+import Anchor from "../../Anchor"
 
 export interface PersonBadgeProps {
-  person: Person | null;
-  me?: boolean;
-  highlight?: boolean;
-  variant?: "default" | "transparent";
-  textOverride?: string;
-  noText?: boolean;
-  link?: boolean;
+  person: Person | null
+  me?: boolean
+  highlight?: boolean
+  variant?: "default" | "transparent"
+  textOverride?: string
+  noText?: boolean
+  link?: boolean
 }
 
 export default function PersonBadge({ person, me, highlight, textOverride, noText, variant = "default", link = false }: PersonBadgeProps) {
   if (!person) {
-    return null;
+    return null
   }
 
-  const badgeClasses = [];
-  if (variant === "default") badgeClasses.push(classes.default);
-  if (me) badgeClasses.push(classes.me);
-  if (highlight) badgeClasses.push(classes.highlighted);
+  const badgeClasses = []
+  if (variant === "default") badgeClasses.push(classes.default)
+  if (me) badgeClasses.push(classes.me)
+  if (highlight) badgeClasses.push(classes.highlighted)
 
   const wrapElement = (children: React.ReactNode) => {
     if (link) {
-      return <Anchor href={`/people/${person.id}`}>{children}</Anchor>;
+      return <Anchor href={`/people/${person.id}`}>{children}</Anchor>
     } else {
-      return children;
+      return children
     }
-  };
+  }
 
   return wrapElement(
     <Group gap="xs" className={badgeClasses.join(" ")} wrap="nowrap">
@@ -41,5 +41,5 @@ export default function PersonBadge({ person, me, highlight, textOverride, noTex
         </Text>
       )}
     </Group>,
-  );
+  )
 }

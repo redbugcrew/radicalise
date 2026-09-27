@@ -1,32 +1,32 @@
-import { Stack, Textarea, Select, Text, Alert } from "@mantine/core";
-import { DatePickerInput } from "@mantine/dates";
-import { useState } from "react";
-import type { Interval, OptOutType, ParticipationIntention } from "../../api/Api";
-import { IconDoorExit } from "@tabler/icons-react";
-import { useAppSelector } from "../../store";
-import type { StepProps } from "./shared";
-import ExpectedParticipation from "./ExpectedParticipation";
+import { Stack, Textarea, Select, Text, Alert } from "@mantine/core"
+import { DatePickerInput } from "@mantine/dates"
+import { useState } from "react"
+import type { Interval, OptOutType, ParticipationIntention } from "../../api/Api"
+import { IconDoorExit } from "@tabler/icons-react"
+import { useAppSelector } from "../../store"
+import type { StepProps } from "./shared"
+import ExpectedParticipation from "./ExpectedParticipation"
 
 type ParticipationStepProps = StepProps & {
-  interval: Interval;
-};
+  interval: Interval
+}
 
 export function ParticipationStep({ form, readOnly, interval }: ParticipationStepProps) {
-  const [intention, setIntention] = useState<ParticipationIntention | null>(form.values.participation_intention);
-  const [optOutType, setOptOutType] = useState<OptOutType | null>(form.values.opt_out_type);
-  const project_noun_name = useAppSelector((state) => state.project?.noun_name || "the project");
+  const [intention, setIntention] = useState<ParticipationIntention | null>(form.values.participation_intention)
+  const [optOutType, setOptOutType] = useState<OptOutType | null>(form.values.opt_out_type)
+  const project_noun_name = useAppSelector((state) => state.project?.noun_name || "the project")
 
   form.watch("participation_intention", ({ value }) => {
-    setIntention(value);
-  });
+    setIntention(value)
+  })
 
   form.watch("opt_out_type", ({ value }) => {
-    setOptOutType(value);
-  });
+    setOptOutType(value)
+  })
 
-  const showOptOut = intention === "OptOut";
-  const showHiatus = showOptOut && optOutType === "Hiatus";
-  const showExpectedParticipation = intention === "OptIn";
+  const showOptOut = intention === "OptOut"
+  const showHiatus = showOptOut && optOutType === "Hiatus"
+  const showExpectedParticipation = intention === "OptIn"
 
   return (
     <Stack gap="xl">
@@ -75,7 +75,11 @@ export function ParticipationStep({ form, readOnly, interval }: ParticipationSte
                 disabled={readOnly}
                 label={optOutType === "Hiatus" ? "Hiatus context" : "Exit context"}
                 rows={4}
-                description={optOutType === "Hiatus" ? "Any context you would like to share about why you are taking a hiatus." : "Any context you would like to share about why you are exiting the project."}
+                description={
+                  optOutType === "Hiatus"
+                    ? "Any context you would like to share about why you are taking a hiatus."
+                    : "Any context you would like to share about why you are exiting the project."
+                }
                 key={form.key("intention_context")}
                 {...form.getInputProps("intention_context")}
               />
@@ -83,8 +87,8 @@ export function ParticipationStep({ form, readOnly, interval }: ParticipationSte
             {optOutType === "Exit" && (
               <Alert variant="light" color="blue" title="Exiting" icon={<IconDoorExit />}>
                 <Text>
-                  This will move you into the exiting state, to be offboarded during this interval. No one is alerted at this stage, so don't hesitate to reach our to your buddy or to PAS crew if you have questions or
-                  need faster action on offboarding.
+                  This will move you into the exiting state, to be offboarded during this interval. No one is alerted at this stage, so
+                  don't hesitate to reach our to your buddy or to PAS crew if you have questions or need faster action on offboarding.
                 </Text>
 
                 <Text mt="md">Once you exit, it's still possible to re-join. Just use the regular expression-of-interest pathway.</Text>
@@ -96,5 +100,5 @@ export function ParticipationStep({ form, readOnly, interval }: ParticipationSte
 
       {showExpectedParticipation && <ExpectedParticipation interval={interval} />}
     </Stack>
-  );
+  )
 }

@@ -1,26 +1,26 @@
-import { useForm } from "@mantine/form";
-import { Button, Select, Stack, Textarea, TextInput } from "@mantine/core";
-import { LinksInput } from "../../../components";
-import { EventResponseExpectation, type CalendarEvent, type EventTemplate, type Link } from "../../../api/Api";
-import { DateTimePicker } from "@mantine/dates";
+import { useForm } from "@mantine/form"
+import { Button, Select, Stack, Textarea, TextInput } from "@mantine/core"
+import { LinksInput } from "../../../components"
+import { EventResponseExpectation, type CalendarEvent, type EventTemplate, type Link } from "../../../api/Api"
+import { DateTimePicker } from "@mantine/dates"
 
 interface CalendarEventFormData {
-  id: number;
-  event_template_id: number | null;
-  links?: any[] | null;
-  name: string | null;
-  summary: string;
-  description: string;
-  location: string;
-  start_at: string | null;
-  end_at?: string | null;
+  id: number
+  event_template_id: number | null
+  links?: any[] | null
+  name: string | null
+  summary: string
+  description: string
+  location: string
+  start_at: string | null
+  end_at?: string | null
 }
 
 interface EventTemplateFormProps {
-  value?: CalendarEvent | null;
-  eventTemplates?: EventTemplate[];
-  submitText?: string;
-  onSubmit: (data: CalendarEvent) => Promise<void>;
+  value?: CalendarEvent | null
+  eventTemplates?: EventTemplate[]
+  submitText?: string
+  onSubmit: (data: CalendarEvent) => Promise<void>
 }
 
 const defaultEvent: CalendarEventFormData = {
@@ -33,20 +33,20 @@ const defaultEvent: CalendarEventFormData = {
   start_at: null,
   end_at: null,
   links: [] as Link[],
-};
+}
 
 function validateDateTime(value: string | null | undefined): string | null {
-  if (!value) return "Date and time is required";
-  const date = new Date(value);
+  if (!value) return "Date and time is required"
+  const date = new Date(value)
   if (date.getHours() === 0 && date.getMinutes() === 0 && date.getSeconds() === 0) {
-    return "Please specify a time (cannot be 0:00:00)";
+    return "Please specify a time (cannot be 0:00:00)"
   }
-  return null;
+  return null
 }
 
 function prepareCalendarEvent(data: CalendarEventFormData): CalendarEvent | null {
   if (!data.event_template_id || !data.name || !data.start_at) {
-    return null;
+    return null
   }
 
   return {
@@ -55,7 +55,7 @@ function prepareCalendarEvent(data: CalendarEventFormData): CalendarEvent | null
     name: data.name,
     start_at: data.start_at,
     response_expectation: EventResponseExpectation.Welcome, // This has no effect
-  };
+  }
 }
 
 export default function EventTemplateForm({ value, eventTemplates, submitText, onSubmit }: EventTemplateFormProps) {
@@ -70,29 +70,29 @@ export default function EventTemplateForm({ value, eventTemplates, submitText, o
       name: (value) => (value && value.trim().length > 0 ? null : "Name is required"),
       start_at: validateDateTime,
       end_at: (value, values) => {
-        const dateTimeError = validateDateTime(value);
-        if (dateTimeError) return dateTimeError;
+        const dateTimeError = validateDateTime(value)
+        if (dateTimeError) return dateTimeError
 
-        const startError = validateDateTime(values.start_at);
-        if (startError) return null;
+        const startError = validateDateTime(values.start_at)
+        if (startError) return null
 
         if (value && values.start_at && new Date(value) <= new Date(values.start_at)) {
-          return "End time must be after start time";
+          return "End time must be after start time"
         }
 
-        return null;
+        return null
       },
     },
-  });
+  })
 
   const onSubmitFormData = (data: CalendarEventFormData) => {
-    const preparedEvent = prepareCalendarEvent(data);
+    const preparedEvent = prepareCalendarEvent(data)
     if (preparedEvent) {
-      onSubmit(preparedEvent);
+      onSubmit(preparedEvent)
     } else {
-      console.error("Failed to prepare calendar event from form data:", data);
+      console.error("Failed to prepare calendar event from form data:", data)
     }
-  };
+  }
 
   return (
     <form onSubmit={form.onSubmit(onSubmitFormData, (errors) => console.log("Form submission errors:", errors))}>
@@ -117,7 +117,12 @@ export default function EventTemplateForm({ value, eventTemplates, submitText, o
             {...form.getInputProps("name")}
           />
 
-          <TextInput label="Location" description="The location of the event." placeholder="A building name, address, or online meeting link" {...form.getInputProps("location")} />
+          <TextInput
+            label="Location"
+            description="The location of the event."
+            placeholder="A building name, address, or online meeting link"
+            {...form.getInputProps("location")}
+          />
 
           <TextInput
             label="Summary"
@@ -134,9 +139,21 @@ export default function EventTemplateForm({ value, eventTemplates, submitText, o
             {...form.getInputProps("description")}
           />
 
-          <DateTimePicker label="Start at" placeholder="Pick a date and time" timePickerProps={{ format: "12h" }} key={form.key("start_at")} {...form.getInputProps("start_at")} />
+          <DateTimePicker
+            label="Start at"
+            placeholder="Pick a date and time"
+            timePickerProps={{ format: "12h" }}
+            key={form.key("start_at")}
+            {...form.getInputProps("start_at")}
+          />
 
-          <DateTimePicker label="End at" placeholder="Pick a date and time" timePickerProps={{ format: "12h" }} key={form.key("end_at")} {...form.getInputProps("end_at")} />
+          <DateTimePicker
+            label="End at"
+            placeholder="Pick a date and time"
+            timePickerProps={{ format: "12h" }}
+            key={form.key("end_at")}
+            {...form.getInputProps("end_at")}
+          />
 
           <LinksInput
             label="Links"
@@ -151,5 +168,5 @@ export default function EventTemplateForm({ value, eventTemplates, submitText, o
         </Button>
       </Stack>
     </form>
-  );
+  )
 }

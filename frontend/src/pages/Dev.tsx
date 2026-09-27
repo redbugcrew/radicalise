@@ -1,19 +1,19 @@
-import { Button, Container, List, Stack, Title } from "@mantine/core";
-import { getApi } from "../api";
+import { Button, Container, List, Stack, Title } from "@mantine/core"
+import { getApi } from "../api"
 
 export default function Dev() {
-  const api = getApi().api;
+  const api = getApi().api
 
   const onRecomputeImplicitInvolvements = () => {
     api
       .recomputeImplicitInvolvements()
       .then(() => {
-        alert("Recomputation success");
+        alert("Recomputation success")
       })
       .catch((error) => {
-        alert("Error performing recomputation: " + error.message);
-      });
-  };
+        alert("Error performing recomputation: " + error.message)
+      })
+  }
 
   return (
     <Container>
@@ -28,5 +28,5 @@ export default function Dev() {
         </List>
       </Stack>
     </Container>
-  );
+  )
 }

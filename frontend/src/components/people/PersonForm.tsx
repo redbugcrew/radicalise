@@ -1,12 +1,12 @@
-import { useForm } from "@mantine/form";
-import { Button, Stack, Textarea, TextInput } from "@mantine/core";
-import type { Person } from "../../api/Api";
-import { AvatarSelect } from "./AvatarSelect";
+import { useForm } from "@mantine/form"
+import { Button, Stack, Textarea, TextInput } from "@mantine/core"
+import type { Person } from "../../api/Api"
+import { AvatarSelect } from "./AvatarSelect"
 
 interface PersonFormProps {
-  person: Person;
+  person: Person
 
-  onSubmit: (values: Person) => void;
+  onSubmit: (values: Person) => void
 }
 
 export default function PersonForm({ person, onSubmit }: PersonFormProps) {
@@ -20,7 +20,7 @@ export default function PersonForm({ person, onSubmit }: PersonFormProps) {
     validate: {
       display_name: (value) => (value ? null : "Display name is required"),
     },
-  });
+  })
 
   return (
     <form onSubmit={form.onSubmit(onSubmit)}>
@@ -28,10 +28,16 @@ export default function PersonForm({ person, onSubmit }: PersonFormProps) {
         <Stack gap="md">
           <TextInput label="Display name" placeholder="Your name in this app" key="display_name" {...form.getInputProps("display_name")} />
           <AvatarSelect label="Avatar" key="avatar" {...form.getInputProps("avatar_id")} />
-          <Textarea label="About me" rows={5} placeholder="Anything you'd like to share about yourself with the project" key="about" {...form.getInputProps("about")} />
+          <Textarea
+            label="About me"
+            rows={5}
+            placeholder="Anything you'd like to share about yourself with the project"
+            key="about"
+            {...form.getInputProps("about")}
+          />
         </Stack>
         <Button type="submit">Submit</Button>
       </Stack>
     </form>
-  );
+  )
 }

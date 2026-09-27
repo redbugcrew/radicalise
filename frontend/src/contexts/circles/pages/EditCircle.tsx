@@ -1,18 +1,18 @@
-import { Container, Stack, Title } from "@mantine/core";
-import CircleForm from "../components/CircleForm";
-import { getApi } from "../../../api";
-import type { Circle } from "../../../api/Api";
-import { handleAppEvents, useAppSelector } from "../../../store";
-import { useNavigate, useParams } from "react-router-dom";
-import { actionFailure, type ActionPromiseResult } from "../../../components/ActionResult";
+import { Container, Stack, Title } from "@mantine/core"
+import CircleForm from "../components/CircleForm"
+import { getApi } from "../../../api"
+import type { Circle } from "../../../api/Api"
+import { handleAppEvents, useAppSelector } from "../../../store"
+import { useNavigate, useParams } from "react-router-dom"
+import { actionFailure, type ActionPromiseResult } from "../../../components/ActionResult"
 
 export default function EditCircle() {
-  const { circleSlug } = useParams<"circleSlug">();
-  const rootCircles = useAppSelector((state) => state.circles.rootCircles);
-  const navigate = useNavigate();
+  const { circleSlug } = useParams<"circleSlug">()
+  const rootCircles = useAppSelector((state) => state.circles.rootCircles)
+  const navigate = useNavigate()
 
-  const circle = rootCircles?.find((c) => c.slug === circleSlug);
-  const otherCircles = rootCircles?.filter((c) => c.id !== circle?.id) || [];
+  const circle = rootCircles?.find((c) => c.slug === circleSlug)
+  const otherCircles = rootCircles?.filter((c) => c.id !== circle?.id) || []
 
   if (!circleSlug || !circle) {
     return (
@@ -20,20 +20,20 @@ export default function EditCircle() {
         <Title order={2}>Circle not found</Title>
         <p>The circle you are trying to edit does not exist.</p>
       </Container>
-    );
+    )
   }
 
   const handleSubmit = async (data: Circle): Promise<ActionPromiseResult> => {
     return getApi()
       .api.updateCircle(data.id.toString(), data)
       .then((response) => {
-        handleAppEvents(response.data);
-        navigate("..");
+        handleAppEvents(response.data)
+        navigate("..")
       })
       .catch((error) => {
-        return actionFailure(error);
-      });
-  };
+        return actionFailure(error)
+      })
+  }
 
   return (
     <Stack>
@@ -41,5 +41,5 @@ export default function EditCircle() {
 
       <CircleForm onSubmit={handleSubmit} value={circle} otherCircles={otherCircles} />
     </Stack>
-  );
+  )
 }

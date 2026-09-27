@@ -1,27 +1,27 @@
-import { IconArrowLeft } from "@tabler/icons-react";
-import { Box, Center, Paper, Text } from "@mantine/core";
-import classes from "./ForgotPassword.module.css";
-import { getApi } from "../../../../api";
-import { Anchor } from "../../../../components";
-import { useState } from "react";
-import AuthLayout from "../../components/AuthLayout";
-import ForgotPasswordForm, { type ForgotPasswordFormData } from "../../components/ForgotPasswordForm/ForgotPasswordForm";
-import { actionFailure, actionSuccess, type ActionPromiseResult } from "../../../../components/ActionResult";
+import { IconArrowLeft } from "@tabler/icons-react"
+import { Box, Center, Paper, Text } from "@mantine/core"
+import classes from "./ForgotPassword.module.css"
+import { getApi } from "../../../../api"
+import { Anchor } from "../../../../components"
+import { useState } from "react"
+import AuthLayout from "../../components/AuthLayout"
+import ForgotPasswordForm, { type ForgotPasswordFormData } from "../../components/ForgotPasswordForm/ForgotPasswordForm"
+import { actionFailure, actionSuccess, type ActionPromiseResult } from "../../../../components/ActionResult"
 
-type ForgotPasswordResult = "sent" | "error";
+type ForgotPasswordResult = "sent" | "error"
 
 export default function ForgotPassword() {
-  let [result, setResult] = useState<ForgotPasswordResult | null>(null);
+  let [result, setResult] = useState<ForgotPasswordResult | null>(null)
 
   const onSubmit = ({ email }: ForgotPasswordFormData): Promise<ActionPromiseResult> => {
     return getApi()
       .api.forgotPassword({ email })
       .then(() => {
-        setResult("sent");
-        return actionSuccess();
+        setResult("sent")
+        return actionSuccess()
       })
-      .catch(actionFailure);
-  };
+      .catch(actionFailure)
+  }
 
   if (result === "sent") {
     return (
@@ -38,12 +38,12 @@ export default function ForgotPassword() {
           </Anchor>
         </Paper>
       </AuthLayout>
-    );
+    )
   }
 
   return (
     <AuthLayout title="Forgot your password?" description="Enter your email to get a reset link">
       <ForgotPasswordForm onSubmit={onSubmit} backLink="../login" />
     </AuthLayout>
-  );
+  )
 }

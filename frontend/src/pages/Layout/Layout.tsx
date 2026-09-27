@@ -1,5 +1,5 @@
-import { AppShell, Burger, Container, Group } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { AppShell, Burger, Container, Group } from "@mantine/core"
+import { useDisclosure } from "@mantine/hooks"
 import {
   IconBrandGithub,
   IconHome2,
@@ -10,53 +10,43 @@ import {
   IconCalendar,
   IconCalendarCog,
   IconCirclesFilled,
-} from "@tabler/icons-react";
-import { Outlet } from "react-router-dom";
-import { Anchor, NavLink, PersonBadge } from "../../components";
-import { handleOwnedAppEvent, useAppSelector } from "../../store";
-import packageJson from "../../../package.json";
-import useWebSocket from "react-use-websocket";
+} from "@tabler/icons-react"
+import { Outlet } from "react-router-dom"
+import { Anchor, NavLink, PersonBadge } from "../../components"
+import { handleOwnedAppEvent, useAppSelector } from "../../store"
+import packageJson from "../../../package.json"
+import useWebSocket from "react-use-websocket"
 
-import classes from "./Layout.module.css";
-import { getSocketUrl } from "../../api";
+import classes from "./Layout.module.css"
+import { getSocketUrl } from "../../api"
 
 export default function Layout() {
-  const [opened, { toggle }] = useDisclosure();
-  const project = useAppSelector((state) => state.project);
-  const person_id = useAppSelector((state) => state.me?.person_id);
-  const person = useAppSelector((state) => state.people[person_id || -1]);
+  const [opened, { toggle }] = useDisclosure()
+  const project = useAppSelector((state) => state.project)
+  const person_id = useAppSelector((state) => state.me?.person_id)
+  const person = useAppSelector((state) => state.people[person_id || -1])
 
   const {} = useWebSocket(getSocketUrl(), {
     share: true,
     onOpen: (event) => {
-      console.log("WebSocket connection opened", event);
+      console.log("WebSocket connection opened", event)
     },
     onClose: () => {
-      console.log("WebSocket connection closed");
+      console.log("WebSocket connection closed")
     },
     onMessage: (event) => {
-      console.log("WebSocket message received", event);
-      if (person_id !== undefined)
-        handleOwnedAppEvent(person_id, JSON.parse(event.data));
+      console.log("WebSocket message received", event)
+      if (person_id !== undefined) handleOwnedAppEvent(person_id, JSON.parse(event.data))
     },
     heartbeat: false,
-  });
+  })
 
   return (
-    <AppShell
-      header={{ height: 60 }}
-      navbar={{ width: 300, breakpoint: "sm", collapsed: { mobile: !opened } }}
-      padding="md"
-    >
+    <AppShell header={{ height: 60 }} navbar={{ width: 300, breakpoint: "sm", collapsed: { mobile: !opened } }} padding="md">
       <AppShell.Header>
         <Group h="100%" px="md" justify="space-between">
           <Group>
-            <Burger
-              opened={opened}
-              onClick={toggle}
-              hiddenFrom="sm"
-              size="sm"
-            />
+            <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
             <Anchor href="/">{project ? project.name : "Radicalise!"}</Anchor>
           </Group>
           <Anchor href={`/people/${person.id}`} onClick={toggle}>
@@ -66,68 +56,24 @@ export default function Layout() {
       </AppShell.Header>
       <AppShell.Navbar p={0}>
         <AppShell.Section className={classes.menu_section}>
-          <NavLink
-            label="Dashboard"
-            href="dashboard"
-            leftSection={<IconHome2 size={18} />}
-            onClick={toggle}
-          />
-          <NavLink
-            label="People"
-            href="people"
-            leftSection={<IconUsers size={18} />}
-            onClick={toggle}
-          />
-          <NavLink
-            label="Crews"
-            href="crews"
-            leftSection={<IconUsersGroup size={18} />}
-            onClick={toggle}
-          />
-          <NavLink
-            label="Events"
-            href="events"
-            leftSection={<IconCalendar size={18} />}
-            onClick={toggle}
-          />
-          {project?.feature_eoi && (
-            <NavLink
-              label="Entry"
-              href="entry_pathways"
-              leftSection={<IconUsers size={18} />}
-              onClick={toggle}
-            />
-          )}
+          <NavLink label="Dashboard" href="dashboard" leftSection={<IconHome2 size={18} />} onClick={toggle} />
+          <NavLink label="People" href="people" leftSection={<IconUsers size={18} />} onClick={toggle} />
+          <NavLink label="Crews" href="crews" leftSection={<IconUsersGroup size={18} />} onClick={toggle} />
+          <NavLink label="Events" href="events" leftSection={<IconCalendar size={18} />} onClick={toggle} />
+          {project?.feature_eoi && <NavLink label="Entry" href="entry_pathways" leftSection={<IconUsers size={18} />} onClick={toggle} />}
         </AppShell.Section>
         <AppShell.Section className={classes.settings_section}>
           <h3 className={classes.section_title}>Settings</h3>
-          <NavLink
-            label="Intervals"
-            href="intervals"
-            leftSection={<IconCalendarMonth size={18} />}
-            onClick={toggle}
-          />
-          <NavLink
-            label="Peer Roles"
-            href="peer_roles"
-            leftSection={<IconUsersGroup size={18} />}
-            onClick={toggle}
-          />
-          <NavLink
-            label="Event Templates"
-            href="events/event_templates"
-            leftSection={<IconCalendarCog size={18} />}
-            onClick={toggle}
-          />
+          <NavLink label="Intervals" href="intervals" leftSection={<IconCalendarMonth size={18} />} onClick={toggle} />
+          <NavLink label="Peer Roles" href="peer_roles" leftSection={<IconUsersGroup size={18} />} onClick={toggle} />
+          <NavLink label="Event Templates" href="events/event_templates" leftSection={<IconCalendarCog size={18} />} onClick={toggle} />
         </AppShell.Section>
 
         <AppShell.Section className={classes.footer_section}>
           <NavLink
             c="dimmed"
             label={"v" + packageJson.version}
-            href={
-              packageJson.homepage + "/releases/tag/v" + packageJson.version
-            }
+            href={packageJson.homepage + "/releases/tag/v" + packageJson.version}
             leftSection={<IconBrandGithub size={18} />}
             onClick={toggle}
           />
@@ -151,5 +97,5 @@ export default function Layout() {
         <Container p={0}>{project && <Outlet />}</Container>
       </AppShell.Main>
     </AppShell>
-  );
+  )
 }

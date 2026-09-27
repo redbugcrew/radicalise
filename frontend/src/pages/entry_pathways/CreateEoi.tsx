@@ -1,39 +1,39 @@
-import { Card, Container, Stack, Title, Text } from "@mantine/core";
-import { EOIForm, Markdown } from "../../components";
-import { getApi } from "../../api";
-import { useContext, useState } from "react";
-import { EoiError, type EntryPathway, type ExpressionOfInterest } from "../../api/Api";
-import { ProjectContext } from "../PublicWithProject";
+import { Card, Container, Stack, Title, Text } from "@mantine/core"
+import { EOIForm, Markdown } from "../../components"
+import { getApi } from "../../api"
+import { useContext, useState } from "react"
+import { EoiError, type EntryPathway, type ExpressionOfInterest } from "../../api/Api"
+import { ProjectContext } from "../PublicWithProject"
 
 interface EoiPageResult {
-  eoi: EntryPathway | null;
-  error: EoiError | null;
+  eoi: EntryPathway | null
+  error: EoiError | null
 }
 
 export default function CreateEoi() {
-  const project = useContext(ProjectContext);
+  const project = useContext(ProjectContext)
   const [result, setResult] = useState<EoiPageResult>({
     eoi: null,
     error: null,
-  });
+  })
 
   if (project.feature_eoi !== true) {
-    return <Container>Expression of Interest is not enabled for this project.</Container>;
+    return <Container>Expression of Interest is not enabled for this project.</Container>
   }
 
   const handleSubmit = (values: ExpressionOfInterest): Promise<void> => {
     return getApi()
       .api.createEoi(values)
       .then((_) => {
-        setResult({ eoi: values, error: null });
+        setResult({ eoi: values, error: null })
       })
       .catch((error) => {
         if (error.response?.status === 400) {
-          const errorEnum = error.response.data as EoiError;
-          setResult({ eoi: null, error: errorEnum });
+          const errorEnum = error.response.data as EoiError
+          setResult({ eoi: null, error: errorEnum })
         }
-      });
-  };
+      })
+  }
 
   return (
     <Container pt="lg" pb="xl">
@@ -59,8 +59,8 @@ export default function CreateEoi() {
             <Stack gap="md">
               <Title order={3}>I think we already have a submission from you</Title>
               <Text>
-                We already have an expression of interest for {project.noun_name ?? "this project"} from that email. If you would like to update your interest, you shoul have received an email with a link to edit or
-                delete your original submission.
+                We already have an expression of interest for {project.noun_name ?? "this project"} from that email. If you would like to
+                update your interest, you shoul have received an email with a link to edit or delete your original submission.
               </Text>
             </Stack>
           </Card>
@@ -83,5 +83,5 @@ export default function CreateEoi() {
         )}
       </Stack>
     </Container>
-  );
+  )
 }

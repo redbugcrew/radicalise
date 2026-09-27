@@ -1,14 +1,14 @@
-import { Container, Group, Stack, Title, Text, Card } from "@mantine/core";
-import { useAppSelector } from "../../store";
-import type { CapacityPlanning, CircleInvolvement, Interval, Person } from "../../api/Api";
-import CapacityScoreIcon from "../../components/CapacityScoreIcon";
-import DateText from "../../components/DateText";
-import WithIntervalData from "../intervals/WithIntervalData";
-import { circleInvolvementsforPerson } from "../../store/current_interval/circle_involvements";
-import { PersonEnrollmentsForInterval } from "../../contexts/peer_roles";
+import { Container, Group, Stack, Title, Text, Card } from "@mantine/core"
+import { useAppSelector } from "../../store"
+import type { CapacityPlanning, CircleInvolvement, Interval, Person } from "../../api/Api"
+import CapacityScoreIcon from "../../components/CapacityScoreIcon"
+import DateText from "../../components/DateText"
+import WithIntervalData from "../intervals/WithIntervalData"
+import { circleInvolvementsforPerson } from "../../store/current_interval/circle_involvements"
+import { PersonEnrollmentsForInterval } from "../../contexts/peer_roles"
 
 function CapacityQuestion({ question, answer }: { question: string; answer: string | null | undefined }) {
-  if (!answer) return null;
+  if (!answer) return null
 
   return (
     <Stack gap={0}>
@@ -17,12 +17,18 @@ function CapacityQuestion({ question, answer }: { question: string; answer: stri
         {answer}
       </Text>
     </Stack>
-  );
+  )
 }
 
-function CapacityPlanningSection({ capacity_planning, capacity_score }: { capacity_planning: CapacityPlanning | null | undefined; capacity_score: number | null | undefined }) {
-  if (!capacity_planning) return null;
-  if (!capacity_planning.wellbeing && !capacity_planning.focus && !capacity_planning.capacity) return null;
+function CapacityPlanningSection({
+  capacity_planning,
+  capacity_score,
+}: {
+  capacity_planning: CapacityPlanning | null | undefined
+  capacity_score: number | null | undefined
+}) {
+  if (!capacity_planning) return null
+  if (!capacity_planning.wellbeing && !capacity_planning.focus && !capacity_planning.capacity) return null
 
   return (
     <Card withBorder>
@@ -38,7 +44,7 @@ function CapacityPlanningSection({ capacity_planning, capacity_score }: { capaci
         <CapacityQuestion question="Capacity" answer={capacity_planning.capacity} />
       </Stack>
     </Card>
-  );
+  )
 }
 
 function ExitingInfo({ person, project_involvement: project_involvement }: { person: Person; project_involvement: CircleInvolvement }) {
@@ -51,7 +57,7 @@ function ExitingInfo({ person, project_involvement: project_involvement }: { per
         {project_involvement.intention_context || "No exit reason provided."}
       </Text>
     </Card>
-  );
+  )
 }
 
 function HiatusInfo({ person, project_involvement }: { person: Person; project_involvement: CircleInvolvement }) {
@@ -67,7 +73,7 @@ function HiatusInfo({ person, project_involvement }: { person: Person; project_i
         {project_involvement.intention_context || "No exit reason provided."}
       </Text>
     </Card>
-  );
+  )
 }
 
 function CircleInvolvementInfo({ involvement, person }: { involvement: CircleInvolvement; person: Person }) {
@@ -83,21 +89,21 @@ function CircleInvolvementInfo({ involvement, person }: { involvement: CircleInv
 
       <CapacityPlanningSection capacity_planning={involvement.capacity_planning} capacity_score={involvement.capacity_score} />
     </Stack>
-  );
+  )
 }
 
 interface PersonForIntervalProps {
-  personIdNum: number;
-  interval: Interval;
+  personIdNum: number
+  interval: Interval
 }
 
 export default function PersonForInterval({ personIdNum, interval }: PersonForIntervalProps) {
-  const person = useAppSelector((state) => state.people[personIdNum || -1]);
+  const person = useAppSelector((state) => state.people[personIdNum || -1])
 
   return (
     <WithIntervalData interval={interval}>
       {({ intervalData, key }) => {
-        const circleInvolvements = circleInvolvementsforPerson(intervalData?.circle_involvements, personIdNum);
+        const circleInvolvements = circleInvolvementsforPerson(intervalData?.circle_involvements, personIdNum)
 
         return (
           <Container key={key}>
@@ -114,8 +120,8 @@ export default function PersonForInterval({ personIdNum, interval }: PersonForIn
               </Card>
             </Stack>
           </Container>
-        );
+        )
       }}
     </WithIntervalData>
-  );
+  )
 }

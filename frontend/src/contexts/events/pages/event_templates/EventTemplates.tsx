@@ -1,11 +1,11 @@
-import { Stack, Group, Title, ActionIcon } from "@mantine/core";
-import { IconPlus } from "@tabler/icons-react";
-import { Anchor } from "../../../../components";
-import { useAppSelector } from "../../../../store";
-import EventTemplatesTable from "../../components/event_templates/EventTemplatesTable";
+import { Stack, Group, Title, ActionIcon } from "@mantine/core"
+import { IconPlus } from "@tabler/icons-react"
+import { Anchor } from "../../../../components"
+import { useAppSelector } from "../../../../store"
+import EventTemplatesTable from "../../components/event_templates/EventTemplatesTable"
 
 export default function EventTemplates() {
-  const eventTemplates = useAppSelector((state) => state.eventTemplates);
+  const eventTemplates = useAppSelector((state) => state.eventTemplates)
 
   return (
     <Stack>
@@ -19,5 +19,5 @@ export default function EventTemplates() {
       </Group>
       <EventTemplatesTable eventTemplates={eventTemplates} />
     </Stack>
-  );
+  )
 }

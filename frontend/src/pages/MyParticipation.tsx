@@ -1,55 +1,55 @@
-import { Container, Stack, Title, Text } from "@mantine/core";
-import ParticipationForm, { type MyParticipationFormData } from "../components/ParticipationForm";
-import { handleAppEvents, useAppSelector } from "../store";
-import { useNavigate, useParams } from "react-router-dom";
-import DateText from "../components/DateText";
-import { useEffect, useState } from "react";
-import { getApi } from "../api";
-import type { CircleInvolvement, MyParticipationInput } from "../api/Api";
-import { useCurrentInterval } from "../store/current_interval";
+import { Container, Stack, Title, Text } from "@mantine/core"
+import ParticipationForm, { type MyParticipationFormData } from "../components/ParticipationForm"
+import { handleAppEvents, useAppSelector } from "../store"
+import { useNavigate, useParams } from "react-router-dom"
+import DateText from "../components/DateText"
+import { useEffect, useState } from "react"
+import { getApi } from "../api"
+import type { CircleInvolvement, MyParticipationInput } from "../api/Api"
+import { useCurrentInterval } from "../store/current_interval"
 
 export default function MyParticipation() {
-  const allIntervals = useAppSelector((state) => state.intervals);
-  const currentInterval = useCurrentInterval();
-  const project = useAppSelector((state) => state.project);
-  const circle = useAppSelector((state) => state.circles.rootCircles[0]);
-  const personId = useAppSelector((state) => state.me?.person_id);
+  const allIntervals = useAppSelector((state) => state.intervals)
+  const currentInterval = useCurrentInterval()
+  const project = useAppSelector((state) => state.project)
+  const circle = useAppSelector((state) => state.circles.rootCircles[0])
+  const personId = useAppSelector((state) => state.me?.person_id)
 
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
-  if (!project) return <Text>Error: Project not found.</Text>;
-  if (!circle) return <Text>Error: Circle not found.</Text>;
-  if (!personId) return <Text>Error: Person ID not found.</Text>;
+  if (!project) return <Text>Error: Project not found.</Text>
+  if (!circle) return <Text>Error: Circle not found.</Text>
+  if (!personId) return <Text>Error: Person ID not found.</Text>
 
-  const { intervalId } = useParams();
-  const intervalIdNumber = Number(intervalId);
-  const api = getApi();
+  const { intervalId } = useParams()
+  const intervalIdNumber = Number(intervalId)
+  const api = getApi()
 
-  const interval = allIntervals.find((i) => i.id === intervalIdNumber);
+  const interval = allIntervals.find((i) => i.id === intervalIdNumber)
 
   if (!interval) {
-    return <Text>Error: Interval not found.</Text>;
+    return <Text>Error: Interval not found.</Text>
   }
   if (!currentInterval) {
-    return <Text>Error: Current interval not found.</Text>;
+    return <Text>Error: Current interval not found.</Text>
   }
 
-  const readOnly = intervalIdNumber < currentInterval.id;
+  const readOnly = intervalIdNumber < currentInterval.id
 
-  const [involvement, setInvolvement] = useState<CircleInvolvement | null>(null);
+  const [involvement, setInvolvement] = useState<CircleInvolvement | null>(null)
   useEffect(() => {
     api.api
       .myParticipation(interval.id, circle.id)
       .then((response) => {
-        setInvolvement(response.data);
+        setInvolvement(response.data)
       })
       .catch((error) => {
-        console.error("Error fetching participation data:", error);
-      });
-  }, [interval.id]);
+        console.error("Error fetching participation data:", error)
+      })
+  }, [interval.id])
 
   if (readOnly && !involvement) {
-    return <Text>Error: You were not participating in this interval.</Text>;
+    return <Text>Error: You were not participating in this interval.</Text>
   }
 
   const onSubmit = (values: MyParticipationFormData) => {
@@ -59,19 +59,19 @@ export default function MyParticipation() {
       ...involvement,
       ...values,
       capacity_score: values.capacity_score ? parseInt(values.capacity_score) : null,
-    };
+    }
 
     api.api
       .updateMyParticipation(interval.id, inputData)
       .then((response) => {
-        console.log("Participation updated successfully", response);
-        handleAppEvents(response.data);
-        navigate("/dashboard");
+        console.log("Participation updated successfully", response)
+        handleAppEvents(response.data)
+        navigate("/dashboard")
       })
       .catch((error) => {
-        console.error("Error updating participation:", error);
-      });
-  };
+        console.error("Error updating participation:", error)
+      })
+  }
 
   return (
     <Container>
@@ -83,7 +83,14 @@ export default function MyParticipation() {
           <DateText date={interval.start_date} /> - <DateText date={interval.end_date} />
         </Text>
       </Stack>
-      <ParticipationForm readOnly={readOnly} personId={personId} involvement={involvement} key={involvement?.id || `fresh-${interval.id}`} onSubmit={onSubmit} interval={interval} />
+      <ParticipationForm
+        readOnly={readOnly}
+        personId={personId}
+        involvement={involvement}
+        key={involvement?.id || `fresh-${interval.id}`}
+        onSubmit={onSubmit}
+        interval={interval}
+      />
     </Container>
-  );
+  )
 }

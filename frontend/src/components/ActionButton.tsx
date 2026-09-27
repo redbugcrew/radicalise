@@ -1,71 +1,79 @@
-import { ActionIcon, type ButtonProps, Button, Group, HoverCard, type PolymorphicComponentProps, Text } from "@mantine/core";
-import { IconAlertCircle, IconX } from "@tabler/icons-react";
-import { useState } from "react";
-import { type ActionPromiseResult, type ActionResult } from "./ActionResult";
+import { ActionIcon, type ButtonProps, Button, Group, HoverCard, type PolymorphicComponentProps, Text } from "@mantine/core"
+import { IconAlertCircle, IconX } from "@tabler/icons-react"
+import { useState } from "react"
+import { type ActionPromiseResult, type ActionResult } from "./ActionResult"
 
 type ActionButtonProps = PolymorphicComponentProps<"button", ButtonProps> & {
-  children?: React.ReactNode;
-  onClick?: () => Promise<ActionPromiseResult>;
-  expand?: boolean;
-  successColor?: string;
-  errorColor?: string;
-  errorIcon?: React.ReactNode;
-};
+  children?: React.ReactNode
+  onClick?: () => Promise<ActionPromiseResult>
+  expand?: boolean
+  successColor?: string
+  errorColor?: string
+  errorIcon?: React.ReactNode
+}
 
-export default function ActionButton({ children, onClick, successColor = "green", errorColor = "red", expand = false, errorIcon = <IconAlertCircle />, ...props }: ActionButtonProps) {
-  const [loading, setLoading] = useState(false);
-  const [showResult, setShowResult] = useState(false);
-  const [result, setResult] = useState<ActionResult | null>(null);
+export default function ActionButton({
+  children,
+  onClick,
+  successColor = "green",
+  errorColor = "red",
+  expand = false,
+  errorIcon = <IconAlertCircle />,
+  ...props
+}: ActionButtonProps) {
+  const [loading, setLoading] = useState(false)
+  const [showResult, setShowResult] = useState(false)
+  const [result, setResult] = useState<ActionResult | null>(null)
 
   const handleResult = (result: ActionPromiseResult) => {
     if (result && typeof result === "object" && "success" in result) {
       if (result.success) {
-        setSuccess();
+        setSuccess()
       } else {
-        setError(result.error || "Unknown error");
+        setError(result.error || "Unknown error")
       }
     }
-  };
+  }
 
   const setSuccess = () => {
-    setResult({ success: true });
-    setShowResult(true);
+    setResult({ success: true })
+    setShowResult(true)
     setTimeout(() => {
-      setShowResult(false);
-      setResult(null);
-    }, 2000);
-  };
+      setShowResult(false)
+      setResult(null)
+    }, 2000)
+  }
 
   const setError = (error: string) => {
-    setResult({ success: false, error });
-    setShowResult(true);
-  };
+    setResult({ success: false, error })
+    setShowResult(true)
+  }
 
   const clearError = () => {
-    setShowResult(false);
-    setResult(null);
-  };
+    setShowResult(false)
+    setResult(null)
+  }
 
   const handleClick = async () => {
     if (onClick) {
-      setLoading(true);
+      setLoading(true)
       onClick()
         .then(handleResult)
         .catch(setError)
         .finally(() => {
-          setLoading(false);
-        });
+          setLoading(false)
+        })
     }
-  };
+  }
 
-  let resultProps = {};
+  let resultProps = {}
   if (showResult) {
     if (result?.success) {
-      console.log("got success colour in result:", result);
-      resultProps = { color: successColor };
+      console.log("got success colour in result:", result)
+      resultProps = { color: successColor }
     }
     if (result?.error) {
-      resultProps = { color: errorColor };
+      resultProps = { color: errorColor }
     }
   }
 
@@ -73,7 +81,7 @@ export default function ActionButton({ children, onClick, successColor = "green"
     <Button {...props} onClick={handleClick} loading={loading} {...resultProps} style={{ flexGrow: expand ? 1 : 0 }}>
       {children}
     </Button>
-  );
+  )
 
   if (result?.error && showResult && errorIcon) {
     return (
@@ -89,8 +97,8 @@ export default function ActionButton({ children, onClick, successColor = "green"
                 radius="xl"
                 color="gray"
                 onClick={(event) => {
-                  event.stopPropagation();
-                  clearError();
+                  event.stopPropagation()
+                  clearError()
                 }}
               >
                 <IconX />
@@ -99,8 +107,8 @@ export default function ActionButton({ children, onClick, successColor = "green"
           </HoverCard.Dropdown>
         </HoverCard>
       </Group>
-    );
+    )
   } else {
-    return button;
+    return button
   }
 }

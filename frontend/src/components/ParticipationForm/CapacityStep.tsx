@@ -1,23 +1,29 @@
-import { Stack, Textarea, Select, Title, Text, Flex, type SelectProps, Group, SegmentedControl } from "@mantine/core";
-import { useAppSelector } from "../../store";
-import { ComboTextArea } from "../";
-import type { ArrayOfStringTuples } from "../forms/ComboTextArea";
-import type { StepProps } from "./shared";
-import { IconCheck } from "@tabler/icons-react";
-import CapacityScoreIcon from "../CapacityScoreIcon";
-import type { Circle } from "../../api/Api";
+import { Stack, Textarea, Select, Title, Text, Flex, type SelectProps, Group, SegmentedControl } from "@mantine/core"
+import { useAppSelector } from "../../store"
+import { ComboTextArea } from "../"
+import type { ArrayOfStringTuples } from "../forms/ComboTextArea"
+import type { StepProps } from "./shared"
+import { IconCheck } from "@tabler/icons-react"
+import CapacityScoreIcon from "../CapacityScoreIcon"
+import type { Circle } from "../../api/Api"
 
 type CapacityStepProps = StepProps & {
-  circles: Circle[];
-};
+  circles: Circle[]
+}
 
 export default function CapacityStep({ form, readOnly, circles }: CapacityStepProps) {
-  const project_noun_name = useAppSelector((state) => state.project?.noun_name || "the project");
+  const project_noun_name = useAppSelector((state) => state.project?.noun_name || "the project")
 
   return (
     <Stack gap="md">
       <Stack gap={0} mb="md">
-        <Flex direction={{ base: "column", sm: "row" }} justify="space-between" align={{ base: "flex-start", sm: "center" }} gap="xs" mb={{ base: "md", sm: 0 }}>
+        <Flex
+          direction={{ base: "column", sm: "row" }}
+          justify="space-between"
+          align={{ base: "flex-start", sm: "center" }}
+          gap="xs"
+          mb={{ base: "md", sm: 0 }}
+        >
           <Title order={3} m={0}>
             Plan your capacity
           </Title>
@@ -34,7 +40,10 @@ export default function CapacityStep({ form, readOnly, circles }: CapacityStepPr
             />
           </Group>
         </Flex>
-        <Text c="dimmed">Optional questions to prompt reflection on life before planning your participation, sharing them with the group can help us be more aware of each other's needs.</Text>
+        <Text c="dimmed">
+          Optional questions to prompt reflection on life before planning your participation, sharing them with the group can help us be
+          more aware of each other's needs.
+        </Text>
       </Stack>
 
       <ComboTextArea
@@ -89,9 +98,16 @@ export default function CapacityStep({ form, readOnly, circles }: CapacityStepPr
         key={form.key("capacity_score")}
         {...form.getInputProps("capacity_score")}
       />
-      <Textarea disabled={readOnly} label="Further context" rows={4} description="Do you want to record any further context about your capacity? " key={form.key("capacity")} {...form.getInputProps("capacity")} />
+      <Textarea
+        disabled={readOnly}
+        label="Further context"
+        rows={4}
+        description="Do you want to record any further context about your capacity? "
+        key={form.key("capacity")}
+        {...form.getInputProps("capacity")}
+      />
     </Stack>
-  );
+  )
 }
 
 const renderCapacityScoreOption: SelectProps["renderOption"] = ({ option, checked }) => (
@@ -100,4 +116,4 @@ const renderCapacityScoreOption: SelectProps["renderOption"] = ({ option, checke
     {option.label}
     {checked && <IconCheck style={{ marginInlineStart: "auto" }} />}
   </Group>
-);
+)

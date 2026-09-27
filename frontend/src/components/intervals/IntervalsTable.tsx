@@ -1,23 +1,23 @@
-import { Table } from "@mantine/core";
-import type { Interval } from "../../api/Api";
-import DateText from "./../DateText";
-import { dateStringToDateTime } from "../../utilities/date";
-import { differenceInDays } from "date-fns";
+import { Table } from "@mantine/core"
+import type { Interval } from "../../api/Api"
+import DateText from "./../DateText"
+import { dateStringToDateTime } from "../../utilities/date"
+import { differenceInDays } from "date-fns"
 
 interface IntervalsTableProps {
-  intervals: Interval[];
-  currentIntervalId: number | null;
+  intervals: Interval[]
+  currentIntervalId: number | null
 }
 
 function IntervalTableRow({ interval, isCurrent }: { interval: Interval; isCurrent: boolean }) {
-  if (!interval) return null;
+  if (!interval) return null
 
-  const stateDate = dateStringToDateTime(interval.start_date);
-  const endDate = dateStringToDateTime(interval.end_date);
-  let duration = null;
+  const stateDate = dateStringToDateTime(interval.start_date)
+  const endDate = dateStringToDateTime(interval.end_date)
+  let duration = null
 
   if (stateDate && endDate) {
-    duration = differenceInDays(endDate, stateDate);
+    duration = differenceInDays(endDate, stateDate)
   }
 
   return (
@@ -31,7 +31,7 @@ function IntervalTableRow({ interval, isCurrent }: { interval: Interval; isCurre
       </Table.Td>
       <Table.Td>{duration}</Table.Td>
     </Table.Tr>
-  );
+  )
 }
 
 export default function IntervalsTable({ intervals, currentIntervalId }: IntervalsTableProps) {
@@ -51,5 +51,5 @@ export default function IntervalsTable({ intervals, currentIntervalId }: Interva
         ))}
       </Table.Tbody>
     </Table>
-  );
+  )
 }

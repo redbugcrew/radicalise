@@ -1,9 +1,9 @@
-import { Badge, Table } from "@mantine/core";
-import type { EntryPathway } from "../../api/Api";
-import Anchor from "../Anchor";
+import { Badge, Table } from "@mantine/core"
+import type { EntryPathway } from "../../api/Api"
+import Anchor from "../Anchor"
 
 interface EntryPathwayTableProps {
-  entryPathways: EntryPathway[];
+  entryPathways: EntryPathway[]
 }
 
 export default function EntryPathwayTable({ entryPathways }: EntryPathwayTableProps) {
@@ -28,5 +28,5 @@ export default function EntryPathwayTable({ entryPathways }: EntryPathwayTablePr
         ))}
       </Table.Tbody>
     </Table>
-  );
+  )
 }

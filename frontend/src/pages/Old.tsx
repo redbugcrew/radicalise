@@ -1,4 +1,4 @@
-import { Tabs } from "@mantine/core";
+import { Tabs } from "@mantine/core"
 
 export default function Old() {
   return (
@@ -66,5 +66,5 @@ export default function Old() {
         </Tabs.Panel>
       </Tabs>
     </div>
-  );
+  )
 }

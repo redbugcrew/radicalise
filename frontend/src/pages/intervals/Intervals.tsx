@@ -1,29 +1,29 @@
-import { ActionIcon, Group, Stack, Title } from "@mantine/core";
-import { handleAppEvents, useAppSelector } from "../../store";
-import { Anchor, IntervalsTable } from "../../components";
-import { IconCalendarPlus } from "@tabler/icons-react";
-import IntervalChanger from "../../components/intervals/IntervalChanger";
-import { useNextInterval } from "../../store/intervals";
-import { actionFailure, actionSuccess, type ActionPromiseResult } from "../../components/ActionResult";
-import { getApi } from "../../api";
-import { useCurrentInterval } from "../../store/current_interval";
+import { ActionIcon, Group, Stack, Title } from "@mantine/core"
+import { handleAppEvents, useAppSelector } from "../../store"
+import { Anchor, IntervalsTable } from "../../components"
+import { IconCalendarPlus } from "@tabler/icons-react"
+import IntervalChanger from "../../components/intervals/IntervalChanger"
+import { useNextInterval } from "../../store/intervals"
+import { actionFailure, actionSuccess, type ActionPromiseResult } from "../../components/ActionResult"
+import { getApi } from "../../api"
+import { useCurrentInterval } from "../../store/current_interval"
 
 export default function Intervals() {
-  const intervals = useAppSelector((state) => state.intervals);
-  const currentInterval = useCurrentInterval();
-  const nextInterval = useNextInterval();
+  const intervals = useAppSelector((state) => state.intervals)
+  const currentInterval = useCurrentInterval()
+  const nextInterval = useNextInterval()
 
   const onNextInterval = async (): Promise<ActionPromiseResult> => {
     return getApi()
       .api.startNextInterval()
       .then((response) => {
-        handleAppEvents(response.data);
-        return actionSuccess();
+        handleAppEvents(response.data)
+        return actionSuccess()
       })
       .catch((error) => {
-        return actionFailure(error);
-      });
-  };
+        return actionFailure(error)
+      })
+  }
 
   return (
     <Stack>
@@ -40,5 +40,5 @@ export default function Intervals() {
 
       <IntervalsTable intervals={intervals} currentIntervalId={currentInterval?.id || null} />
     </Stack>
-  );
+  )
 }

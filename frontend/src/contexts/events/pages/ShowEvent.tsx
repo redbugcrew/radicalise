@@ -1,24 +1,26 @@
-import { ActionIcon, Group, Stack, Title, Text, Table } from "@mantine/core";
-import { useParams } from "react-router-dom";
-import { useAppSelector } from "../../../store";
-import MyAttendance from "../components/MyAttendance";
-import { Anchor, LinksStack, Markdown } from "../../../components";
-import { IconEdit } from "@tabler/icons-react";
-import EventAttendeeTable from "../components/EventAttendeeTable";
-import { isPast } from "date-fns";
+import { ActionIcon, Group, Stack, Title, Text, Table } from "@mantine/core"
+import { useParams } from "react-router-dom"
+import { useAppSelector } from "../../../store"
+import MyAttendance from "../components/MyAttendance"
+import { Anchor, LinksStack, Markdown } from "../../../components"
+import { IconEdit } from "@tabler/icons-react"
+import EventAttendeeTable from "../components/EventAttendeeTable"
+import { isPast } from "date-fns"
 
 export default function ShowEvent() {
-  const { eventId } = useParams<"eventId">();
-  const eventIdNum = eventId ? parseInt(eventId, 10) : undefined;
+  const { eventId } = useParams<"eventId">()
+  const eventIdNum = eventId ? parseInt(eventId, 10) : undefined
 
-  if (eventIdNum === undefined) return <div>Invalid Event ID</div>;
+  if (eventIdNum === undefined) return <div>Invalid Event ID</div>
 
-  const event = useAppSelector((state) => state.events.find((e) => e.id === eventIdNum));
-  if (!event) return <div>Event not found</div>;
+  const event = useAppSelector((state) => state.events.find((e) => e.id === eventIdNum))
+  if (!event) return <div>Event not found</div>
 
-  const eventTemplate = useAppSelector((state) => (event.event_template_id ? state.eventTemplates.find((et) => et.id === event.event_template_id) : null));
+  const eventTemplate = useAppSelector((state) =>
+    event.event_template_id ? state.eventTemplates.find((et) => et.id === event.event_template_id) : null,
+  )
 
-  const inPast = event.end_at ? isPast(event.end_at) : isPast(event.start_at);
+  const inPast = event.end_at ? isPast(event.end_at) : isPast(event.start_at)
 
   return (
     <Stack>
@@ -99,5 +101,5 @@ export default function ShowEvent() {
         )}
       </Stack>
     </Stack>
-  );
+  )
 }

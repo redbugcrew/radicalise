@@ -1,27 +1,27 @@
-import { Badge, Group, Table, Text, Stack } from "@mantine/core";
-import { Anchor } from "..";
-import { useState } from "react";
-import CapacityScoreIcon from "../CapacityScoreIcon";
-import Avatar from "./Avatar";
-import { SearchField, SortableTh, sortData, Th } from "../SortableTable/SortableTable";
+import { Badge, Group, Table, Text, Stack } from "@mantine/core"
+import { Anchor } from ".."
+import { useState } from "react"
+import CapacityScoreIcon from "../CapacityScoreIcon"
+import Avatar from "./Avatar"
+import { SearchField, SortableTh, sortData, Th } from "../SortableTable/SortableTable"
 
 interface Crew {
-  id: number;
-  name: string;
+  id: number
+  name: string
 }
 
 export interface PeopleTableRow {
-  id: number;
-  name: string;
-  avatar_id: number;
-  capacity_score: number | null;
-  dimmed?: boolean;
-  counter: number;
-  crews: Crew[];
+  id: number
+  name: string
+  avatar_id: number
+  capacity_score: number | null
+  dimmed?: boolean
+  counter: number
+  crews: Crew[]
 }
 
 function matchesFilter(item: PeopleTableRow, lowerCaseQuery: string): boolean {
-  return item.name.toLowerCase().includes(lowerCaseQuery) || item.crews.some((crew) => crew.name.toLowerCase().includes(lowerCaseQuery));
+  return item.name.toLowerCase().includes(lowerCaseQuery) || item.crews.some((crew) => crew.name.toLowerCase().includes(lowerCaseQuery))
 }
 
 const crewColours: Record<number, string> = {
@@ -29,21 +29,21 @@ const crewColours: Record<number, string> = {
   3: "cyan",
   4: "pink",
   5: "green",
-};
+}
 
 interface PersonLinkWithCapacityProps {
-  personId: number;
-  personName: string;
-  avatarId: number;
-  capacityScore: number | null;
-  dimmed?: boolean;
-  intervalId?: number | null;
+  personId: number
+  personName: string
+  avatarId: number
+  capacityScore: number | null
+  dimmed?: boolean
+  intervalId?: number | null
 }
 
 function PersonLinkWithCapacity({ personId, personName, avatarId, capacityScore, dimmed, intervalId }: PersonLinkWithCapacityProps) {
-  let link = `/people/${personId}`;
+  let link = `/people/${personId}`
   if (intervalId) {
-    link += `#interval${intervalId}`;
+    link += `#interval${intervalId}`
   }
 
   return (
@@ -56,41 +56,48 @@ function PersonLinkWithCapacity({ personId, personName, avatarId, capacityScore,
         <CapacityScoreIcon score={capacityScore} />
       </Group>
     </Anchor>
-  );
+  )
 }
 
 export interface SortableRowData {
-  name: string;
+  name: string
 }
 
 interface PeopleTableProps {
-  people: PeopleTableRow[];
-  intervalId?: number | null;
+  people: PeopleTableRow[]
+  intervalId?: number | null
 }
 
 export default function PeopleTable({ people, intervalId }: PeopleTableProps) {
-  const [search, setSearch] = useState("");
-  const [sortedData, setSortedData] = useState(people);
-  const [sortBy, setSortBy] = useState<keyof SortableRowData | null>(null);
-  const [reverseSortDirection, setReverseSortDirection] = useState(false);
+  const [search, setSearch] = useState("")
+  const [sortedData, setSortedData] = useState(people)
+  const [sortBy, setSortBy] = useState<keyof SortableRowData | null>(null)
+  const [reverseSortDirection, setReverseSortDirection] = useState(false)
 
   const setSorting = (field: keyof SortableRowData) => {
-    const reversed = field === sortBy ? !reverseSortDirection : false;
-    setReverseSortDirection(reversed);
-    setSortBy(field);
-    setSortedData(sortData(people, { sortBy: field, reversed, search }, matchesFilter));
-  };
+    const reversed = field === sortBy ? !reverseSortDirection : false
+    setReverseSortDirection(reversed)
+    setSortBy(field)
+    setSortedData(sortData(people, { sortBy: field, reversed, search }, matchesFilter))
+  }
 
   const handleSearchChange = (value: string) => {
-    setSearch(value);
-    setSortedData(sortData(people, { sortBy, reversed: reverseSortDirection, search: value }, matchesFilter));
-  };
+    setSearch(value)
+    setSortedData(sortData(people, { sortBy, reversed: reverseSortDirection, search: value }, matchesFilter))
+  }
 
   const rows = sortedData.map((item) => (
     <Table.Tr key={item.id}>
       <Table.Td>
         <Group justify="space-between">
-          <PersonLinkWithCapacity personId={item.id} personName={item.name} avatarId={item.avatar_id} capacityScore={item.capacity_score} dimmed={item.dimmed} intervalId={intervalId} />
+          <PersonLinkWithCapacity
+            personId={item.id}
+            personName={item.name}
+            avatarId={item.avatar_id}
+            capacityScore={item.capacity_score}
+            dimmed={item.dimmed}
+            intervalId={intervalId}
+          />
           {item.counter > 0 ? (
             <Text c="dimmed" size="sm">
               {item.counter}
@@ -107,7 +114,7 @@ export default function PeopleTable({ people, intervalId }: PeopleTableProps) {
         ))}
       </Table.Td>
     </Table.Tr>
-  ));
+  ))
 
   return (
     <Stack align="stretch">
@@ -124,5 +131,5 @@ export default function PeopleTable({ people, intervalId }: PeopleTableProps) {
         <Table.Tbody>{rows}</Table.Tbody>
       </Table>
     </Stack>
-  );
+  )
 }

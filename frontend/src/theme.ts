@@ -1,4 +1,4 @@
-import { createTheme, Input, InputWrapper } from "@mantine/core";
+import { createTheme, Input, InputWrapper } from "@mantine/core"
 
 export const theme = createTheme({
   components: {
@@ -10,17 +10,17 @@ export const theme = createTheme({
             paddingBottom: "0.2em",
           },
           root: {},
-        };
+        }
         if (!props.size) {
           result.root = {
             ...result.root,
             "--input-label-size": "18px",
             "--input-description-size": "16px",
             "--input-fz": "16px",
-          };
+          }
         }
 
-        return result;
+        return result
       },
     }),
 
@@ -31,8 +31,8 @@ export const theme = createTheme({
           input: {
             "--input-bg": "var(--mantine-color-dark-8)",
           },
-        };
+        }
       },
     }),
   },
-});
+})

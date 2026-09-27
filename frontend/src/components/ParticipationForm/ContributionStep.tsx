@@ -1,26 +1,26 @@
-import { Stack, Title, Text } from "@mantine/core";
-import { type FormErrors, type UseFormReturnType } from "@mantine/form";
-import { EventResponseExpectation, type CrewInvolvement, type Interval } from "../../api/Api";
-import { useAppSelector } from "../../store";
-import { CrewParticipationsInput } from "../";
-import type { CrewWithLinks } from "../../store/crews";
-import type { MyParticipationFormData } from "./shared";
-import { occurInInterval, withResponseExpection } from "../../store/events";
-import EventsList from "../../contexts/events/components/EventsList";
+import { Stack, Title, Text } from "@mantine/core"
+import { type FormErrors, type UseFormReturnType } from "@mantine/form"
+import { EventResponseExpectation, type CrewInvolvement, type Interval } from "../../api/Api"
+import { useAppSelector } from "../../store"
+import { CrewParticipationsInput } from "../"
+import type { CrewWithLinks } from "../../store/crews"
+import type { MyParticipationFormData } from "./shared"
+import { occurInInterval, withResponseExpection } from "../../store/events"
+import EventsList from "../../contexts/events/components/EventsList"
 
 interface ContributionStepProps {
-  personId: number;
-  interval: Interval;
-  crewInvolvements: CrewInvolvement[];
-  previousInvolvements?: CrewInvolvement[] | undefined | null;
-  form: UseFormReturnType<MyParticipationFormData, MyParticipationFormData, (values: MyParticipationFormData) => FormErrors>;
-  readOnly?: boolean;
+  personId: number
+  interval: Interval
+  crewInvolvements: CrewInvolvement[]
+  previousInvolvements?: CrewInvolvement[] | undefined | null
+  form: UseFormReturnType<MyParticipationFormData, MyParticipationFormData, (values: MyParticipationFormData) => FormErrors>
+  readOnly?: boolean
 }
 
 function CrewContributions({ form, readOnly, personId, interval, crewInvolvements, previousInvolvements }: ContributionStepProps) {
-  const crewsMap = useAppSelector((state) => state.crews);
-  const crews = Object.values(crewsMap) as CrewWithLinks[];
-  const people = useAppSelector((state) => state.people);
+  const crewsMap = useAppSelector((state) => state.crews)
+  const crews = Object.values(crewsMap) as CrewWithLinks[]
+  const people = useAppSelector((state) => state.people)
 
   return (
     <Stack gap="lg">
@@ -41,25 +41,28 @@ function CrewContributions({ form, readOnly, personId, interval, crewInvolvement
         {...form.getInputProps("crew_involvements")}
       />
     </Stack>
-  );
+  )
 }
 
 function EventContributions({ interval }: { interval: Interval }) {
-  const expectations = [EventResponseExpectation.Encouraged, EventResponseExpectation.Welcome];
-  const events_state = useAppSelector((state) => state.events);
-  const events = withResponseExpection(occurInInterval(events_state, interval), expectations);
+  const expectations = [EventResponseExpectation.Encouraged, EventResponseExpectation.Welcome]
+  const events_state = useAppSelector((state) => state.events)
+  const events = withResponseExpection(occurInInterval(events_state, interval), expectations)
 
-  if (events.length === 0) return null;
+  if (events.length === 0) return null
 
   return (
     <Stack gap="md">
       <Stack gap={0}>
         <Title order={3}>Events</Title>
-        <Text c="dimmed">As part of additional participation, you might want to let people know if you're going to these events. You can change these at any time.</Text>
+        <Text c="dimmed">
+          As part of additional participation, you might want to let people know if you're going to these events. You can change these at
+          any time.
+        </Text>
       </Stack>
       <EventsList events={events} interactive />
     </Stack>
-  );
+  )
 }
 
 export default function ContributionStep(props: ContributionStepProps) {
@@ -68,5 +71,5 @@ export default function ContributionStep(props: ContributionStepProps) {
       <CrewContributions {...props} />
       <EventContributions interval={props.interval} />
     </Stack>
-  );
+  )
 }

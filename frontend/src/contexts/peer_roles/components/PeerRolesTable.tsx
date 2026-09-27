@@ -1,8 +1,8 @@
-import { Table } from "@mantine/core";
-import type { PeerRole } from "../../../api/Api";
+import { Table } from "@mantine/core"
+import type { PeerRole } from "../../../api/Api"
 
 interface PeerRolesTableProps {
-  peerRoles: PeerRole[];
+  peerRoles: PeerRole[]
 }
 
 export default function PeerRolesTable({ peerRoles }: PeerRolesTableProps) {
@@ -13,7 +13,7 @@ export default function PeerRolesTable({ peerRoles }: PeerRolesTableProps) {
       <Table.Td>{role.distribution_type}</Table.Td>
       {/* <Table.Td>edit</Table.Td> */}
     </Table.Tr>
-  ));
+  ))
 
   return (
     <Table verticalSpacing="md">
@@ -27,5 +27,5 @@ export default function PeerRolesTable({ peerRoles }: PeerRolesTableProps) {
       </Table.Thead>
       <Table.Tbody>{rows}</Table.Tbody>
     </Table>
-  );
+  )
 }

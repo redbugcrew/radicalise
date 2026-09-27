@@ -1,18 +1,18 @@
-import { Stack, Title, Text } from "@mantine/core";
-import { EventResponseExpectation, type Interval } from "../../api/Api";
-import EventsList from "../../contexts/events/components/EventsList";
-import { useAppSelector } from "../../store";
-import { occurInInterval, withResponseExpection } from "../../store/events";
+import { Stack, Title, Text } from "@mantine/core"
+import { EventResponseExpectation, type Interval } from "../../api/Api"
+import EventsList from "../../contexts/events/components/EventsList"
+import { useAppSelector } from "../../store"
+import { occurInInterval, withResponseExpection } from "../../store/events"
 
 interface ExpectedParticipationProps {
-  interval: Interval;
+  interval: Interval
 }
 
 export default function ExpectedParticipation({ interval }: ExpectedParticipationProps) {
-  const expectations = [EventResponseExpectation.Expected];
-  const events = useAppSelector((state) => withResponseExpection(occurInInterval(state.events, interval), expectations));
+  const expectations = [EventResponseExpectation.Expected]
+  const events = useAppSelector((state) => withResponseExpection(occurInInterval(state.events, interval), expectations))
 
-  if (events.length === 0) return null;
+  if (events.length === 0) return null
 
   return (
     <Stack>
@@ -22,5 +22,5 @@ export default function ExpectedParticipation({ interval }: ExpectedParticipatio
       </Stack>
       <EventsList events={events} interactive />
     </Stack>
-  );
+  )
 }

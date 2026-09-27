@@ -1,12 +1,12 @@
-import { useForm } from "@mantine/form";
-import { Button, Stack, TextInput } from "@mantine/core";
-import LinksInput, { optionalLinksValidator } from "../links/LinksInput/LinksInput";
-import type { CrewWithLinks } from "../../store/crews";
+import { useForm } from "@mantine/form"
+import { Button, Stack, TextInput } from "@mantine/core"
+import LinksInput, { optionalLinksValidator } from "../links/LinksInput/LinksInput"
+import type { CrewWithLinks } from "../../store/crews"
 
 interface CrewFormProps {
-  crew: CrewWithLinks;
+  crew: CrewWithLinks
 
-  onSubmit: (values: CrewWithLinks) => void;
+  onSubmit: (values: CrewWithLinks) => void
 }
 
 export default function CrewForm({ crew, onSubmit }: CrewFormProps) {
@@ -18,7 +18,7 @@ export default function CrewForm({ crew, onSubmit }: CrewFormProps) {
       description: (value) => (value ? null : "Description is required"),
       links: optionalLinksValidator as (value: unknown) => string | null,
     },
-  });
+  })
 
   return (
     <form onSubmit={form.onSubmit(onSubmit)}>
@@ -31,5 +31,5 @@ export default function CrewForm({ crew, onSubmit }: CrewFormProps) {
         <Button type="submit">Submit</Button>
       </Stack>
     </form>
-  );
+  )
 }

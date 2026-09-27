@@ -1,10 +1,10 @@
-import { type Interval } from "../../api/Api";
-import { mapCirclesInvolvements } from "../../store/current_interval/circle_involvements";
-import WithIntervalData from "../intervals/WithIntervalData";
-import PeopleByCircle from "./PeopleByCircle";
+import { type Interval } from "../../api/Api"
+import { mapCirclesInvolvements } from "../../store/current_interval/circle_involvements"
+import WithIntervalData from "../intervals/WithIntervalData"
+import PeopleByCircle from "./PeopleByCircle"
 
 interface PeopleForIntervalProps {
-  interval: Interval;
+  interval: Interval
 }
 
 export default function PeopleForInterval({ interval }: PeopleForIntervalProps) {
@@ -22,5 +22,5 @@ export default function PeopleForInterval({ interval }: PeopleForIntervalProps) 
         )
       }
     </WithIntervalData>
-  );
+  )
 }

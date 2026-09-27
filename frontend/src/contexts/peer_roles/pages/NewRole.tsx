@@ -1,11 +1,11 @@
-import { Container, Title, Stack } from "@mantine/core";
-import RoleForm, { type RoleFormData } from "../components/RoleForm";
+import { Container, Title, Stack } from "@mantine/core"
+import RoleForm, { type RoleFormData } from "../components/RoleForm"
 
 export default function NewRole() {
   //const navigate = useNavigate();
 
   const handleSubmit = async (data: RoleFormData): Promise<void> => {
-    console.log("handling form result", data);
+    console.log("handling form result", data)
     //return getApi()
     //  .api.createNewRole(data)
     //  .then((response) => {
@@ -15,7 +15,7 @@ export default function NewRole() {
     //  .catch((error) => {
     //    console.error("Error creating role:", error);
     //  });
-  }; // These lines can replace the console.log line once the createNewRol api endpoint has been set up
+  } // These lines can replace the console.log line once the createNewRol api endpoint has been set up
 
   return (
     <Container>
@@ -24,5 +24,5 @@ export default function NewRole() {
         <RoleForm onSubmit={handleSubmit} />
       </Stack>
     </Container>
-  );
+  )
 }
