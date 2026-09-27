@@ -11,8 +11,8 @@ chrono = "0.4"
 cookie = { version = "0.18", features = ["signed"] }
 lazy_static = "1.5"
 password-auth = "1.0"
-reqwest = { version = "0.12", features = ["rustls-tls"] }
-resend-rs = "0.17"
+reqwest = { version = "0.13", features = ["rustls-native-certs"] }
+resend-rs = "0.32"
 serde = "1.0"
 serde_json = "1.0"
 sqlx = { version = "0.9", features = [
@@ -24,8 +24,8 @@ thiserror = "2.0"
 time = "0.3"
 tokio = { version = "1.45", features = ["macros", "rt-multi-thread"] }
 tower = "0.5"
-tower-http = { version = "0.6", features = ["cors", "fs"] }
-tower-sessions = { version = "0.14", features = ["signed"] }
+tower-http = { version = "0.7", features = ["cors", "fs"] }
+tower-sessions = { version = "0.15", features = ["signed"] }
 tower-sessions-sqlx-store = { git = "https://github.com/maxcountryman/tower-sessions-stores.git", rev = "75cb75792d0a8d9231723b07e7524897201ef73b", features = [
   "sqlite",
 ] }
