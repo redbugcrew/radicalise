@@ -87,7 +87,10 @@ jobs:
           key: ${{ runner.os }}-sqlx-cli-0.8.3-native-tls-sqlite
 
       - name: Install sqlx-cli
-        run: cargo install sqlx-cli --version 0.8.3 --no-default-features --features native-tls,sqlite
+        run: |
+          if ! command -v sqlx &>/dev/null; then
+            cargo install sqlx-cli --version 0.8.3 --no-default-features --features native-tls,sqlite
+          fi
 
       - name: Create database and run migrations
         run: |
@@ -140,7 +143,10 @@ jobs:
           key: ${{ runner.os }}-sqlx-cli-0.8.3-native-tls-sqlite
 
       - name: Install sqlx-cli
-        run: cargo install sqlx-cli --version 0.8.3 --no-default-features --features native-tls,sqlite
+        run: |
+          if ! command -v sqlx &>/dev/null; then
+            cargo install sqlx-cli --version 0.8.3 --no-default-features --features native-tls,sqlite
+          fi
 
       - name: Download build artifacts
         uses: actions/download-artifact@v4
