@@ -122,30 +122,6 @@ const router = createBrowserRouter([
         element: <MyParticipation />,
       },
       {
-        path: "events",
-        children: [
-          {
-            path: "event_templates",
-            children: [
-              { path: "", element: <EventTemplates /> },
-              { path: "new", element: <NewEventTemplate /> },
-              { path: ":templateId/edit", element: <EditEventTemplate /> },
-            ],
-          },
-          {
-            path: "",
-            element: <Events />,
-            children: [
-              { path: "", element: <UpcomingEvents /> },
-              { path: "list/:tabValue", element: <AllEvents /> },
-            ],
-          },
-          { path: "new", element: <NewEvent /> },
-          { path: ":eventId", element: <ShowEvent /> },
-          { path: ":eventId/edit", element: <EditEvent /> },
-        ],
-      },
-      {
         path: "dev",
         element: <Dev />,
       },
@@ -206,6 +182,30 @@ const router = createBrowserRouter([
                 path: ":crewId/edit",
                 element: <EditCrew />,
               },
+            ],
+          },
+          {
+            path: "events",
+            children: [
+              {
+                path: "event_templates",
+                children: [
+                  { path: "", element: <EventTemplates /> },
+                  { path: "new", element: <NewEventTemplate /> },
+                  { path: ":templateId/edit", element: <EditEventTemplate /> },
+                ],
+              },
+              {
+                path: "",
+                element: <Events />,
+                children: [
+                  { path: "", element: <UpcomingEvents /> },
+                  { path: "list/:tabValue", element: <AllEvents /> },
+                ],
+              },
+              { path: "new", element: <NewEvent /> },
+              { path: ":eventId", element: <ShowEvent /> },
+              { path: ":eventId/edit", element: <EditEvent /> },
             ],
           },
         ],

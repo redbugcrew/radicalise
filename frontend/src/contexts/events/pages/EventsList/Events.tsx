@@ -10,6 +10,8 @@ export default function Events() {
 
   const navigate = useNavigate()
   const { tabValue } = useParams()
+  const { projectSlug } = useParams<"projectSlug">()
+
   const tab: TabId = (tabValue as TabId) || "upcoming"
 
   console.log("tab is: ", tab)
@@ -24,7 +26,7 @@ export default function Events() {
           </ActionIcon>
         </Anchor>
       </Group>
-      <Tabs value={tab} onChange={(value) => navigate(tabPath(tabValueFromString(value)))}>
+      <Tabs value={tab} onChange={(value) => navigate(tabPath(tabValueFromString(value), projectSlug))}>
         <Tabs.List>
           <Tabs.Tab value="upcoming" leftSection={<IconLayoutList size={tabIconSize} />}>
             Upcoming
@@ -52,11 +54,13 @@ function tabValueFromString(value: string | undefined | null): TabId {
   }
 }
 
-const tabPath = (tabValue: TabId) => {
+const tabPath = (tabValue: TabId, projectSlug: string | undefined) => {
+  const prefix = projectSlug ? `/project/${projectSlug}/events` : "/events"
+
   switch (tabValue) {
     case "all":
-      return "/events/list/all"
+      return `${prefix}/list/all`
     default:
-      return "/events"
+      return prefix
   }
 }

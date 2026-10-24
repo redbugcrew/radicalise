@@ -13,7 +13,7 @@ export default function NewEventTemplate() {
       .api.createEventTemplate(data)
       .then((response) => {
         handleAppEvents(response.data)
-        navigate("/events/event_templates")
+        navigate("..")
       })
       .catch((error) => {
         console.error("Error creating event template:", error)

@@ -14,7 +14,7 @@ export default function NewEvent() {
       .api.createCalendarEvent(data)
       .then((response) => {
         handleAppEvents(response.data)
-        navigate("/events")
+        navigate("..")
       })
       .catch((error) => {
         console.error("Error creating event:", error)

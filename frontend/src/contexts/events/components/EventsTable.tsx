@@ -8,6 +8,7 @@ import { SearchField, SortableTh, sortData } from "../../../components/SortableT
 import { format, isFuture } from "date-fns"
 import { useAppSelector } from "../../../store"
 import PersonEventAttendanceIcon from "./AttendanceIcon"
+import { currentProjectPath } from "../../../pages/LoadProject"
 
 interface EventsTableProps {
   events: CalendarEvent[]
@@ -119,7 +120,7 @@ export default function EventsTable({ events, noDataMessage }: EventsTableProps)
                 <DateText date={row.start_at} />
               </Table.Td>
               <Table.Td>
-                <Anchor href={`/events/${row.id}`}>{row.name}</Anchor>
+                <Anchor href={currentProjectPath(`/events/${row.id}`)}>{row.name}</Anchor>
               </Table.Td>
               {currentPersonId && (
                 <Table.Td maw="5em" align="right">

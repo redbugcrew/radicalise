@@ -4,6 +4,7 @@ import styles from "./EventCard.module.css"
 import { Anchor, LinksStack, TimeRangeText } from "../../../../components"
 import MyAttendance from "../MyAttendance"
 import EventAttendanceTotals from "../EventAttendanceTotals"
+import { currentProjectPath } from "../../../../pages/LoadProject"
 
 interface EventCardProps {
   event: CalendarEvent
@@ -39,7 +40,7 @@ export default function EventCard({ event, showParticipantCounts, interactive }:
     return card
   } else {
     return (
-      <Anchor href={`/events/${event.id}`} className={styles.cardLink}>
+      <Anchor href={currentProjectPath(`/events/${event.id}`)} className={styles.cardLink}>
         {card}
       </Anchor>
     )
