@@ -18,7 +18,7 @@ export default function NewInterval() {
     api.api.createInterval(interval).then((response) => {
       if (response.status === 201) {
         handleAppEvents(response.data)
-        navigate("/intervals")
+        navigate("..")
       } else {
         console.error("Failed to create interval:", response)
       }
