@@ -102,14 +102,6 @@ const router = createBrowserRouter([
         ],
       },
       {
-        path: "peer_roles",
-        element: <PeerRoles />,
-      },
-      {
-        path: "peer_roles/new",
-        element: <NewRole />,
-      },
-      {
         path: "my_participation/:intervalId",
         element: <MyParticipation />,
       },
@@ -210,6 +202,19 @@ const router = createBrowserRouter([
               {
                 path: "new",
                 element: <NewInterval />,
+              },
+            ],
+          },
+          {
+            path: "peer_roles",
+            children: [
+              {
+                path: "",
+                element: <PeerRoles />,
+              },
+              {
+                path: "new",
+                element: <NewRole />,
               },
             ],
           },
