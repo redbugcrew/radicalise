@@ -1,6 +1,6 @@
 ---
 - hosts:
-    - brassica.radhousing.org
+    - participate.radhousing.org
   roles:
     - docker_swarm_manager
     - traefik
