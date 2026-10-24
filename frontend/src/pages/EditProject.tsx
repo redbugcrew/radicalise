@@ -4,11 +4,9 @@ import { ProjectForm } from "../components"
 import type { Project } from "../api/Api"
 import { getApi } from "../api"
 import { useNavigate } from "react-router-dom"
-import { crewsArrayFromObjectMap } from "../store/crews"
 
 export default function EditProject() {
   const project = useAppSelector((state) => state.project)
-  const crews = useAppSelector((state) => crewsArrayFromObjectMap(state.crews))
   const navigate = useNavigate()
 
   if (!project) return <Container>Error: Project not found</Container>
@@ -35,7 +33,7 @@ export default function EditProject() {
       <Title order={2} size="h4" mb="lg">
         {project.name}
       </Title>
-      <ProjectForm project={project} crews={crews} onSubmit={onSubmit} />
+      <ProjectForm project={project} onSubmit={onSubmit} />
     </Container>
   )
 }

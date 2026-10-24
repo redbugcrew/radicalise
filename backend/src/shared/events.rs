@@ -9,7 +9,6 @@ pub enum AppEvent {
     CrewsEvent(crate::crews::events::CrewsEvent),
     ProjectEvent(crate::my_project::events::ProjectEvent),
     PeopleEvent(crate::people::events::PeopleEvent),
-    EntryPathwayEvent(crate::entry_pathways::events::EntryPathwayEvent),
     EventTemplatesEvent(crate::event_templates::events::EventTemplatesEvent),
     CalendarEventsEvent(crate::calendar_events::events::CalendarEventsEvent),
     CalendarEventAttendancesEvent(crate::calendar_event_attendances::events::CalendarEventAttendancesEvent),

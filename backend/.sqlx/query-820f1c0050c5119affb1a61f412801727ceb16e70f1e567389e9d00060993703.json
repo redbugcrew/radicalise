@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT id, name, noun_name, description, slug, feature_eoi, eoi_description, eoi_managing_crew_id\n        FROM projects WHERE id = ?",
+  "query": "SELECT id, name, noun_name, description, slug\n        FROM projects WHERE slug = ?",
   "describe": {
     "columns": [
       {
@@ -57,39 +57,6 @@
             "name": "slug"
           }
         }
-      },
-      {
-        "name": "feature_eoi",
-        "ordinal": 5,
-        "type_info": "Bool",
-        "origin": {
-          "Table": {
-            "table": "projects",
-            "name": "feature_eoi"
-          }
-        }
-      },
-      {
-        "name": "eoi_description",
-        "ordinal": 6,
-        "type_info": "Text",
-        "origin": {
-          "Table": {
-            "table": "projects",
-            "name": "eoi_description"
-          }
-        }
-      },
-      {
-        "name": "eoi_managing_crew_id",
-        "ordinal": 7,
-        "type_info": "Integer",
-        "origin": {
-          "Table": {
-            "table": "projects",
-            "name": "eoi_managing_crew_id"
-          }
-        }
       }
     ],
     "parameters": {
@@ -100,11 +67,8 @@
       false,
       true,
       true,
-      true,
-      false,
-      true,
       true
     ]
   },
-  "hash": "75ae8be60e5410dd8764396586828e9b5839045f179893b656e1470a2e9f98b8"
+  "hash": "820f1c0050c5119affb1a61f412801727ceb16e70f1e567389e9d00060993703"
 }

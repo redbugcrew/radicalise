@@ -17,7 +17,7 @@ pub fn invited_to_circle_email(to_address: String, params: InvitedToCircleEmailP
     let to = [to_address];
     let subject = "You're invited to join a project on RADicalise";
 
-    let manage_eoi_url = absolute_url_for_email(&format!(
+    let accept_invite_url = absolute_url_for_email(&format!(
         "/project/{}/invitation/accept?token={}",
         encode(&params.project_slug),
         encode(&params.invitation_token)
@@ -37,7 +37,7 @@ pub fn invited_to_circle_email(to_address: String, params: InvitedToCircleEmailP
         inviter = params.inviter_name,
         project = params.project_name.unwrap_or_else(|| "their project".to_string()),
         message_html = message_html,
-        url = manage_eoi_url,
+        url = accept_invite_url,
     );
 
     CreateEmailBaseOptions::new(DEFAULT_EMAIL_FROM_ADDRESS, to, subject).with_html(&html_content)

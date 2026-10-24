@@ -91,7 +91,7 @@ export function ParticipationStep({ form, readOnly, interval }: ParticipationSte
                   don't hesitate to reach our to your buddy or to PAS crew if you have questions or need faster action on offboarding.
                 </Text>
 
-                <Text mt="md">Once you exit, it's still possible to re-join. Just use the regular expression-of-interest pathway.</Text>
+                <Text mt="md">Once you exit, it's still possible to re-join.</Text>
               </Alert>
             )}
           </>

@@ -6,7 +6,6 @@ use crate::{
     calendar_events::repo::list_calendar_events_with_attendances,
     circles::repo::{find_all_circles, find_all_circles_ids},
     crews::repo::find_all_crews_with_links,
-    entry_pathways::repo::find_all_entry_pathways_for_project,
     event_templates::repo::find_all_event_templates,
     intervals::repo::find_current_interval,
     my_project::involvements_repo::{find_all_circle_involvements, find_all_circle_involvements_for_person},
@@ -14,8 +13,8 @@ use crate::{
     people::repo::find_all_people,
     shared::{
         entities::{
-            CalendarEvent, Circle, CircleId, CircleInvolvement, CrewInvolvement, CrewWithLinks, EntryPathway, EventTemplate, Interval,
-            IntervalId, PeerEnrollment, PeerRole, Person, PersonId, Project, ProjectId,
+            CalendarEvent, Circle, CircleId, CircleInvolvement, CrewInvolvement, CrewWithLinks, EventTemplate, Interval, IntervalId,
+            PeerEnrollment, PeerRole, Person, PersonId, Project, ProjectId,
         },
         links_repo::{find_all_links_for_owner, update_links_for_owner},
     },
@@ -50,7 +49,6 @@ pub struct InitialData {
     pub crews: Vec<CrewWithLinks>,
     pub intervals: Vec<Interval>,
     pub current_interval_data: IntervalData,
-    pub entry_pathways: Vec<EntryPathway>,
     pub event_templates: Vec<EventTemplate>,
     pub calendar_events: Vec<CalendarEvent>,
     pub peer_roles: Vec<PeerRole>,
@@ -58,7 +56,7 @@ pub struct InitialData {
 
 pub async fn find_project(project_id: ProjectId, pool: &SqlitePool) -> Result<Project, sqlx::Error> {
     sqlx::query!(
-        "SELECT id, name, noun_name, description, slug, feature_eoi, eoi_description, eoi_managing_crew_id
+        "SELECT id, name, noun_name, description, slug
         FROM projects WHERE id = ?",
         project_id.id
     )
@@ -71,15 +69,12 @@ pub async fn find_project(project_id: ProjectId, pool: &SqlitePool) -> Result<Pr
         description: row.description,
         links: vec![], // Links are not fetched here, assuming they are handled elsewhere
         slug: row.slug,
-        feature_eoi: row.feature_eoi,
-        eoi_description: row.eoi_description,
-        eoi_managing_crew_id: row.eoi_managing_crew_id,
     })
 }
 
 pub async fn find_project_by_slug(project_slug: String, pool: &SqlitePool) -> Result<Project, sqlx::Error> {
     sqlx::query!(
-        "SELECT id, name, noun_name, description, slug, feature_eoi, eoi_description, eoi_managing_crew_id
+        "SELECT id, name, noun_name, description, slug
         FROM projects WHERE slug = ?",
         project_slug
     )
@@ -92,9 +87,6 @@ pub async fn find_project_by_slug(project_slug: String, pool: &SqlitePool) -> Re
         description: row.description,
         links: vec![], // Links are not fetched here, assuming they are handled elsewhere
         slug: row.slug,
-        feature_eoi: row.feature_eoi,
-        eoi_description: row.eoi_description,
-        eoi_managing_crew_id: row.eoi_managing_crew_id,
     })
 }
 
@@ -153,7 +145,6 @@ pub async fn find_initial_data_for_project(project: Project, pool: &SqlitePool) 
 
     let current_interval = find_current_interval(project.typed_id(), pool).await?;
 
-    let entry_pathways = find_all_entry_pathways_for_project(project.typed_id(), pool).await?;
     let event_templates = find_all_event_templates(project.typed_id(), pool).await?;
     let calendar_events = list_calendar_events_with_attendances(project.typed_id(), pool).await?;
 
@@ -169,7 +160,6 @@ pub async fn find_initial_data_for_project(project: Project, pool: &SqlitePool) 
         event_templates,
         intervals,
         current_interval_data,
-        entry_pathways,
         calendar_events,
         peer_roles,
     })
@@ -192,16 +182,12 @@ pub async fn update_project(input: Project, project_id: ProjectId, pool: &Sqlite
     sqlx::query!(
         "UPDATE projects
          SET
-            name = ?, noun_name = ?, description = ?, slug = ?,
-            feature_eoi = ?, eoi_description = ?, eoi_managing_crew_id = ?
+            name = ?, noun_name = ?, description = ?, slug = ?
          WHERE id = ?",
         input.name,
         input.noun_name,
         input.description,
         input.slug,
-        input.feature_eoi,
-        input.eoi_description,
-        input.eoi_managing_crew_id,
         project_id.id
     )
     .execute(pool)
