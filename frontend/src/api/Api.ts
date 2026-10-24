@@ -55,402 +55,389 @@ export enum AttendanceIntention {
 
 export type AppEvent =
   | {
-      MeEvent: MeEvent;
+      MeEvent: MeEvent
     }
   | {
-      IntervalsEvent: IntervalsEvent;
+      IntervalsEvent: IntervalsEvent
     }
   | {
-      CrewsEvent: CrewsEvent;
+      CrewsEvent: CrewsEvent
     }
   | {
-      ProjectEvent: ProjectEvent;
+      ProjectEvent: ProjectEvent
     }
   | {
-      PeopleEvent: PeopleEvent;
+      PeopleEvent: PeopleEvent
     }
   | {
-      EventTemplatesEvent: EventTemplatesEvent;
+      EventTemplatesEvent: EventTemplatesEvent
     }
   | {
-      CalendarEventsEvent: CalendarEventsEvent;
+      CalendarEventsEvent: CalendarEventsEvent
     }
   | {
-      CalendarEventAttendancesEvent: CalendarEventAttendancesEvent;
+      CalendarEventAttendancesEvent: CalendarEventAttendancesEvent
     }
   | {
-      CirclesEvent: CirclesEvent;
-    };
+      CirclesEvent: CirclesEvent
+    }
 
 export interface CalendarEvent {
-  attendances?: CalendarEventAttendance[] | null;
-  description: string;
-  end_at?: string | null;
+  attendances?: CalendarEventAttendance[] | null
+  description: string
+  end_at?: string | null
   /** @format int64 */
-  event_template_id: number;
+  event_template_id: number
   /** @format int64 */
-  id: number;
-  links?: Link[] | null;
-  location: string;
-  name: string;
-  response_expectation: EventResponseExpectation;
-  start_at: string;
-  summary: string;
+  id: number
+  links?: Link[] | null
+  location: string
+  name: string
+  response_expectation: EventResponseExpectation
+  start_at: string
+  summary: string
 }
 
 export interface CalendarEventAttendance {
-  actual?: boolean | null;
+  actual?: boolean | null
   /** @format int64 */
-  calendar_event_id: number;
+  calendar_event_id: number
   /** @format int64 */
-  id: number;
-  intention?: AttendanceIntention | null;
+  id: number
+  intention?: AttendanceIntention | null
   /** @format int64 */
-  person_id: number;
+  person_id: number
 }
 
 export type CalendarEventAttendancesEvent = {
-  CalendarEventAttendanceUpdated: CalendarEventAttendance;
-};
+  CalendarEventAttendanceUpdated: CalendarEventAttendance
+}
 
 export type CalendarEventsEvent = {
-  CalendarEventUpdated: CalendarEvent;
-};
+  CalendarEventUpdated: CalendarEvent
+}
 
 export interface CapacityPlanning {
-  capacity?: string | null;
-  focus?: string | null;
-  wellbeing?: string | null;
+  capacity?: string | null
+  focus?: string | null
+  wellbeing?: string | null
 }
 
 export interface Circle {
   /** @format int64 */
-  id: number;
+  id: number
   /** @format int64 */
-  inside_circle_id?: number | null;
-  name: string;
+  inside_circle_id?: number | null
+  name: string
   /** @format int64 */
-  project_id: number;
-  slug: string;
+  project_id: number
+  slug: string
 }
 
 export interface CircleInvitation {
   /** @format int64 */
-  circle_id: number;
+  circle_id: number
   /** @format int64 */
-  circle_involvement_id?: number | null;
-  created_at: string;
-  expires_at: string;
+  circle_involvement_id?: number | null
+  created_at: string
+  expires_at: string
   /** @format int64 */
-  id: number;
-  invitation_token: string;
-  invitee_email: string;
-  message?: string | null;
+  id: number
+  invitation_token: string
+  invitee_email: string
+  message?: string | null
   /** @format int64 */
-  person_id: number;
-  sent_at?: string | null;
+  person_id: number
+  sent_at?: string | null
 }
 
 export interface CircleInvitationDetails {
-  circle: Circle;
-  invitation: CircleInvitation;
-  project: Project;
+  circle: Circle
+  invitation: CircleInvitation
+  project: Project
 }
 
 export interface CircleInvolvement {
-  capacity_planning?: CapacityPlanning | null;
+  capacity_planning?: CapacityPlanning | null
   /** @format int64 */
-  capacity_planning_visibility_circle_id?: number | null;
+  capacity_planning_visibility_circle_id?: number | null
   /** @format int64 */
-  capacity_score?: number | null;
+  capacity_score?: number | null
   /** @format int64 */
-  circle_id: number;
+  circle_id: number
   /** @format int64 */
-  id: number;
+  id: number
   /** @format int64 */
-  implicit_counter: number;
-  intention_context?: string | null;
+  implicit_counter: number
+  intention_context?: string | null
   /** @format int64 */
-  interval_id: number;
-  opt_out_planned_return_date?: string | null;
-  opt_out_type?: OptOutType | null;
-  participation_intention?: ParticipationIntention | null;
+  interval_id: number
+  opt_out_planned_return_date?: string | null
+  opt_out_type?: OptOutType | null
+  participation_intention?: ParticipationIntention | null
   /** @format int64 */
-  person_id: number;
+  person_id: number
   /** @format int64 */
-  project_id: number;
-  status: InvolvementStatus;
+  project_id: number
+  status: InvolvementStatus
 }
 
 export interface CircleInvolvementData {
   /** @format int64 */
-  circle_id: number;
-  circle_involvements: CircleInvolvement[];
+  circle_id: number
+  circle_involvements: CircleInvolvement[]
   /** @format int64 */
-  interval_id: number;
+  interval_id: number
 }
 
 export type CirclesEvent = {
-  CircleUpdated: Circle;
-};
+  CircleUpdated: Circle
+}
 
 export interface CreateAttendanceRequest {
   /** @format int64 */
-  calendar_event_id: number;
-  intention?: AttendanceIntention | null;
+  calendar_event_id: number
+  intention?: AttendanceIntention | null
 }
 
 export interface Credentials {
-  email: string;
-  password: string;
+  email: string
+  password: string
 }
 
 export interface CrewInvolvement {
-  convenor: boolean;
+  convenor: boolean
   /** @format int64 */
-  crew_id: number;
+  crew_id: number
   /** @format int64 */
-  id: number;
+  id: number
   /** @format int64 */
-  interval_id: number;
+  interval_id: number
   /** @format int64 */
-  person_id: number;
-  volunteered_convenor: boolean;
+  person_id: number
+  volunteered_convenor: boolean
 }
 
 export interface CrewWithLinks {
-  description?: string | null;
+  description?: string | null
   /** @format int64 */
-  id: number;
-  links?: Link[] | null;
-  name: string;
+  id: number
+  links?: Link[] | null
+  name: string
   /** @format int64 */
-  project_id: number;
+  project_id: number
 }
 
 export type CrewsEvent = {
-  CrewUpdated: CrewWithLinks;
-};
+  CrewUpdated: CrewWithLinks
+}
 
 export interface EventTemplate {
   /** @format int64 */
-  id: number;
-  links?: Link[] | null;
-  name: string;
-  response_expectation: EventResponseExpectation;
-  summary: string;
+  id: number
+  links?: Link[] | null
+  name: string
+  response_expectation: EventResponseExpectation
+  summary: string
 }
 
 export type EventTemplatesEvent = {
-  EventTemplateUpdated: EventTemplate;
-};
+  EventTemplateUpdated: EventTemplate
+}
 
 export interface ForgotPasswordRequest {
-  email: string;
+  email: string
 }
 
 export interface InitialData {
-  calendar_events: CalendarEvent[];
-  circles: Circle[];
-  crews: CrewWithLinks[];
-  current_interval_data: IntervalData;
-  event_templates: EventTemplate[];
-  intervals: Interval[];
-  peer_roles: PeerRole[];
-  people: Person[];
-  project: Project;
+  calendar_events: CalendarEvent[]
+  circles: Circle[]
+  crews: CrewWithLinks[]
+  current_interval_data: IntervalData
+  event_templates: EventTemplate[]
+  intervals: Interval[]
+  peer_roles: PeerRole[]
+  people: Person[]
+  project: Project
 }
 
 export interface Interval {
-  end_date: string;
+  end_date: string
   /** @format int64 */
-  id: number;
-  start_date: string;
+  id: number
+  start_date: string
 }
 
 export interface IntervalData {
-  circle_involvements: CircleInvolvementData[];
-  crew_involvements: CrewInvolvement[];
-  interval: Interval;
-  peer_enrollments: PeerEnrollment[];
+  circle_involvements: CircleInvolvementData[]
+  crew_involvements: CrewInvolvement[]
+  interval: Interval
+  peer_enrollments: PeerEnrollment[]
 }
 
 export type IntervalsEvent =
   | {
-      IntervalCreated: Interval;
+      IntervalCreated: Interval
     }
   | {
-      IntervalStarted: Interval;
-    };
+      IntervalStarted: Interval
+    }
 
 export interface InvitePersonRequest {
   /** @format int64 */
-  circle_id: number;
-  email: string;
-  message?: string | null;
-  name: string;
+  circle_id: number
+  email: string
+  message?: string | null
+  name: string
 }
 
 export interface InvitePersonResponse {
-  events: AppEvent[];
-  person: Person;
+  events: AppEvent[]
+  person: Person
 }
 
 export interface Link {
-  label?: string | null;
-  link_type: string;
-  url: string;
+  label?: string | null
+  link_type: string
+  url: string
 }
 
 export interface LoginResponse {
   /** @format int64 */
-  user_id: number;
+  user_id: number
 }
 
 export type MeEvent = {
-  IntervalDataChanged: PersonIntervalData;
-};
+  IntervalDataChanged: PersonIntervalData
+}
 
 export interface MyInitialData {
-  calendar_token?: string | null;
+  calendar_token?: string | null
   /** @format int64 */
-  person_id: number;
+  person_id: number
 }
 
 export interface MyParticipationInput {
-  capacity?: string | null;
+  capacity?: string | null
   /** @format int64 */
-  capacity_planning_visibility_circle_id?: number | null;
+  capacity_planning_visibility_circle_id?: number | null
   /** @format int64 */
-  capacity_score?: number | null;
+  capacity_score?: number | null
   /** @format int64 */
-  circle_id: number;
-  crew_involvements?: CrewInvolvement[] | null;
-  focus?: string | null;
-  intention_context?: string | null;
-  opt_out_planned_return_date?: string | null;
-  opt_out_type?: OptOutType | null;
-  participation_intention?: ParticipationIntention | null;
+  circle_id: number
+  crew_involvements?: CrewInvolvement[] | null
+  focus?: string | null
+  intention_context?: string | null
+  opt_out_planned_return_date?: string | null
+  opt_out_type?: OptOutType | null
+  participation_intention?: ParticipationIntention | null
   /** @format int64 */
-  project_id: number;
-  wellbeing?: string | null;
+  project_id: number
+  wellbeing?: string | null
 }
 
 export interface PeerEnrollment {
   /** @format int64 */
-  id: number;
+  id: number
   /** @format int64 */
-  interval_id: number;
+  interval_id: number
   /** @format int64 */
-  peer_id: number;
+  peer_id: number
   /** @format int64 */
-  peer_role_id: number;
+  peer_role_id: number
   /** @format int64 */
-  person_id: number;
+  person_id: number
 }
 
 export interface PeerRole {
   /** @format int64 */
-  circle_id: number;
+  circle_id: number
   /** @format int64 */
-  constrained_by_id?: number | null;
-  distribution_type: PeerRoleDistributionType;
+  constrained_by_id?: number | null
+  distribution_type: PeerRoleDistributionType
   /** @format int64 */
-  id: number;
-  name: string;
+  id: number
+  name: string
   /** @format int64 */
-  project_id: number;
-  summary?: string | null;
+  project_id: number
+  summary?: string | null
 }
 
 export type PeopleEvent = {
-  PersonUpdated: Person;
-};
+  PersonUpdated: Person
+}
 
 export interface Person {
-  about?: string | null;
+  about?: string | null
   /** @format int64 */
-  avatar_id?: number | null;
-  display_name: string;
+  avatar_id?: number | null
+  display_name: string
   /** @format int64 */
-  id: number;
+  id: number
   /** @format int64 */
-  project_id: number;
+  project_id: number
 }
 
 export interface PersonIntervalData {
-  data: IntervalData;
+  data: IntervalData
   /** @format int64 */
-  person_id: number;
+  person_id: number
 }
 
 export interface Project {
-  description?: string | null;
+  description?: string | null
   /** @format int64 */
-  id: number;
-  links: Link[];
-  name?: string | null;
-  noun_name?: string | null;
-  slug?: string | null;
+  id: number
+  links: Link[]
+  name?: string | null
+  noun_name?: string | null
+  slug?: string | null
 }
 
 export type ProjectEvent =
   | {
-      ProjectUpdated: Project;
+      ProjectUpdated: Project
     }
   | {
-      CircleInvolvementUpdated: CircleInvolvement;
-    };
+      CircleInvolvementUpdated: CircleInvolvement
+    }
 
 export interface ResetPasswordRequest {
-  password: string;
-  token: string;
+  password: string
+  token: string
 }
 
 export interface SignUpRequest {
-  email: string;
-  password: string;
+  email: string
+  password: string
 }
 
-import type {
-  AxiosInstance,
-  AxiosRequestConfig,
-  AxiosResponse,
-  HeadersDefaults,
-  ResponseType,
-} from "axios";
-import axios from "axios";
+import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, ResponseType } from "axios"
+import axios from "axios"
 
-export type QueryParamsType = Record<string | number, any>;
+export type QueryParamsType = Record<string | number, any>
 
-export interface FullRequestParams
-  extends Omit<AxiosRequestConfig, "data" | "params" | "url" | "responseType"> {
+export interface FullRequestParams extends Omit<AxiosRequestConfig, "data" | "params" | "url" | "responseType"> {
   /** set parameter to `true` for call `securityWorker` for this request */
-  secure?: boolean;
+  secure?: boolean
   /** request path */
-  path: string;
+  path: string
   /** content type of request body */
-  type?: ContentType;
+  type?: ContentType
   /** query params */
-  query?: QueryParamsType;
+  query?: QueryParamsType
   /** format of response (i.e. response.json() -> format: "json") */
-  format?: ResponseType;
+  format?: ResponseType
   /** request body */
-  body?: unknown;
+  body?: unknown
 }
 
-export type RequestParams = Omit<
-  FullRequestParams,
-  "body" | "method" | "query" | "path"
->;
+export type RequestParams = Omit<FullRequestParams, "body" | "method" | "query" | "path">
 
-export interface ApiConfig<SecurityDataType = unknown>
-  extends Omit<AxiosRequestConfig, "data" | "cancelToken"> {
-  securityWorker?: (
-    securityData: SecurityDataType | null,
-  ) => Promise<AxiosRequestConfig | void> | AxiosRequestConfig | void;
-  secure?: boolean;
-  format?: ResponseType;
+export interface ApiConfig<SecurityDataType = unknown> extends Omit<AxiosRequestConfig, "data" | "cancelToken"> {
+  securityWorker?: (securityData: SecurityDataType | null) => Promise<AxiosRequestConfig | void> | AxiosRequestConfig | void
+  secure?: boolean
+  format?: ResponseType
 }
 
 export enum ContentType {
@@ -462,80 +449,64 @@ export enum ContentType {
 }
 
 export class HttpClient<SecurityDataType = unknown> {
-  public instance: AxiosInstance;
-  private securityData: SecurityDataType | null = null;
-  private securityWorker?: ApiConfig<SecurityDataType>["securityWorker"];
-  private secure?: boolean;
-  private format?: ResponseType;
+  public instance: AxiosInstance
+  private securityData: SecurityDataType | null = null
+  private securityWorker?: ApiConfig<SecurityDataType>["securityWorker"]
+  private secure?: boolean
+  private format?: ResponseType
 
-  constructor({
-    securityWorker,
-    secure,
-    format,
-    ...axiosConfig
-  }: ApiConfig<SecurityDataType> = {}) {
+  constructor({ securityWorker, secure, format, ...axiosConfig }: ApiConfig<SecurityDataType> = {}) {
     this.instance = axios.create({
       ...axiosConfig,
       baseURL: axiosConfig.baseURL || "",
-    });
-    this.secure = secure;
-    this.format = format;
-    this.securityWorker = securityWorker;
+    })
+    this.secure = secure
+    this.format = format
+    this.securityWorker = securityWorker
   }
 
   public setSecurityData = (data: SecurityDataType | null) => {
-    this.securityData = data;
-  };
+    this.securityData = data
+  }
 
-  protected mergeRequestParams(
-    params1: AxiosRequestConfig,
-    params2?: AxiosRequestConfig,
-  ): AxiosRequestConfig {
-    const method = params1.method || (params2 && params2.method);
+  protected mergeRequestParams(params1: AxiosRequestConfig, params2?: AxiosRequestConfig): AxiosRequestConfig {
+    const method = params1.method || (params2 && params2.method)
 
     return {
       ...this.instance.defaults,
       ...params1,
       ...(params2 || {}),
       headers: {
-        ...((method &&
-          this.instance.defaults.headers[
-            method.toLowerCase() as keyof HeadersDefaults
-          ]) ||
-          {}),
+        ...((method && this.instance.defaults.headers[method.toLowerCase() as keyof HeadersDefaults]) || {}),
         ...(params1.headers || {}),
         ...((params2 && params2.headers) || {}),
       },
-    };
+    }
   }
 
   protected stringifyFormItem(formItem: unknown) {
     if (typeof formItem === "object" && formItem !== null) {
-      return JSON.stringify(formItem);
+      return JSON.stringify(formItem)
     } else {
-      return `${formItem}`;
+      return `${formItem}`
     }
   }
 
   protected createFormData(input: Record<string, unknown>): FormData {
     if (input instanceof FormData) {
-      return input;
+      return input
     }
     return Object.keys(input || {}).reduce((formData, key) => {
-      const property = input[key];
-      const propertyContent: any[] =
-        property instanceof Array ? property : [property];
+      const property = input[key]
+      const propertyContent: any[] = property instanceof Array ? property : [property]
 
       for (const formItem of propertyContent) {
-        const isFileType = formItem instanceof Blob || formItem instanceof File;
-        formData.append(
-          key,
-          isFileType ? formItem : this.stringifyFormItem(formItem),
-        );
+        const isFileType = formItem instanceof Blob || formItem instanceof File
+        formData.append(key, isFileType ? formItem : this.stringifyFormItem(formItem))
       }
 
-      return formData;
-    }, new FormData());
+      return formData
+    }, new FormData())
   }
 
   public request = async <T = any, _E = any>({
@@ -548,29 +519,16 @@ export class HttpClient<SecurityDataType = unknown> {
     ...params
   }: FullRequestParams): Promise<AxiosResponse<T>> => {
     const secureParams =
-      ((typeof secure === "boolean" ? secure : this.secure) &&
-        this.securityWorker &&
-        (await this.securityWorker(this.securityData))) ||
-      {};
-    const requestParams = this.mergeRequestParams(params, secureParams);
-    const responseFormat = format || this.format || undefined;
+      ((typeof secure === "boolean" ? secure : this.secure) && this.securityWorker && (await this.securityWorker(this.securityData))) || {}
+    const requestParams = this.mergeRequestParams(params, secureParams)
+    const responseFormat = format || this.format || undefined
 
-    if (
-      type === ContentType.FormData &&
-      body &&
-      body !== null &&
-      typeof body === "object"
-    ) {
-      body = this.createFormData(body as Record<string, unknown>);
+    if (type === ContentType.FormData && body && body !== null && typeof body === "object") {
+      body = this.createFormData(body as Record<string, unknown>)
     }
 
-    if (
-      type === ContentType.Text &&
-      body &&
-      body !== null &&
-      typeof body !== "string"
-    ) {
-      body = JSON.stringify(body);
+    if (type === ContentType.Text && body && body !== null && typeof body !== "string") {
+      body = JSON.stringify(body)
     }
 
     return this.instance.request({
@@ -583,8 +541,8 @@ export class HttpClient<SecurityDataType = unknown> {
       responseType: responseFormat,
       data: body,
       url: path,
-    });
-  };
+    })
+  }
 }
 
 /**
@@ -592,9 +550,7 @@ export class HttpClient<SecurityDataType = unknown> {
  * @version 1.5.1
  * @license
  */
-export class Api<
-  SecurityDataType extends unknown,
-> extends HttpClient<SecurityDataType> {
+export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
   api = {
     /**
      * No description
@@ -678,10 +634,7 @@ export class Api<
      * @name CreateCalendarEventAttendance
      * @request POST:/api/calendar_event_attendances
      */
-    createCalendarEventAttendance: (
-      data: CreateAttendanceRequest,
-      params: RequestParams = {},
-    ) =>
+    createCalendarEventAttendance: (data: CreateAttendanceRequest, params: RequestParams = {}) =>
       this.request<AppEvent[], any>({
         path: `/api/calendar_event_attendances`,
         method: "POST",
@@ -713,11 +666,7 @@ export class Api<
      * @name UpdateCalendarEvent
      * @request PUT:/api/calendar_events/{event_id}
      */
-    updateCalendarEvent: (
-      eventId: string,
-      data: CalendarEvent,
-      params: RequestParams = {},
-    ) =>
+    updateCalendarEvent: (eventId: string, data: CalendarEvent, params: RequestParams = {}) =>
       this.request<AppEvent[], any>({
         path: `/api/calendar_events/${eventId}`,
         method: "PUT",
@@ -749,11 +698,7 @@ export class Api<
      * @name UpdateCircle
      * @request PUT:/api/circles/{circle_id}
      */
-    updateCircle: (
-      circleId: string,
-      data: Circle,
-      params: RequestParams = {},
-    ) =>
+    updateCircle: (circleId: string, data: Circle, params: RequestParams = {}) =>
       this.request<AppEvent[], string>({
         path: `/api/circles/${circleId}`,
         method: "PUT",
@@ -769,11 +714,7 @@ export class Api<
      * @name UpdateCrew
      * @request PUT:/api/crews/{crew_id}
      */
-    updateCrew: (
-      crewId: string,
-      data: CrewWithLinks,
-      params: RequestParams = {},
-    ) =>
+    updateCrew: (crewId: string, data: CrewWithLinks, params: RequestParams = {}) =>
       this.request<AppEvent[], any>({
         path: `/api/crews/${crewId}`,
         method: "PUT",
@@ -819,11 +760,7 @@ export class Api<
      * @name UpdateEventTemplate
      * @request PUT:/api/event_templates/{event_template_id}
      */
-    updateEventTemplate: (
-      eventTemplateId: string,
-      data: EventTemplate,
-      params: RequestParams = {},
-    ) =>
+    updateEventTemplate: (eventTemplateId: string, data: EventTemplate, params: RequestParams = {}) =>
       this.request<any, any>({
         path: `/api/event_templates/${eventTemplateId}`,
         method: "PUT",
@@ -913,11 +850,7 @@ export class Api<
      * @name UpdateMyParticipation
      * @request POST:/api/me/interval/{interval_id}/my_participation
      */
-    updateMyParticipation: (
-      intervalId: number,
-      data: MyParticipationInput,
-      params: RequestParams = {},
-    ) =>
+    updateMyParticipation: (intervalId: number, data: MyParticipationInput, params: RequestParams = {}) =>
       this.request<AppEvent[], any>({
         path: `/api/me/interval/${intervalId}/my_participation`,
         method: "POST",
@@ -933,11 +866,7 @@ export class Api<
      * @name MyParticipation
      * @request GET:/api/me/participation/interval/{interval_id}/circle/{circle_id}
      */
-    myParticipation: (
-      intervalId: number,
-      circleId: number,
-      params: RequestParams = {},
-    ) =>
+    myParticipation: (intervalId: number, circleId: number, params: RequestParams = {}) =>
       this.request<CircleInvolvement | null, any>({
         path: `/api/me/participation/interval/${intervalId}/circle/${circleId}`,
         method: "GET",
@@ -995,11 +924,7 @@ export class Api<
      * @name UpdatePerson
      * @request PUT:/api/people/{person_id}
      */
-    updatePerson: (
-      personId: string,
-      data: Person,
-      params: RequestParams = {},
-    ) =>
+    updatePerson: (personId: string, data: Person, params: RequestParams = {}) =>
       this.request<AppEvent[], any>({
         path: `/api/people/${personId}`,
         method: "PUT",
@@ -1049,5 +974,5 @@ export class Api<
         method: "GET",
         ...params,
       }),
-  };
+  }
 }
