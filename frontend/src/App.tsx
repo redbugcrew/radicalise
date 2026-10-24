@@ -56,32 +56,6 @@ const router = createBrowserRouter([
         element: <Navigate to="dashboard" replace />,
       },
       {
-        path: "project_settings",
-        children: [
-          {
-            path: "edit",
-            element: <EditProject />,
-          },
-          {
-            path: "circles",
-            children: [
-              {
-                path: "",
-                element: <Circles />,
-              },
-              {
-                path: "new",
-                element: <NewCircle />,
-              },
-              {
-                path: ":circleSlug/edit",
-                element: <EditCircle />,
-              },
-            ],
-          },
-        ],
-      },
-      {
         path: "invitations",
         children: [
           {
@@ -210,6 +184,32 @@ const router = createBrowserRouter([
           {
             path: "my_participation/:intervalId",
             element: <MyParticipation />,
+          },
+          {
+            path: "project_settings",
+            children: [
+              {
+                path: "edit",
+                element: <EditProject />,
+              },
+              {
+                path: "circles",
+                children: [
+                  {
+                    path: "",
+                    element: <Circles />,
+                  },
+                  {
+                    path: "new",
+                    element: <NewCircle />,
+                  },
+                  {
+                    path: ":circleSlug/edit",
+                    element: <EditCircle />,
+                  },
+                ],
+              },
+            ],
           },
         ],
       },

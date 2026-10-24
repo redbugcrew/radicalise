@@ -17,7 +17,7 @@ export default function EditProject() {
       .then((response) => {
         if (response.status === 200) {
           handleAppEvents(response.data)
-          navigate("/")
+          navigate("../../dashboard")
         } else {
           console.error("Failed to update project:", response)
         }

@@ -79,14 +79,14 @@ export default function Layout() {
           <NavLink
             c="dimmed"
             label="Project settings"
-            href="/project_settings/edit"
+            href="project_settings/edit"
             leftSection={<IconSettings size={18} />}
             onClick={toggle}
           />
           <NavLink
             c="dimmed"
             label="Circles"
-            href="/project_settings/circles"
+            href="project_settings/circles"
             leftSection={<IconCirclesFilled size={18} />}
             onClick={toggle}
           />
