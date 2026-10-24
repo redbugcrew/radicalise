@@ -3,6 +3,7 @@ import type { Person } from "../../../api/Api"
 import classes from "./PersonBadge.module.css"
 import Avatar from "../Avatar"
 import Anchor from "../../Anchor"
+import { currentProjectPath } from "../../../pages/LoadProject"
 
 export interface PersonBadgeProps {
   person: Person | null
@@ -26,7 +27,7 @@ export default function PersonBadge({ person, me, highlight, textOverride, noTex
 
   const wrapElement = (children: React.ReactNode) => {
     if (link) {
-      return <Anchor href={`/people/${person.id}`}>{children}</Anchor>
+      return <Anchor href={currentProjectPath(`/people/${person.id}`)}>{children}</Anchor>
     } else {
       return children
     }

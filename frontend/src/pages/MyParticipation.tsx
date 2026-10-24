@@ -7,6 +7,7 @@ import { useEffect, useState } from "react"
 import { getApi } from "../api"
 import type { CircleInvolvement, MyParticipationInput } from "../api/Api"
 import { useCurrentInterval } from "../store/current_interval"
+import { currentProjectPath } from "./LoadProject"
 
 export default function MyParticipation() {
   const allIntervals = useAppSelector((state) => state.intervals)
@@ -65,7 +66,7 @@ export default function MyParticipation() {
       .then((response) => {
         console.log("Participation updated successfully", response)
         handleAppEvents(response.data)
-        navigate("/dashboard")
+        navigate(`/project/${project.slug}/dashboard`)
       })
       .catch((error) => {
         console.error("Error updating participation:", error)

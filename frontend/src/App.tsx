@@ -1,6 +1,6 @@
 import { Navigate, RouterProvider, createBrowserRouter, type LoaderFunction } from "react-router-dom"
 import { Provider as ReduxProvider } from "react-redux"
-import store, { loadInitialData, type AppStore } from "./store"
+import store, { type AppStore } from "./store"
 import { MantineProvider } from "@mantine/core"
 import { Notifications } from "@mantine/notifications"
 import {
@@ -45,13 +45,6 @@ import { PeerRoles } from "./contexts/peer_roles"
 import NewRole from "./contexts/peer_roles/pages/NewRole"
 //import NewRole from "./contexts/peer_roles/pages/NewRole";
 
-function withStore(func: (store: AppStore) => any, store: AppStore): LoaderFunction<any> {
-  const wrappedFunc: LoaderFunction<any> = async () => {
-    return func(store)
-  }
-  return wrappedFunc
-}
-
 const router = createBrowserRouter([
   {
     path: "/",
@@ -61,10 +54,6 @@ const router = createBrowserRouter([
       {
         path: "",
         element: <Navigate to="dashboard" replace />,
-      },
-      {
-        path: "dashboard",
-        element: <Dashboard />,
       },
       {
         path: "project_settings",
@@ -102,10 +91,6 @@ const router = createBrowserRouter([
         ],
       },
       {
-        path: "my_participation/:intervalId",
-        element: <MyParticipation />,
-      },
-      {
         path: "dev",
         element: <Dev />,
       },
@@ -138,6 +123,10 @@ const router = createBrowserRouter([
         path: "",
         element: <Layout />,
         children: [
+          {
+            path: "dashboard",
+            element: <Dashboard />,
+          },
           {
             path: "people",
             children: [
@@ -217,6 +206,10 @@ const router = createBrowserRouter([
                 element: <NewRole />,
               },
             ],
+          },
+          {
+            path: "my_participation/:intervalId",
+            element: <MyParticipation />,
           },
         ],
       },
