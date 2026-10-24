@@ -6,7 +6,7 @@ pub async fn find_all_peer_roles(project_id: ProjectId, pool: &SqlitePool) -> Re
     let rows = sqlx::query_as!(
         PeerRole,
         r#"
-        SELECT id, name, summary, project_id, circle_id, distribution_type as "distribution_type: PeerRoleDistributionType", constrained_by_id
+        SELECT id, name, summary, project_id, circle_id, distribution_type as "distribution_type: PeerRoleDistributionType", constrained_by_id, max_intervals
         FROM peer_roles
         WHERE project_id = ?
         "#,

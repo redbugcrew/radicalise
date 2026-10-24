@@ -36,6 +36,7 @@ pub trait PairingAlgorithm {
         people: Vec<PeerId>,
         history: Option<&MatchHistory<PeerId>>,
         constraint_edges: Option<&[(PeerId, PeerId)]>,
+        max_intervals: Option<i64>,
         rng: &mut R,
     ) -> Result<MatchResults<PeerId>, PairingAlgorithmError>
     where
@@ -57,6 +58,7 @@ impl PairingAlgorithm for PeerRoleDistributionType {
         people: Vec<PeerId>,
         match_history: Option<&MatchHistory<PeerId>>,
         constraint_edges: Option<&[(PeerId, PeerId)]>,
+        max_intervals: Option<i64>,
         rng: &mut R,
     ) -> Result<MatchResults<PeerId>, PairingAlgorithmError>
     where
@@ -71,7 +73,13 @@ impl PairingAlgorithm for PeerRoleDistributionType {
                 constraint_edges,
                 rng,
             )),
-            Self::StickyUnidirectional => sticky_unidirectional(people, match_history.expect("History required"), constraint_edges, rng),
+            Self::StickyUnidirectional => sticky_unidirectional(
+                people,
+                match_history.expect("History required"),
+                constraint_edges,
+                max_intervals,
+                rng,
+            ),
         }
     }
 }

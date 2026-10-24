@@ -161,7 +161,7 @@ async fn assign_interval_peer_role(
         let mut rng = rng();
         peer_role
             .distribution_type
-            .distribute(people, history.as_ref(), constraint_edges, &mut rng)
+            .distribute(people, history.as_ref(), constraint_edges, peer_role.max_intervals, &mut rng)
     }
     .map_err(|error| {
         println!("Constraint violation while assigning peer role '{}': {}", peer_role.name, error);
