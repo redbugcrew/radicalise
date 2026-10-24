@@ -6,6 +6,7 @@ import styles from "./CrewCard.module.css"
 import Anchor from "../../Anchor"
 import type { CrewWithLinks } from "../../../store/crews"
 import LinksStack from "../../links/LinksDisplay/LinksStack"
+import { currentProjectPath } from "../../../pages/LoadProject"
 
 interface CrewCardProps {
   crew: CrewWithLinks
@@ -51,7 +52,7 @@ export default function CrewCard({ crew, involvements, people, highlightPersonId
               <Title order={2} size="h4">
                 {crew.name}
               </Title>
-              <Anchor c="dimmed" href={`/crews/${crew.id}/edit`} size="xs">
+              <Anchor c="dimmed" href={currentProjectPath(`/crews/${crew.id}/edit`)} size="xs">
                 edit
               </Anchor>
             </Group>

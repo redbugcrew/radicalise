@@ -19,6 +19,7 @@ import {
   Dev,
   InvitePerson,
   AcceptInvitation,
+  LoadProject,
 } from "./pages"
 import { buildRoutes as buildAuthRoutes } from "./contexts/auth"
 import { theme } from "./theme"
@@ -54,8 +55,8 @@ function withStore(func: (store: AppStore) => any, store: AppStore): LoaderFunct
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Layout />,
-    loader: withStore(loadInitialData, store),
+    // element: <Layout />,
+    // loader: withStore(loadInitialData, store),
     children: [
       {
         path: "",
@@ -92,23 +93,6 @@ const router = createBrowserRouter([
         ],
       },
       {
-        path: "people",
-        children: [
-          {
-            path: "",
-            element: <People />,
-          },
-          {
-            path: ":personId/edit",
-            element: <EditPerson />,
-          },
-          {
-            path: ":personId",
-            element: <Person />,
-          },
-        ],
-      },
-      {
         path: "invitations",
         children: [
           {
@@ -124,14 +108,6 @@ const router = createBrowserRouter([
       {
         path: "peer_roles/new",
         element: <NewRole />,
-      },
-      {
-        path: "crews",
-        element: <Crews />,
-      },
-      {
-        path: "crews/:crewId/edit",
-        element: <EditCrew />,
       },
       {
         path: "intervals",
@@ -180,7 +156,7 @@ const router = createBrowserRouter([
     children: buildAuthRoutes(),
   },
   {
-    path: "project/:projectSlug",
+    path: "project/:projectSlug/pub",
     element: <PublicWithProject />,
     children: [
       {
@@ -189,6 +165,48 @@ const router = createBrowserRouter([
           {
             path: "accept",
             element: <AcceptInvitation />,
+          },
+        ],
+      },
+    ],
+  },
+  {
+    path: "project/:projectSlug",
+    element: <LoadProject />,
+    children: [
+      {
+        path: "",
+        element: <Layout />,
+        children: [
+          {
+            path: "people",
+            children: [
+              {
+                path: "",
+                element: <People />,
+              },
+              {
+                path: ":personId/edit",
+                element: <EditPerson />,
+              },
+              {
+                path: ":personId",
+                element: <Person />,
+              },
+            ],
+          },
+          {
+            path: "crews",
+            children: [
+              {
+                path: "",
+                element: <Crews />,
+              },
+              {
+                path: ":crewId/edit",
+                element: <EditCrew />,
+              },
+            ],
           },
         ],
       },
