@@ -66,11 +66,12 @@ function ParticipationFormForInterval({
 
   const minStep = 0
   const maxStep = additionalParticipationActive ? 2 : 1
+  const default_visible_circle = circles[0]?.id ?? null
 
   const form = useForm<MyParticipationFormData>({
     mode: "controlled",
     initialValues: {
-      capacity_planning_visibility_circle_id: involvement?.capacity_planning_visibility_circle_id ?? null,
+      capacity_planning_visibility_circle_id: involvement?.capacity_planning_visibility_circle_id ?? default_visible_circle,
       wellbeing: involvement?.capacity_planning?.wellbeing ?? "",
       focus: involvement?.capacity_planning?.focus ?? "",
       capacity_score: involvement?.capacity_score?.toString() ?? null,
