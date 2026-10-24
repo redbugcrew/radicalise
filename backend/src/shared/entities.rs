@@ -507,6 +507,7 @@ pub struct PeerRole {
     pub distribution_type: PeerRoleDistributionType,
     pub summary: Option<String>,
     pub constrained_by_id: Option<i64>,
+    pub max_intervals: Option<i64>,
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]

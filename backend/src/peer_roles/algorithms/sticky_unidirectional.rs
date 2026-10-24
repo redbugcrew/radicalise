@@ -9,6 +9,7 @@ pub fn sticky_unidirectional<PeerId, R: Rng>(
     people: Vec<PeerId>,
     history: &MatchHistory<PeerId>,
     constraint_edges: Option<&[(PeerId, PeerId)]>,
+    max_intervals: Option<i64>,
     rng: &mut R,
 ) -> Result<MatchResults<PeerId>, super::PairingAlgorithmError>
 where
@@ -266,7 +267,7 @@ mod tests {
     fn returns_empty_matches_by_default() {
         let mut rng = SmallRng::seed_from_u64(0);
 
-        let result = sticky_unidirectional::<String, _>(vec![], &empty_history(), None, &mut rng).unwrap();
+        let result = sticky_unidirectional::<String, _>(vec![], &empty_history(), None, None, &mut rng).unwrap();
         assert!(result.edges().is_empty());
     }
 
@@ -274,7 +275,7 @@ mod tests {
     fn return_empty_matches_if_theres_only_one_person() {
         let mut rng = SmallRng::seed_from_u64(0);
 
-        let result = sticky_unidirectional::<String, _>(vec!["andi".to_string()], &empty_history(), None, &mut rng).unwrap();
+        let result = sticky_unidirectional::<String, _>(vec!["andi".to_string()], &empty_history(), None, None, &mut rng).unwrap();
         assert!(result.edges().is_empty());
     }
 
@@ -282,7 +283,8 @@ mod tests {
     fn matches_two_people_with_no_history() {
         let mut rng = SmallRng::seed_from_u64(0);
         let result =
-            sticky_unidirectional::<String, _>(vec!["andi".to_string(), "bob".to_string()], &empty_history(), None, &mut rng).unwrap();
+            sticky_unidirectional::<String, _>(vec!["andi".to_string(), "bob".to_string()], &empty_history(), None, None, &mut rng)
+                .unwrap();
 
         assert_eq!(result.to_string(), "{andi: [bob], bob: [andi]}");
     }
@@ -294,6 +296,7 @@ mod tests {
         let result = sticky_unidirectional::<String, _>(
             vec!["andi".to_string(), "bob".to_string(), "carol".to_string(), "dave".to_string()],
             &empty_history(),
+            None,
             None,
             &mut rng,
         )
@@ -319,6 +322,7 @@ mod tests {
         let result = sticky_unidirectional::<String, _>(
             vec!["andi".to_string(), "carol".to_string(), "bob".to_string(), "dave".to_string()],
             &history,
+            None,
             None,
             &mut rng,
         )
@@ -356,6 +360,7 @@ mod tests {
             vec!["andi".to_string(), "bob".to_string(), "carol".to_string(), "dave".to_string()],
             &history,
             None,
+            None,
             &mut rng,
         )
         .unwrap();
@@ -392,6 +397,7 @@ mod tests {
             vec!["andi".to_string(), "bob".to_string(), "carol".to_string(), "dave".to_string()],
             &empty_history(),
             Some(&[("andi".to_string(), "dave".to_string()), ("dave".to_string(), "andi".to_string())]),
+            None,
             &mut rng,
         )
         .unwrap();
@@ -419,6 +425,7 @@ mod tests {
             vec!["andi".to_string(), "bob".to_string(), "carol".to_string(), "dave".to_string()],
             &empty_history(),
             Some(&[("andi".to_string(), "carol".to_string()), ("carol".to_string(), "andi".to_string())]),
+            None,
             &mut rng,
         )
         .unwrap();
@@ -466,6 +473,7 @@ mod tests {
                 ("c".to_string(), "d".to_string()),
                 ("d".to_string(), "c".to_string()),
             ]),
+            None,
             &mut rng,
         )
         .unwrap();
