@@ -71,7 +71,7 @@ where
 {
     let oldest_history = history.oldest_match_intervals();
     if let (Some(oldest), Some(max)) = (oldest_history, max_intervals) {
-        return oldest.0 >= max;
+        return oldest.0 + 1 >= max;
     }
     false
 }
@@ -532,7 +532,7 @@ mod tests {
             vec!["andi".to_string(), "bob".to_string(), "carol".to_string()],
             &history,
             None,
-            Some(2),
+            Some(3),
             &mut rng,
         )
         .unwrap();
@@ -559,7 +559,7 @@ mod tests {
             vec!["andi".to_string(), "bob".to_string(), "carol".to_string()],
             &history,
             None,
-            Some(1),
+            Some(2),
             &mut rng,
         )
         .unwrap();
