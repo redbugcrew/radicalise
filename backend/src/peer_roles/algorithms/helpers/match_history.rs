@@ -45,6 +45,10 @@ where
             .any(|((a, _), intervals_ago)| a == person && intervals_ago.0 == 1)
     }
 
+    pub fn oldest_match_intervals(&self) -> Option<IntervalsAgo> {
+        self.last_matched.values().copied().max()
+    }
+
     fn record_directed(map: &mut HashMap<(PeerId, PeerId), IntervalsAgo>, a: PeerId, b: PeerId, intervals_ago: IntervalsAgo) {
         map.entry((a, b))
             .and_modify(|existing| *existing = (*existing).min(intervals_ago))

@@ -2,6 +2,7 @@ use super::super::match_results::MatchResults;
 use super::helpers::match_history::{IntervalsAgo, MatchHistory};
 use rand::Rng;
 use rand::seq::SliceRandom;
+use std::fmt::{Debug, Display};
 
 const MAX_SEARCH_NODES: usize = 1_000_000;
 
@@ -13,10 +14,15 @@ pub fn sticky_unidirectional<PeerId, R: Rng>(
     rng: &mut R,
 ) -> Result<MatchResults<PeerId>, super::PairingAlgorithmError>
 where
-    PeerId: std::fmt::Display + Clone + Eq + std::hash::Hash + Ord + std::fmt::Debug,
+    PeerId: Display + Clone + Eq + std::hash::Hash + Ord + Debug,
 {
     if people.len() <= 1 {
         return Ok(MatchResults::new());
+    }
+
+    let flip_stickyness = check_violates_max_intervals(history, max_intervals);
+    if flip_stickyness {
+        eprintln!("Max intervals reached, changing roles");
     }
 
     let start_candidates = ordered_start_candidates(&people, history, rng);
@@ -35,6 +41,7 @@ where
             &mut unmatched,
             history,
             constraint_edges,
+            flip_stickyness,
             rng,
             &mut best_cycle,
             &mut best_score,
@@ -58,9 +65,20 @@ where
     }
 }
 
+fn check_violates_max_intervals<PeerId>(history: &MatchHistory<PeerId>, max_intervals: Option<i64>) -> bool
+where
+    PeerId: Clone + Eq + std::hash::Hash,
+{
+    let oldest_history = history.oldest_match_intervals();
+    if let (Some(oldest), Some(max)) = (oldest_history, max_intervals) {
+        return oldest.0 >= max;
+    }
+    false
+}
+
 fn ordered_start_candidates<PeerId, R: Rng>(people: &[PeerId], history: &MatchHistory<PeerId>, rng: &mut R) -> Vec<PeerId>
 where
-    PeerId: Clone + Eq + std::hash::Hash + Ord + std::fmt::Debug,
+    PeerId: Clone + Eq + std::hash::Hash + Ord + Debug,
 {
     let mut with_history: Vec<PeerId> = people
         .iter()
@@ -87,13 +105,14 @@ fn build_best_cycle<PeerId, R: Rng>(
     unmatched: &mut Vec<PeerId>,
     history: &MatchHistory<PeerId>,
     constraint_edges: Option<&[(PeerId, PeerId)]>,
+    flip_stickyness: bool,
     rng: &mut R,
     best_cycle: &mut Option<Vec<PeerId>>,
     best_score: &mut usize,
     visited: &mut usize,
 ) -> bool
 where
-    PeerId: Clone + Eq + std::hash::Hash + Ord + std::fmt::Debug,
+    PeerId: Clone + Eq + std::hash::Hash + Ord + Debug,
 {
     *visited += 1;
     if *visited > MAX_SEARCH_NODES {
@@ -119,7 +138,7 @@ where
     }
 
     let last = path.last().unwrap().clone();
-    let candidates = ordered_candidates(&last, unmatched, history, constraint_edges, rng);
+    let candidates = ordered_candidates(&last, unmatched, history, constraint_edges, flip_stickyness, rng);
 
     for candidate in candidates {
         path.push(candidate.clone());
@@ -131,6 +150,7 @@ where
             unmatched,
             history,
             constraint_edges,
+            flip_stickyness,
             rng,
             best_cycle,
             best_score,
@@ -153,10 +173,11 @@ fn ordered_candidates<PeerId, R: Rng>(
     unmatched: &[PeerId],
     history: &MatchHistory<PeerId>,
     constraint_edges: Option<&[(PeerId, PeerId)]>,
+    flip_stickyness: bool,
     rng: &mut R,
 ) -> Vec<PeerId>
 where
-    PeerId: Clone + Eq + std::hash::Hash + Ord + std::fmt::Debug,
+    PeerId: Clone + Eq + std::hash::Hash + Ord + Debug,
 {
     let mut from_last_interval: Vec<PeerId> = Vec::new();
     let mut others: Vec<PeerId> = Vec::new();
@@ -167,7 +188,11 @@ where
         }
 
         if history.last_matched(last_person, person) == Some(IntervalsAgo(1)) {
-            from_last_interval.push(person.clone());
+            if flip_stickyness {
+                continue;
+            } else {
+                from_last_interval.push(person.clone());
+            }
         } else {
             others.push(person.clone());
         }
@@ -230,6 +255,8 @@ where
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashSet;
+
     use crate::peer_roles::algorithms::IntervalsAgo;
 
     use super::*;
@@ -492,5 +519,59 @@ mod tests {
             missing,
             result.to_string()
         );
+    }
+
+    #[test]
+    fn setting_max_intervals_to_more_than_needed_does_nothing() {
+        let mut rng = SmallRng::seed_from_u64(3);
+
+        let mut history = empty_history();
+        add_circle_to_history(&mut history, vec!["andi", "bob", "carol"], IntervalsAgo(1));
+
+        let result = sticky_unidirectional::<String, _>(
+            vec!["andi".to_string(), "bob".to_string(), "carol".to_string()],
+            &history,
+            None,
+            Some(2),
+            &mut rng,
+        )
+        .unwrap();
+
+        let edges: HashSet<(String, String)> = result.edges().iter().cloned().collect();
+
+        let expected_edges = [
+            ("andi".to_string(), "bob".to_string()),
+            ("bob".to_string(), "carol".to_string()),
+            ("carol".to_string(), "andi".to_string()),
+        ];
+
+        assert_eq!(edges, expected_edges.iter().cloned().collect::<HashSet<_>>());
+    }
+
+    #[test]
+    fn setting_max_intervals_to_less_than_or_equal_to_history_causes_reallocation() {
+        let mut rng = SmallRng::seed_from_u64(3);
+
+        let mut history = empty_history();
+        add_circle_to_history(&mut history, vec!["andi", "bob", "carol"], IntervalsAgo(1));
+
+        let result = sticky_unidirectional::<String, _>(
+            vec!["andi".to_string(), "bob".to_string(), "carol".to_string()],
+            &history,
+            None,
+            Some(1),
+            &mut rng,
+        )
+        .unwrap();
+
+        let edges: HashSet<(String, String)> = result.edges().iter().cloned().collect();
+
+        let expected_edges = [
+            ("bob".to_string(), "andi".to_string()),
+            ("carol".to_string(), "bob".to_string()),
+            ("andi".to_string(), "carol".to_string()),
+        ];
+
+        assert_eq!(edges, expected_edges.iter().cloned().collect::<HashSet<_>>());
     }
 }
