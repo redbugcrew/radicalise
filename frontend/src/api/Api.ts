@@ -47,13 +47,6 @@ export enum EventResponseExpectation {
   Welcome = "Welcome",
 }
 
-export enum EoiError {
-  ProjectNotFound = "ProjectNotFound",
-  EoiNotFound = "EoiNotFound",
-  EoiFeatureDisabled = "EoiFeatureDisabled",
-  EmailAlreadyExists = "EmailAlreadyExists",
-}
-
 export enum AttendanceIntention {
   Going = "Going",
   Uncertain = "Uncertain",
@@ -75,9 +68,6 @@ export type AppEvent =
     }
   | {
       PeopleEvent: PeopleEvent
-    }
-  | {
-      EntryPathwayEvent: EntryPathwayEvent
     }
   | {
       EventTemplatesEvent: EventTemplatesEvent
@@ -114,7 +104,7 @@ export interface CalendarEventAttendance {
   calendar_event_id: number
   /** @format int64 */
   id: number
-  intention?: null | AttendanceIntention
+  intention?: AttendanceIntention | null
   /** @format int64 */
   person_id: number
 }
@@ -168,7 +158,7 @@ export interface CircleInvitationDetails {
 }
 
 export interface CircleInvolvement {
-  capacity_planning?: null | CapacityPlanning
+  capacity_planning?: CapacityPlanning | null
   /** @format int64 */
   capacity_planning_visibility_circle_id?: number | null
   /** @format int64 */
@@ -183,8 +173,8 @@ export interface CircleInvolvement {
   /** @format int64 */
   interval_id: number
   opt_out_planned_return_date?: string | null
-  opt_out_type?: null | OptOutType
-  participation_intention?: null | ParticipationIntention
+  opt_out_type?: OptOutType | null
+  participation_intention?: ParticipationIntention | null
   /** @format int64 */
   person_id: number
   /** @format int64 */
@@ -207,7 +197,7 @@ export type CirclesEvent = {
 export interface CreateAttendanceRequest {
   /** @format int64 */
   calendar_event_id: number
-  intention?: null | AttendanceIntention
+  intention?: AttendanceIntention | null
 }
 
 export interface Credentials {
@@ -242,23 +232,6 @@ export type CrewsEvent = {
   CrewUpdated: CrewWithLinks
 }
 
-export interface EntryPathway {
-  conflict_experience?: string | null
-  context?: string | null
-  /** @format int64 */
-  id: number
-  interest?: string | null
-  name: string
-  participant_connections?: string | null
-  /** @format int64 */
-  project_id: number
-  referral?: string | null
-}
-
-export type EntryPathwayEvent = {
-  EntryPathwayUpdated: EntryPathway
-}
-
 export interface EventTemplate {
   /** @format int64 */
   id: number
@@ -272,20 +245,6 @@ export type EventTemplatesEvent = {
   EventTemplateUpdated: EventTemplate
 }
 
-export interface ExpressionOfInterest {
-  conflict_experience?: string | null
-  context?: string | null
-  email: string
-  /** @format int64 */
-  id: number
-  interest?: string | null
-  name: string
-  participant_connections?: string | null
-  /** @format int64 */
-  project_id: number
-  referral?: string | null
-}
-
 export interface ForgotPasswordRequest {
   email: string
 }
@@ -295,7 +254,6 @@ export interface InitialData {
   circles: Circle[]
   crews: CrewWithLinks[]
   current_interval_data: IntervalData
-  entry_pathways: EntryPathway[]
   event_templates: EventTemplate[]
   intervals: Interval[]
   peer_roles: PeerRole[]
@@ -371,8 +329,8 @@ export interface MyParticipationInput {
   focus?: string | null
   intention_context?: string | null
   opt_out_planned_return_date?: string | null
-  opt_out_type?: null | OptOutType
-  participation_intention?: null | ParticipationIntention
+  opt_out_type?: OptOutType | null
+  participation_intention?: ParticipationIntention | null
   /** @format int64 */
   project_id: number
   wellbeing?: string | null
@@ -394,6 +352,8 @@ export interface PeerEnrollment {
 export interface PeerRole {
   /** @format int64 */
   circle_id: number
+  /** @format int64 */
+  constrained_by_id?: number | null
   distribution_type: PeerRoleDistributionType
   /** @format int64 */
   id: number
@@ -426,10 +386,6 @@ export interface PersonIntervalData {
 
 export interface Project {
   description?: string | null
-  eoi_description?: string | null
-  /** @format int64 */
-  eoi_managing_crew_id?: number | null
-  feature_eoi: boolean
   /** @format int64 */
   id: number
   links: Link[]
@@ -591,7 +547,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 1.5.0
+ * @version 1.5.1
  * @license
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
@@ -603,7 +559,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request GET:/api/auth/current_user
      */
     getCurrentUser: (params: RequestParams = {}) =>
-      this.request<null | LoginResponse, any>({
+      this.request<LoginResponse | null, any>({
         path: `/api/auth/current_user`,
         method: "GET",
         format: "json",
@@ -911,7 +867,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request GET:/api/me/participation/interval/{interval_id}/circle/{circle_id}
      */
     myParticipation: (intervalId: number, circleId: number, params: RequestParams = {}) =>
-      this.request<null | CircleInvolvement, any>({
+      this.request<CircleInvolvement | null, any>({
         path: `/api/me/participation/interval/${intervalId}/circle/${circleId}`,
         method: "GET",
         format: "json",
@@ -981,22 +937,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name CreateEoi
-     * @request POST:/api/public/eoi
-     */
-    createEoi: (data: ExpressionOfInterest, params: RequestParams = {}) =>
-      this.request<any, EoiError>({
-        path: `/api/public/eoi`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name GetInvitation
      * @request GET:/api/public/invitation/{token}
      */
@@ -1018,50 +958,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<Project, any>({
         path: `/api/public/project/by_slug/${projectSlug}`,
         method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name DeleteEoi
-     * @request DELETE:/api/public/project/{project_id}/eoi/{auth_token}
-     */
-    deleteEoi: (authToken: string, projectId: number, params: RequestParams = {}) =>
-      this.request<any, any>({
-        path: `/api/public/project/${projectId}/eoi/${authToken}`,
-        method: "DELETE",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name GetEoiByAuthToken
-     * @request GET:/api/public/project/{project_id}/interest/by_auth_token/{auth_token}
-     */
-    getEoiByAuthToken: (authToken: string, projectId: number, params: RequestParams = {}) =>
-      this.request<ExpressionOfInterest, any>({
-        path: `/api/public/project/${projectId}/interest/by_auth_token/${authToken}`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name UpdateEoi
-     * @request PUT:/api/public/projects/{project_id}/eoi/{auth_token}
-     */
-    updateEoi: (authToken: string, projectId: number, data: ExpressionOfInterest, params: RequestParams = {}) =>
-      this.request<any, EoiError>({
-        path: `/api/public/projects/${projectId}/eoi/${authToken}`,
-        method: "PUT",
-        body: data,
-        type: ContentType.Json,
         format: "json",
         ...params,
       }),

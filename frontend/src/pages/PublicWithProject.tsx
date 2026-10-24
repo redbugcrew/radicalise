@@ -5,7 +5,6 @@ import { getApi } from "../api"
 import { Container, Stack, Title, Text } from "@mantine/core"
 
 const dummyProject: Project = {
-  feature_eoi: false,
   id: -1,
   links: [],
 }

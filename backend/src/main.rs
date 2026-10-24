@@ -32,7 +32,6 @@ mod circles;
 mod crews;
 mod database;
 mod dev;
-mod entry_pathways;
 mod event_templates;
 mod intervals;
 mod invitations;

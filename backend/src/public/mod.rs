@@ -7,10 +7,6 @@ use crate::{my_project::repo::find_project_by_slug, shared::entities::Project};
 pub fn router() -> OpenApiRouter {
     OpenApiRouter::new()
         .routes(routes!(get_project_by_slug))
-        .routes(routes!(crate::entry_pathways::create_eoi))
-        .routes(routes!(crate::entry_pathways::update_eoi))
-        .routes(routes!(crate::entry_pathways::delete_eoi))
-        .routes(routes!(crate::entry_pathways::get_eoi_by_auth_token))
         .routes(routes!(crate::calendar_events::get_calendar_ics))
         .routes(routes!(crate::invitations::get_invitation))
 }

@@ -6,7 +6,6 @@ import peopleReducer, { peopleLoaded, personUpdated } from "./people"
 import intervalsReducer, { intervalsLoaded, intervalCreated } from "./intervals"
 import currentIntervalReducer, { circleInvolvementUpdated, currentIntervalLoaded, personIntervalDataChanged } from "./current_interval"
 import crewsReducer, { crewsLoaded, crewUpdated } from "./crews"
-import entryPathwaysReducer, { entryPathwaysLoaded, entryPathwayUpdated } from "./entry_pathways"
 import eventTemplatesReducer, { eventTemplatesLoaded, eventTemplateUpdated } from "./event_templates"
 import eventsReducer, { eventsLoaded, eventUpdated, singleAttendanceUpdate } from "./events"
 import meReducer, { meLoaded } from "./me"
@@ -19,7 +18,6 @@ import type {
   CalendarEventsEvent,
   ProjectEvent,
   CrewsEvent,
-  EntryPathwayEvent,
   EventTemplatesEvent,
   IntervalsEvent,
   MeEvent,
@@ -36,7 +34,6 @@ const store = configureStore({
     currentInterval: currentIntervalReducer,
     crews: crewsReducer,
     me: meReducer,
-    entryPathways: entryPathwaysReducer,
     eventTemplates: eventTemplatesReducer,
     events: eventsReducer,
     peerRoles: peerRolesReducer,
@@ -65,7 +62,6 @@ async function loadProjectData(store: AppStore, api: ReturnType<typeof getApi>):
       store.dispatch(crewsLoaded(response.data.crews))
       store.dispatch(intervalsLoaded(response.data.intervals))
       store.dispatch(currentIntervalLoaded(response.data.current_interval_data))
-      store.dispatch(entryPathwaysLoaded(response.data.entry_pathways))
       store.dispatch(projectLoaded(response.data.project))
       store.dispatch(eventTemplatesLoaded(response.data.event_templates))
       store.dispatch(eventsLoaded(response.data.calendar_events))
@@ -149,12 +145,6 @@ export async function handlePeopleEvent(event: PeopleEvent) {
   }
 }
 
-export async function handleEntryPathwayEvent(event: EntryPathwayEvent) {
-  if (event.EntryPathwayUpdated) {
-    store.dispatch(entryPathwayUpdated(event.EntryPathwayUpdated))
-  }
-}
-
 export async function handleEventTemplatesEvent(event: EventTemplatesEvent) {
   if (event.EventTemplateUpdated) {
     store.dispatch(eventTemplateUpdated(event.EventTemplateUpdated))
@@ -192,8 +182,6 @@ export async function handleAppEvent(event: AppEvent) {
     handleProjectEvent(event.ProjectEvent)
   } else if ("PeopleEvent" in event && event.PeopleEvent) {
     handlePeopleEvent(event.PeopleEvent)
-  } else if ("EntryPathwayEvent" in event && event.EntryPathwayEvent) {
-    handleEntryPathwayEvent(event.EntryPathwayEvent)
   } else if ("EventTemplatesEvent" in event && event.EventTemplatesEvent) {
     handleEventTemplatesEvent(event.EventTemplatesEvent)
   } else if ("CalendarEventsEvent" in event && event.CalendarEventsEvent) {

@@ -2,7 +2,7 @@ use sqlx::SqlitePool;
 
 use crate::{
     repo_utilities::InsertRecordError,
-    shared::entities::{CrewId, IntervalId, Person, PersonId, ProjectId, UserId},
+    shared::entities::{Person, PersonId, ProjectId, UserId},
 };
 
 pub async fn insert_person_without_user(
@@ -101,22 +101,6 @@ pub async fn find_all_people(project_id: ProjectId, pool: &SqlitePool) -> Result
     )
     .fetch_all(pool)
     .await
-}
-
-pub async fn find_crew_involved_emails(crew_id: CrewId, interval_id: IntervalId, pool: &SqlitePool) -> Result<Vec<String>, sqlx::Error> {
-    let rows = sqlx::query!(
-        "SELECT email
-        FROM users
-        INNER JOIN people ON users.id = people.user_id
-        INNER JOIN crew_involvements ON people.id = crew_involvements.person_id
-        WHERE crew_involvements.crew_id = ? AND crew_involvements.interval_id = ?",
-        crew_id.id,
-        interval_id.id
-    )
-    .fetch_all(pool)
-    .await?;
-
-    Ok(rows.into_iter().filter_map(|row| row.email).collect())
 }
 
 pub async fn delete_person(person_id: PersonId, pool: &SqlitePool) -> Result<(), sqlx::Error> {

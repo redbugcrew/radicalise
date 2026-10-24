@@ -5,7 +5,6 @@ import { MantineProvider } from "@mantine/core"
 import { Notifications } from "@mantine/notifications"
 import {
   EditPerson,
-  CreateEoi,
   Layout,
   Dashboard,
   People,
@@ -16,9 +15,6 @@ import {
   Intervals,
   NewInterval,
   EditProject,
-  EntryPathways,
-  DisplayEntryPathway,
-  ManageMyEoi,
   PublicWithProject,
   Dev,
   InvitePerson,
@@ -150,14 +146,6 @@ const router = createBrowserRouter([
         element: <MyParticipation />,
       },
       {
-        path: "entry_pathways",
-        element: <EntryPathways />,
-      },
-      {
-        path: "entry_pathways/:entryPathwayId",
-        element: <DisplayEntryPathway />,
-      },
-      {
         path: "events",
         children: [
           {
@@ -192,31 +180,9 @@ const router = createBrowserRouter([
     children: buildAuthRoutes(),
   },
   {
-    path: "collective/:projectSlug",
-    element: <PublicWithProject />,
-    children: [
-      {
-        path: "interest",
-        element: <CreateEoi />,
-      },
-      {
-        path: "interest/:authToken",
-        element: <ManageMyEoi />,
-      },
-    ],
-  },
-  {
     path: "project/:projectSlug",
     element: <PublicWithProject />,
     children: [
-      {
-        path: "interest",
-        element: <CreateEoi />,
-      },
-      {
-        path: "interest/:authToken",
-        element: <ManageMyEoi />,
-      },
       {
         path: "invitation",
         children: [
