@@ -60,7 +60,6 @@ export default function Layout() {
           <NavLink label="People" href="people" leftSection={<IconUsers size={18} />} onClick={toggle} />
           <NavLink label="Crews" href="crews" leftSection={<IconUsersGroup size={18} />} onClick={toggle} />
           <NavLink label="Events" href="events" leftSection={<IconCalendar size={18} />} onClick={toggle} />
-          {project?.feature_eoi && <NavLink label="Entry" href="entry_pathways" leftSection={<IconUsers size={18} />} onClick={toggle} />}
         </AppShell.Section>
         <AppShell.Section className={classes.settings_section}>
           <h3 className={classes.section_title}>Settings</h3>

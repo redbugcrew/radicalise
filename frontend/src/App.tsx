@@ -15,8 +15,6 @@ import {
   Intervals,
   NewInterval,
   EditProject,
-  EntryPathways,
-  DisplayEntryPathway,
   PublicWithProject,
   Dev,
   InvitePerson,
@@ -146,14 +144,6 @@ const router = createBrowserRouter([
       {
         path: "my_participation/:intervalId",
         element: <MyParticipation />,
-      },
-      {
-        path: "entry_pathways",
-        element: <EntryPathways />,
-      },
-      {
-        path: "entry_pathways/:entryPathwayId",
-        element: <DisplayEntryPathway />,
       },
       {
         path: "events",
