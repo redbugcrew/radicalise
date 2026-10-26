@@ -14,7 +14,6 @@ use crate::{
     people::repo::find_person_by_calendar_token,
     realtime::RealtimeState,
     shared::{
-        default_project_id,
         entities::{CalendarEvent, CalendarEventId, ProjectId},
         events::AppEvent,
     },
@@ -115,15 +114,22 @@ async fn update_calendar_event(
 #[utoipa::path(
     get,
     path = "/{calendar_token}/calendar.ics",
+    params(
+        ("project_id" = i64, Path, description = "Project ID"),
+        ("calendar_token" = String, Path, description = "Calendar token")
+    ),
     responses(
         (status = OK, body = String, description = "ICS calendar data", content_type = "text/calendar"),
         (status = INTERNAL_SERVER_ERROR, body = ()),
     ),
 )]
-pub async fn get_calendar_ics(Path(calendar_token): Path<String>, Extension(pool): Extension<SqlitePool>) -> impl IntoResponse {
+pub async fn get_calendar_ics(
+    Path((project_id, calendar_token)): Path<(i64, String)>,
+    Extension(pool): Extension<SqlitePool>,
+) -> impl IntoResponse {
     println!("Received request for calendar ICS with token: {}", calendar_token);
 
-    let project = match find_project(default_project_id(), &pool).await {
+    let project = match find_project(ProjectId::new(project_id), &pool).await {
         Ok(project) => project,
         Err(err) => {
             eprintln!("Error looking up project: {}", err);
