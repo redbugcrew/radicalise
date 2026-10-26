@@ -5,6 +5,7 @@ import type { PeopleObjectMap } from "../../../store/people"
 
 import classes from "./Enrollments.module.css"
 import GroupedEnrollmentLine from "./GroupedEnrollmentLine"
+import React from "react"
 
 interface GroupedEnrollmentsProps {
   enrollments: PeerEnrollment[]
@@ -49,7 +50,7 @@ export default function GroupedEnrollments({ enrollments, subjectPersonId, viewe
   return (
     <div className={classes.multiple_roles}>
       {grouped.map(({ role, enrollments }) => (
-        <>
+        <React.Fragment key={role.id}>
           <Text fw="bold" pt={3}>
             {role.name}
           </Text>
@@ -62,7 +63,7 @@ export default function GroupedEnrollments({ enrollments, subjectPersonId, viewe
               viewerPersonId={viewerPersonId}
             />
           </Stack>
-        </>
+        </React.Fragment>
       ))}
     </div>
   )
