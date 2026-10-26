@@ -4,7 +4,6 @@ pub fn private_api_router() -> OpenApiRouter {
     OpenApiRouter::new()
         .nest("/projects/{project_id}", private_project_api_router())
         .nest("/me", crate::me::router())
-        .nest("/people", crate::people::router())
         .nest("/dev", crate::dev::router())
         .nest("/event_templates", crate::event_templates::router())
         .nest("/calendar_events", crate::calendar_events::router())
@@ -18,6 +17,7 @@ pub fn private_project_api_router() -> OpenApiRouter {
         .nest("/my_project", crate::my_project::router())
         .nest("/intervals", crate::intervals::router())
         .nest("/crews", crate::crews::router())
+        .nest("/people", crate::people::router())
 }
 
 pub fn public_api_router() -> OpenApiRouter {

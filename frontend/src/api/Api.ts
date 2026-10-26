@@ -847,22 +847,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name UpdatePerson
-     * @request PUT:/api/people/{person_id}
-     */
-    updatePerson: (personId: string, data: Person, params: RequestParams = {}) =>
-      this.request<AppEvent[], any>({
-        path: `/api/people/${personId}`,
-        method: "PUT",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name UpdateCrew
      * @request PUT:/api/projects/{project_id}/crews/{crew_id}
      */
@@ -946,6 +930,22 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<InitialData, any>({
         path: `/api/projects/${projectId}/my_project/state`,
         method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdatePerson
+     * @request PUT:/api/projects/{project_id}/people/{person_id}
+     */
+    updatePerson: (projectId: number, personId: string, data: Person, params: RequestParams = {}) =>
+      this.request<AppEvent[], any>({
+        path: `/api/projects/${projectId}/people/${personId}`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),
