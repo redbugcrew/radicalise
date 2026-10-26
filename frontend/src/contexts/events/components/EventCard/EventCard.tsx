@@ -4,7 +4,7 @@ import styles from "./EventCard.module.css"
 import { Anchor, LinksStack, TimeRangeText } from "../../../../components"
 import MyAttendance from "../MyAttendance"
 import EventAttendanceTotals from "../EventAttendanceTotals"
-import { currentProjectPath } from "../../../../pages/LoadMyProject"
+import { currentProjectPath } from "../../../../pages/LoadProjectState"
 
 interface EventCardProps {
   event: CalendarEvent

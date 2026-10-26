@@ -19,7 +19,7 @@ import {
   Dev,
   InvitePerson,
   AcceptInvitation,
-  LoadMyProject,
+  LoadProjectState,
   LoadMyProjects,
 } from "./pages"
 import { buildRoutes as buildAuthRoutes } from "./contexts/auth"
@@ -94,7 +94,7 @@ const router = createBrowserRouter([
         children: [
           {
             path: "",
-            element: <LoadMyProject />,
+            element: <LoadProjectState />,
             children: [
               {
                 path: "",

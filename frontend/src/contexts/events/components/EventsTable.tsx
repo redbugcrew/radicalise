@@ -8,7 +8,7 @@ import { SearchField, SortableTh, sortData } from "../../../components/SortableT
 import { format, isFuture } from "date-fns"
 import { useAppSelector } from "../../../store"
 import PersonEventAttendanceIcon from "./AttendanceIcon"
-import { currentProjectPath } from "../../../pages/LoadMyProject"
+import { currentProjectPath } from "../../../pages/LoadProjectState"
 
 interface EventsTableProps {
   events: CalendarEvent[]

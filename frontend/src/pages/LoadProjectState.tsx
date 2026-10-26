@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { Outlet, useParams } from "react-router-dom"
 import { loadInitialProjectData } from "../store"
 
-export default function LoadMyProject() {
+export default function LoadProjectState() {
   const { projectSlug } = useParams<"projectSlug">()
   const [loading, setLoading] = useState(true)
 
