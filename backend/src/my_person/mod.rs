@@ -15,8 +15,7 @@ use crate::{
     },
     realtime::RealtimeState,
     shared::{
-        default_project_id,
-        entities::{CircleId, CircleInvolvement, IntervalId, UserId},
+        entities::{CircleId, CircleInvolvement, IntervalId, ProjectId, UserId},
         events::AppEvent,
     },
 };
@@ -32,15 +31,22 @@ pub fn router() -> OpenApiRouter {
         .routes(routes!(update_my_participation))
 }
 
-#[utoipa::path(get, path = "/", responses(
+#[utoipa::path(
+    get,
+    path = "/",
+    params(
+        ("project_id" = i64, Path, description = "Project ID")
+    ),
+    responses(
         (status = 200, description = "Project found successfully", body = MyInitialData),
         (status = NOT_FOUND, description = "Project was not found", body = ()),
         (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
-    ),)]
-async fn get_my_state(Extension(pool): Extension<SqlitePool>, auth_session: AuthSession) -> impl IntoResponse {
+    ),
+)]
+async fn get_my_state(Extension(pool): Extension<SqlitePool>, auth_session: AuthSession, Path(project_id): Path<i64>) -> impl IntoResponse {
     match auth_session.user().await {
         Some(user) => {
-            let result = repo::find_initial_data_for_user(default_project_id(), UserId::new(user.id), &pool).await;
+            let result = repo::find_initial_data_for_user(ProjectId::new(project_id), UserId::new(user.id), &pool).await;
 
             match result {
                 Ok(initial_data) => (StatusCode::OK, Json(initial_data)).into_response(),
@@ -58,8 +64,9 @@ async fn get_my_state(Extension(pool): Extension<SqlitePool>, auth_session: Auth
     get,
     path = "/participation/interval/{interval_id}/circle/{circle_id}",
     params(
+        ("project_id" = i64, Path, description = "Project ID"),
         ("interval_id" = i64, Path, description = "Interval ID"),
-        ("circle_id" = i64, Path, description = "Circle ID")
+        ("circle_id" = i64, Path, description = "Circle ID"),
     ),
     responses(
         (status = 200, description = "Fetched my participation successfully", body = Option<CircleInvolvement>),
@@ -67,13 +74,13 @@ async fn get_my_state(Extension(pool): Extension<SqlitePool>, auth_session: Auth
     ),
 )]
 async fn my_participation(
-    Path((interval_id, circle_id)): Path<(i64, i64)>,
+    Path((project_id, interval_id, circle_id)): Path<(i64, i64, i64)>,
     Extension(pool): Extension<SqlitePool>,
     auth_session: AuthSession,
 ) -> impl IntoResponse {
     match auth_session.user().await {
         Some(user) => {
-            let person_id = find_person_id_for_user(default_project_id(), UserId::new(user.id), &pool).await;
+            let person_id = find_person_id_for_user(ProjectId::new(project_id), UserId::new(user.id), &pool).await;
             if person_id.is_err() {
                 return (StatusCode::NOT_FOUND, ()).into_response();
             }
@@ -86,7 +93,7 @@ async fn my_participation(
                 person_id, interval_id, circle_id
             );
 
-            let result = find_circle_involvement(default_project_id(), circle_id, person_id, interval_id, &pool).await;
+            let result = find_circle_involvement(ProjectId::new(project_id), circle_id, person_id, interval_id, &pool).await;
 
             match result {
                 Ok(Some(data)) => (StatusCode::OK, Json(data)).into_response(),
@@ -102,6 +109,7 @@ async fn my_participation(
     post,
     path = "/interval/{interval_id}/my_participation",
     params(
+        ("project_id" = i64, Path, description = "Project ID"),
         ("interval_id" = i64, Path, description = "Interval ID")
     ),
     request_body(
@@ -114,7 +122,7 @@ async fn my_participation(
     ),
 )]
 async fn update_my_participation(
-    Path(interval_id): Path<i64>,
+    Path((project_id, interval_id)): Path<(i64, i64)>,
     Extension(pool): Extension<SqlitePool>,
     Extension(realtime_state): Extension<RealtimeState>,
     auth_session: AuthSession,
@@ -125,7 +133,9 @@ async fn update_my_participation(
         None => return (StatusCode::UNAUTHORIZED, ()).into_response(),
     };
 
-    let person_id = match find_person_id_for_user(default_project_id(), UserId::new(user.id), &pool).await {
+    let project_id = ProjectId::new(project_id);
+
+    let person_id = match find_person_id_for_user(project_id.clone(), UserId::new(user.id), &pool).await {
         Ok(person_id) => person_id,
         Err(_) => return (StatusCode::NOT_FOUND, ()).into_response(),
     };
@@ -136,8 +146,6 @@ async fn update_my_participation(
         Ok(circles) => circles,
         Err(_) => return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
     };
-
-    let project_id = default_project_id();
 
     let update_result = update_my_involvements(person_id.clone(), interval_id.clone(), input, &pool).await;
 

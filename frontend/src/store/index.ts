@@ -80,9 +80,9 @@ async function loadProjectData(projectId: number, store: AppStore, api: ReturnTy
     })
 }
 
-async function loadMeData(store: AppStore, api: ReturnType<typeof getApi>): Promise<Response | null> {
+async function loadMeData(projectId: number, store: AppStore, api: ReturnType<typeof getApi>): Promise<Response | null> {
   return api.api
-    .getMyState()
+    .getMyState(projectId)
     .then((response) => {
       store.dispatch(meLoaded(response.data))
       return null
@@ -107,7 +107,7 @@ export async function loadInitialProjectData(projectId: number): Promise<boolean
     return true
   } else {
     console.log("Loading initial data from API...")
-    return loadMeData(store, api)
+    return loadMeData(projectId, store, api)
       .then(() => loadProjectData(projectId, store, api))
       .then(() => true)
   }

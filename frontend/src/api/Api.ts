@@ -647,50 +647,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name GetMyState
-     * @request GET:/api/my_person
-     */
-    getMyState: (params: RequestParams = {}) =>
-      this.request<MyInitialData, any>({
-        path: `/api/my_person`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name UpdateMyParticipation
-     * @request POST:/api/my_person/interval/{interval_id}/my_participation
-     */
-    updateMyParticipation: (intervalId: number, data: MyParticipationInput, params: RequestParams = {}) =>
-      this.request<AppEvent[], any>({
-        path: `/api/my_person/interval/${intervalId}/my_participation`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name MyParticipation
-     * @request GET:/api/my_person/participation/interval/{interval_id}/circle/{circle_id}
-     */
-    myParticipation: (intervalId: number, circleId: number, params: RequestParams = {}) =>
-      this.request<CircleInvolvement | null, any>({
-        path: `/api/my_person/participation/interval/${intervalId}/circle/${circleId}`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name GetVisibleProjects
      * @request GET:/api/my_user/projects/visible
      */
@@ -886,6 +842,50 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<any, string>({
         path: `/api/projects/${projectId}/invitations/invitation/${token}/accept`,
         method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GetMyState
+     * @request GET:/api/projects/{project_id}/my_person
+     */
+    getMyState: (projectId: number, params: RequestParams = {}) =>
+      this.request<MyInitialData, any>({
+        path: `/api/projects/${projectId}/my_person`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdateMyParticipation
+     * @request POST:/api/projects/{project_id}/my_person/interval/{interval_id}/my_participation
+     */
+    updateMyParticipation: (projectId: number, intervalId: number, data: MyParticipationInput, params: RequestParams = {}) =>
+      this.request<AppEvent[], any>({
+        path: `/api/projects/${projectId}/my_person/interval/${intervalId}/my_participation`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name MyParticipation
+     * @request GET:/api/projects/{project_id}/my_person/participation/interval/{interval_id}/circle/{circle_id}
+     */
+    myParticipation: (projectId: number, intervalId: number, circleId: number, params: RequestParams = {}) =>
+      this.request<CircleInvolvement | null, any>({
+        path: `/api/projects/${projectId}/my_person/participation/interval/${intervalId}/circle/${circleId}`,
+        method: "GET",
         format: "json",
         ...params,
       }),
