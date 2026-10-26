@@ -3,7 +3,7 @@ pub mod repo;
 
 use std::vec;
 
-use axum::{Extension, Json, http::StatusCode, response::IntoResponse};
+use axum::{Extension, Json, extract::Path, http::StatusCode, response::IntoResponse};
 use serde::Deserialize;
 use sqlx::SqlitePool;
 use utoipa::ToSchema;
@@ -15,7 +15,7 @@ use crate::{
     people::repo::find_person_by_user_id,
     realtime::RealtimeState,
     shared::{
-        entities::{AttendanceIntention, UserId},
+        entities::{AttendanceIntention, ProjectId, UserId},
         events::AppEvent,
     },
 };
@@ -34,6 +34,9 @@ pub struct CreateAttendanceRequest {
     post,
     path = "/",
     request_body(content = CreateAttendanceRequest, content_type = "application/json"),
+    params(
+        ("project_id" = i64, Path, description = "Project ID")
+    ),
     responses(
         (status = CREATED, body = Vec<AppEvent>),
         (status = INTERNAL_SERVER_ERROR, body = ())
@@ -42,12 +45,14 @@ pub struct CreateAttendanceRequest {
 async fn create_calendar_event_attendance(
     Extension(realtime_state): Extension<RealtimeState>,
     auth_session: AuthSession,
+    Path(project_id): Path<i64>,
     Extension(pool): Extension<SqlitePool>,
     axum::extract::Json(input): axum::extract::Json<CreateAttendanceRequest>,
 ) -> impl IntoResponse {
     let user_id = UserId::new(auth_session.user().await.unwrap().id);
+    let project_id = ProjectId::new(project_id);
 
-    let person = match find_person_by_user_id(user_id.clone(), crate::shared::default_project_id(), &pool).await {
+    let person = match find_person_by_user_id(user_id.clone(), project_id, &pool).await {
         Ok(Some(person)) => person,
         Ok(None) => {
             println!("no person found for user_id {:?}", user_id);

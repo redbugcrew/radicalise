@@ -633,22 +633,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name CreateCalendarEventAttendance
-     * @request POST:/api/calendar_event_attendances
-     */
-    createCalendarEventAttendance: (data: CreateAttendanceRequest, params: RequestParams = {}) =>
-      this.request<AppEvent[], any>({
-        path: `/api/calendar_event_attendances`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name CreateCircle
      * @request POST:/api/circles
      */
@@ -776,6 +760,22 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<Project[], any>({
         path: `/api/me/projects/visible`,
         method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CreateCalendarEventAttendance
+     * @request POST:/api/projects/{project_id}/calendar_event_attendances
+     */
+    createCalendarEventAttendance: (projectId: number, data: CreateAttendanceRequest, params: RequestParams = {}) =>
+      this.request<AppEvent[], any>({
+        path: `/api/projects/${projectId}/calendar_event_attendances`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),

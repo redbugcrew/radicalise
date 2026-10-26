@@ -24,7 +24,7 @@ export default function MyAttendance({ event, readonly }: MyAttendanceSelectorPr
     console.log(`Event ID: ${eventId}, New Intention: ${intention}`)
 
     getApi()
-      .api.createCalendarEventAttendance({
+      .api.createCalendarEventAttendance(currentPerson.project_id, {
         calendar_event_id: eventId,
         intention: intention,
       })
