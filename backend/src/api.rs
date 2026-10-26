@@ -3,7 +3,8 @@ use utoipa_axum::router::OpenApiRouter;
 pub fn private_api_router() -> OpenApiRouter {
     OpenApiRouter::new()
         .nest("/projects/{project_id}", private_project_api_router())
-        .nest("/me", crate::me::router())
+        .nest("/my_person", crate::my_person::router())
+        .nest("/my_user", crate::my_user::router())
         .nest("/dev", crate::dev::router())
 }
 

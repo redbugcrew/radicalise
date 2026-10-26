@@ -4,20 +4,19 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     auth::auth_backend::AuthSession,
-    me::{
+    my_person::{
         events::MeEvent,
         my_involvement::{MyParticipationInput, update_my_involvements},
         repo::{MyInitialData, find_person_id_for_user},
     },
     my_project::{
         involvements_repo::{find_circle_involvement, find_circles_for_person_in_interval},
-        repo::find_projects_for_user,
         strip_data::strip_private_data,
     },
     realtime::RealtimeState,
     shared::{
         default_project_id,
-        entities::{CircleId, CircleInvolvement, IntervalId, Project, UserId},
+        entities::{CircleId, CircleInvolvement, IntervalId, UserId},
         events::AppEvent,
     },
 };
@@ -28,33 +27,9 @@ pub mod repo;
 
 pub fn router() -> OpenApiRouter {
     OpenApiRouter::new()
-        .routes(routes!(get_visible_projects))
         .routes(routes!(get_my_state))
         .routes(routes!(my_participation))
         .routes(routes!(update_my_participation))
-}
-
-#[utoipa::path(
-    get,
-    path = "/projects/visible",
-    responses(
-        (status = 200, body = [Project]),
-        (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
-        (status = UNAUTHORIZED, description = "Unauthorized", body = ()),
-    ),
-)]
-async fn get_visible_projects(auth_session: AuthSession, Extension(pool): Extension<SqlitePool>) -> impl IntoResponse {
-    let user_id = match auth_session.user().await {
-        Some(user) => UserId::new(user.id),
-        None => {
-            eprintln!("Unauthorized access to get_visible_projects");
-            return (StatusCode::UNAUTHORIZED, ()).into_response();
-        }
-    };
-
-    let projects = find_projects_for_user(user_id, &pool).await.unwrap_or_default();
-
-    (StatusCode::OK, Json(projects)).into_response()
 }
 
 #[utoipa::path(get, path = "/", responses(

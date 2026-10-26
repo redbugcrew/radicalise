@@ -4,7 +4,7 @@ use utoipa::ToSchema;
 use crate::{
     crews::repo::{find_crew_involvements, intervals_participated_since_last_convened, set_crew_convenor},
     intervals::repo::{IntervalType, find_interval, get_interval_type},
-    me::repo::{self},
+    my_person::repo::{self},
     my_project::involvements_repo::{CircleInvolvementRecord, upsert_circle_involvement},
     shared::entities::{CrewId, CrewInvolvement, IntervalId, InvolvementStatus, OptOutType, ParticipationIntention, PersonId},
 };

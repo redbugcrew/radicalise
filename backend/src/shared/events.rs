@@ -4,7 +4,7 @@ use utoipa::ToSchema;
 #[allow(clippy::enum_variant_names)]
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
 pub enum AppEvent {
-    MeEvent(crate::me::events::MeEvent),
+    MeEvent(crate::my_person::events::MeEvent),
     IntervalsEvent(crate::intervals::events::IntervalsEvent),
     CrewsEvent(crate::crews::events::CrewsEvent),
     ProjectEvent(crate::my_project::events::ProjectEvent),
