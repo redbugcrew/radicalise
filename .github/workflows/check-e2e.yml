@@ -19,6 +19,7 @@ jobs:
         working-directory: ./frontend
     env:
       DATABASE_URL: sqlite://${{ github.workspace }}/backend/data/test/test_radicalise.sqlite
+      PATH: $GITHUB_PATH:$HOME/.cargo/bin
     steps:
       - name: Checkout
         uses: actions/checkout@v4
