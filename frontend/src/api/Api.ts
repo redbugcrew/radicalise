@@ -649,38 +649,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name CreateCalendarEvent
-     * @request POST:/api/calendar_events
-     */
-    createCalendarEvent: (data: CalendarEvent, params: RequestParams = {}) =>
-      this.request<AppEvent[], any>({
-        path: `/api/calendar_events`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name UpdateCalendarEvent
-     * @request PUT:/api/calendar_events/{event_id}
-     */
-    updateCalendarEvent: (eventId: string, data: CalendarEvent, params: RequestParams = {}) =>
-      this.request<AppEvent[], any>({
-        path: `/api/calendar_events/${eventId}`,
-        method: "PUT",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name CreateCircle
      * @request POST:/api/circles
      */
@@ -808,6 +776,38 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<Project[], any>({
         path: `/api/me/projects/visible`,
         method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CreateCalendarEvent
+     * @request POST:/api/projects/{project_id}/calendar_events
+     */
+    createCalendarEvent: (projectId: number, data: CalendarEvent, params: RequestParams = {}) =>
+      this.request<AppEvent[], any>({
+        path: `/api/projects/${projectId}/calendar_events`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdateCalendarEvent
+     * @request PUT:/api/projects/{project_id}/calendar_events/{event_id}
+     */
+    updateCalendarEvent: (projectId: number, eventId: number, data: CalendarEvent, params: RequestParams = {}) =>
+      this.request<AppEvent[], any>({
+        path: `/api/projects/${projectId}/calendar_events/${eventId}`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),
