@@ -44,6 +44,20 @@ jobs:
           fi
           echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
 
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            backend/target
+          key: ${{ runner.os }}-cargo-cache-${{ hashFiles('backend/Cargo.lock') }}
+
+      - name: Build backend
+        run: |
+          cd ../backend
+          cargo build --release
+
       - name: Initialize test database
         run: |
           export PATH="$HOME/.cargo/bin:$PATH"
@@ -55,7 +69,7 @@ jobs:
       - name: Start backend
         run: |
           cd ../backend
-          cargo run &
+          cargo run --release &
           # Wait for backend to be ready (timeout after 2 minutes)
           count=0
           until curl -s localhost:8200/api-docs/openapi.json > /dev/null || [ $count -eq 60 ]; do
