@@ -5,7 +5,7 @@ import { getApi } from "../api"
 import { Container, Stack, Title, Text, AppShell } from "@mantine/core"
 import { MyProjectsContext } from "./LoadMyProjects"
 
-interface SelectedProjectData {
+export interface SelectedProjectData {
   project: Project
   canAccess: boolean
 }

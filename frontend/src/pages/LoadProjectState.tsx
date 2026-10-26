@@ -1,16 +1,28 @@
 import { useEffect, useState } from "react"
 import { Outlet, useParams } from "react-router-dom"
 import { loadInitialProjectData } from "../store"
+import { SelectedProjectContext, type SelectedProjectData } from "./LoadSelectedProject"
 
 export default function LoadProjectState() {
-  const { projectSlug } = useParams<"projectSlug">()
+  return (
+    <SelectedProjectContext.Consumer>
+      {(projectData) => projectData && <LoadProjectStateInner projectData={projectData} />}
+    </SelectedProjectContext.Consumer>
+  )
+}
+
+interface LoadProjectStateInnerProps {
+  projectData: SelectedProjectData
+}
+
+function LoadProjectStateInner({ projectData }: LoadProjectStateInnerProps) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    console.log("Loading project with slug:", projectSlug)
+    console.log("Loading project with slug:", projectData.project.slug)
 
     loadInitialProjectData().then(() => setLoading(false))
-  }, [projectSlug])
+  }, [projectData.project.slug, projectData.canAccess])
 
   return <div>{loading ? null : <Outlet />}</div>
 }

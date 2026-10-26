@@ -3,6 +3,7 @@ import { useDisclosure } from "@mantine/hooks"
 import { Outlet } from "react-router-dom"
 import { Anchor, PersonBadge } from "../../components"
 import { useAppSelector } from "../../store"
+import { currentProjectPath } from "../LoadProjectState"
 
 export default function Layout() {
   const [opened, { toggle }] = useDisclosure()
@@ -19,7 +20,7 @@ export default function Layout() {
             <Anchor href="/">{project ? project.name : "Radicalise!"}</Anchor>
           </Group>
           {person && (
-            <Anchor href={`/people/${person.id}`} onClick={toggle}>
+            <Anchor href={currentProjectPath(`/people/${person.id}`)} onClick={toggle}>
               <PersonBadge person={person} variant="transparent" noText />
             </Anchor>
           )}
