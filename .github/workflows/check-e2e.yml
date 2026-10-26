@@ -31,6 +31,13 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Install sqlx-cli
+        run: |
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+          if [[ ! -x "$HOME/.cargo/bin/sqlx" ]]; then
+            cargo install sqlx-cli --version 0.8.3 --no-default-features --features native-tls,sqlite
+          fi
+
       - name: Initialize test database
         run: just db-test-init
 
