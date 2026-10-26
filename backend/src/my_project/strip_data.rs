@@ -16,7 +16,7 @@ pub fn strip_private_data_from_initial_data(data: &InitialData, viewer_circles: 
     result.current_interval_data = data
         .current_interval_data
         .as_ref()
-        .map(|current_interval_data| strip_private_data_from_interval_data(&current_interval_data, viewer_circles, person_id));
+        .map(|current_interval_data| strip_private_data_from_interval_data(current_interval_data, viewer_circles, person_id));
 
     result
 }
