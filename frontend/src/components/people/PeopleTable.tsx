@@ -42,7 +42,7 @@ interface PersonLinkWithCapacityProps {
 }
 
 function PersonLinkWithCapacity({ personId, personName, avatarId, capacityScore, dimmed, intervalId }: PersonLinkWithCapacityProps) {
-  let projectSlug = useCurrentProjectSlug()
+  const projectSlug = useCurrentProjectSlug()
   let link = `/people/${personId}`
   if (intervalId) {
     link += `#interval${intervalId}`

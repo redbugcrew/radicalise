@@ -7,7 +7,6 @@ import { useEffect, useState } from "react"
 import { getApi } from "../api"
 import type { CircleInvolvement, MyParticipationInput } from "../api/Api"
 import { useCurrentInterval } from "../store/current_interval"
-import { currentProjectPath } from "./LoadProjectState"
 
 export default function MyParticipation() {
   const allIntervals = useAppSelector((state) => state.intervals)

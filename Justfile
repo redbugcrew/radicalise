@@ -22,6 +22,5 @@ format:
     cd frontend && npm run format:write
     cd backend && cargo fmt
 
-[working-directory: 'frontend']
 gen-api:
-    npm run swagger
+    cd frontend && npm run swagger
