@@ -31,6 +31,6 @@ test.describe("Project Page", () => {
 
   test("should load project by slug", async ({ page }) => {
     await page.goto("/project/foobar/")
-    await expect(page.getByText("Radicalise!")).toBeVisible()
+    await expect(page.getByText("Welcome back!")).toBeVisible()
   })
 })
