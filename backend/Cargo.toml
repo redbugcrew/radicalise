@@ -12,7 +12,7 @@ cookie = { version = "0.18", features = ["signed"] }
 lazy_static = "1.5"
 password-auth = "1.0"
 reqwest = { version = "0.13", features = ["rustls"] }
-resend-rs = "0.32"
+resend-rs = "0.35"
 serde = "1.0"
 serde_json = "1.0"
 sqlx = { version = "0.9", features = [

@@ -586,6 +586,20 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name LogOut
+     * @request POST:/api/auth/log_out
+     */
+    logOut: (params: RequestParams = {}) =>
+      this.request<any, string>({
+        path: `/api/auth/log_out`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name Login
      * @request POST:/api/auth/login
      */
@@ -984,7 +998,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name GetCalendarIcs
      * @request GET:/api/public/{calendar_token}/calendar.ics
      */
-    getCalendarIcs: (calendarToken: string, params: RequestParams = {}) =>
+    getCalendarIcs: (projectId: number, calendarToken: string, params: RequestParams = {}) =>
       this.request<string, any>({
         path: `/api/public/${calendarToken}/calendar.ics`,
         method: "GET",
