@@ -9,11 +9,17 @@ import { notifications } from "@mantine/notifications"
 
 export default function InvitePerson() {
   const circles = useAppSelector((state) => state.circles.rootCircles)
+  const projectId = useAppSelector((state) => state.project?.id)
   const navigate = useNavigate()
+
+  if (!projectId) {
+    console.error("Project ID is not available.")
+    return null
+  }
 
   const onSubmit = (values: InvitePersonRequest) => {
     return getApi()
-      .api.invitePerson(values)
+      .api.invitePerson(projectId, values)
       .then((response) => {
         const { events, person } = response.data
         handleAppEvents(events)

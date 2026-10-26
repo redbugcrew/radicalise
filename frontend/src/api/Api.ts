@@ -647,36 +647,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name InvitePerson
-     * @request POST:/api/invitations/invitation/new
-     */
-    invitePerson: (data: InvitePersonRequest, params: RequestParams = {}) =>
-      this.request<InvitePersonResponse, string>({
-        path: `/api/invitations/invitation/new`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AcceptInvitation
-     * @request POST:/api/invitations/invitation/{token}/accept
-     */
-    acceptInvitation: (token: string, params: RequestParams = {}) =>
-      this.request<any, string>({
-        path: `/api/invitations/invitation/${token}/accept`,
-        method: "POST",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name GetMyState
      * @request GET:/api/me
      */
@@ -893,6 +863,36 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name InvitePerson
+     * @request POST:/api/projects/{project_id}/invitations/invitation/new
+     */
+    invitePerson: (projectId: number, data: InvitePersonRequest, params: RequestParams = {}) =>
+      this.request<InvitePersonResponse, string>({
+        path: `/api/projects/${projectId}/invitations/invitation/new`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AcceptInvitation
+     * @request POST:/api/projects/{project_id}/invitations/invitation/{token}/accept
+     */
+    acceptInvitation: (token: string, projectId: number, params: RequestParams = {}) =>
+      this.request<any, string>({
+        path: `/api/projects/${projectId}/invitations/invitation/${token}/accept`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name UpdateProject
      * @request PUT:/api/projects/{project_id}/my_project
      */
@@ -956,7 +956,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name GetInvitation
      * @request GET:/api/public/invitation/{token}
      */
-    getInvitation: (token: string, params: RequestParams = {}) =>
+    getInvitation: (token: string, projectId: number, params: RequestParams = {}) =>
       this.request<CircleInvitationDetails, string>({
         path: `/api/public/invitation/${token}`,
         method: "GET",

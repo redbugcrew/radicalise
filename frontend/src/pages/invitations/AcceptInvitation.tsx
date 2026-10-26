@@ -8,6 +8,7 @@ import { actionSuccess, DisplayActionResult, type ActionPromiseResult } from "..
 import { getApi } from "../../api"
 import { useState } from "react"
 import { notifications } from "@mantine/notifications"
+import { SelectedProjectContext } from "../LoadSelectedProject"
 
 function AcceptInvitationLoggedOut() {
   const navigate = useNavigate()
@@ -26,16 +27,17 @@ interface AcceptInvitationLoggedInProps {
   token: string
   onAuthFailure: () => void
   onAccepted: () => void
+  projectId: number
 }
 
-function AcceptInvitationLoggedIn({ token, onAuthFailure, onAccepted }: AcceptInvitationLoggedInProps) {
+function AcceptInvitationLoggedIn({ token, onAuthFailure, onAccepted, projectId }: AcceptInvitationLoggedInProps) {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<ActionPromiseResult | null>(null)
 
   const handleAccept = () => {
     setLoading(true)
     getApi()
-      .api.acceptInvitation(token)
+      .api.acceptInvitation(token, projectId)
       .then(() => {
         setResult(actionSuccess())
         onAccepted()
@@ -97,44 +99,59 @@ export default function AcceptInvitation() {
   }
 
   return (
-    <Container maw={600} my={40}>
-      <TokenOrRedirect redirectTo="/">
-        {(token) => (
-          <InvitationOrError token={token} onNotFound={<InvitationNotFound />}>
-            {({ project, circle }) => (
-              <MaybeLoggedIn>
-                {(loggedIn, handleAuthFailure) => (
-                  <Stack gap="md">
-                    <Stack gap={0} mb="md">
-                      <Title order={2} c="dimmed" m={0}>
-                        {project.name}
-                      </Title>
-                      <Title order={1} mt={0} lh={1.2}>
-                        You have been invited to participate
-                      </Title>
-                    </Stack>
-                    <Text size="lg">
-                      This is a platform for people to manage their own participation in projects, opting in to activities only when it fits
-                      their interest and capacity.
-                    </Text>
+    <SelectedProjectContext.Consumer>
+      {(selectedProject) =>
+        !selectedProject ? (
+          <Container>
+            <p>No project specified</p>
+          </Container>
+        ) : (
+          <Container maw={600} my={40}>
+            <TokenOrRedirect redirectTo="/">
+              {(token) => (
+                <InvitationOrError token={token} onNotFound={<InvitationNotFound />} projectId={selectedProject.project.id}>
+                  {({ project, circle }) => (
+                    <MaybeLoggedIn>
+                      {(loggedIn, handleAuthFailure) => (
+                        <Stack gap="md">
+                          <Stack gap={0} mb="md">
+                            <Title order={2} c="dimmed" m={0}>
+                              {project.name}
+                            </Title>
+                            <Title order={1} mt={0} lh={1.2}>
+                              You have been invited to participate
+                            </Title>
+                          </Stack>
+                          <Text size="lg">
+                            This is a platform for people to manage their own participation in projects, opting in to activities only when
+                            it fits their interest and capacity.
+                          </Text>
 
-                    <Text>
-                      <strong>{capitalizeFirstLetter(project.noun_name ?? project.name ?? "This unnamed project")}</strong> would like to
-                      invite you to join their project, and engage in the circle called <strong>{circle.name}</strong>.
-                    </Text>
+                          <Text>
+                            <strong>{capitalizeFirstLetter(project.noun_name ?? project.name ?? "This unnamed project")}</strong> would like
+                            to invite you to join their project, and engage in the circle called <strong>{circle.name}</strong>.
+                          </Text>
 
-                    {loggedIn ? (
-                      <AcceptInvitationLoggedIn token={token} onAuthFailure={handleAuthFailure} onAccepted={onAccepted} />
-                    ) : (
-                      <AcceptInvitationLoggedOut />
-                    )}
-                  </Stack>
-                )}
-              </MaybeLoggedIn>
-            )}
-          </InvitationOrError>
-        )}
-      </TokenOrRedirect>
-    </Container>
+                          {loggedIn ? (
+                            <AcceptInvitationLoggedIn
+                              token={token}
+                              onAuthFailure={handleAuthFailure}
+                              onAccepted={onAccepted}
+                              projectId={selectedProject.project.id}
+                            />
+                          ) : (
+                            <AcceptInvitationLoggedOut />
+                          )}
+                        </Stack>
+                      )}
+                    </MaybeLoggedIn>
+                  )}
+                </InvitationOrError>
+              )}
+            </TokenOrRedirect>
+          </Container>
+        )
+      }
+    </SelectedProjectContext.Consumer>
   )
 }

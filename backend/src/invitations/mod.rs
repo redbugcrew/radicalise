@@ -17,7 +17,6 @@ use crate::{
     people::events::PeopleEvent,
     realtime::RealtimeState,
     shared::{
-        default_project_id,
         email_sender::ResendEmailSender,
         entities::{Circle, CircleId, CircleInvitation, Person, Project, ProjectId, UserId},
         events::AppEvent,
@@ -42,6 +41,9 @@ struct InvitePersonResponse {
 
 #[utoipa::path(post, path = "/invitation/new",
     request_body(content = InvitePersonRequest, content_type = "application/json"),
+    params(
+        ("project_id" = i64, Path, description = "Project ID")
+    ),
     responses(
         (status = 200, body = InvitePersonResponse),
         (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
@@ -49,6 +51,7 @@ struct InvitePersonResponse {
     ),
 )]
 pub async fn invite_person(
+    Path(project_id): Path<i64>,
     Extension(pool): Extension<SqlitePool>,
     Extension(realtime_state): Extension<RealtimeState>,
     auth_session: AuthSession,
@@ -62,7 +65,7 @@ pub async fn invite_person(
         None => return (StatusCode::UNAUTHORIZED, "Unauthorized").into_response(),
     };
 
-    let current_interval = match find_current_interval(default_project_id(), &pool).await {
+    let current_interval = match find_current_interval(ProjectId::new(project_id), &pool).await {
         Ok(Some(interval)) => interval,
         Ok(None) => {
             return (StatusCode::INTERNAL_SERVER_ERROR, "No current interval").into_response();
@@ -77,7 +80,7 @@ pub async fn invite_person(
         &ResendEmailSender::new(resend),
         &input,
         current_user_id,
-        default_project_id(),
+        ProjectId::new(project_id),
         current_interval,
     )
     .await;
@@ -129,10 +132,11 @@ pub struct CircleInvitationDetails {
         (status = BAD_REQUEST,  body = String),
     ),
     params(
-        ("token" = String, Path, description = "Invitation token")
+        ("token" = String, Path, description = "Invitation token"),
+        ("project_id" = i64, Path, description = "Project ID")
     )
 )]
-pub async fn get_invitation(Path(token): Path<String>, Extension(pool): Extension<SqlitePool>) -> impl IntoResponse {
+pub async fn get_invitation(Path((token, project_id)): Path<(String, i64)>, Extension(pool): Extension<SqlitePool>) -> impl IntoResponse {
     let invitation = match find_circle_invitation_by_token(token, &pool).await {
         Ok(invitation) => invitation,
         Err(_) => return (StatusCode::NOT_FOUND, ()).into_response(),
@@ -148,6 +152,10 @@ pub async fn get_invitation(Path(token): Path<String>, Extension(pool): Extensio
         Err(_) => return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
     };
 
+    if project.id != project_id {
+        return (StatusCode::BAD_REQUEST, "Project ID does not match invitation").into_response();
+    }
+
     (
         StatusCode::OK,
         Json(CircleInvitationDetails {
@@ -162,17 +170,18 @@ pub async fn get_invitation(Path(token): Path<String>, Extension(pool): Extensio
 #[utoipa::path(
     post,
     path = "/invitation/{token}/accept",
+    params(
+        ("token" = String, Path, description = "Invitation token"),
+        ("project_id" = i64, Path, description = "Project ID")
+    ),
     responses(
         (status = 200, body = ()),
         (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
         (status = BAD_REQUEST,  body = String),
     ),
-    params(
-        ("token" = String, Path, description = "Invitation token")
-    )
 )]
 pub async fn accept_invitation(
-    Path(token): Path<String>,
+    Path((token, project_id)): Path<(String, i64)>,
     Extension(pool): Extension<SqlitePool>,
     auth_session: AuthSession,
 ) -> impl IntoResponse {
@@ -181,7 +190,7 @@ pub async fn accept_invitation(
         None => return (StatusCode::UNAUTHORIZED, "Unauthorized").into_response(),
     };
 
-    let current_interval = match find_current_interval(default_project_id(), &pool).await {
+    let current_interval = match find_current_interval(ProjectId::new(project_id), &pool).await {
         Ok(Some(interval)) => interval,
         Ok(None) => {
             return (StatusCode::INTERNAL_SERVER_ERROR, "No current interval").into_response();
