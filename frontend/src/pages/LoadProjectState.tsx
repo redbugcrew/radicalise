@@ -27,11 +27,15 @@ function LoadProjectStateInner({ projectData }: LoadProjectStateInnerProps) {
   return <div>{loading ? null : <Outlet />}</div>
 }
 
-export function currentProjectPath(path: string) {
-  const { projectSlug } = useParams<"projectSlug">()
-  if (path.startsWith("/")) {
+export function currentProjectPath(path: string, projectSlug?: string) {
+  if (path.startsWith("/") && projectSlug) {
     return `/project/${projectSlug}${path}`
   } else {
     return path
   }
+}
+
+export function useCurrentProjectSlug(): string | undefined {
+  const { projectSlug } = useParams<"projectSlug">()
+  return projectSlug
 }

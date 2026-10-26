@@ -1,4 +1,4 @@
-import { AppShell, Burger, Container, Group } from "@mantine/core"
+import { AppShell, Container } from "@mantine/core"
 import { useDisclosure } from "@mantine/hooks"
 import {
   IconBrandGithub,

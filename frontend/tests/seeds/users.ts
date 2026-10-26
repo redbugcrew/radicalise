@@ -1,5 +1,3 @@
-import { getDbConnection } from "./connection"
-
 const USER_SEEDS: Record<string, { email: string; passwordHash: string; displayName: string }> = {
   andi: {
     email: "andi@example.com",
