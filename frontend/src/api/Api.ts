@@ -634,11 +634,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @name RecomputeImplicitInvolvements
-     * @request POST:/api/dev/recompute_implicit_involvements
+     * @request POST:/api/dev/projects/{project_id}/recompute_implicit_involvements
      */
-    recomputeImplicitInvolvements: (params: RequestParams = {}) =>
+    recomputeImplicitInvolvements: (projectId: number, params: RequestParams = {}) =>
       this.request<any, any>({
-        path: `/api/dev/recompute_implicit_involvements`,
+        path: `/api/dev/projects/${projectId}/recompute_implicit_involvements`,
         method: "POST",
         format: "json",
         ...params,

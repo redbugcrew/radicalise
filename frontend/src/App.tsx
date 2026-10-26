@@ -16,7 +16,6 @@ import {
   NewInterval,
   EditProject,
   LoadSelectedProject,
-  Dev,
   InvitePerson,
   AcceptInvitation,
   LoadProjectState,
@@ -83,10 +82,6 @@ const router = createBrowserRouter([
             element: <InvitePerson />,
           },
         ],
-      },
-      {
-        path: "dev",
-        element: <Dev />,
       },
       {
         path: "project",
