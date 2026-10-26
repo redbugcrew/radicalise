@@ -8,7 +8,6 @@ use crate::{
     peer_roles::{AssignPeerRolesError, assign_interval_peer_roles},
     realtime::RealtimeState,
     shared::{
-        default_project_id,
         entities::{Interval, ProjectId},
         events::AppEvent,
     },

@@ -713,22 +713,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name UpdateCrew
-     * @request PUT:/api/crews/{crew_id}
-     */
-    updateCrew: (crewId: string, data: CrewWithLinks, params: RequestParams = {}) =>
-      this.request<AppEvent[], any>({
-        path: `/api/crews/${crewId}`,
-        method: "PUT",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name RecomputeImplicitInvolvements
      * @request POST:/api/dev/recompute_implicit_involvements
      */
@@ -869,6 +853,22 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     updatePerson: (personId: string, data: Person, params: RequestParams = {}) =>
       this.request<AppEvent[], any>({
         path: `/api/people/${personId}`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdateCrew
+     * @request PUT:/api/projects/{project_id}/crews/{crew_id}
+     */
+    updateCrew: (projectId: number, crewId: number, data: CrewWithLinks, params: RequestParams = {}) =>
+      this.request<AppEvent[], any>({
+        path: `/api/projects/${projectId}/crews/${crewId}`,
         method: "PUT",
         body: data,
         type: ContentType.Json,
