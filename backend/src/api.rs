@@ -2,9 +2,8 @@ use utoipa_axum::router::OpenApiRouter;
 
 pub fn private_api_router() -> OpenApiRouter {
     OpenApiRouter::new()
-        .nest("/projects/{project_id}/my_project", crate::my_project::router())
+        .nest("/projects/{project_id}", private_project_api_router())
         .nest("/me", crate::me::router())
-        .nest("/intervals", crate::intervals::router())
         .nest("/crews", crate::crews::router())
         .nest("/people", crate::people::router())
         .nest("/dev", crate::dev::router())
@@ -13,6 +12,12 @@ pub fn private_api_router() -> OpenApiRouter {
         .nest("/calendar_event_attendances", crate::calendar_event_attendances::router())
         .nest("/circles", crate::circles::router())
         .nest("/invitations", crate::invitations::router())
+}
+
+pub fn private_project_api_router() -> OpenApiRouter {
+    OpenApiRouter::new()
+        .nest("/my_project", crate::my_project::router())
+        .nest("/intervals", crate::intervals::router())
 }
 
 pub fn public_api_router() -> OpenApiRouter {

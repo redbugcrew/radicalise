@@ -1,4 +1,4 @@
-use axum::{Extension, Json, http::StatusCode, response::IntoResponse};
+use axum::{Extension, Json, extract::Path, http::StatusCode, response::IntoResponse};
 use sqlx::SqlitePool;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
@@ -7,7 +7,11 @@ use crate::{
     intervals::{events::IntervalsEvent, tasks::add_interval_implicit_involvements},
     peer_roles::{AssignPeerRolesError, assign_interval_peer_roles},
     realtime::RealtimeState,
-    shared::{default_project_id, entities::Interval, events::AppEvent},
+    shared::{
+        default_project_id,
+        entities::{Interval, ProjectId},
+        events::AppEvent,
+    },
 };
 
 pub mod events;
@@ -20,22 +24,30 @@ pub fn router() -> OpenApiRouter {
         .routes(routes!(start_next_interval))
 }
 
-#[utoipa::path(post, path = "/",
+#[utoipa::path(
+    post,
+    path = "/",
     request_body(content = Interval, content_type = "application/json"),
     responses(
         (status = 201, body = Vec<AppEvent>),
         (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
     ),
+    params(
+        ("project_id" = i64, Path, description = "Project ID")
+    )
 )]
 async fn create_interval(
     Extension(pool): Extension<SqlitePool>,
     Extension(realtime_state): Extension<RealtimeState>,
     auth_session: AuthSession,
+    Path(project_id): Path<i64>,
     axum::extract::Json(interval): axum::extract::Json<Interval>,
 ) -> impl IntoResponse {
     println!("Creating interval: {:?}", interval);
 
-    match repo::insert_interval(interval, default_project_id(), &pool).await {
+    let project_id = ProjectId::new(project_id);
+
+    match repo::insert_interval(interval, project_id, &pool).await {
         Ok(response) => {
             let event = AppEvent::IntervalsEvent(IntervalsEvent::IntervalCreated(response));
             realtime_state.broadcast_app_event(Some(auth_session), event.clone()).await;
@@ -71,15 +83,19 @@ impl IntoResponse for StartNextIntervalError {
         (status = 200, body = Vec<AppEvent>),
         (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = StartNextIntervalError),
     ),
+    params(
+        ("project_id" = i64, Path, description = "Project ID")
+    )
 )]
 async fn start_next_interval(
     Extension(pool): Extension<SqlitePool>,
     Extension(realtime_state): Extension<RealtimeState>,
+    Path(project_id): Path<i64>,
     auth_session: AuthSession,
 ) -> impl IntoResponse {
     println!("Starting next interval");
 
-    let project_id = default_project_id();
+    let project_id = ProjectId::new(project_id);
 
     let current_interval = match repo::find_current_interval(project_id.clone(), &pool).await {
         Ok(Some(interval)) => interval,

@@ -10,12 +10,20 @@ import { useNavigate } from "react-router-dom"
 
 export default function NewInterval() {
   const intervals = useAppSelector((state) => state.intervals)
+  const projectId = useAppSelector((state) => state.project?.id)
+
   const navigate = useNavigate()
+
   const lastInterval = intervals.length > 0 ? intervals[intervals.length - 1] : null
+
+  if (!projectId) {
+    console.error("No project ID found")
+    return null
+  }
 
   const onSubmit = (interval: Interval) => {
     const api = getApi()
-    api.api.createInterval(interval).then((response) => {
+    api.api.createInterval(projectId, interval).then((response) => {
       if (response.status === 201) {
         handleAppEvents(response.data)
         navigate("..")

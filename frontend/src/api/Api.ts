@@ -775,36 +775,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name CreateInterval
-     * @request POST:/api/intervals
-     */
-    createInterval: (data: Interval, params: RequestParams = {}) =>
-      this.request<AppEvent[], any>({
-        path: `/api/intervals`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name StartNextInterval
-     * @request POST:/api/intervals/start_next_interval
-     */
-    startNextInterval: (params: RequestParams = {}) =>
-      this.request<AppEvent[], StartNextIntervalError>({
-        path: `/api/intervals/start_next_interval`,
-        method: "POST",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name InvitePerson
      * @request POST:/api/invitations/invitation/new
      */
@@ -902,6 +872,36 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "PUT",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CreateInterval
+     * @request POST:/api/projects/{project_id}/intervals
+     */
+    createInterval: (projectId: number, data: Interval, params: RequestParams = {}) =>
+      this.request<AppEvent[], any>({
+        path: `/api/projects/${projectId}/intervals`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name StartNextInterval
+     * @request POST:/api/projects/{project_id}/intervals/start_next_interval
+     */
+    startNextInterval: (projectId: number, params: RequestParams = {}) =>
+      this.request<AppEvent[], StartNextIntervalError>({
+        path: `/api/projects/${projectId}/intervals/start_next_interval`,
+        method: "POST",
         format: "json",
         ...params,
       }),
