@@ -45,13 +45,14 @@ jobs:
           echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
 
       - name: Cache cargo
-        uses: actions/cache@v4
+        # swatinem/rust-cache is purpose-built for Cargo. It restores partial
+        # caches via shared-key (so a changed Cargo.lock still reuses most of
+        # target/) and saves even when the job fails, which breaks the
+        # failing-run → no-cache-saved → next-run-rebuilds-everything cycle.
+        uses: swatinem/rust-cache@v2
         with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            backend/target
-          key: ${{ runner.os }}-cargo-cache-${{ hashFiles('backend/Cargo.lock') }}
+          workspaces: backend
+          shared-key: cargo-cache
 
       - name: Build backend
         run: |

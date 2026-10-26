@@ -21,7 +21,7 @@ function LoadProjectStateInner({ projectData }: LoadProjectStateInnerProps) {
   useEffect(() => {
     console.log("Loading project with slug:", projectData.project.slug)
 
-    loadInitialProjectData().then(() => setLoading(false))
+    loadInitialProjectData(projectData.project.id).then(() => setLoading(false))
   }, [projectData.project.slug, projectData.canAccess])
 
   return <div>{loading ? null : <Outlet />}</div>

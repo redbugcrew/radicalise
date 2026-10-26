@@ -13,7 +13,7 @@ export default function EditProject() {
 
   const onSubmit = (values: Project) => {
     getApi()
-      .api.updateProject(values)
+      .api.updateProject(project.id, values)
       .then((response) => {
         if (response.status === 200) {
           handleAppEvents(response.data)

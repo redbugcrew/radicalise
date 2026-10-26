@@ -17,8 +17,7 @@ use crate::{
     people::repo::find_person_by_user_id,
     realtime::RealtimeState,
     shared::{
-        default_project_id,
-        entities::{Interval, IntervalId, Project, UserId},
+        entities::{Interval, IntervalId, Project, ProjectId, UserId},
         events::AppEvent,
     },
 };
@@ -40,12 +39,23 @@ pub fn router() -> OpenApiRouter {
         .routes(routes!(update_project))
 }
 
-#[utoipa::path(get, path = "/state", responses(
+#[utoipa::path(
+    get,
+    path = "/state",
+    responses(
         (status = 200, description = "Project found successfully", body = InitialData),
         (status = NOT_FOUND, description = "Project was not found", body = ()),
         (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
-    ),)]
-async fn get_project_state(auth_session: AuthSession, Extension(pool): Extension<SqlitePool>) -> impl IntoResponse {
+    ),
+    params(
+        ("project_id" = i64, Path, description = "Project ID")
+    )
+)]
+async fn get_project_state(
+    auth_session: AuthSession,
+    Path(project_id): Path<i64>,
+    Extension(pool): Extension<SqlitePool>,
+) -> impl IntoResponse {
     let user_id = match auth_session.user().await {
         Some(user) => UserId::new(user.id),
         None => {
@@ -54,7 +64,9 @@ async fn get_project_state(auth_session: AuthSession, Extension(pool): Extension
         }
     };
 
-    let project = match repo::find_project_with_links(default_project_id(), &pool).await {
+    let project_id = ProjectId::new(project_id);
+
+    let project = match repo::find_project_with_links(project_id, &pool).await {
         Ok(project) => project,
         Err(e) => return db_error(e, "Failed to find project with links"),
     };
@@ -99,22 +111,25 @@ async fn get_project_state(auth_session: AuthSession, Extension(pool): Extension
         (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
     ),
     params(
-        ("interval_id" = i64, Path, description = "Interval ID")
+        ("interval_id" = i64, Path, description = "Interval ID"),
+        ("project_id" = i64, Path, description = "Project ID")
     )
 )]
 async fn get_interval_data(
     auth_session: AuthSession,
     Path(interval_id): Path<i64>,
+    Path(project_id): Path<i64>,
     Extension(pool): Extension<SqlitePool>,
 ) -> impl IntoResponse {
     let interval_id = IntervalId::new(interval_id);
+    let project_id = ProjectId::new(project_id);
 
     let interval: Interval = match find_interval(interval_id.clone(), &pool).await {
         Ok(interval) => interval,
         Err(e) => return db_error(e, "Failed to find interval"),
     };
 
-    let interval_data = match find_interval_data(&interval, default_project_id(), &pool).await {
+    let interval_data = match find_interval_data(&interval, project_id.clone(), &pool).await {
         Ok(data) => data,
         Err(e) => return db_error(e, "Failed to find interval data"),
     };
@@ -128,7 +143,7 @@ async fn get_interval_data(
     };
 
     // Fetch the person for this user_id and project
-    let person = match find_person_by_user_id(user_id.clone(), default_project_id(), &pool).await {
+    let person = match find_person_by_user_id(user_id.clone(), project_id, &pool).await {
         Ok(Some(person)) => person,
         Ok(None) => return (StatusCode::NOT_FOUND, ()).into_response(),
         Err(e) => return db_error(e, "Failed to find person by user ID"),
@@ -151,16 +166,22 @@ async fn get_interval_data(
         (status = 200, body = Vec<AppEvent>),
         (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
     ),
+    params(
+        ("project_id" = i64, Path, description = "Project ID")
+    )
 )]
 pub async fn update_project(
     auth_session: AuthSession,
+    Path(project_id): Path<i64>,
     Extension(pool): Extension<SqlitePool>,
     Extension(realtime_state): Extension<RealtimeState>,
     Json(input): Json<Project>,
 ) -> impl IntoResponse {
+    let project_id = ProjectId::new(project_id);
+
     println!("Updating project: {:?}", input);
 
-    match repo::update_project_with_links(input, default_project_id(), &pool).await {
+    match repo::update_project_with_links(input, project_id, &pool).await {
         Ok(response) => {
             let event = AppEvent::ProjectEvent(ProjectEvent::ProjectUpdated(response));
             realtime_state.broadcast_app_event(Some(auth_session), event.clone()).await;

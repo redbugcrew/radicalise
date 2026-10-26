@@ -39,9 +39,9 @@ export const useSelectedInterval = (): Interval | null => {
   return selectedInterval
 }
 
-export async function fetchIntervalData(intervalId: number): Promise<IntervalData | null> {
+export async function fetchIntervalData(intervalId: number, projectId: number): Promise<IntervalData | null> {
   return getApi()
-    .api.getIntervalData(intervalId)
+    .api.getIntervalData(intervalId, projectId)
     .then((data) => {
       return data.data
     })
@@ -53,6 +53,7 @@ export async function fetchIntervalData(intervalId: number): Promise<IntervalDat
 
 export default function WithIntervalData({ interval, children }: WithIntervalDataProps) {
   const currentIntervalData = useAppSelector((state) => state.currentInterval)
+  const currentProjectId = useAppSelector((state) => state.project?.id)
 
   const [cacheKey, setCacheKey] = useState<number>(0)
 
@@ -65,7 +66,7 @@ export default function WithIntervalData({ interval, children }: WithIntervalDat
   const tableKey = interval ? `${interval.id}-${cacheKey}` : "no-interval"
 
   useEffect(() => {
-    if (!interval) {
+    if (!interval || !currentProjectId) {
       setIntervalData(null)
       return
     }
@@ -77,7 +78,7 @@ export default function WithIntervalData({ interval, children }: WithIntervalDat
       const api = getApi()
 
       api.api
-        .getIntervalData(interval.id)
+        .getIntervalData(interval.id, currentProjectId)
         .then((response) => {
           setIntervalData(response.data)
         })
@@ -88,7 +89,7 @@ export default function WithIntervalData({ interval, children }: WithIntervalDat
     }
 
     incrementCacheKey()
-  }, [interval, currentIntervalData])
+  }, [interval, currentIntervalData, currentProjectId])
 
   if (!interval) return null
 

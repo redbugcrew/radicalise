@@ -253,7 +253,7 @@ export interface InitialData {
   calendar_events: CalendarEvent[]
   circles: Circle[]
   crews: CrewWithLinks[]
-  current_interval_data: IntervalData
+  current_interval_data?: IntervalData | null
   event_templates: EventTemplate[]
   intervals: Interval[]
   peer_roles: PeerRole[]
@@ -893,12 +893,28 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name UpdateProject
-     * @request PUT:/api/my_project
+     * @name UpdatePerson
+     * @request PUT:/api/people/{person_id}
      */
-    updateProject: (data: Project, params: RequestParams = {}) =>
+    updatePerson: (personId: string, data: Person, params: RequestParams = {}) =>
       this.request<AppEvent[], any>({
-        path: `/api/my_project`,
+        path: `/api/people/${personId}`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdateProject
+     * @request PUT:/api/projects/{project_id}/my_project
+     */
+    updateProject: (projectId: number, data: Project, params: RequestParams = {}) =>
+      this.request<AppEvent[], any>({
+        path: `/api/projects/${projectId}/my_project`,
         method: "PUT",
         body: data,
         type: ContentType.Json,
@@ -910,11 +926,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @name GetIntervalData
-     * @request GET:/api/my_project/interval/{interval_id}/state
+     * @request GET:/api/projects/{project_id}/my_project/interval/{interval_id}/state
      */
-    getIntervalData: (intervalId: number, params: RequestParams = {}) =>
+    getIntervalData: (intervalId: number, projectId: number, params: RequestParams = {}) =>
       this.request<IntervalData, any>({
-        path: `/api/my_project/interval/${intervalId}/state`,
+        path: `/api/projects/${projectId}/my_project/interval/${intervalId}/state`,
         method: "GET",
         format: "json",
         ...params,
@@ -924,28 +940,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @name GetProjectState
-     * @request GET:/api/my_project/state
+     * @request GET:/api/projects/{project_id}/my_project/state
      */
-    getProjectState: (params: RequestParams = {}) =>
+    getProjectState: (projectId: number, params: RequestParams = {}) =>
       this.request<InitialData, any>({
-        path: `/api/my_project/state`,
+        path: `/api/projects/${projectId}/my_project/state`,
         method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name UpdatePerson
-     * @request PUT:/api/people/{person_id}
-     */
-    updatePerson: (personId: string, data: Person, params: RequestParams = {}) =>
-      this.request<AppEvent[], any>({
-        path: `/api/people/${personId}`,
-        method: "PUT",
-        body: data,
-        type: ContentType.Json,
         format: "json",
         ...params,
       }),
