@@ -14,7 +14,7 @@ use crate::{
     shared::{
         entities::{
             CalendarEvent, Circle, CircleId, CircleInvolvement, CrewInvolvement, CrewWithLinks, EventTemplate, Interval, IntervalId,
-            PeerEnrollment, PeerRole, Person, PersonId, Project, ProjectId,
+            PeerEnrollment, PeerRole, Person, PersonId, Project, ProjectId, UserId,
         },
         links_repo::{find_all_links_for_owner, update_links_for_owner},
     },
@@ -95,6 +95,30 @@ pub async fn find_project_with_links(project_id: ProjectId, pool: &SqlitePool) -
     let links = find_all_links_for_owner(project_id.id, "projects".to_string(), pool).await?;
 
     Ok(Project { links, ..project })
+}
+
+pub async fn find_projects_for_user(user_id: UserId, pool: &SqlitePool) -> Result<Vec<Project>, sqlx::Error> {
+    sqlx::query!(
+        "SELECT p.id as id, name, noun_name, description, slug
+        FROM projects p
+        JOIN people pe ON pe.project_id = p.id
+        WHERE pe.user_id = ?",
+        user_id.id
+    )
+    .fetch_all(pool)
+    .await
+    .map(|rows| {
+        rows.into_iter()
+            .map(|row| Project {
+                id: row.id,
+                name: Some(row.name),
+                noun_name: row.noun_name,
+                description: row.description,
+                links: vec![], // Links are not fetched here, assuming they are handled elsewhere
+                slug: row.slug,
+            })
+            .collect::<Vec<Project>>()
+    })
 }
 
 pub async fn find_all_crew_involvements(interval_id: IntervalId, pool: &SqlitePool) -> Result<Vec<CrewInvolvement>, sqlx::Error> {

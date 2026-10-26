@@ -19,7 +19,8 @@ import {
   Dev,
   InvitePerson,
   AcceptInvitation,
-  LoadProject,
+  LoadMyProject,
+  LoadMyProjects,
 } from "./pages"
 import { buildRoutes as buildAuthRoutes } from "./contexts/auth"
 import { theme } from "./theme"
@@ -89,125 +90,131 @@ const router = createBrowserRouter([
       },
       {
         path: "project/:projectSlug",
-        element: <LoadProject />,
+        element: <LoadMyProjects />,
         children: [
           {
             path: "",
-            element: <ProjectLayout />,
+            element: <LoadMyProject />,
             children: [
               {
                 path: "",
-                element: <Navigate to="dashboard" replace />,
-              },
-              {
-                path: "dashboard",
-                element: <Dashboard />,
-              },
-              {
-                path: "people",
+                element: <ProjectLayout />,
                 children: [
                   {
                     path: "",
-                    element: <People />,
+                    element: <Navigate to="dashboard" replace />,
                   },
                   {
-                    path: ":personId/edit",
-                    element: <EditPerson />,
+                    path: "dashboard",
+                    element: <Dashboard />,
                   },
                   {
-                    path: ":personId",
-                    element: <Person />,
-                  },
-                ],
-              },
-              {
-                path: "crews",
-                children: [
-                  {
-                    path: "",
-                    element: <Crews />,
-                  },
-                  {
-                    path: ":crewId/edit",
-                    element: <EditCrew />,
-                  },
-                ],
-              },
-              {
-                path: "events",
-                children: [
-                  {
-                    path: "event_templates",
-                    children: [
-                      { path: "", element: <EventTemplates /> },
-                      { path: "new", element: <NewEventTemplate /> },
-                      { path: ":templateId/edit", element: <EditEventTemplate /> },
-                    ],
-                  },
-                  {
-                    path: "",
-                    element: <Events />,
-                    children: [
-                      { path: "", element: <UpcomingEvents /> },
-                      { path: "list/:tabValue", element: <AllEvents /> },
-                    ],
-                  },
-                  { path: "new", element: <NewEvent /> },
-                  { path: ":eventId", element: <ShowEvent /> },
-                  { path: ":eventId/edit", element: <EditEvent /> },
-                ],
-              },
-              {
-                path: "intervals",
-                children: [
-                  {
-                    path: "",
-                    element: <Intervals />,
-                  },
-                  {
-                    path: "new",
-                    element: <NewInterval />,
-                  },
-                ],
-              },
-              {
-                path: "peer_roles",
-                children: [
-                  {
-                    path: "",
-                    element: <PeerRoles />,
-                  },
-                  {
-                    path: "new",
-                    element: <NewRole />,
-                  },
-                ],
-              },
-              {
-                path: "my_participation/:intervalId",
-                element: <MyParticipation />,
-              },
-              {
-                path: "project_settings",
-                children: [
-                  {
-                    path: "edit",
-                    element: <EditProject />,
-                  },
-                  {
-                    path: "circles",
+                    path: "people",
                     children: [
                       {
                         path: "",
-                        element: <Circles />,
+                        element: <People />,
+                      },
+                      {
+                        path: ":personId/edit",
+                        element: <EditPerson />,
+                      },
+                      {
+                        path: ":personId",
+                        element: <Person />,
+                      },
+                    ],
+                  },
+                  {
+                    path: "crews",
+                    children: [
+                      {
+                        path: "",
+                        element: <Crews />,
+                      },
+                      {
+                        path: ":crewId/edit",
+                        element: <EditCrew />,
+                      },
+                    ],
+                  },
+                  {
+                    path: "events",
+                    children: [
+                      {
+                        path: "event_templates",
+                        children: [
+                          { path: "", element: <EventTemplates /> },
+                          { path: "new", element: <NewEventTemplate /> },
+                          { path: ":templateId/edit", element: <EditEventTemplate /> },
+                        ],
+                      },
+                      {
+                        path: "",
+                        element: <Events />,
+                        children: [
+                          { path: "", element: <UpcomingEvents /> },
+                          { path: "list/:tabValue", element: <AllEvents /> },
+                        ],
+                      },
+                      { path: "new", element: <NewEvent /> },
+                      { path: ":eventId", element: <ShowEvent /> },
+                      { path: ":eventId/edit", element: <EditEvent /> },
+                    ],
+                  },
+                  {
+                    path: "intervals",
+                    children: [
+                      {
+                        path: "",
+                        element: <Intervals />,
                       },
                       {
                         path: "new",
-                        element: <NewCircle />,
+                        element: <NewInterval />,
+                      },
+                    ],
+                  },
+                  {
+                    path: "peer_roles",
+                    children: [
+                      {
+                        path: "",
+                        element: <PeerRoles />,
                       },
                       {
-                        path: ":circleSlug/edit",
-                        element: <EditCircle />,
+                        path: "new",
+                        element: <NewRole />,
+                      },
+                    ],
+                  },
+                  {
+                    path: "my_participation/:intervalId",
+                    element: <MyParticipation />,
+                  },
+                  {
+                    path: "project_settings",
+                    children: [
+                      {
+                        path: "edit",
+                        element: <EditProject />,
+                      },
+                      {
+                        path: "circles",
+                        children: [
+                          {
+                            path: "",
+                            element: <Circles />,
+                          },
+                          {
+                            path: "new",
+                            element: <NewCircle />,
+                          },
+                          {
+                            path: ":circleSlug/edit",
+                            element: <EditCircle />,
+                          },
+                        ],
                       },
                     ],
                   },

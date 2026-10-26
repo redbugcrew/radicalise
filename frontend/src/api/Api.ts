@@ -357,6 +357,8 @@ export interface PeerRole {
   distribution_type: PeerRoleDistributionType
   /** @format int64 */
   id: number
+  /** @format int64 */
+  max_intervals?: number | null
   name: string
   /** @format int64 */
   project_id: number
@@ -952,11 +954,25 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @name GetProjectBySlug
-     * @request GET:/api/public/project/by_slug/{project_slug}
+     * @request GET:/api/public/projects/by_slug/{project_slug}
      */
     getProjectBySlug: (projectSlug: string, params: RequestParams = {}) =>
       this.request<Project, any>({
-        path: `/api/public/project/by_slug/${projectSlug}`,
+        path: `/api/public/projects/by_slug/${projectSlug}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GetVisibleProjects
+     * @request GET:/api/public/projects/visible
+     */
+    getVisibleProjects: (params: RequestParams = {}) =>
+      this.request<Project[], any>({
+        path: `/api/public/projects/visible`,
         method: "GET",
         format: "json",
         ...params,

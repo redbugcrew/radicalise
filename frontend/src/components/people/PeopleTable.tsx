@@ -4,7 +4,7 @@ import { useState } from "react"
 import CapacityScoreIcon from "../CapacityScoreIcon"
 import Avatar from "./Avatar"
 import { SearchField, SortableTh, sortData, Th } from "../SortableTable/SortableTable"
-import { currentProjectPath } from "../../pages/LoadProject"
+import { currentProjectPath } from "../../pages/LoadMyProject"
 
 interface Crew {
   id: number
