@@ -25,17 +25,18 @@ pub async fn insert_person_without_user(
     Ok(result)
 }
 
-pub async fn update_person(input: Person, pool: &SqlitePool) -> Result<Person, sqlx::Error> {
+pub async fn update_person(project_id: ProjectId, input: Person, pool: &SqlitePool) -> Result<Person, sqlx::Error> {
     sqlx::query_as!(
         Person,
         "
         UPDATE people
         SET display_name = ?, about = ?, avatar_id = ?
-        WHERE id = ?",
+        WHERE id = ? AND project_id = ?",
         input.display_name,
         input.about,
         input.avatar_id,
         input.id,
+        project_id.id,
     )
     .execute(pool)
     .await?;

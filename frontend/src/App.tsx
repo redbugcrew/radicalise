@@ -16,7 +16,6 @@ import {
   NewInterval,
   EditProject,
   LoadSelectedProject,
-  Dev,
   InvitePerson,
   AcceptInvitation,
   LoadProjectState,
@@ -76,19 +75,6 @@ const router = createBrowserRouter([
         element: <Navigate to="/project" replace />,
       },
       {
-        path: "invitations",
-        children: [
-          {
-            path: "new",
-            element: <InvitePerson />,
-          },
-        ],
-      },
-      {
-        path: "dev",
-        element: <Dev />,
-      },
-      {
         path: "project",
         element: <LoadMyProjects />,
         children: [
@@ -111,6 +97,15 @@ const router = createBrowserRouter([
                       {
                         path: "dashboard",
                         element: <Dashboard />,
+                      },
+                      {
+                        path: "invitations",
+                        children: [
+                          {
+                            path: "new",
+                            element: <InvitePerson />,
+                          },
+                        ],
                       },
                       {
                         path: "people",

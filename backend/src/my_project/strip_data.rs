@@ -1,5 +1,5 @@
 use crate::{
-    me::repo::PersonIntervalData,
+    my_person::repo::PersonIntervalData,
     my_project::repo::{CircleInvolvementData, InitialData, IntervalData},
     shared::entities::{Circle, CircleInvolvement, PersonId},
 };

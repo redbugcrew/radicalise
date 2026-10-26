@@ -7,11 +7,19 @@ import type { CalendarEvent } from "../../../api/Api"
 
 export default function NewEvent() {
   const eventTemplates = useAppSelector((state) => state.eventTemplates)
+  const projectId = useAppSelector((state) => state.project?.id)
   const navigate = useNavigate()
+
+  if (!projectId)
+    return (
+      <Container>
+        <p>No project selected.</p>
+      </Container>
+    )
 
   const handleSubmit = async (data: CalendarEvent): Promise<void> => {
     return getApi()
-      .api.createCalendarEvent(data)
+      .api.createCalendarEvent(projectId, data)
       .then((response) => {
         handleAppEvents(response.data)
         navigate("..")

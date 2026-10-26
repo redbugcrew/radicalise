@@ -7,8 +7,7 @@ use crate::{
     circles::events::CirclesEvent,
     realtime::RealtimeState,
     shared::{
-        default_project_id,
-        entities::{Circle, CircleId},
+        entities::{Circle, CircleId, ProjectId},
         events::AppEvent,
     },
 };
@@ -24,6 +23,9 @@ pub fn router() -> OpenApiRouter {
     post,
     path = "/",
     request_body(content = Circle, content_type = "application/json"),
+    params(
+        ("project_id" = i64, Path, description = "Project ID")
+    ),
     responses(
         (status = CREATED, body = Vec<AppEvent>),
         (status = BAD_REQUEST, body = String),
@@ -31,6 +33,7 @@ pub fn router() -> OpenApiRouter {
     ),
 )]
 async fn create_circle(
+    Path(project_id): Path<i64>,
     Extension(pool): Extension<SqlitePool>,
     Extension(realtime_state): Extension<RealtimeState>,
     auth_session: AuthSession,
@@ -38,7 +41,7 @@ async fn create_circle(
 ) -> impl IntoResponse {
     println!("Creating circle: {:?}", data);
 
-    match repo::insert_circle(&data, default_project_id(), &pool).await {
+    match repo::insert_circle(&data, ProjectId::new(project_id), &pool).await {
         Ok(circle) => {
             let event = broadcast_circle_update_event(auth_session, &realtime_state, circle).await;
             (StatusCode::CREATED, Json(vec![event])).into_response()
@@ -62,6 +65,10 @@ async fn create_circle(
     put,
     path = "/{circle_id}",
     request_body(content = Circle, content_type = "application/json"),
+    params(
+        ("project_id" = i64, Path, description = "Project ID"),
+        ("circle_id" = i64, Path, description = "Circle ID")
+    ),
     responses(
         (status = OK, body = Vec<AppEvent>),
         (status = BAD_REQUEST, body = String),
@@ -70,6 +77,7 @@ async fn create_circle(
 )]
 async fn update_circle(
     Path(circle_id): Path<i64>,
+    Path(project_id): Path<i64>,
     Extension(pool): Extension<SqlitePool>,
     Extension(realtime_state): Extension<RealtimeState>,
     auth_session: AuthSession,
@@ -77,7 +85,7 @@ async fn update_circle(
 ) -> impl IntoResponse {
     println!("Updating circle with ID {}: {:?}", circle_id, data);
 
-    match repo::update_circle(CircleId::new(circle_id), &data, default_project_id(), &pool).await {
+    match repo::update_circle(CircleId::new(circle_id), &data, ProjectId::new(project_id), &pool).await {
         Ok(circle) => {
             let event = broadcast_circle_update_event(auth_session, &realtime_state, circle).await;
             (StatusCode::OK, Json(vec![event])).into_response()

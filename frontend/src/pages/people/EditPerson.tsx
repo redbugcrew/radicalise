@@ -9,11 +9,14 @@ export default function EditPerson() {
   const { personId } = useParams<"personId">()
   const personIdNum = personId ? parseInt(personId, 10) : undefined
   const person = useAppSelector((state) => state.people[personIdNum || -1])
+  const projectId = useAppSelector((state) => state.project?.id)
   const navigate = useNavigate()
+
+  if (!projectId) return <Container>Error: Project not found</Container>
 
   const onSubmit = (values: Person) => {
     getApi()
-      .api.updatePerson(values.id.toString(), values)
+      .api.updatePerson(projectId, values.id.toString(), values)
       .then((response) => {
         if (response.status === 200) {
           handleAppEvents(response.data)

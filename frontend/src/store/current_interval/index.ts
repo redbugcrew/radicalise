@@ -10,7 +10,7 @@ const currentIntervalSlice = createSlice({
   name: "current_interval",
   initialState: null as CurrentIntervalState,
   reducers: {
-    currentIntervalLoaded: (_state: CurrentIntervalState, action: PayloadAction<IntervalData>) => {
+    currentIntervalLoaded: (_state: CurrentIntervalState, action: PayloadAction<IntervalData | null>) => {
       return action.payload
     },
     circleInvolvementUpdated: (state: CurrentIntervalState, action: PayloadAction<CircleInvolvement>) => {

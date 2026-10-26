@@ -5,7 +5,10 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 use crate::{
     auth::auth_backend::AuthSession,
     realtime::RealtimeState,
-    shared::{default_project_id, entities::EventTemplate, events::AppEvent},
+    shared::{
+        entities::{EventTemplate, ProjectId},
+        events::AppEvent,
+    },
 };
 
 use self::events::EventTemplatesEvent;
@@ -23,12 +26,16 @@ pub fn router() -> OpenApiRouter {
     post,
     path = "/",
     request_body(content = EventTemplate, content_type = "application/json"),
+    params(
+        ("project_id" = i64, Path, description = "Project ID")
+    ),
     responses(
         (status = 201, body = ()),
         (status = INTERNAL_SERVER_ERROR, body = ()),
     ),
 )]
 async fn create_event_template(
+    Path(project_id): Path<i64>,
     Extension(pool): Extension<SqlitePool>,
     Extension(realtime_state): Extension<RealtimeState>,
     auth_session: AuthSession,
@@ -36,7 +43,9 @@ async fn create_event_template(
 ) -> impl IntoResponse {
     println!("Creating event template: {:?}", data);
 
-    match repo::insert_event_template_with_links(&data, default_project_id(), &pool).await {
+    let project_id = ProjectId::new(project_id);
+
+    match repo::insert_event_template_with_links(&data, project_id, &pool).await {
         Ok(event_template) => {
             let event = AppEvent::EventTemplatesEvent(EventTemplatesEvent::EventTemplateUpdated(event_template));
             realtime_state.broadcast_app_event(Some(auth_session), event.clone()).await;
@@ -53,6 +62,10 @@ async fn create_event_template(
     put,
     path = "/{event_template_id}",
     request_body(content = EventTemplate, content_type = "application/json"),
+    params(
+        ("project_id" = i64, Path, description = "Project ID"),
+        ("event_template_id" = i64, Path, description = "Event Template ID")
+    ),
     responses(
         (status = 201, body = ()),
         (status = INTERNAL_SERVER_ERROR, body = ()),
@@ -60,6 +73,7 @@ async fn create_event_template(
 )]
 async fn update_event_template(
     Path(event_template_id): Path<i64>,
+    Path(project_id): Path<i64>,
     Extension(pool): Extension<SqlitePool>,
     Extension(realtime_state): Extension<RealtimeState>,
     auth_session: AuthSession,
@@ -67,7 +81,9 @@ async fn update_event_template(
 ) -> impl IntoResponse {
     println!("Updating event template with ID {}: {:?}", event_template_id, data);
 
-    match repo::update_event_template_with_links(&data, default_project_id(), &pool).await {
+    let project_id = ProjectId::new(project_id);
+
+    match repo::update_event_template_with_links(&data, project_id, &pool).await {
         Ok(event_template) => {
             let event = AppEvent::EventTemplatesEvent(EventTemplatesEvent::EventTemplateUpdated(event_template));
             realtime_state.broadcast_app_event(Some(auth_session), event.clone()).await;

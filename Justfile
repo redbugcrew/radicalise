@@ -24,3 +24,4 @@ format:
 
 gen-api:
     cd frontend && npm run swagger
+    cd frontend && npm run format:write

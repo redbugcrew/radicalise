@@ -53,15 +53,15 @@ export const useAppStore = useStore.withTypes<AppStore>()
 //   payload: data,
 // });
 
-async function loadProjectData(store: AppStore, api: ReturnType<typeof getApi>): Promise<Response | null> {
+async function loadProjectData(projectId: number, store: AppStore, api: ReturnType<typeof getApi>): Promise<Response | null> {
   return api.api
-    .getProjectState()
+    .getProjectState(projectId)
     .then((response) => {
       store.dispatch(circlesLoaded(response.data.circles))
       store.dispatch(peopleLoaded(response.data.people))
       store.dispatch(crewsLoaded(response.data.crews))
       store.dispatch(intervalsLoaded(response.data.intervals))
-      store.dispatch(currentIntervalLoaded(response.data.current_interval_data))
+      store.dispatch(currentIntervalLoaded(response.data.current_interval_data || null))
       store.dispatch(projectLoaded(response.data.project))
       store.dispatch(eventTemplatesLoaded(response.data.event_templates))
       store.dispatch(eventsLoaded(response.data.calendar_events))
@@ -80,9 +80,9 @@ async function loadProjectData(store: AppStore, api: ReturnType<typeof getApi>):
     })
 }
 
-async function loadMeData(store: AppStore, api: ReturnType<typeof getApi>): Promise<Response | null> {
+async function loadMeData(projectId: number, store: AppStore, api: ReturnType<typeof getApi>): Promise<Response | null> {
   return api.api
-    .getMyState()
+    .getMyState(projectId)
     .then((response) => {
       store.dispatch(meLoaded(response.data))
       return null
@@ -98,19 +98,7 @@ async function loadMeData(store: AppStore, api: ReturnType<typeof getApi>): Prom
     })
 }
 
-export async function loadInitialData(store: AppStore) {
-  const api = getApi()
-
-  const dataHasLoaded = store.getState().project
-
-  if (!dataHasLoaded) {
-    console.log("Loading initial data from API...")
-    return loadMeData(store, api).then(() => loadProjectData(store, api))
-  }
-  return null
-}
-
-export async function loadInitialProjectData(): Promise<boolean> {
+export async function loadInitialProjectData(projectId: number): Promise<boolean> {
   const api = getApi()
 
   const dataHasLoaded = store.getState().project
@@ -119,8 +107,8 @@ export async function loadInitialProjectData(): Promise<boolean> {
     return true
   } else {
     console.log("Loading initial data from API...")
-    return loadMeData(store, api)
-      .then(() => loadProjectData(store, api))
+    return loadMeData(projectId, store, api)
+      .then(() => loadProjectData(projectId, store, api))
       .then(() => true)
   }
 }
@@ -132,11 +120,14 @@ export async function handleMeEvent(event: MeEvent) {
 }
 
 export async function handleIntervalsEvent(event: IntervalsEvent) {
+  const currentProjectId = store.getState().project?.id
+  if (!currentProjectId) return
+
   if ("IntervalCreated" in event && event.IntervalCreated) {
     store.dispatch(intervalCreated(event.IntervalCreated))
   } else if ("IntervalStarted" in event && event.IntervalStarted) {
     // For simplicity, we'll just reload all interval data when an interval starts
-    loadProjectData(store, getApi())
+    loadProjectData(currentProjectId, store, getApi())
   }
 }
 

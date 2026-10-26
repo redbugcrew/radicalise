@@ -23,16 +23,17 @@ export default function MyParticipation() {
   const [involvement, setInvolvement] = useState<CircleInvolvement | null>(null)
 
   useEffect(() => {
-    if (!interval || !circle) return
+    if (!interval || !circle || !project) return
+
     api.api
-      .myParticipation(interval.id, circle.id)
+      .myParticipation(project.id, interval.id, circle.id)
       .then((response) => {
         setInvolvement(response.data)
       })
       .catch((error) => {
         console.error("Error fetching participation data:", error)
       })
-  }, [api, interval, circle])
+  }, [api, interval?.id, circle.id, project?.id])
 
   if (!project) return <Text>Error: Project not found.</Text>
   if (!circle) return <Text>Error: Circle not found.</Text>
@@ -61,7 +62,7 @@ export default function MyParticipation() {
     }
 
     api.api
-      .updateMyParticipation(interval.id, inputData)
+      .updateMyParticipation(project.id, interval.id, inputData)
       .then((response) => {
         console.log("Participation updated successfully", response)
         handleAppEvents(response.data)

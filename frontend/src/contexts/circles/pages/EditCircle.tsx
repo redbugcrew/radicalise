@@ -25,7 +25,7 @@ export default function EditCircle() {
 
   const handleSubmit = async (data: Circle): Promise<ActionPromiseResult> => {
     return getApi()
-      .api.updateCircle(data.id.toString(), data)
+      .api.updateCircle(circle.project_id, circle.id, data)
       .then((response) => {
         handleAppEvents(response.data)
         navigate("..")

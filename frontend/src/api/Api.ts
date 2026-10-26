@@ -253,7 +253,7 @@ export interface InitialData {
   calendar_events: CalendarEvent[]
   circles: Circle[]
   crews: CrewWithLinks[]
-  current_interval_data: IntervalData
+  current_interval_data?: IntervalData | null
   event_templates: EventTemplate[]
   intervals: Interval[]
   peer_roles: PeerRole[]
@@ -633,12 +633,40 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name CreateCalendarEventAttendance
-     * @request POST:/api/calendar_event_attendances
+     * @name RecomputeImplicitInvolvements
+     * @request POST:/api/dev/projects/{project_id}/recompute_implicit_involvements
      */
-    createCalendarEventAttendance: (data: CreateAttendanceRequest, params: RequestParams = {}) =>
+    recomputeImplicitInvolvements: (projectId: number, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/dev/projects/${projectId}/recompute_implicit_involvements`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GetVisibleProjects
+     * @request GET:/api/my_user/projects/visible
+     */
+    getVisibleProjects: (params: RequestParams = {}) =>
+      this.request<Project[], any>({
+        path: `/api/my_user/projects/visible`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CreateCalendarEventAttendance
+     * @request POST:/api/projects/{project_id}/calendar_event_attendances
+     */
+    createCalendarEventAttendance: (projectId: number, data: CreateAttendanceRequest, params: RequestParams = {}) =>
       this.request<AppEvent[], any>({
-        path: `/api/calendar_event_attendances`,
+        path: `/api/projects/${projectId}/calendar_event_attendances`,
         method: "POST",
         body: data,
         type: ContentType.Json,
@@ -650,11 +678,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @name CreateCalendarEvent
-     * @request POST:/api/calendar_events
+     * @request POST:/api/projects/{project_id}/calendar_events
      */
-    createCalendarEvent: (data: CalendarEvent, params: RequestParams = {}) =>
+    createCalendarEvent: (projectId: number, data: CalendarEvent, params: RequestParams = {}) =>
       this.request<AppEvent[], any>({
-        path: `/api/calendar_events`,
+        path: `/api/projects/${projectId}/calendar_events`,
         method: "POST",
         body: data,
         type: ContentType.Json,
@@ -666,11 +694,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @name UpdateCalendarEvent
-     * @request PUT:/api/calendar_events/{event_id}
+     * @request PUT:/api/projects/{project_id}/calendar_events/{event_id}
      */
-    updateCalendarEvent: (eventId: string, data: CalendarEvent, params: RequestParams = {}) =>
+    updateCalendarEvent: (projectId: number, eventId: number, data: CalendarEvent, params: RequestParams = {}) =>
       this.request<AppEvent[], any>({
-        path: `/api/calendar_events/${eventId}`,
+        path: `/api/projects/${projectId}/calendar_events/${eventId}`,
         method: "PUT",
         body: data,
         type: ContentType.Json,
@@ -682,11 +710,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @name CreateCircle
-     * @request POST:/api/circles
+     * @request POST:/api/projects/{project_id}/circles
      */
-    createCircle: (data: Circle, params: RequestParams = {}) =>
+    createCircle: (projectId: number, data: Circle, params: RequestParams = {}) =>
       this.request<AppEvent[], string>({
-        path: `/api/circles`,
+        path: `/api/projects/${projectId}/circles`,
         method: "POST",
         body: data,
         type: ContentType.Json,
@@ -698,11 +726,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @name UpdateCircle
-     * @request PUT:/api/circles/{circle_id}
+     * @request PUT:/api/projects/{project_id}/circles/{circle_id}
      */
-    updateCircle: (circleId: string, data: Circle, params: RequestParams = {}) =>
+    updateCircle: (projectId: number, circleId: number, data: Circle, params: RequestParams = {}) =>
       this.request<AppEvent[], string>({
-        path: `/api/circles/${circleId}`,
+        path: `/api/projects/${projectId}/circles/${circleId}`,
         method: "PUT",
         body: data,
         type: ContentType.Json,
@@ -714,11 +742,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @name UpdateCrew
-     * @request PUT:/api/crews/{crew_id}
+     * @request PUT:/api/projects/{project_id}/crews/{crew_id}
      */
-    updateCrew: (crewId: string, data: CrewWithLinks, params: RequestParams = {}) =>
+    updateCrew: (projectId: number, crewId: number, data: CrewWithLinks, params: RequestParams = {}) =>
       this.request<AppEvent[], any>({
-        path: `/api/crews/${crewId}`,
+        path: `/api/projects/${projectId}/crews/${crewId}`,
         method: "PUT",
         body: data,
         type: ContentType.Json,
@@ -729,26 +757,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name RecomputeImplicitInvolvements
-     * @request POST:/api/dev/recompute_implicit_involvements
-     */
-    recomputeImplicitInvolvements: (params: RequestParams = {}) =>
-      this.request<any, any>({
-        path: `/api/dev/recompute_implicit_involvements`,
-        method: "POST",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name CreateEventTemplate
-     * @request POST:/api/event_templates
+     * @request POST:/api/projects/{project_id}/event_templates
      */
-    createEventTemplate: (data: EventTemplate, params: RequestParams = {}) =>
+    createEventTemplate: (projectId: number, data: EventTemplate, params: RequestParams = {}) =>
       this.request<any, any>({
-        path: `/api/event_templates`,
+        path: `/api/projects/${projectId}/event_templates`,
         method: "POST",
         body: data,
         type: ContentType.Json,
@@ -760,11 +774,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @name UpdateEventTemplate
-     * @request PUT:/api/event_templates/{event_template_id}
+     * @request PUT:/api/projects/{project_id}/event_templates/{event_template_id}
      */
-    updateEventTemplate: (eventTemplateId: string, data: EventTemplate, params: RequestParams = {}) =>
+    updateEventTemplate: (projectId: number, eventTemplateId: number, data: EventTemplate, params: RequestParams = {}) =>
       this.request<any, any>({
-        path: `/api/event_templates/${eventTemplateId}`,
+        path: `/api/projects/${projectId}/event_templates/${eventTemplateId}`,
         method: "PUT",
         body: data,
         type: ContentType.Json,
@@ -776,11 +790,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @name CreateInterval
-     * @request POST:/api/intervals
+     * @request POST:/api/projects/{project_id}/intervals
      */
-    createInterval: (data: Interval, params: RequestParams = {}) =>
+    createInterval: (projectId: number, data: Interval, params: RequestParams = {}) =>
       this.request<AppEvent[], any>({
-        path: `/api/intervals`,
+        path: `/api/projects/${projectId}/intervals`,
         method: "POST",
         body: data,
         type: ContentType.Json,
@@ -792,11 +806,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @name StartNextInterval
-     * @request POST:/api/intervals/start_next_interval
+     * @request POST:/api/projects/{project_id}/intervals/start_next_interval
      */
-    startNextInterval: (params: RequestParams = {}) =>
+    startNextInterval: (projectId: number, params: RequestParams = {}) =>
       this.request<AppEvent[], StartNextIntervalError>({
-        path: `/api/intervals/start_next_interval`,
+        path: `/api/projects/${projectId}/intervals/start_next_interval`,
         method: "POST",
         format: "json",
         ...params,
@@ -806,11 +820,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @name InvitePerson
-     * @request POST:/api/invitations/invitation/new
+     * @request POST:/api/projects/{project_id}/invitations/invitation/new
      */
-    invitePerson: (data: InvitePersonRequest, params: RequestParams = {}) =>
+    invitePerson: (projectId: number, data: InvitePersonRequest, params: RequestParams = {}) =>
       this.request<InvitePersonResponse, string>({
-        path: `/api/invitations/invitation/new`,
+        path: `/api/projects/${projectId}/invitations/invitation/new`,
         method: "POST",
         body: data,
         type: ContentType.Json,
@@ -822,11 +836,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @name AcceptInvitation
-     * @request POST:/api/invitations/invitation/{token}/accept
+     * @request POST:/api/projects/{project_id}/invitations/invitation/{token}/accept
      */
-    acceptInvitation: (token: string, params: RequestParams = {}) =>
+    acceptInvitation: (token: string, projectId: number, params: RequestParams = {}) =>
       this.request<any, string>({
-        path: `/api/invitations/invitation/${token}/accept`,
+        path: `/api/projects/${projectId}/invitations/invitation/${token}/accept`,
         method: "POST",
         format: "json",
         ...params,
@@ -836,11 +850,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @name GetMyState
-     * @request GET:/api/me
+     * @request GET:/api/projects/{project_id}/my_person
      */
-    getMyState: (params: RequestParams = {}) =>
+    getMyState: (projectId: number, params: RequestParams = {}) =>
       this.request<MyInitialData, any>({
-        path: `/api/me`,
+        path: `/api/projects/${projectId}/my_person`,
         method: "GET",
         format: "json",
         ...params,
@@ -850,11 +864,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @name UpdateMyParticipation
-     * @request POST:/api/me/interval/{interval_id}/my_participation
+     * @request POST:/api/projects/{project_id}/my_person/interval/{interval_id}/my_participation
      */
-    updateMyParticipation: (intervalId: number, data: MyParticipationInput, params: RequestParams = {}) =>
+    updateMyParticipation: (projectId: number, intervalId: number, data: MyParticipationInput, params: RequestParams = {}) =>
       this.request<AppEvent[], any>({
-        path: `/api/me/interval/${intervalId}/my_participation`,
+        path: `/api/projects/${projectId}/my_person/interval/${intervalId}/my_participation`,
         method: "POST",
         body: data,
         type: ContentType.Json,
@@ -866,25 +880,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @name MyParticipation
-     * @request GET:/api/me/participation/interval/{interval_id}/circle/{circle_id}
+     * @request GET:/api/projects/{project_id}/my_person/participation/interval/{interval_id}/circle/{circle_id}
      */
-    myParticipation: (intervalId: number, circleId: number, params: RequestParams = {}) =>
+    myParticipation: (projectId: number, intervalId: number, circleId: number, params: RequestParams = {}) =>
       this.request<CircleInvolvement | null, any>({
-        path: `/api/me/participation/interval/${intervalId}/circle/${circleId}`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name GetVisibleProjects
-     * @request GET:/api/me/projects/visible
-     */
-    getVisibleProjects: (params: RequestParams = {}) =>
-      this.request<Project[], any>({
-        path: `/api/me/projects/visible`,
+        path: `/api/projects/${projectId}/my_person/participation/interval/${intervalId}/circle/${circleId}`,
         method: "GET",
         format: "json",
         ...params,
@@ -894,11 +894,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @name UpdateProject
-     * @request PUT:/api/my_project
+     * @request PUT:/api/projects/{project_id}/my_project
      */
-    updateProject: (data: Project, params: RequestParams = {}) =>
+    updateProject: (projectId: number, data: Project, params: RequestParams = {}) =>
       this.request<AppEvent[], any>({
-        path: `/api/my_project`,
+        path: `/api/projects/${projectId}/my_project`,
         method: "PUT",
         body: data,
         type: ContentType.Json,
@@ -910,11 +910,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @name GetIntervalData
-     * @request GET:/api/my_project/interval/{interval_id}/state
+     * @request GET:/api/projects/{project_id}/my_project/interval/{interval_id}/state
      */
-    getIntervalData: (intervalId: number, params: RequestParams = {}) =>
+    getIntervalData: (intervalId: number, projectId: number, params: RequestParams = {}) =>
       this.request<IntervalData, any>({
-        path: `/api/my_project/interval/${intervalId}/state`,
+        path: `/api/projects/${projectId}/my_project/interval/${intervalId}/state`,
         method: "GET",
         format: "json",
         ...params,
@@ -924,11 +924,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @name GetProjectState
-     * @request GET:/api/my_project/state
+     * @request GET:/api/projects/{project_id}/my_project/state
      */
-    getProjectState: (params: RequestParams = {}) =>
+    getProjectState: (projectId: number, params: RequestParams = {}) =>
       this.request<InitialData, any>({
-        path: `/api/my_project/state`,
+        path: `/api/projects/${projectId}/my_project/state`,
         method: "GET",
         format: "json",
         ...params,
@@ -938,11 +938,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @name UpdatePerson
-     * @request PUT:/api/people/{person_id}
+     * @request PUT:/api/projects/{project_id}/people/{person_id}
      */
-    updatePerson: (personId: string, data: Person, params: RequestParams = {}) =>
+    updatePerson: (projectId: number, personId: string, data: Person, params: RequestParams = {}) =>
       this.request<AppEvent[], any>({
-        path: `/api/people/${personId}`,
+        path: `/api/projects/${projectId}/people/${personId}`,
         method: "PUT",
         body: data,
         type: ContentType.Json,
@@ -956,7 +956,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name GetInvitation
      * @request GET:/api/public/invitation/{token}
      */
-    getInvitation: (token: string, params: RequestParams = {}) =>
+    getInvitation: (token: string, projectId: number, params: RequestParams = {}) =>
       this.request<CircleInvitationDetails, string>({
         path: `/api/public/invitation/${token}`,
         method: "GET",

@@ -10,12 +10,18 @@ import { useCurrentInterval } from "../../store/current_interval"
 
 export default function Intervals() {
   const intervals = useAppSelector((state) => state.intervals)
+  const projectId = useAppSelector((state) => state.project?.id)
   const currentInterval = useCurrentInterval()
   const nextInterval = useNextInterval()
 
+  if (!projectId) {
+    console.error("No project ID found")
+    return null
+  }
+
   const onNextInterval = async (): Promise<ActionPromiseResult> => {
     return getApi()
-      .api.startNextInterval()
+      .api.startNextInterval(projectId)
       .then((response) => {
         handleAppEvents(response.data)
         return actionSuccess()

@@ -14,8 +14,7 @@ use crate::{
     people::repo::find_person_by_calendar_token,
     realtime::RealtimeState,
     shared::{
-        default_project_id,
-        entities::{CalendarEvent, CalendarEventId},
+        entities::{CalendarEvent, CalendarEventId, ProjectId},
         events::AppEvent,
     },
 };
@@ -36,12 +35,16 @@ pub fn router() -> OpenApiRouter {
     post,
     path = "/",
     request_body(content = CalendarEvent, content_type = "application/json"),
+    params(
+        ("project_id" = i64, Path, description = "Project ID")
+    ),
     responses(
         (status = CREATED, body = Vec<AppEvent>),
         (status = INTERNAL_SERVER_ERROR, body = ()),
     ),
 )]
 async fn create_calendar_event(
+    Path(project_id): Path<i64>,
     Extension(pool): Extension<SqlitePool>,
     Extension(realtime_state): Extension<RealtimeState>,
     auth_session: AuthSession,
@@ -49,7 +52,9 @@ async fn create_calendar_event(
 ) -> impl IntoResponse {
     println!("Creating calendar event: {:?}", data);
 
-    match repo::insert_calendar_event_with_links(&data, data.event_template_id, default_project_id(), &pool).await {
+    let project_id = ProjectId::new(project_id);
+
+    match repo::insert_calendar_event_with_links(&data, data.event_template_id, project_id, &pool).await {
         Ok(calendar_event) => {
             let event = AppEvent::CalendarEventsEvent(CalendarEventsEvent::CalendarEventUpdated(calendar_event));
             realtime_state.broadcast_app_event(Some(auth_session), event.clone()).await;
@@ -66,6 +71,10 @@ async fn create_calendar_event(
     put,
     path = "/{event_id}",
     request_body(content = CalendarEvent, content_type = "application/json"),
+    params(
+        ("project_id" = i64, Path, description = "Project ID"),
+        ("event_id" = i64, Path, description = "Event ID")
+    ),
     responses(
         (status = OK, body = Vec<AppEvent>),
         (status = INTERNAL_SERVER_ERROR, body = ()),
@@ -73,6 +82,7 @@ async fn create_calendar_event(
 )]
 async fn update_calendar_event(
     Path(event_id): Path<i64>,
+    Path(project_id): Path<i64>,
     Extension(pool): Extension<SqlitePool>,
     Extension(realtime_state): Extension<RealtimeState>,
     auth_session: AuthSession,
@@ -84,7 +94,7 @@ async fn update_calendar_event(
         CalendarEventId::new(event_id),
         &data,
         data.event_template_id,
-        default_project_id(),
+        ProjectId::new(project_id),
         &pool,
     )
     .await
@@ -92,10 +102,10 @@ async fn update_calendar_event(
         Ok(calendar_event) => {
             let event = AppEvent::CalendarEventsEvent(CalendarEventsEvent::CalendarEventUpdated(calendar_event));
             realtime_state.broadcast_app_event(Some(auth_session), event.clone()).await;
-            (StatusCode::CREATED, Json(vec![event])).into_response()
+            (StatusCode::OK, Json(vec![event])).into_response()
         }
         Err(err) => {
-            eprintln!("Failed to create calendar event: {}", err);
+            eprintln!("Failed to update calendar event: {}", err);
             (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response()
         }
     }
@@ -104,15 +114,22 @@ async fn update_calendar_event(
 #[utoipa::path(
     get,
     path = "/{calendar_token}/calendar.ics",
+    params(
+        ("project_id" = i64, Path, description = "Project ID"),
+        ("calendar_token" = String, Path, description = "Calendar token")
+    ),
     responses(
         (status = OK, body = String, description = "ICS calendar data", content_type = "text/calendar"),
         (status = INTERNAL_SERVER_ERROR, body = ()),
     ),
 )]
-pub async fn get_calendar_ics(Path(calendar_token): Path<String>, Extension(pool): Extension<SqlitePool>) -> impl IntoResponse {
+pub async fn get_calendar_ics(
+    Path((project_id, calendar_token)): Path<(i64, String)>,
+    Extension(pool): Extension<SqlitePool>,
+) -> impl IntoResponse {
     println!("Received request for calendar ICS with token: {}", calendar_token);
 
-    let project = match find_project(default_project_id(), &pool).await {
+    let project = match find_project(ProjectId::new(project_id), &pool).await {
         Ok(project) => project,
         Err(err) => {
             eprintln!("Error looking up project: {}", err);

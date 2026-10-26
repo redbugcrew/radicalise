@@ -10,14 +10,16 @@ export default function EditEvent() {
   const eventIdNum = eventId ? parseInt(eventId, 10) : undefined
 
   const event = useAppSelector((state) => state.events.find((e) => e.id === eventIdNum))
+  const projectId = useAppSelector((state) => state.project?.id)
   const navigate = useNavigate()
 
   if (eventIdNum === undefined) return <div>Invalid Event ID</div>
   if (!event) return <div>Event not found</div>
+  if (!projectId) return <div>No project selected.</div>
 
   const handleSubmit = async (data: CalendarEvent): Promise<void> => {
     return getApi()
-      .api.updateCalendarEvent(event.id.toString(), data)
+      .api.updateCalendarEvent(projectId, event.id, data)
       .then((response) => {
         handleAppEvents(response.data)
         navigate(`../${event.id}`)

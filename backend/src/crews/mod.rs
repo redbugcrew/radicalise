@@ -6,7 +6,10 @@ use crate::{
     auth::auth_backend::AuthSession,
     crews::events::CrewsEvent,
     realtime::RealtimeState,
-    shared::{default_project_id, entities::CrewWithLinks, events::AppEvent},
+    shared::{
+        entities::{CrewWithLinks, ProjectId},
+        events::AppEvent,
+    },
 };
 
 pub mod events;
@@ -16,28 +19,37 @@ pub fn router() -> OpenApiRouter {
     OpenApiRouter::new().routes(routes!(update_crew))
 }
 
-#[utoipa::path(put, path = "/{crew_id}",
+#[utoipa::path(
+    put,
+    path = "/{crew_id}",
     request_body(content = CrewWithLinks, content_type = "application/json"),
     responses(
         (status = 200, body = Vec<AppEvent>),
         (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
         (status = BAD_REQUEST,  body = ()),
     ),
+    params(
+        ("project_id" = i64, Path, description = "Project ID"),
+        ("crew_id" = i64, Path, description = "Crew ID")
+    )
 )]
 pub async fn update_crew(
     Path(crew_id): Path<i64>,
+    Path(project_id): Path<i64>,
     Extension(pool): Extension<SqlitePool>,
     Extension(realtime_state): Extension<RealtimeState>,
     auth_session: AuthSession,
     Json(input): Json<CrewWithLinks>,
 ) -> impl IntoResponse {
+    let project_id = ProjectId::new(project_id);
+
     println!("Updating crew with ID {}: {:?}", crew_id, input);
 
     if input.id != crew_id {
         return (StatusCode::BAD_REQUEST, "Crew ID mismatch").into_response();
     }
 
-    match repo::update_crew_with_links(default_project_id(), input, &pool).await {
+    match repo::update_crew_with_links(project_id, input, &pool).await {
         Ok(response) => {
             let event = AppEvent::CrewsEvent(CrewsEvent::CrewUpdated(response));
             realtime_state.broadcast_app_event(Some(auth_session), event.clone()).await;

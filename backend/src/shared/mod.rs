@@ -1,11 +1,5 @@
-pub const COLLECTIVE_ID: i64 = 1;
-
 pub mod email_helpers;
 pub mod email_sender;
 pub mod entities;
 pub mod events;
 pub mod links_repo;
-
-pub fn default_project_id() -> entities::ProjectId {
-    entities::ProjectId { id: COLLECTIVE_ID }
-}
