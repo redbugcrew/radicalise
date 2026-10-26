@@ -56,7 +56,7 @@ jobs:
       - name: Build backend
         run: |
           cd ../backend
-          cargo build
+          SQLX_OFFLINE=true cargo build
 
       - name: Initialize test database
         run: |
