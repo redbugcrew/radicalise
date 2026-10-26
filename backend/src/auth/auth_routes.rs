@@ -21,6 +21,7 @@ pub fn auth_router() -> OpenApiRouter {
         .routes(routes!(forgot_password))
         .routes(routes!(reset_password))
         .routes(routes!(login))
+        .routes(routes!(log_out))
         .routes(routes!(sign_up))
         .routes(routes!(get_current_user))
 }
@@ -137,6 +138,21 @@ async fn login(
     }
 
     Ok((StatusCode::OK, axum::Json(LoginResponse { user_id: user.id })).into_response())
+}
+
+#[utoipa::path(
+    post,
+    path = "/log_out",
+    responses(
+        (status = OK, body = ()),
+        (status = INTERNAL_SERVER_ERROR, body = String)
+    )
+)]
+async fn log_out(auth_session: AuthSession) -> impl IntoResponse {
+    if auth_session.logout().await.is_err() {
+        return (StatusCode::INTERNAL_SERVER_ERROR, "Failed to log out").into_response();
+    }
+    (StatusCode::OK, ()).into_response()
 }
 
 #[derive(ToSchema, Deserialize)]
