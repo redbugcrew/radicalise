@@ -879,6 +879,20 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name GetVisibleProjects
+     * @request GET:/api/me/projects/visible
+     */
+    getVisibleProjects: (params: RequestParams = {}) =>
+      this.request<Project[], any>({
+        path: `/api/me/projects/visible`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name UpdateProject
      * @request PUT:/api/my_project
      */
@@ -959,20 +973,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     getProjectBySlug: (projectSlug: string, params: RequestParams = {}) =>
       this.request<Project, any>({
         path: `/api/public/projects/by_slug/${projectSlug}`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name GetVisibleProjects
-     * @request GET:/api/public/projects/visible
-     */
-    getVisibleProjects: (params: RequestParams = {}) =>
-      this.request<Project[], any>({
-        path: `/api/public/projects/visible`,
         method: "GET",
         format: "json",
         ...params,

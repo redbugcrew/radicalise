@@ -48,7 +48,7 @@ pub struct InitialData {
     pub people: Vec<Person>,
     pub crews: Vec<CrewWithLinks>,
     pub intervals: Vec<Interval>,
-    pub current_interval_data: IntervalData,
+    pub current_interval_data: Option<IntervalData>,
     pub event_templates: Vec<EventTemplate>,
     pub calendar_events: Vec<CalendarEvent>,
     pub peer_roles: Vec<PeerRole>,
@@ -167,12 +167,16 @@ pub async fn find_initial_data_for_project(project: Project, pool: &SqlitePool) 
     .fetch_all(pool)
     .await?;
 
-    let current_interval = find_current_interval(project.typed_id(), pool).await?;
-
     let event_templates = find_all_event_templates(project.typed_id(), pool).await?;
     let calendar_events = list_calendar_events_with_attendances(project.typed_id(), pool).await?;
 
-    let current_interval_data = find_interval_data(&current_interval, project.typed_id(), pool).await?;
+    let current_interval = find_current_interval(project.typed_id(), pool).await?;
+
+    let current_interval_data = if let Some(interval) = &current_interval {
+        find_interval_data(interval, project.typed_id(), pool).await?.into()
+    } else {
+        None
+    };
 
     let peer_roles = find_all_peer_roles(project.typed_id(), pool).await?;
 

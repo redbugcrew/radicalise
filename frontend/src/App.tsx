@@ -73,7 +73,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: "",
-        element: <Navigate to="/project/brassica" replace />,
+        element: <Navigate to="/project" replace />,
       },
       {
         path: "invitations",
@@ -89,11 +89,11 @@ const router = createBrowserRouter([
         element: <Dev />,
       },
       {
-        path: "project/:projectSlug",
+        path: "project",
         element: <LoadMyProjects />,
         children: [
           {
-            path: "",
+            path: ":projectSlug",
             element: <LoadSelectedProject />,
             children: [
               {

@@ -82,7 +82,10 @@ async fn start_next_interval(
     let project_id = default_project_id();
 
     let current_interval = match repo::find_current_interval(project_id.clone(), &pool).await {
-        Ok(interval) => interval,
+        Ok(Some(interval)) => interval,
+        Ok(None) => {
+            return StartNextIntervalError::CurrentIntervalNotFound.into_response();
+        }
         Err(_) => {
             return StartNextIntervalError::CurrentIntervalNotFound.into_response();
         }

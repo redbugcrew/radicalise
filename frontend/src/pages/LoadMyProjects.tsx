@@ -1,6 +1,5 @@
 import { createContext, useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { Outlet } from "react-router-dom"
+import { Outlet, useNavigate } from "react-router-dom"
 import { getApi } from "../api"
 import type { Project } from "../api/Api"
 
@@ -17,7 +16,12 @@ export default function LoadMyProjects() {
       .api.getVisibleProjects()
       .then((response) => {
         if (response.status === 200) {
+          const projects = response.data
           setMyProjects(response.data)
+
+          if (projects.length > 0) {
+            navigate(`/project/${projects[0].slug}`)
+          }
         }
       })
       .catch((error) => {

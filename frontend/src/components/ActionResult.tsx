@@ -80,7 +80,7 @@ export function DisplayActionResult({ result, handlers = {}, displaySuccess = fa
     if (displaySuccess) return <Text c="green">Action succeeded!</Text>
   } else if (result.error) {
     if (result.login_needed && redirectToLogin) {
-      navigate("/auth/node_steward/login")
+      navigate("/auth/login")
       return null
     }
 

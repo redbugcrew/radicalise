@@ -63,7 +63,10 @@ pub async fn invite_person(
     };
 
     let current_interval = match find_current_interval(default_project_id(), &pool).await {
-        Ok(interval) => interval,
+        Ok(Some(interval)) => interval,
+        Ok(None) => {
+            return (StatusCode::INTERNAL_SERVER_ERROR, "No current interval").into_response();
+        }
         Err(_) => {
             return (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error").into_response();
         }
@@ -179,7 +182,10 @@ pub async fn accept_invitation(
     };
 
     let current_interval = match find_current_interval(default_project_id(), &pool).await {
-        Ok(interval) => interval,
+        Ok(Some(interval)) => interval,
+        Ok(None) => {
+            return (StatusCode::INTERNAL_SERVER_ERROR, "No current interval").into_response();
+        }
         Err(_) => {
             return (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error").into_response();
         }

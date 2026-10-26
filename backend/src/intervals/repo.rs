@@ -71,7 +71,7 @@ pub async fn find_interval(interval_id: IntervalId, pool: &SqlitePool) -> Result
     .await
 }
 
-pub async fn find_current_interval(project_id: ProjectId, pool: &SqlitePool) -> Result<Interval, sqlx::Error> {
+pub async fn find_current_interval(project_id: ProjectId, pool: &SqlitePool) -> Result<Option<Interval>, sqlx::Error> {
     sqlx::query_as!(
         Interval,
         "SELECT intervals.id, intervals.start_date, intervals.end_date
@@ -82,7 +82,7 @@ pub async fn find_current_interval(project_id: ProjectId, pool: &SqlitePool) -> 
         LIMIT 1",
         project_id.id
     )
-    .fetch_one(pool)
+    .fetch_optional(pool)
     .await
 }
 
