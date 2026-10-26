@@ -56,7 +56,7 @@ jobs:
       - name: Build backend
         run: |
           cd ../backend
-          cargo build --release
+          cargo build
 
       - name: Initialize test database
         run: |
@@ -69,7 +69,7 @@ jobs:
       - name: Start backend
         run: |
           cd ../backend
-          cargo run --release &
+          cargo run &
           # Wait for backend to be ready (timeout after 2 minutes)
           count=0
           until curl -s localhost:8200/api-docs/openapi.json > /dev/null || [ $count -eq 60 ]; do
