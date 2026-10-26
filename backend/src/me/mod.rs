@@ -54,7 +54,7 @@ async fn get_visible_projects(auth_session: AuthSession, Extension(pool): Extens
 
     let projects = find_projects_for_user(user_id, &pool).await.unwrap_or_default();
 
-    return (StatusCode::OK, Json(projects)).into_response();
+    (StatusCode::OK, Json(projects)).into_response()
 }
 
 #[utoipa::path(get, path = "/", responses(
@@ -71,7 +71,7 @@ async fn get_my_state(Extension(pool): Extension<SqlitePool>, auth_session: Auth
                 Ok(initial_data) => (StatusCode::OK, Json(initial_data)).into_response(),
                 Err(err) => {
                     eprintln!("Error fetching initial data: {:?}", err);
-                    return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
+                    (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response()
                 }
             }
         }
