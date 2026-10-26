@@ -17,6 +17,9 @@ db-test-init:
 playwright:
     mprocs -c mprocs.test.yaml
 
+format:
+    cd frontend && npm run format:write
+    cd backend && cargo fmt
 
 [working-directory: 'frontend']
 gen-api:
