@@ -98,12 +98,18 @@ jobs:
       - name: Start frontend
         run: |
           npm run build
-          npm run preview &
-          # Wait for frontend to be ready
-          until curl -s localhost:5173 > /dev/null; do
-            echo "Waiting for frontend..."
+          npm run preview -- --port 5173 --host &
+          # Wait for frontend to be ready (timeout after 2 minutes)
+          count=0
+          until curl -s localhost:5173 > /dev/null || [ $count -eq 60 ]; do
+            echo "Waiting for frontend... ($((count * 2))s)"
             sleep 2
+            count=$((count + 1))
           done
+          if [ $count -eq 60 ]; then
+            echo "Frontend failed to start within 120 seconds"
+            exit 1
+          fi
 
       - name: Run Playwright tests
         run: npx playwright test
