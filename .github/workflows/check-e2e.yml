@@ -19,7 +19,6 @@ jobs:
         working-directory: ./frontend
     env:
       DATABASE_URL: sqlite://${{ github.workspace }}/backend/data/test/test_radicalise.sqlite
-      PATH: $GITHUB_PATH:$HOME/.cargo/bin
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -46,7 +45,9 @@ jobs:
           echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
 
       - name: Initialize test database
-        run: just db-test-init
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          just db-test-init
 
       - name: Start backend
         run: |
