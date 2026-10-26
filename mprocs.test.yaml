@@ -1,0 +1,12 @@
+procs:
+  frontend:
+    shell: "npm run dev"
+    cwd: "./frontend"
+  backend:
+    shell: "DATABASE_URL=sqlite:data/test/test_radicalise.sqlite cargo run"
+    cwd: "./backend"
+    env:
+      DATABASE_URL: "sqlite:data/test/test_radicalise.sqlite"
+  playwright:
+    shell: "DATABASE_URL=sqlite:backend/data/test/test_radicalise.sqlite npx playwright test --ui"
+    cwd: "./frontend"

@@ -20,7 +20,7 @@ export default function EditEvent() {
       .api.updateCalendarEvent(event.id.toString(), data)
       .then((response) => {
         handleAppEvents(response.data)
-        navigate("/events/" + eventId)
+        navigate(`../${event.id}`)
       })
       .catch((error) => {
         console.error("Error updating event:", error)

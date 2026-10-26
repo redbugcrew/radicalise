@@ -3,7 +3,7 @@ import { getApi } from "../../../api"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import AuthLayout from "../components/AuthLayout"
 import type { LoginFormData } from "../components/LoginForm"
-import { actionFailure, actionSuccess, type ActionPromiseResult } from "../../../components/ActionResult"
+import { actionSuccess, type ActionPromiseResult } from "../../../components/ActionResult"
 import LoginForm from "../components/LoginForm"
 import { Stack } from "@mantine/core"
 
@@ -18,7 +18,14 @@ export default function Login() {
         navigate(searchParams.get("redirect") ?? "/")
         return actionSuccess()
       })
-      .catch(actionFailure)
+      .catch((error) => {
+        console.error("Login failed:", error)
+        return {
+          success: false,
+          error: "Invalid login details",
+          login_needed: false,
+        }
+      })
   }
 
   return (

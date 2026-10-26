@@ -25,7 +25,7 @@ export default function EditEventTemplate() {
       .api.updateEventTemplate(templateIdNum.toString(), data)
       .then((response) => {
         handleAppEvents(response.data)
-        navigate("/events/event_templates")
+        navigate("..")
       })
       .catch((error) => {
         console.error("Error updating event template:", error)

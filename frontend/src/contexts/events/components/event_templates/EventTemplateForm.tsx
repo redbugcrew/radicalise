@@ -60,7 +60,7 @@ export default function EventTemplateForm({ value, onSubmit }: EventTemplateForm
           />
         </Stack>
         <Button type="submit" loading={form.submitting}>
-          Create template
+          {value ? "Update template" : "Create template"}
         </Button>
       </Stack>
     </form>

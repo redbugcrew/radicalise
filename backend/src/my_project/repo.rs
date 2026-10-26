@@ -14,7 +14,7 @@ use crate::{
     shared::{
         entities::{
             CalendarEvent, Circle, CircleId, CircleInvolvement, CrewInvolvement, CrewWithLinks, EventTemplate, Interval, IntervalId,
-            PeerEnrollment, PeerRole, Person, PersonId, Project, ProjectId,
+            PeerEnrollment, PeerRole, Person, PersonId, Project, ProjectId, UserId,
         },
         links_repo::{find_all_links_for_owner, update_links_for_owner},
     },
@@ -48,7 +48,7 @@ pub struct InitialData {
     pub people: Vec<Person>,
     pub crews: Vec<CrewWithLinks>,
     pub intervals: Vec<Interval>,
-    pub current_interval_data: IntervalData,
+    pub current_interval_data: Option<IntervalData>,
     pub event_templates: Vec<EventTemplate>,
     pub calendar_events: Vec<CalendarEvent>,
     pub peer_roles: Vec<PeerRole>,
@@ -97,6 +97,30 @@ pub async fn find_project_with_links(project_id: ProjectId, pool: &SqlitePool) -
     Ok(Project { links, ..project })
 }
 
+pub async fn find_projects_for_user(user_id: UserId, pool: &SqlitePool) -> Result<Vec<Project>, sqlx::Error> {
+    sqlx::query!(
+        "SELECT p.id as id, name, noun_name, description, slug
+        FROM projects p
+        JOIN people pe ON pe.project_id = p.id
+        WHERE pe.user_id = ?",
+        user_id.id
+    )
+    .fetch_all(pool)
+    .await
+    .map(|rows| {
+        rows.into_iter()
+            .map(|row| Project {
+                id: row.id,
+                name: Some(row.name),
+                noun_name: row.noun_name,
+                description: row.description,
+                links: vec![], // Links are not fetched here, assuming they are handled elsewhere
+                slug: row.slug,
+            })
+            .collect::<Vec<Project>>()
+    })
+}
+
 pub async fn find_all_crew_involvements(interval_id: IntervalId, pool: &SqlitePool) -> Result<Vec<CrewInvolvement>, sqlx::Error> {
     sqlx::query_as!(
         CrewInvolvement,
@@ -143,12 +167,16 @@ pub async fn find_initial_data_for_project(project: Project, pool: &SqlitePool) 
     .fetch_all(pool)
     .await?;
 
-    let current_interval = find_current_interval(project.typed_id(), pool).await?;
-
     let event_templates = find_all_event_templates(project.typed_id(), pool).await?;
     let calendar_events = list_calendar_events_with_attendances(project.typed_id(), pool).await?;
 
-    let current_interval_data = find_interval_data(&current_interval, project.typed_id(), pool).await?;
+    let current_interval = find_current_interval(project.typed_id(), pool).await?;
+
+    let current_interval_data = if let Some(interval) = &current_interval {
+        find_interval_data(interval, project.typed_id(), pool).await?.into()
+    } else {
+        None
+    };
 
     let peer_roles = find_all_peer_roles(project.typed_id(), pool).await?;
 

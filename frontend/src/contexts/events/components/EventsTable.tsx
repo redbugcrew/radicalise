@@ -8,6 +8,7 @@ import { SearchField, SortableTh, sortData } from "../../../components/SortableT
 import { format, isFuture } from "date-fns"
 import { useAppSelector } from "../../../store"
 import PersonEventAttendanceIcon from "./AttendanceIcon"
+import { currentProjectPath, useCurrentProjectSlug } from "../../../pages/LoadProjectState"
 
 interface EventsTableProps {
   events: CalendarEvent[]
@@ -32,6 +33,7 @@ function matchesFilter(item: CalendarEventRowData, lowerCaseQuery: string): bool
 
 export default function EventsTable({ events, noDataMessage }: EventsTableProps) {
   const currentPersonId = useAppSelector((state) => state.me?.person_id)
+  const projectSlug = useCurrentProjectSlug()
 
   const [search, setSearch] = useState("")
   const [sortBy, setSortBy] = useState<SortableEventField>("start_at")
@@ -119,7 +121,7 @@ export default function EventsTable({ events, noDataMessage }: EventsTableProps)
                 <DateText date={row.start_at} />
               </Table.Td>
               <Table.Td>
-                <Anchor href={`/events/${row.id}`}>{row.name}</Anchor>
+                <Anchor href={currentProjectPath(`/events/${row.id}`, projectSlug)}>{row.name}</Anchor>
               </Table.Td>
               {currentPersonId && (
                 <Table.Td maw="5em" align="right">

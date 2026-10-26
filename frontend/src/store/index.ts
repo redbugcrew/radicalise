@@ -110,6 +110,21 @@ export async function loadInitialData(store: AppStore) {
   return null
 }
 
+export async function loadInitialProjectData(): Promise<boolean> {
+  const api = getApi()
+
+  const dataHasLoaded = store.getState().project
+
+  if (dataHasLoaded) {
+    return true
+  } else {
+    console.log("Loading initial data from API...")
+    return loadMeData(store, api)
+      .then(() => loadProjectData(store, api))
+      .then(() => true)
+  }
+}
+
 export async function handleMeEvent(event: MeEvent) {
   if (event.IntervalDataChanged) {
     store.dispatch(personIntervalDataChanged(event.IntervalDataChanged))

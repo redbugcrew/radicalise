@@ -18,7 +18,7 @@ pub fn invited_to_circle_email(to_address: String, params: InvitedToCircleEmailP
     let subject = "You're invited to join a project on RADicalise";
 
     let accept_invite_url = absolute_url_for_email(&format!(
-        "/project/{}/invitation/accept?token={}",
+        "/project/{}/pub/invitation/accept?token={}",
         encode(&params.project_slug),
         encode(&params.invitation_token)
     ));

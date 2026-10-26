@@ -11,7 +11,7 @@ pub fn router() -> OpenApiRouter {
         .routes(routes!(crate::invitations::get_invitation))
 }
 
-#[utoipa::path(get, path = "/project/by_slug/{project_slug}", responses(
+#[utoipa::path(get, path = "/projects/by_slug/{project_slug}", responses(
         (status = 200, body = Project),
         (status = NOT_FOUND, description = "Project was not found", body = ()),
         (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),

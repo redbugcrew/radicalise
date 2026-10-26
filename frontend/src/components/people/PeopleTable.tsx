@@ -4,6 +4,7 @@ import { useState } from "react"
 import CapacityScoreIcon from "../CapacityScoreIcon"
 import Avatar from "./Avatar"
 import { SearchField, SortableTh, sortData, Th } from "../SortableTable/SortableTable"
+import { currentProjectPath, useCurrentProjectSlug } from "../../pages/LoadProjectState"
 
 interface Crew {
   id: number
@@ -41,13 +42,14 @@ interface PersonLinkWithCapacityProps {
 }
 
 function PersonLinkWithCapacity({ personId, personName, avatarId, capacityScore, dimmed, intervalId }: PersonLinkWithCapacityProps) {
+  const projectSlug = useCurrentProjectSlug()
   let link = `/people/${personId}`
   if (intervalId) {
     link += `#interval${intervalId}`
   }
 
   return (
-    <Anchor href={link}>
+    <Anchor href={currentProjectPath(link, projectSlug)}>
       <Group gap="sm" wrap="nowrap">
         <Avatar avatarId={avatarId} />
         <Text fz="sm" fw={500} c={dimmed ? "dimmed" : "default"}>

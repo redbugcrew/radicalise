@@ -6,6 +6,7 @@ import styles from "./CrewCard.module.css"
 import Anchor from "../../Anchor"
 import type { CrewWithLinks } from "../../../store/crews"
 import LinksStack from "../../links/LinksDisplay/LinksStack"
+import { currentProjectPath, useCurrentProjectSlug } from "../../../pages/LoadProjectState"
 
 interface CrewCardProps {
   crew: CrewWithLinks
@@ -30,6 +31,7 @@ function sortByConvenorThenName(a: PersonAndInvolvement, b: PersonAndInvolvement
 }
 
 export default function CrewCard({ crew, involvements, people, highlightPersonId }: CrewCardProps) {
+  const projectSlug = useCurrentProjectSlug()
   const crewPeople: PersonAndInvolvement[] = involvements
     .map((involvement) => ({ involvement, person: people[involvement.person_id] }))
     .filter(({ person }) => person)
@@ -51,7 +53,7 @@ export default function CrewCard({ crew, involvements, people, highlightPersonId
               <Title order={2} size="h4">
                 {crew.name}
               </Title>
-              <Anchor c="dimmed" href={`/crews/${crew.id}/edit`} size="xs">
+              <Anchor c="dimmed" href={currentProjectPath(`/crews/${crew.id}/edit`, projectSlug)} size="xs">
                 edit
               </Anchor>
             </Group>

@@ -1,45 +1,16 @@
-import { AppShell, Burger, Container, Group } from "@mantine/core"
+import { AppShell, Burger, Group } from "@mantine/core"
 import { useDisclosure } from "@mantine/hooks"
-import {
-  IconBrandGithub,
-  IconHome2,
-  IconSettings,
-  IconUsers,
-  IconUsersGroup,
-  IconCalendarMonth,
-  IconCalendar,
-  IconCalendarCog,
-  IconCirclesFilled,
-} from "@tabler/icons-react"
 import { Outlet } from "react-router-dom"
-import { Anchor, NavLink, PersonBadge } from "../../components"
-import { handleOwnedAppEvent, useAppSelector } from "../../store"
-import packageJson from "../../../package.json"
-import useWebSocket from "react-use-websocket"
-
-import classes from "./Layout.module.css"
-import { getSocketUrl } from "../../api"
+import { Anchor, PersonBadge } from "../../components"
+import { useAppSelector } from "../../store"
+import { currentProjectPath, useCurrentProjectSlug } from "../LoadProjectState"
 
 export default function Layout() {
   const [opened, { toggle }] = useDisclosure()
   const project = useAppSelector((state) => state.project)
   const person_id = useAppSelector((state) => state.me?.person_id)
   const person = useAppSelector((state) => state.people[person_id || -1])
-
-  useWebSocket(getSocketUrl(), {
-    share: true,
-    onOpen: (event) => {
-      console.log("WebSocket connection opened", event)
-    },
-    onClose: () => {
-      console.log("WebSocket connection closed")
-    },
-    onMessage: (event) => {
-      console.log("WebSocket message received", event)
-      if (person_id !== undefined) handleOwnedAppEvent(person_id, JSON.parse(event.data))
-    },
-    heartbeat: false,
-  })
+  const projectSlug = useCurrentProjectSlug()
 
   return (
     <AppShell header={{ height: 60 }} navbar={{ width: 300, breakpoint: "sm", collapsed: { mobile: !opened } }} padding="md">
@@ -49,52 +20,14 @@ export default function Layout() {
             <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
             <Anchor href="/">{project ? project.name : "Radicalise!"}</Anchor>
           </Group>
-          <Anchor href={`/people/${person.id}`} onClick={toggle}>
-            <PersonBadge person={person} variant="transparent" noText />
-          </Anchor>
+          {person && (
+            <Anchor href={currentProjectPath(`/people/${person.id}`, projectSlug)} onClick={toggle}>
+              <PersonBadge person={person} variant="transparent" noText />
+            </Anchor>
+          )}
         </Group>
       </AppShell.Header>
-      <AppShell.Navbar p={0}>
-        <AppShell.Section className={classes.menu_section}>
-          <NavLink label="Dashboard" href="dashboard" leftSection={<IconHome2 size={18} />} onClick={toggle} />
-          <NavLink label="People" href="people" leftSection={<IconUsers size={18} />} onClick={toggle} />
-          <NavLink label="Crews" href="crews" leftSection={<IconUsersGroup size={18} />} onClick={toggle} />
-          <NavLink label="Events" href="events" leftSection={<IconCalendar size={18} />} onClick={toggle} />
-        </AppShell.Section>
-        <AppShell.Section className={classes.settings_section}>
-          <h3 className={classes.section_title}>Settings</h3>
-          <NavLink label="Intervals" href="intervals" leftSection={<IconCalendarMonth size={18} />} onClick={toggle} />
-          <NavLink label="Peer Roles" href="peer_roles" leftSection={<IconUsersGroup size={18} />} onClick={toggle} />
-          <NavLink label="Event Templates" href="events/event_templates" leftSection={<IconCalendarCog size={18} />} onClick={toggle} />
-        </AppShell.Section>
-
-        <AppShell.Section className={classes.footer_section}>
-          <NavLink
-            c="dimmed"
-            label={"v" + packageJson.version}
-            href={packageJson.homepage + "/releases/tag/v" + packageJson.version}
-            leftSection={<IconBrandGithub size={18} />}
-            onClick={toggle}
-          />
-          <NavLink
-            c="dimmed"
-            label="Project settings"
-            href="/project_settings/edit"
-            leftSection={<IconSettings size={18} />}
-            onClick={toggle}
-          />
-          <NavLink
-            c="dimmed"
-            label="Circles"
-            href="/project_settings/circles"
-            leftSection={<IconCirclesFilled size={18} />}
-            onClick={toggle}
-          />
-        </AppShell.Section>
-      </AppShell.Navbar>
-      <AppShell.Main>
-        <Container p={0}>{project && <Outlet />}</Container>
-      </AppShell.Main>
+      <Outlet />
     </AppShell>
   )
 }

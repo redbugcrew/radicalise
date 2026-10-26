@@ -65,7 +65,7 @@ export default function MyParticipation() {
       .then((response) => {
         console.log("Participation updated successfully", response)
         handleAppEvents(response.data)
-        navigate("/dashboard")
+        navigate(`/project/${project.slug}/dashboard`)
       })
       .catch((error) => {
         console.error("Error updating participation:", error)

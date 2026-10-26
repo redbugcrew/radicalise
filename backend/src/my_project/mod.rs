@@ -28,8 +28,8 @@ pub mod involvements_repo;
 pub mod repo;
 pub mod strip_data;
 
-fn db_error(e: impl std::fmt::Debug) -> Response {
-    eprintln!("Database error: {:?}", e);
+fn db_error(e: impl std::fmt::Debug, msg: &str) -> Response {
+    eprintln!("Database error: {:?} - {}", e, msg);
     (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response()
 }
 
@@ -49,37 +49,43 @@ async fn get_project_state(auth_session: AuthSession, Extension(pool): Extension
     let user_id = match auth_session.user().await {
         Some(user) => UserId::new(user.id),
         None => {
-            eprintln!("Unauthorized access to get_project_state");
+            eprintln!("Unauthorized access to get_project_state with no user");
             return (StatusCode::UNAUTHORIZED, ()).into_response();
         }
     };
 
     let project = match repo::find_project_with_links(default_project_id(), &pool).await {
         Ok(project) => project,
-        Err(e) => return db_error(e),
+        Err(e) => return db_error(e, "Failed to find project with links"),
     };
 
     // Fetch the person for this user_id and project
     let person = match find_person_by_user_id(user_id.clone(), project.typed_id(), &pool).await {
         Ok(Some(person)) => person,
         Ok(None) => return (StatusCode::NOT_FOUND, ()).into_response(),
-        Err(e) => return db_error(e),
+        Err(e) => return db_error(e, "Failed to find person by user ID"),
     };
 
     let initial_data = match repo::find_initial_data_for_project(project, &pool).await {
         Ok(data) => data,
-        Err(e) => return db_error(e),
+        Err(e) => return db_error(e, "Failed to find initial data for project"),
     };
 
-    // Fetch the circles for this person
-    let current_interval_id = initial_data.current_interval_data.interval.typed_id();
+    let initial_data = match &initial_data.current_interval_data {
+        Some(current_interval_data) => {
+            // Fetch the circles for this person
+            let current_interval_id = current_interval_data.interval.typed_id();
 
-    let my_circles = match involvements_repo::find_circles_for_person_in_interval(person.typed_id(), current_interval_id, &pool).await {
-        Ok(circles) => circles,
-        Err(e) => return db_error(e),
+            let my_circles =
+                match involvements_repo::find_circles_for_person_in_interval(person.typed_id(), current_interval_id, &pool).await {
+                    Ok(circles) => circles,
+                    Err(e) => return db_error(e, "Failed to find circles for person in interval"),
+                };
+
+            strip_data::strip_private_data_from_initial_data(&initial_data, &my_circles, &person.typed_id())
+        }
+        None => initial_data,
     };
-
-    let initial_data = strip_data::strip_private_data_from_initial_data(&initial_data, &my_circles, &person.typed_id());
 
     (StatusCode::OK, Json(initial_data)).into_response()
 }
@@ -105,18 +111,18 @@ async fn get_interval_data(
 
     let interval: Interval = match find_interval(interval_id.clone(), &pool).await {
         Ok(interval) => interval,
-        Err(e) => return db_error(e),
+        Err(e) => return db_error(e, "Failed to find interval"),
     };
 
     let interval_data = match find_interval_data(&interval, default_project_id(), &pool).await {
         Ok(data) => data,
-        Err(e) => return db_error(e),
+        Err(e) => return db_error(e, "Failed to find interval data"),
     };
 
     let user_id = match auth_session.user().await {
         Some(user) => UserId::new(user.id),
         None => {
-            eprintln!("Unauthorized access to get_project_state");
+            eprintln!("Unauthorized access to get_interval_data with no user");
             return (StatusCode::UNAUTHORIZED, ()).into_response();
         }
     };
@@ -125,13 +131,13 @@ async fn get_interval_data(
     let person = match find_person_by_user_id(user_id.clone(), default_project_id(), &pool).await {
         Ok(Some(person)) => person,
         Ok(None) => return (StatusCode::NOT_FOUND, ()).into_response(),
-        Err(e) => return db_error(e),
+        Err(e) => return db_error(e, "Failed to find person by user ID"),
     };
 
     let my_circles =
         match involvements_repo::find_circles_for_person_in_interval(person.typed_id(), interval_data.interval.typed_id(), &pool).await {
             Ok(circles) => circles,
-            Err(e) => return db_error(e),
+            Err(e) => return db_error(e, "Failed to find circles for person in interval"),
         };
 
     let interval_data = strip_data::strip_private_data_from_interval_data(&interval_data, &my_circles, &person.typed_id());
@@ -160,6 +166,6 @@ pub async fn update_project(
             realtime_state.broadcast_app_event(Some(auth_session), event.clone()).await;
             (StatusCode::OK, Json(vec![event])).into_response()
         }
-        Err(e) => db_error(e),
+        Err(e) => db_error(e, "Failed to update project with links"),
     }
 }

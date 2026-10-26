@@ -7,3 +7,7 @@ node_modules/
 
 target
 mprocs.log
+
+# Testing
+test-results/
+frontend/playwright-report
