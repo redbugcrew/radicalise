@@ -55,12 +55,18 @@ jobs:
       - name: Start backend
         run: |
           cd ../backend
-          cargo run --background &
-          # Wait for backend to be ready
-          until curl -s localhost:8200/api-docs/openapi.json > /dev/null; do
-            echo "Waiting for backend..."
+          cargo run &
+          # Wait for backend to be ready (timeout after 2 minutes)
+          count=0
+          until curl -s localhost:8200/api-docs/openapi.json > /dev/null || [ $count -eq 60 ]; do
+            echo "Waiting for backend... ($((count * 2))s)"
             sleep 2
+            count=$((count + 1))
           done
+          if [ $count -eq 60 ]; then
+            echo "Backend failed to start within 120 seconds"
+            exit 1
+          fi
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
