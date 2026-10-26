@@ -104,6 +104,8 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Start frontend
+        env:
+          VITE_API_HOST: http://localhost:8200/
         run: |
           npm run build
           npm run preview -- --port 5173 --host &
