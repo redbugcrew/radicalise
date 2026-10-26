@@ -47,6 +47,7 @@ jobs:
       - name: Initialize test database
         run: |
           export PATH="$HOME/.cargo/bin:$PATH"
+          cd ..
           just db-test-init
 
       - name: Start backend
