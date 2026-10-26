@@ -727,38 +727,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name CreateEventTemplate
-     * @request POST:/api/event_templates
-     */
-    createEventTemplate: (data: EventTemplate, params: RequestParams = {}) =>
-      this.request<any, any>({
-        path: `/api/event_templates`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name UpdateEventTemplate
-     * @request PUT:/api/event_templates/{event_template_id}
-     */
-    updateEventTemplate: (eventTemplateId: string, data: EventTemplate, params: RequestParams = {}) =>
-      this.request<any, any>({
-        path: `/api/event_templates/${eventTemplateId}`,
-        method: "PUT",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name InvitePerson
      * @request POST:/api/invitations/invitation/new
      */
@@ -853,6 +821,38 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     updateCrew: (projectId: number, crewId: number, data: CrewWithLinks, params: RequestParams = {}) =>
       this.request<AppEvent[], any>({
         path: `/api/projects/${projectId}/crews/${crewId}`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CreateEventTemplate
+     * @request POST:/api/projects/{project_id}/event_templates
+     */
+    createEventTemplate: (projectId: number, data: EventTemplate, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/projects/${projectId}/event_templates`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdateEventTemplate
+     * @request PUT:/api/projects/{project_id}/event_templates/{event_template_id}
+     */
+    updateEventTemplate: (projectId: number, eventTemplateId: number, data: EventTemplate, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/projects/${projectId}/event_templates/${eventTemplateId}`,
         method: "PUT",
         body: data,
         type: ContentType.Json,

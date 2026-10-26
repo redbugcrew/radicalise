@@ -10,6 +10,9 @@ export default function EditEventTemplate() {
   const templateIdNum = templateId ? parseInt(templateId, 10) : undefined
   const template = useAppSelector((state) => state.eventTemplates.find((t) => t.id === templateIdNum))
   const navigate = useNavigate()
+  const projectId = useAppSelector((state) => state.project?.id)
+
+  if (!projectId) return <Container>Error: Project not found</Container>
 
   if (!templateIdNum || !template) {
     return (
@@ -22,7 +25,7 @@ export default function EditEventTemplate() {
 
   const handleSubmit = async (data: EventTemplate): Promise<void> => {
     return getApi()
-      .api.updateEventTemplate(templateIdNum.toString(), data)
+      .api.updateEventTemplate(projectId, templateIdNum, data)
       .then((response) => {
         handleAppEvents(response.data)
         navigate("..")
