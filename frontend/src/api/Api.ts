@@ -633,38 +633,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name CreateCircle
-     * @request POST:/api/circles
-     */
-    createCircle: (data: Circle, params: RequestParams = {}) =>
-      this.request<AppEvent[], string>({
-        path: `/api/circles`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name UpdateCircle
-     * @request PUT:/api/circles/{circle_id}
-     */
-    updateCircle: (circleId: string, data: Circle, params: RequestParams = {}) =>
-      this.request<AppEvent[], string>({
-        path: `/api/circles/${circleId}`,
-        method: "PUT",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name RecomputeImplicitInvolvements
      * @request POST:/api/dev/recompute_implicit_involvements
      */
@@ -805,6 +773,38 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     updateCalendarEvent: (projectId: number, eventId: number, data: CalendarEvent, params: RequestParams = {}) =>
       this.request<AppEvent[], any>({
         path: `/api/projects/${projectId}/calendar_events/${eventId}`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CreateCircle
+     * @request POST:/api/projects/{project_id}/circles
+     */
+    createCircle: (projectId: number, data: Circle, params: RequestParams = {}) =>
+      this.request<AppEvent[], string>({
+        path: `/api/projects/${projectId}/circles`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdateCircle
+     * @request PUT:/api/projects/{project_id}/circles/{circle_id}
+     */
+    updateCircle: (projectId: number, circleId: number, data: Circle, params: RequestParams = {}) =>
+      this.request<AppEvent[], string>({
+        path: `/api/projects/${projectId}/circles/${circleId}`,
         method: "PUT",
         body: data,
         type: ContentType.Json,
