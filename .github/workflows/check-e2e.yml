@@ -48,6 +48,8 @@ jobs:
         run: |
           export PATH="$HOME/.cargo/bin:$PATH"
           cd ..
+          # Verify the cargo-sqlx binary exists and is executable
+          ls -l $HOME/.cargo/bin/cargo-sqlx || echo "cargo-sqlx binary not found"
           just db-test-init
 
       - name: Start backend
