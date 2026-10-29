@@ -27,6 +27,12 @@ RUN cp /app/target/$(cat /app/.platform)/release/radicalise /app/radicalise
 
 # RUNNER
 FROM ubuntu AS runner
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
+# reqwest/rustls-platform-verifier reads CA roots from the OS trust store; the
+# vendored OpenSSL (via sqlx native-tls) must be pointed at the same bundle
+# because its default lookup path is the build-time sysroot.
+ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 COPY --from=rustbuilder /app/radicalise /app/backend/radicalise
 COPY --from=vitebuilder /app/dist /app/frontend
 ENV FRONTEND_PATH=/app/frontend

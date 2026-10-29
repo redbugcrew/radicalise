@@ -30,3 +30,9 @@ format:
 gen-api:
     cd frontend && npm run swagger
     cd frontend && npm run format:write
+
+docker-build:
+    docker build -t radicalise .
+
+docker-run: docker-build
+    docker run --rm -p 8200:8200 radicalise
