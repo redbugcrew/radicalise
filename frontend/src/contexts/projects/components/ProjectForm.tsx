@@ -4,7 +4,7 @@ import type { Project, Link } from "../../../api/Api"
 import LinksInput, { linksValidator } from "../../../components/links/LinksInput/LinksInput"
 
 interface ProjectFormProps {
-  project: Project
+  project?: Project | null
 
   onSubmit: (values: Project) => void
 }
@@ -18,9 +18,16 @@ interface ProjectFormValues {
   slug?: string | null
 }
 
-function convertProjectToFormValues(input: Project): ProjectFormValues {
-  return {
-    ...input,
+function convertProjectToFormValues(input?: Project | null | undefined): ProjectFormValues {
+  if (!input) {
+    return {
+      id: 0,
+      links: [],
+    }
+  } else {
+    return {
+      ...input,
+    }
   }
 }
 
