@@ -18,6 +18,8 @@ interface LoadProjectStateInnerProps {
 function LoadProjectStateInner({ projectData }: LoadProjectStateInnerProps) {
   const [loading, setLoading] = useState(true)
 
+  console.log("LoadProjectStateInner", projectData.project.slug)
+
   useEffect(() => {
     console.log("Loading project with slug:", projectData.project.slug)
 

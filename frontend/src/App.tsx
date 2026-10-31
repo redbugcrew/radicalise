@@ -68,15 +68,15 @@ const router = createBrowserRouter([
   },
   {
     path: "/",
-    element: <Layout />,
+    element: <Navigate to="/project" replace />,
+  },
+  {
+    path: "project",
+    element: <LoadMyProjects />,
     children: [
       {
         path: "",
-        element: <Navigate to="/project" replace />,
-      },
-      {
-        path: "project",
-        element: <LoadMyProjects />,
+        element: <Layout />,
         children: [
           {
             path: ":projectSlug",

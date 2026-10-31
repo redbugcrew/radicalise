@@ -101,7 +101,7 @@ async function loadMeData(projectId: number, store: AppStore, api: ReturnType<ty
 export async function loadInitialProjectData(projectId: number): Promise<boolean> {
   const api = getApi()
 
-  const dataHasLoaded = store.getState().project
+  const dataHasLoaded = store.getState().project?.id == projectId
 
   if (dataHasLoaded) {
     return true
