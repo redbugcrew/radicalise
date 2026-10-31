@@ -1,9 +1,9 @@
 import { AppShell, Burger, Group, Menu } from "@mantine/core"
 import { useDisclosure } from "@mantine/hooks"
 import { Link, Outlet, useNavigate } from "react-router-dom"
-import { Anchor, PersonBadge, ProjectSwitcher } from "../../components"
+import { Anchor, PersonBadge } from "../../components"
 import { useAppSelector } from "../../store"
-import { currentProjectPath, useCurrentProjectSlug } from "../LoadProjectState"
+import { currentProjectPath, useCurrentProjectSlug, ProjectSwitcher } from "../../contexts/projects"
 import { getApi } from "../../api"
 
 export default function Layout() {
@@ -32,7 +32,7 @@ export default function Layout() {
           <Group>
             <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
             <Anchor href="/">{project ? project.name : "Radicalise!"}</Anchor>
-            <ProjectSwitcher value={project} />
+            <ProjectSwitcher value={project} canCreateNew />
           </Group>
           {person && (
             <Menu shadow="md" width={200}>

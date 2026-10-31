@@ -1,7 +1,7 @@
 import { createContext, useEffect, useState } from "react"
 import { Outlet, useParams } from "react-router-dom"
-import type { Project } from "../api/Api"
-import { getApi } from "../api"
+import type { Project } from "../../../api/Api"
+import { getApi } from "../../../api"
 import { Container, Stack, Title, Text, AppShell } from "@mantine/core"
 import { MyProjectsContext } from "./LoadMyProjects"
 

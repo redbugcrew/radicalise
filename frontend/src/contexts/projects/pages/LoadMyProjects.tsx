@@ -1,7 +1,7 @@
 import { createContext, useEffect, useState } from "react"
 import { Outlet, useNavigate } from "react-router-dom"
-import { getApi } from "../api"
-import type { Project } from "../api/Api"
+import { getApi } from "../../../api"
+import type { Project } from "../../../api/Api"
 
 export const MyProjectsContext = createContext<Project[]>([])
 

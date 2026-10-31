@@ -1,8 +1,8 @@
 import { Container, Title } from "@mantine/core"
-import { handleAppEvents, useAppSelector } from "../store"
-import { ProjectForm } from "../components"
-import type { Project } from "../api/Api"
-import { getApi } from "../api"
+import { handleAppEvents, useAppSelector } from "../../../store"
+import ProjectForm from "../components/ProjectForm"
+import type { Project } from "../../../api/Api"
+import { getApi } from "../../../api"
 import { useNavigate } from "react-router-dom"
 
 export default function EditProject() {

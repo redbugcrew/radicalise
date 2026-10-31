@@ -8,7 +8,7 @@ import { actionSuccess, DisplayActionResult, type ActionPromiseResult } from "..
 import { getApi } from "../../api"
 import { useState } from "react"
 import { notifications } from "@mantine/notifications"
-import { SelectedProjectContext } from "../LoadSelectedProject"
+import { SelectedProjectContext } from "../../contexts/projects"
 
 function AcceptInvitationLoggedOut() {
   const navigate = useNavigate()

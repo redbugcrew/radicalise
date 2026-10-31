@@ -14,13 +14,10 @@ import {
   EditCrew,
   Intervals,
   NewInterval,
-  EditProject,
-  LoadSelectedProject,
   InvitePerson,
   AcceptInvitation,
-  LoadProjectState,
-  LoadMyProjects,
 } from "./pages"
+import { LoadSelectedProject, LoadProjectState, LoadMyProjects } from "./contexts/projects"
 import { buildRoutes as buildAuthRoutes } from "./contexts/auth"
 import { theme } from "./theme"
 import {
@@ -44,6 +41,7 @@ import { Circles, EditCircle, NewCircle } from "./contexts/circles"
 import { PeerRoles } from "./contexts/peer_roles"
 import NewRole from "./contexts/peer_roles/pages/NewRole"
 import ProjectLayout from "./pages/Layout/ProjectLayout"
+import { EditProject, NewProject } from "./contexts/projects"
 //import NewRole from "./contexts/peer_roles/pages/NewRole";
 
 const router = createBrowserRouter([
@@ -69,6 +67,10 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <Navigate to="/project" replace />,
+  },
+  {
+    path: "projects/new",
+    element: <NewProject />,
   },
   {
     path: "project",

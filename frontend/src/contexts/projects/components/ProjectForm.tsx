@@ -1,7 +1,7 @@
 import { useForm } from "@mantine/form"
 import { Button, Stack, Textarea, TextInput } from "@mantine/core"
-import type { Project, Link } from "../api/Api"
-import LinksInput, { linksValidator } from "./links/LinksInput/LinksInput"
+import type { Project, Link } from "../../../api/Api"
+import LinksInput, { linksValidator } from "../../../components/links/LinksInput/LinksInput"
 
 interface ProjectFormProps {
   project: Project
