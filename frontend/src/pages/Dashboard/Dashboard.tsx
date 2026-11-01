@@ -4,7 +4,7 @@ import { useAppSelector } from "../../store"
 import { AttendanceIntention, type CalendarEvent, type CircleInvolvement, type CrewInvolvement, type Interval } from "../../api/Api"
 import DateText from "../../components/DateText"
 import classes from "./Dashboard.module.css"
-import { CrewsList, LinksStack } from "../../components"
+import { Anchor, CrewsList, LinksStack, NoData } from "../../components"
 import { compareStrings } from "../../utilities/comparison"
 import { isFuture } from "date-fns"
 import EventsList from "../../contexts/events/components/EventsList"
@@ -18,6 +18,7 @@ import { forPerson } from "../../store/current_interval/crew_involvements"
 import { circleInvolvementforCircleAndPerson } from "../../store/current_interval/circle_involvements"
 import WithIntervalData from "../intervals/WithIntervalData"
 import { PersonEnrollmentsForInterval } from "../../contexts/peer_roles"
+import { current } from "immer"
 
 function ParticipationBadge({ involvement }: { involvement: CircleInvolvement | null }) {
   if (!involvement) return <Badge color="gray">No intention</Badge>
@@ -212,10 +213,22 @@ export default function Dashboard() {
         {project.feature_peer_roles && <MyPeerRoles personId={personId} />}
 
         {myCurrentCrewInvolvements && <MyCrews personId={myData.person_id} myInvolvements={myCurrentCrewInvolvements} />}
-        <Stack gap="md">
-          <Title order={2}>Resources</Title>
-          <LinksStack links={project.links} />
-        </Stack>
+
+        {project.links.length > 0 && (
+          <Stack gap="md">
+            <Title order={2}>Resources</Title>
+            <LinksStack links={project.links} />
+          </Stack>
+        )}
+
+        {!currentInterval && (
+          <NoData title="No active interval">
+            <Stack>
+              <Text>There is no active interval for this project at the moment.</Text>
+              <Anchor href="../intervals">Manage project intervals</Anchor>
+            </Stack>
+          </NoData>
+        )}
       </Stack>
     </Container>
   )

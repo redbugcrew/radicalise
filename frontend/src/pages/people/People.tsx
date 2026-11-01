@@ -1,5 +1,5 @@
-import { Group, Stack, Title } from "@mantine/core"
-import { IntervalSelector } from "../../components"
+import { Group, Stack, Text, Title } from "@mantine/core"
+import { Anchor, IntervalSelector, NoData } from "../../components"
 import { useAppSelector } from "../../store"
 import PeopleForInterval from "./PeopleForInterval"
 import { useSelectedInterval } from "../intervals/WithIntervalData"
@@ -20,8 +20,19 @@ export default function People() {
           </ActionIcon>
         </Anchor> */}
       </Group>
+
       <IntervalSelector intervals={intervals} selectedInterval={selectedInterval} currentInterval={currentInterval} />
-      {selectedInterval && <PeopleForInterval interval={selectedInterval} key={selectedInterval.id} />}
+
+      {selectedInterval ? (
+        <PeopleForInterval interval={selectedInterval} key={selectedInterval.id} />
+      ) : (
+        <NoData title="No current interval">
+          <Stack>
+            <Text>People participate in the project during active intervals. To see the people, first setup your project intervals.</Text>
+            <Anchor href="../intervals">Manage project intervals</Anchor>
+          </Stack>
+        </NoData>
+      )}
     </Stack>
   )
 }
