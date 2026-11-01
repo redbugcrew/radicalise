@@ -27,6 +27,11 @@ format:
     cd frontend && npm run format:write
     cd backend && cargo fmt
 
+prepare-queries:
+    cd backend && cargo sqlx prepare
+
+prepare: format prepare-queries
+
 gen-api:
     cd frontend && npm run swagger
     cd frontend && npm run format:write
