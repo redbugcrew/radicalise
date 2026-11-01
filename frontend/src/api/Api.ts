@@ -47,6 +47,11 @@ export enum EventResponseExpectation {
   Welcome = "Welcome",
 }
 
+export enum CreateProjectError {
+  SlugAlreadyTaken = "SlugAlreadyTaken",
+  ServerError = "ServerError",
+}
+
 export enum AttendanceIntention {
   Going = "Going",
   Uncertain = "Uncertain",
@@ -336,6 +341,12 @@ export interface MyParticipationInput {
   wellbeing?: string | null
 }
 
+export interface NewProjectData {
+  name: string
+  person_name: string
+  slug: string
+}
+
 export interface PeerEnrollment {
   /** @format int64 */
   id: number
@@ -391,9 +402,8 @@ export interface Project {
   /** @format int64 */
   id: number
   links: Link[]
-  name?: string | null
-  noun_name?: string | null
-  slug?: string | null
+  name: string
+  slug: string
 }
 
 export type ProjectEvent =
@@ -549,7 +559,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 1.5.1
+ * @version 1.6.1
  * @license
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
@@ -668,6 +678,22 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<Project[], any>({
         path: `/api/my_user/projects/visible`,
         method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CreateProject
+     * @request POST:/api/projects
+     */
+    createProject: (data: NewProjectData, params: RequestParams = {}) =>
+      this.request<Project, CreateProjectError>({
+        path: `/api/projects`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),

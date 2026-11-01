@@ -14,14 +14,13 @@ impl ProjectId {
     }
 }
 
-#[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
+#[derive(Serialize, Deserialize, ToSchema, Debug, Clone, Default)]
 pub struct Project {
     pub id: i64,
-    pub name: Option<String>,
-    pub noun_name: Option<String>,
+    pub name: String,
     pub description: Option<String>,
     pub links: Vec<Link>,
-    pub slug: Option<String>,
+    pub slug: String,
 }
 
 impl Project {
@@ -297,6 +296,16 @@ pub struct Circle {
 }
 
 impl Circle {
+    pub fn new(project_id: ProjectId) -> Circle {
+        Circle {
+            id: -1,
+            project_id: project_id.id,
+            name: "Participants".to_string(),
+            slug: "participants".to_string(),
+            inside_circle_id: None,
+        }
+    }
+
     pub fn typed_id(&self) -> CircleId {
         CircleId::new(self.id)
     }

@@ -174,9 +174,9 @@ export default function Dashboard() {
   const currentInterval = useCurrentInterval()
   const nextInterval = useNextInterval()
 
-  if (!myData || !project || !circleId) {
-    return <Text>Error: Data not found.</Text>
-  }
+  if (!myData) return <Text>Error: Data not found.</Text>
+  if (!project) return <Text>Error: Project not found.</Text>
+  if (!circleId) return <Text>Error: Circle not found.</Text>
 
   const personId = myData.person_id
 

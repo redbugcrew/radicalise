@@ -19,9 +19,10 @@ import useWebSocket from "react-use-websocket"
 
 import classes from "./Layout.module.css"
 import { getSocketUrl } from "../../api"
+import Header from "./Header"
 
 export default function ProjectLayout() {
-  const [, { toggle }] = useDisclosure()
+  const [opened, { toggle }] = useDisclosure()
   const project = useAppSelector((state) => state.project)
   const person_id = useAppSelector((state) => state.me?.person_id)
 
@@ -41,7 +42,8 @@ export default function ProjectLayout() {
   })
 
   return (
-    <>
+    <AppShell header={{ height: 60 }} navbar={{ width: 300, breakpoint: "sm", collapsed: { mobile: !opened } }} padding="md">
+      <Header onToggle={toggle} opened={opened} />
       <AppShell.Navbar p={0}>
         <AppShell.Section className={classes.menu_section}>
           <NavLink label="Dashboard" href="dashboard" leftSection={<IconHome2 size={18} />} onClick={toggle} />
@@ -83,6 +85,6 @@ export default function ProjectLayout() {
       <AppShell.Main>
         <Container p={0}>{project && <Outlet />}</Container>
       </AppShell.Main>
-    </>
+    </AppShell>
   )
 }

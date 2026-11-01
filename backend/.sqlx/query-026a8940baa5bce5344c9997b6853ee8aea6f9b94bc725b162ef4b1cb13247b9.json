@@ -1,74 +1,74 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT id, name, noun_name, description, slug\n        FROM projects WHERE id = ?",
+  "query": "\n        INSERT INTO people (project_id, display_name, user_id)\n        VALUES (?, ?, ?)\n        RETURNING id AS \"id!\", project_id, display_name, about, avatar_id",
   "describe": {
     "columns": [
       {
-        "name": "id",
+        "name": "id!",
         "ordinal": 0,
         "type_info": "Integer",
         "origin": {
           "Table": {
-            "table": "projects",
+            "table": "people",
             "name": "id"
           }
         }
       },
       {
-        "name": "name",
+        "name": "project_id",
         "ordinal": 1,
-        "type_info": "Text",
+        "type_info": "Integer",
         "origin": {
           "Table": {
-            "table": "projects",
-            "name": "name"
+            "table": "people",
+            "name": "project_id"
           }
         }
       },
       {
-        "name": "noun_name",
+        "name": "display_name",
         "ordinal": 2,
         "type_info": "Text",
         "origin": {
           "Table": {
-            "table": "projects",
-            "name": "noun_name"
+            "table": "people",
+            "name": "display_name"
           }
         }
       },
       {
-        "name": "description",
+        "name": "about",
         "ordinal": 3,
         "type_info": "Text",
         "origin": {
           "Table": {
-            "table": "projects",
-            "name": "description"
+            "table": "people",
+            "name": "about"
           }
         }
       },
       {
-        "name": "slug",
+        "name": "avatar_id",
         "ordinal": 4,
-        "type_info": "Text",
+        "type_info": "Integer",
         "origin": {
           "Table": {
-            "table": "projects",
-            "name": "slug"
+            "table": "people",
+            "name": "avatar_id"
           }
         }
       }
     ],
     "parameters": {
-      "Right": 1
+      "Right": 3
     },
     "nullable": [
+      null,
       false,
       false,
-      true,
       true,
       true
     ]
   },
-  "hash": "58b0286453518fa57fb9d224afb7ee908990fadfffb9f79bd6ee80a1904fb249"
+  "hash": "026a8940baa5bce5344c9997b6853ee8aea6f9b94bc725b162ef4b1cb13247b9"
 }

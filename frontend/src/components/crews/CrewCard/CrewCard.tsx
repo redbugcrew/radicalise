@@ -6,7 +6,7 @@ import styles from "./CrewCard.module.css"
 import Anchor from "../../Anchor"
 import type { CrewWithLinks } from "../../../store/crews"
 import LinksStack from "../../links/LinksDisplay/LinksStack"
-import { currentProjectPath, useCurrentProjectSlug } from "../../../pages/LoadProjectState"
+import { currentProjectPath, useCurrentProjectSlug } from "../../../contexts/projects"
 
 interface CrewCardProps {
   crew: CrewWithLinks

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { Outlet, useParams } from "react-router-dom"
-import { loadInitialProjectData } from "../store"
+import { loadInitialProjectData } from "../../../store"
 import { SelectedProjectContext, type SelectedProjectData } from "./LoadSelectedProject"
 
 export default function LoadProjectState() {

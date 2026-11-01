@@ -8,7 +8,7 @@ import { actionSuccess, DisplayActionResult, type ActionPromiseResult } from "..
 import { getApi } from "../../api"
 import { useState } from "react"
 import { notifications } from "@mantine/notifications"
-import { SelectedProjectContext } from "../LoadSelectedProject"
+import { SelectedProjectContext } from "../../contexts/projects"
 
 function AcceptInvitationLoggedOut() {
   const navigate = useNavigate()
@@ -128,8 +128,8 @@ export default function AcceptInvitation() {
                           </Text>
 
                           <Text>
-                            <strong>{capitalizeFirstLetter(project.noun_name ?? project.name ?? "This unnamed project")}</strong> would like
-                            to invite you to join their project, and engage in the circle called <strong>{circle.name}</strong>.
+                            <strong>{capitalizeFirstLetter(project.name ?? "This unnamed project")}</strong> would like to invite you to
+                            join their project, and engage in the circle called <strong>{circle.name}</strong>.
                           </Text>
 
                           {loggedIn ? (

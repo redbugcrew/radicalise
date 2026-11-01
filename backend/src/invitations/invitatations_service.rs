@@ -20,7 +20,7 @@ use crate::{
         delete_circle_involvement_by_id, find_circle_involvement, find_circle_involvement_by_id, insert_circle_involvement,
         update_involvement_status,
     },
-    people::repo::{delete_person, find_person_by_id, find_person_by_user_id, insert_person_without_user, update_person_user_id},
+    people::repo::{create_person_without_user, delete_person, find_person_by_id, find_person_by_user_id, update_person_user_id},
     repo_utilities::InsertRecordError,
     shared::entities::{
         CircleId, CircleInvitation, CircleInvolvement, CircleInvolvementId, Interval, InvolvementStatus, Person, PersonId, ProjectId,
@@ -97,7 +97,7 @@ pub async fn invite_person(
 
     let person = match existing_invitation {
         Some(invitation) => find_person_by_id(PersonId::new(invitation.person_id), pool).await.map_err(db_err)?,
-        None => insert_person_without_user(project_id.clone(), input.name.clone(), pool)
+        None => create_person_without_user(project_id.clone(), input.name.clone(), pool)
             .await
             .map_err(|err| match err {
                 InsertRecordError::RecordAlreadyExists => InvitePersonError::InputInvalid,
@@ -164,7 +164,7 @@ pub async fn invite_person(
     let email = invited_to_circle_email(
         input.email.clone(),
         InvitedToCircleEmailParams {
-            project_slug: project.slug.clone().unwrap_or("unknown".to_string()),
+            project_slug: project.slug.clone(),
             invitation_token: circle_invitation.invitation_token.clone(),
             invitee_name: input.name.clone(),
             inviter_name: inviting_person.display_name.clone(),

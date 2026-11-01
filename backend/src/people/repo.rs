@@ -5,7 +5,7 @@ use crate::{
     shared::entities::{Person, PersonId, ProjectId, UserId},
 };
 
-pub async fn insert_person_without_user(
+pub async fn create_person_without_user(
     project_id: ProjectId,
     display_name: String,
     pool: &SqlitePool,
@@ -18,6 +18,28 @@ pub async fn insert_person_without_user(
         RETURNING id AS \"id!\", project_id, display_name, about, avatar_id",
         project_id.id,
         display_name,
+    )
+    .fetch_one(pool)
+    .await?;
+
+    Ok(result)
+}
+
+pub async fn create_person(
+    project_id: ProjectId,
+    user_id: UserId,
+    display_name: String,
+    pool: &SqlitePool,
+) -> Result<Person, InsertRecordError> {
+    let result = sqlx::query_as!(
+        Person,
+        "
+        INSERT INTO people (project_id, display_name, user_id)
+        VALUES (?, ?, ?)
+        RETURNING id AS \"id!\", project_id, display_name, about, avatar_id",
+        project_id.id,
+        display_name,
+        user_id.id,
     )
     .fetch_one(pool)
     .await?;

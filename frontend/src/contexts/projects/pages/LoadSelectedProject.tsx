@@ -1,7 +1,8 @@
 import { createContext, useEffect, useState } from "react"
 import { Outlet, useParams } from "react-router-dom"
-import type { Project } from "../api/Api"
-import { getApi } from "../api"
+import type { Project } from "../../../api/Api"
+import { useContext } from "react"
+import { getApi } from "../../../api"
 import { Container, Stack, Title, Text, AppShell } from "@mantine/core"
 import { MyProjectsContext } from "./LoadMyProjects"
 
@@ -13,14 +14,7 @@ export interface SelectedProjectData {
 export const SelectedProjectContext = createContext<SelectedProjectData | undefined>(undefined)
 
 export default function LoadSelectedProject() {
-  return <MyProjectsContext.Consumer>{(projects) => <LoadSelectedProjectInner myProjects={projects} />}</MyProjectsContext.Consumer>
-}
-
-interface LoadSelectedProjectInnerProps {
-  myProjects: Project[]
-}
-
-function LoadSelectedProjectInner({ myProjects }: LoadSelectedProjectInnerProps) {
+  const { myProjects } = useContext(MyProjectsContext)
   const { projectSlug } = useParams<"projectSlug">()
   const [selectedProjectData, setSelectedProjectData] = useState<SelectedProjectData | null | undefined>(undefined)
 

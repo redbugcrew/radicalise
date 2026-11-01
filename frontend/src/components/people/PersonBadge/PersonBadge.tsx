@@ -3,7 +3,7 @@ import type { Person } from "../../../api/Api"
 import classes from "./PersonBadge.module.css"
 import Avatar from "../Avatar"
 import Anchor from "../../Anchor"
-import { currentProjectPath, useCurrentProjectSlug } from "../../../pages/LoadProjectState"
+import { currentProjectPath, useCurrentProjectSlug } from "../../../contexts/projects"
 
 export interface PersonBadgeProps {
   person: Person | null

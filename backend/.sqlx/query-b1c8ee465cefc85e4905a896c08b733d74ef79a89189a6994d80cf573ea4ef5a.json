@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT id, name, noun_name, description, slug\n        FROM projects WHERE slug = ?",
+  "query": "SELECT id, name, description, slug\n        FROM projects WHERE id = ?",
   "describe": {
     "columns": [
       {
@@ -26,19 +26,8 @@
         }
       },
       {
-        "name": "noun_name",
-        "ordinal": 2,
-        "type_info": "Text",
-        "origin": {
-          "Table": {
-            "table": "projects",
-            "name": "noun_name"
-          }
-        }
-      },
-      {
         "name": "description",
-        "ordinal": 3,
+        "ordinal": 2,
         "type_info": "Text",
         "origin": {
           "Table": {
@@ -49,7 +38,7 @@
       },
       {
         "name": "slug",
-        "ordinal": 4,
+        "ordinal": 3,
         "type_info": "Text",
         "origin": {
           "Table": {
@@ -66,9 +55,8 @@
       false,
       false,
       true,
-      true,
-      true
+      false
     ]
   },
-  "hash": "820f1c0050c5119affb1a61f412801727ceb16e70f1e567389e9d00060993703"
+  "hash": "b1c8ee465cefc85e4905a896c08b733d74ef79a89189a6994d80cf573ea4ef5a"
 }
