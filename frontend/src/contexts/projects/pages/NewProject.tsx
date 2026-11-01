@@ -1,19 +1,19 @@
-import { Container, Title } from "@mantine/core"
-import type { Project } from "../../../api/Api"
+import { Container, Stack, Title } from "@mantine/core"
 import { actionSuccess, actionFailure, type ActionPromiseResult } from "../../../components/ActionResult"
 import { useContext } from "react"
-import ProjectForm from "../components/ProjectForm"
+import NewProjectForm from "../components/NewProjectForm"
 import { getApi } from "../../../api"
 import { MyProjectsContext } from "./LoadMyProjects"
 import { useNavigate } from "react-router-dom"
+import type { NewProjectData } from "../../../api/Api"
 
 export default function NewProject() {
   const { addProject } = useContext(MyProjectsContext)
   const navigate = useNavigate()
 
-  const onSubmit = async (project: Project): Promise<ActionPromiseResult> => {
+  const onSubmit = async (values: NewProjectData): Promise<ActionPromiseResult> => {
     return getApi()
-      .api.createProject(project)
+      .api.createProject(values)
       .then((response) => {
         addProject(response.data)
 
@@ -27,9 +27,11 @@ export default function NewProject() {
 
   return (
     <Container>
-      <Title order={1}>New Project</Title>
+      <Stack>
+        <Title order={1}>New Project</Title>
 
-      <ProjectForm onSubmit={onSubmit} noLinks />
+        <NewProjectForm onSubmit={onSubmit} />
+      </Stack>
     </Container>
   )
 }

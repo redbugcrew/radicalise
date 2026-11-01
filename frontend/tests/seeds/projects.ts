@@ -1,9 +1,8 @@
 import { CircleDbHelper } from "./circles"
 
-const PROJECT_SEEDS: Record<string, { name: string; nounName: string; description: string }> = {
+const PROJECT_SEEDS: Record<string, { name: string; description: string }> = {
   foobar: {
     name: "Foo Bar Project",
-    nounName: "Foo Bar",
     description: "A test project for E2E",
   },
 }
@@ -45,13 +44,9 @@ export class ProjectDbHelper {
     // 3. Insert project
     const id = slug === "foobar" ? 1 : null
     if (id) {
-      this.db
-        .prepare("INSERT INTO projects (id, name, description, noun_name, slug) VALUES (?, ?, ?, ?, ?)")
-        .run(id, seed.name, seed.description, seed.nounName, slug)
+      this.db.prepare("INSERT INTO projects (id, name, description, slug) VALUES (?, ?, ?, ?)").run(id, seed.name, seed.description, slug)
     } else {
-      this.db
-        .prepare("INSERT INTO projects (name, description, noun_name, slug) VALUES (?, ?, ?, ?)")
-        .run(seed.name, seed.description, seed.nounName, slug)
+      this.db.prepare("INSERT INTO projects (name, description, slug) VALUES (?, ?, ?, ?)").run(seed.name, seed.description, slug)
     }
 
     // 4. Automatically seed circles for this project

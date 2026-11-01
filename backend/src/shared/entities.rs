@@ -14,7 +14,7 @@ impl ProjectId {
     }
 }
 
-#[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
+#[derive(Serialize, Deserialize, ToSchema, Debug, Clone, Default)]
 pub struct Project {
     pub id: i64,
     pub name: String,

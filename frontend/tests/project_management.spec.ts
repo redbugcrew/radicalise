@@ -39,13 +39,12 @@ test.describe("Project Management", () => {
     const randomSlug = `test-project-${Math.random().toString(36).substring(2, 9)}`
 
     // Fill out the project form
-    await page.getByRole("textbox", { name: "Name", exact: true }).fill("Test Project")
-    await page.getByLabel("Noun name").fill("The Test Project")
-    await page.getByLabel("URL name").fill(randomSlug)
-    await page.getByLabel("Description").fill("This is a test project description")
+    await page.getByLabel("Project Name").fill("The Test Project")
+    await page.getByLabel("URL Name").fill(randomSlug)
+    await page.getByLabel("Your Name").fill("Andi")
 
     // Submit the form
-    await page.getByRole("button", { name: "Submit" }).click()
+    await page.getByRole("button", { name: "Create project" }).click()
 
     // Verify navigation to the new project's dashboard
     await expect(page).toHaveURL(`/project/${randomSlug}/dashboard`)

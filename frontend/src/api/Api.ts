@@ -49,6 +49,7 @@ export enum EventResponseExpectation {
 
 export enum CreateProjectError {
   SlugAlreadyTaken = "SlugAlreadyTaken",
+  ServerError = "ServerError",
 }
 
 export enum AttendanceIntention {
@@ -338,6 +339,12 @@ export interface MyParticipationInput {
   /** @format int64 */
   project_id: number
   wellbeing?: string | null
+}
+
+export interface NewProjectData {
+  name: string
+  person_name: string
+  slug: string
 }
 
 export interface PeerEnrollment {
@@ -681,7 +688,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name CreateProject
      * @request POST:/api/projects
      */
-    createProject: (data: Project, params: RequestParams = {}) =>
+    createProject: (data: NewProjectData, params: RequestParams = {}) =>
       this.request<Project, CreateProjectError>({
         path: `/api/projects`,
         method: "POST",

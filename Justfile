@@ -12,7 +12,7 @@ db-schema table="":
 
 db-test-init:
     mkdir -p backend/data/test
-    cd backend && DATABASE_URL="sqlite://data/test/test_radicalise.sqlite?mode=rwc" cargo sqlx database reset
+    cd backend && DATABASE_URL="sqlite://data/test/test_radicalise.sqlite?mode=rwc" cargo sqlx database reset -y
     sqlite3 backend/data/test/test_radicalise.sqlite "DELETE FROM circles; DELETE FROM projects;"
 
 db-dev-init:
@@ -20,7 +20,7 @@ db-dev-init:
     cd backend && DATABASE_URL="sqlite://data/dev/radicalise.sqlite?mode=rwc" cargo sqlx database reset
     sqlite3 backend/data/dev/radicalise.sqlite "DELETE FROM circles; DELETE FROM projects;"
 
-playwright:
+playwright: db-test-init
     mprocs -c mprocs.test.yaml
 
 format:

@@ -2,7 +2,7 @@
 DROP INDEX "collective_slug_unique";
 ALTER TABLE projects ADD COLUMN slug_copy TEXT NOT NULL DEFAULT '';
 
-UPDATE projects SET slug_copy = slug;
+UPDATE projects SET slug_copy = slug WHERE slug IS NOT NULL;
 
 ALTER TABLE projects DROP COLUMN slug;
 ALTER TABLE projects ADD COLUMN slug TEXT NOT NULL DEFAULT '';

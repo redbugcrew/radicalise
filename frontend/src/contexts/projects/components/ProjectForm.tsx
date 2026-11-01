@@ -62,7 +62,6 @@ export default function ProjectForm({ project, onSubmit, noLinks }: ProjectFormP
       <Stack gap="lg">
         <Stack gap="md">
           <TextInput label="Name" key="name" {...form.getInputProps("name")} placeholder="eg: Awesome Club" />
-          <TextInput label="Noun name" key="noun_name" {...form.getInputProps("noun_name")} placeholder="eg: The Awesome Club" />
 
           <TextInput
             label="URL name"
@@ -87,7 +86,7 @@ export default function ProjectForm({ project, onSubmit, noLinks }: ProjectFormP
           handlers={{ SlugAlreadyTaken: <DisplayFormError heading={"That project URL name is already taken"} /> }}
         />
 
-        <Button type="submit">Submit</Button>
+        <Button type="submit">{project ? "Update project" : "Create project"}</Button>
       </Stack>
     </form>
   )
