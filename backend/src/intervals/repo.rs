@@ -12,8 +12,8 @@ pub enum IntervalType {
 pub async fn insert_interval(interval: Interval, project_id: ProjectId, pool: &SqlitePool) -> Result<Interval, sqlx::Error> {
     let mut transaction = pool.begin().await?;
 
-    let last_id = sqlx::query!(
-        "SELECT MAX(id) AS id
+    let last_number = sqlx::query!(
+        "SELECT MAX(number) AS id
         FROM intervals
         WHERE
             project_id = ?",
@@ -23,14 +23,14 @@ pub async fn insert_interval(interval: Interval, project_id: ProjectId, pool: &S
     .await
     .map(|row| row.id)?;
 
-    let next_id = last_id.map_or(1, |id| id + 1);
+    let next_number = last_number.map_or(1, |id| id + 1);
 
     let result = sqlx::query_as!(
         Interval,
         "INSERT INTO intervals (number, start_date, end_date, project_id)
          VALUES (?, ?, ?, ?)
          RETURNING id AS \"id!\", number, start_date, end_date",
-        next_id,
+        next_number,
         interval.start_date,
         interval.end_date,
         project_id.id

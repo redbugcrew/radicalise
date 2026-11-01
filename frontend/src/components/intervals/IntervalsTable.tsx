@@ -21,8 +21,8 @@ function IntervalTableRow({ interval, isCurrent }: { interval: Interval; isCurre
   }
 
   return (
-    <Table.Tr key={interval.id} style={{ boxShadow: isCurrent ? "-3px 0 0 0 var(--mantine-color-blue-5)" : undefined }}>
-      <Table.Td>{interval.id}</Table.Td>
+    <Table.Tr key={interval.number} style={{ boxShadow: isCurrent ? "-3px 0 0 0 var(--mantine-color-blue-5)" : undefined }}>
+      <Table.Td>{interval.number}</Table.Td>
       <Table.Td>
         <DateText date={interval.start_date} />
       </Table.Td>
@@ -47,7 +47,7 @@ export default function IntervalsTable({ intervals, currentIntervalId }: Interva
       </Table.Thead>
       <Table.Tbody>
         {intervals.map((interval) => (
-          <IntervalTableRow key={interval.id} interval={interval} isCurrent={currentIntervalId === interval.id} />
+          <IntervalTableRow key={interval.number} interval={interval} isCurrent={currentIntervalId === interval.id} />
         ))}
       </Table.Tbody>
     </Table>
