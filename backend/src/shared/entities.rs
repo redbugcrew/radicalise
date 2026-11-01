@@ -21,6 +21,8 @@ pub struct Project {
     pub description: Option<String>,
     pub links: Vec<Link>,
     pub slug: String,
+    pub feature_events: bool,
+    pub feature_peer_roles: bool,
 }
 
 impl Project {

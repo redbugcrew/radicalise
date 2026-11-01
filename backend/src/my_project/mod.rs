@@ -1,9 +1,4 @@
-use axum::{
-    Extension, Json,
-    extract::Path,
-    http::StatusCode,
-    response::{IntoResponse, Response},
-};
+use axum::{Extension, Json, extract::Path, http::StatusCode, response::IntoResponse};
 use sqlx::SqlitePool;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
@@ -17,6 +12,7 @@ use crate::{
     people::repo::find_person_by_user_id,
     realtime::RealtimeState,
     shared::{
+        api_helpers::db_error,
         entities::{Interval, IntervalId, Project, ProjectId, UserId},
         events::AppEvent,
     },
@@ -26,11 +22,6 @@ pub mod events;
 pub mod involvements_repo;
 pub mod repo;
 pub mod strip_data;
-
-fn db_error(e: impl std::fmt::Debug, msg: &str) -> Response {
-    eprintln!("Database error: {:?} - {}", e, msg);
-    (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response()
-}
 
 pub fn router() -> OpenApiRouter {
     OpenApiRouter::new()

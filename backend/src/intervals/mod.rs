@@ -8,6 +8,7 @@ use crate::{
     peer_roles::{AssignPeerRolesError, assign_interval_peer_roles},
     realtime::RealtimeState,
     shared::{
+        api_helpers::db_error,
         entities::{Interval, ProjectId},
         events::AppEvent,
     },
@@ -52,7 +53,7 @@ async fn create_interval(
             realtime_state.broadcast_app_event(Some(auth_session), event.clone()).await;
             (StatusCode::CREATED, Json(vec![event])).into_response()
         }
-        Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
+        Err(e) => db_error(e, "inserting interval"),
     }
 }
 

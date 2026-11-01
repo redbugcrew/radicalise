@@ -399,6 +399,8 @@ export interface PersonIntervalData {
 
 export interface Project {
   description?: string | null
+  feature_events: boolean
+  feature_peer_roles: boolean
   /** @format int64 */
   id: number
   links: Link[]

@@ -1,3 +1,4 @@
+pub mod api_helpers;
 pub mod email_helpers;
 pub mod email_sender;
 pub mod entities;

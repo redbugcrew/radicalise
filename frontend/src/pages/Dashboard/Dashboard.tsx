@@ -206,8 +206,11 @@ export default function Dashboard() {
             }}
           </WithIntervalData>
         </Stack>
-        <MyEvents personId={personId} />
-        <MyPeerRoles personId={personId} />
+
+        {project.feature_events && <MyEvents personId={personId} />}
+
+        {project.feature_peer_roles && <MyPeerRoles personId={personId} />}
+
         {myCurrentCrewInvolvements && <MyCrews personId={myData.person_id} myInvolvements={myCurrentCrewInvolvements} />}
         <Stack gap="md">
           <Title order={2}>Resources</Title>

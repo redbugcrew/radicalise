@@ -1,8 +1,4 @@
-use axum::{
-    Extension, Json,
-    http::StatusCode,
-    response::{IntoResponse, Response},
-};
+use axum::{Extension, Json, http::StatusCode, response::IntoResponse};
 use serde::{Deserialize, Serialize};
 use sqlx::SqlitePool;
 use utoipa::ToSchema;
@@ -12,15 +8,13 @@ use crate::{
     auth::auth_backend::AuthSession,
     circles::repo::insert_circle,
     people::repo::create_person,
-    shared::entities::{Circle, Project, UserId},
+    shared::{
+        api_helpers::db_error,
+        entities::{Circle, Project, UserId},
+    },
 };
 
 mod repo;
-
-fn db_error(e: impl std::fmt::Debug, msg: &str) -> Response {
-    eprintln!("Database error: {:?} - {}", e, msg);
-    (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response()
-}
 
 pub fn router() -> OpenApiRouter {
     OpenApiRouter::new().routes(routes!(create_project))
