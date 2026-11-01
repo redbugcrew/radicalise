@@ -51,7 +51,7 @@ export default function WithIntervalData({ interval, children }: WithIntervalDat
     setCacheKey((prevKey) => prevKey + 1)
   }
 
-  const tableKey = interval ? `${interval.id}-${cacheKey}` : "no-interval"
+  const tableKey = interval ? `${interval.number}-${cacheKey}` : "no-interval"
 
   useEffect(() => {
     if (!interval || !currentProjectId) {
@@ -66,7 +66,7 @@ export default function WithIntervalData({ interval, children }: WithIntervalDat
       const api = getApi()
 
       api.api
-        .getIntervalData(interval.id, currentProjectId)
+        .getIntervalData(interval.number, currentProjectId)
         .then((response) => {
           setIntervalData(response.data)
         })

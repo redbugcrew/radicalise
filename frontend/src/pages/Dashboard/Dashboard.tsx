@@ -18,7 +18,6 @@ import { forPerson } from "../../store/current_interval/crew_involvements"
 import { circleInvolvementforCircleAndPerson } from "../../store/current_interval/circle_involvements"
 import WithIntervalData from "../intervals/WithIntervalData"
 import { PersonEnrollmentsForInterval } from "../../contexts/peer_roles"
-import { current } from "immer"
 
 function ParticipationBadge({ involvement }: { involvement: CircleInvolvement | null }) {
   if (!involvement) return <Badge color="gray">No intention</Badge>
