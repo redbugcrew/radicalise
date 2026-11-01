@@ -5,6 +5,7 @@ pub fn private_api_router() -> OpenApiRouter {
         .nest("/projects/{project_id}", private_project_api_router())
         .nest("/my_user", crate::my_user::router())
         .nest("/dev", crate::dev::router())
+        .nest("/projects", crate::projects::router())
 }
 
 pub fn private_project_api_router() -> OpenApiRouter {

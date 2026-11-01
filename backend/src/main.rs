@@ -40,6 +40,7 @@ mod my_project;
 mod my_user;
 mod peer_roles;
 mod people;
+mod projects;
 mod public;
 mod realtime;
 mod repo_utilities;

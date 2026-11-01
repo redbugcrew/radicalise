@@ -47,6 +47,10 @@ export enum EventResponseExpectation {
   Welcome = "Welcome",
 }
 
+export enum CreateProjectError {
+  SlugAlreadyTaken = "SlugAlreadyTaken",
+}
+
 export enum AttendanceIntention {
   Going = "Going",
   Uncertain = "Uncertain",
@@ -549,7 +553,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 1.5.1
+ * @version 1.6.1
  * @license
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
@@ -668,6 +672,22 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<Project[], any>({
         path: `/api/my_user/projects/visible`,
         method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CreateProject
+     * @request POST:/api/projects
+     */
+    createProject: (data: Project, params: RequestParams = {}) =>
+      this.request<Project, CreateProjectError>({
+        path: `/api/projects`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),

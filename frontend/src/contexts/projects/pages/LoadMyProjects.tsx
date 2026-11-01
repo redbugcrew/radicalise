@@ -3,7 +3,15 @@ import { Outlet, useNavigate } from "react-router-dom"
 import { getApi } from "../../../api"
 import type { Project } from "../../../api/Api"
 
-export const MyProjectsContext = createContext<Project[]>([])
+interface MyProjectsContextType {
+  myProjects: Project[]
+  addProject: (project: Project) => void
+}
+
+export const MyProjectsContext = createContext<MyProjectsContextType>({
+  myProjects: [],
+  addProject: () => {},
+})
 
 export default function LoadMyProjects() {
   const [myProjects, setMyProjects] = useState<Project[] | undefined>(undefined)
@@ -34,10 +42,15 @@ export default function LoadMyProjects() {
       })
   }, [])
 
+  const addProject = (project: Project) => {
+    if (myProjects === undefined) return
+    setMyProjects([...(myProjects ?? []), project])
+  }
+
   if (myProjects === undefined) return null
 
   return (
-    <MyProjectsContext value={myProjects}>
+    <MyProjectsContext value={{ myProjects, addProject }}>
       <Outlet />
     </MyProjectsContext>
   )
