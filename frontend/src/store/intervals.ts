@@ -39,7 +39,9 @@ export function useNextInterval(): Interval | null {
   const allIntervals = useAppSelector((state) => state.intervals)
   const currentInterval = useAppSelector((state) => state.currentInterval?.interval)
 
-  if (!currentInterval) return null
+  if (!currentInterval) {
+    return allIntervals.length === 0 ? null : allIntervals[0]
+  }
 
   const currentIntervalIndex = allIntervals.findIndex((i) => i.id === currentInterval.id)
   if (currentIntervalIndex === -1 || currentIntervalIndex === allIntervals.length - 1) {
