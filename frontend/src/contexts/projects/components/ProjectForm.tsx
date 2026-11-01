@@ -48,7 +48,7 @@ export default function ProjectForm({ project, onSubmit, noLinks }: ProjectFormP
       name: (value) => (value ? null : "Name is required"),
       slug: (value) => {
         if (!value) return "URL name is required"
-        if (!/^[a-z0-9-]+$/.test(value)) "Slug may only include lowercase letters, numbers, and hyphens"
+        if (!/^[a-z0-9-]+$/.test(value)) return "Slug may only include lowercase letters, numbers, and hyphens"
         return null
       },
       links: linksValidator,
