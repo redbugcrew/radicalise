@@ -106,7 +106,7 @@ export async function loadInitialProjectData(projectId: number): Promise<boolean
   if (dataHasLoaded) {
     return true
   } else {
-    console.log("Loading initial data from API...")
+    console.log("Loading initial data from API for project", projectId, "...")
     return loadMeData(projectId, store, api)
       .then(() => loadProjectData(projectId, store, api))
       .then(() => true)

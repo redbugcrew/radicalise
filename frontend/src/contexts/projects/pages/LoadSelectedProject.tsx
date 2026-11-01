@@ -26,7 +26,7 @@ export default function LoadSelectedProject() {
 
     const projectInMyProjects = myProjects.find((project) => project.slug === projectSlug)
     if (projectInMyProjects) {
-      console.log("Project found in my projects:", projectInMyProjects)
+      console.log("Project found in my projects:", projectInMyProjects, " matching slug ", projectSlug)
       setSelectedProjectData({ project: projectInMyProjects, canAccess: true })
       return
     }
