@@ -1,6 +1,6 @@
 use sqlx::SqlitePool;
 
-use crate::shared::entities::{Interval, IntervalId, ProjectId};
+use crate::shared::entities::{Interval, IntervalId, IntervalNumber, ProjectId};
 
 #[derive(PartialEq, Debug, Clone, Copy)]
 pub enum IntervalType {
@@ -25,11 +25,11 @@ pub async fn insert_interval(interval: Interval, project_id: ProjectId, pool: &S
 
     let next_id = last_id.map_or(1, |id| id + 1);
 
-    sqlx::query_as!(
+    let result = sqlx::query_as!(
         Interval,
-        "INSERT INTO intervals (id, start_date, end_date, project_id)
+        "INSERT INTO intervals (number, start_date, end_date, project_id)
          VALUES (?, ?, ?, ?)
-         RETURNING id AS \"id!\", start_date, end_date",
+         RETURNING id AS \"id!\", number, start_date, end_date",
         next_id,
         interval.start_date,
         interval.end_date,
@@ -41,16 +41,17 @@ pub async fn insert_interval(interval: Interval, project_id: ProjectId, pool: &S
     transaction.commit().await?;
 
     Ok(Interval {
-        id: next_id,
-        start_date: interval.start_date,
-        end_date: interval.end_date,
+        id: result.id,
+        number: result.number,
+        start_date: result.start_date,
+        end_date: result.end_date,
     })
 }
 
 pub async fn find_all_intervals(project_id: ProjectId, pool: &SqlitePool) -> Result<Vec<Interval>, sqlx::Error> {
     sqlx::query_as!(
         Interval,
-        "SELECT id, start_date, end_date
+        "SELECT id, number, start_date, end_date
         FROM intervals
         WHERE
           project_id = ?
@@ -64,8 +65,19 @@ pub async fn find_all_intervals(project_id: ProjectId, pool: &SqlitePool) -> Res
 pub async fn find_interval(interval_id: IntervalId, pool: &SqlitePool) -> Result<Interval, sqlx::Error> {
     sqlx::query_as!(
         Interval,
-        "SELECT id, start_date, end_date FROM intervals WHERE id = ?",
+        "SELECT id, number, start_date, end_date FROM intervals WHERE id = ?",
         interval_id.id
+    )
+    .fetch_one(pool)
+    .await
+}
+
+pub async fn find_interval_by_number(interval_number: IntervalNumber, pool: &SqlitePool) -> Result<Interval, sqlx::Error> {
+    sqlx::query_as!(
+        Interval,
+        "SELECT id, number, start_date, end_date FROM intervals WHERE number = ? AND project_id = ?",
+        interval_number.number,
+        interval_number.project_id.id
     )
     .fetch_one(pool)
     .await
@@ -74,7 +86,7 @@ pub async fn find_interval(interval_id: IntervalId, pool: &SqlitePool) -> Result
 pub async fn find_current_interval(project_id: ProjectId, pool: &SqlitePool) -> Result<Option<Interval>, sqlx::Error> {
     sqlx::query_as!(
         Interval,
-        "SELECT intervals.id, intervals.start_date, intervals.end_date
+        "SELECT intervals.id, intervals.number, intervals.start_date, intervals.end_date
         FROM intervals
         INNER JOIN projects ON projects.current_interval_id = intervals.id AND projects.id = intervals.project_id
         WHERE projects.id = ?
@@ -93,7 +105,7 @@ pub async fn find_next_interval(
 ) -> Result<Option<Interval>, sqlx::Error> {
     sqlx::query_as!(
         Interval,
-        "SELECT id, start_date, end_date
+        "SELECT id, number, start_date, end_date
         FROM intervals
         WHERE
             project_id = ? AND
@@ -113,7 +125,7 @@ pub async fn find_previous_interval(
 ) -> Result<Option<Interval>, sqlx::Error> {
     sqlx::query_as!(
         Interval,
-        "SELECT id, start_date, end_date
+        "SELECT id, number, start_date, end_date
         FROM intervals
         WHERE
             project_id = ? AND

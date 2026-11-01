@@ -131,7 +131,8 @@ mod tests {
             .expect("Failed to insert test interval");
 
         let interval = Interval {
-            id: 1,
+            id: 21,
+            number: 1,
             start_date: "2026-01-01".to_string(),
             end_date: "2026-03-31".to_string(),
         };
@@ -180,7 +181,8 @@ mod tests {
         .expect("Failed to insert circle involvement in first interval");
 
         let second_interval = Interval {
-            id: 2,
+            id: 22,
+            number: 2,
             start_date: "2026-04-01".to_string(),
             end_date: "2026-06-30".to_string(),
         };

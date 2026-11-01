@@ -270,6 +270,8 @@ export interface Interval {
   end_date: string
   /** @format int64 */
   id: number
+  /** @format int64 */
+  number: number
   start_date: string
 }
 
@@ -952,11 +954,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @name GetIntervalData
-     * @request GET:/api/projects/{project_id}/my_project/interval/{interval_id}/state
+     * @request GET:/api/projects/{project_id}/my_project/interval/{interval_number}/state
      */
-    getIntervalData: (intervalId: number, projectId: number, params: RequestParams = {}) =>
+    getIntervalData: (intervalNumber: number, projectId: number, params: RequestParams = {}) =>
       this.request<IntervalData, any>({
-        path: `/api/projects/${projectId}/my_project/interval/${intervalId}/state`,
+        path: `/api/projects/${projectId}/my_project/interval/${intervalNumber}/state`,
         method: "GET",
         format: "json",
         ...params,

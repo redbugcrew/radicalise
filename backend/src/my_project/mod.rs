@@ -4,7 +4,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     auth::auth_backend::AuthSession,
-    intervals::repo::find_interval,
+    intervals::repo::find_interval_by_number,
     my_project::{
         events::ProjectEvent,
         repo::{InitialData, IntervalData, find_interval_data},
@@ -13,7 +13,7 @@ use crate::{
     realtime::RealtimeState,
     shared::{
         api_helpers::db_error,
-        entities::{Interval, IntervalId, Project, ProjectId, UserId},
+        entities::{Interval, IntervalNumber, Project, ProjectId, UserId},
         events::AppEvent,
     },
 };
@@ -95,27 +95,26 @@ async fn get_project_state(
 
 #[utoipa::path(
     get,
-    path = "/interval/{interval_id}/state",
+    path = "/interval/{interval_number}/state",
     responses(
         (status = 200, body = IntervalData),
         (status = NOT_FOUND, description = "Project was not found", body = ()),
         (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
     ),
     params(
-        ("interval_id" = i64, Path, description = "Interval ID"),
-        ("project_id" = i64, Path, description = "Project ID")
+        ("project_id" = i64, Path, description = "Project ID"),
+        ("interval_number" = i64, Path, description = "Interval Number")
     )
 )]
 async fn get_interval_data(
     auth_session: AuthSession,
-    Path(interval_id): Path<i64>,
-    Path(project_id): Path<i64>,
+    Path((project_id, interval_number)): Path<(i64, i64)>,
     Extension(pool): Extension<SqlitePool>,
 ) -> impl IntoResponse {
-    let interval_id = IntervalId::new(interval_id);
     let project_id = ProjectId::new(project_id);
+    let interval_number = IntervalNumber::new(interval_number, project_id.clone());
 
-    let interval: Interval = match find_interval(interval_id.clone(), &pool).await {
+    let interval: Interval = match find_interval_by_number(interval_number, &pool).await {
         Ok(interval) => interval,
         Err(e) => return db_error(e, "Failed to find interval"),
     };

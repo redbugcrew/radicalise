@@ -24,7 +24,7 @@ function IntervalNavigationButton({ variant, to }: IntervalNavigationButtonProps
   const onClick = () => {
     navigate({
       search: location.search,
-      hash: to ? `#interval${to.id}` : "",
+      hash: to ? `#interval${to.number}` : "",
     })
   }
 

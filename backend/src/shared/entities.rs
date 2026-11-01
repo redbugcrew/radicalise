@@ -79,9 +79,25 @@ impl IntervalId {
     }
 }
 
+#[derive(Clone, Debug, PartialEq)]
+pub struct IntervalNumber {
+    pub number: i64,
+    pub project_id: ProjectId,
+}
+
+impl IntervalNumber {
+    pub fn new(number: i64, project_id: ProjectId) -> Self {
+        IntervalNumber {
+            number,
+            project_id: project_id,
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
 pub struct Interval {
     pub id: i64,
+    pub number: i64,
     pub start_date: String,
     pub end_date: String,
 }

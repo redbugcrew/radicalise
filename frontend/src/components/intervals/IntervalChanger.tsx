@@ -38,7 +38,7 @@ export default function IntervalChanger({ interval, nextInterval, onNextInterval
           <Title order={2} size="md">
             Current interval{" "}
             <Text span c="blue" fw={700}>
-              {interval.id}
+              {interval.number}
             </Text>
           </Title>
           {endsInPast ? (
@@ -49,7 +49,7 @@ export default function IntervalChanger({ interval, nextInterval, onNextInterval
         </Stack>
         {nextInterval && (
           <ActionButton color="blue" onClick={onNextInterval}>
-            Start interval {nextInterval.id}
+            Start interval {nextInterval.number}
           </ActionButton>
         )}
       </Group>

@@ -437,7 +437,8 @@ mod tests {
 
     fn interval_1() -> Interval {
         Interval {
-            id: 1,
+            id: 31,
+            number: 1,
             start_date: "2026-01-01".to_string(),
             end_date: "2026-03-31".to_string(),
         }
@@ -593,7 +594,8 @@ mod tests {
             .expect("Failed to insert interval 2");
 
         let interval_2 = Interval {
-            id: 2,
+            id: 32,
+            number: 2,
             start_date: "2026-04-01".to_string(),
             end_date: "2026-06-30".to_string(),
         };
