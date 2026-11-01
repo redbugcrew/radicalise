@@ -296,6 +296,16 @@ pub struct Circle {
 }
 
 impl Circle {
+    pub fn new(project_id: ProjectId) -> Circle {
+        Circle {
+            id: -1,
+            project_id: project_id.id,
+            name: "Participants".to_string(),
+            slug: "participants".to_string(),
+            inside_circle_id: None,
+        }
+    }
+
     pub fn typed_id(&self) -> CircleId {
         CircleId::new(self.id)
     }

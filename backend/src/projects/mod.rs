@@ -10,8 +10,9 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     auth::auth_backend::AuthSession,
+    circles::repo::insert_circle,
     people::repo::create_person,
-    shared::entities::{Project, UserId},
+    shared::entities::{Circle, Project, UserId},
 };
 
 mod repo;
@@ -90,12 +91,15 @@ pub async fn create_project(
         }
     };
 
-    match create_person(project.typed_id(), user_id, input.person_name, &pool).await {
-        Ok(person) => person,
-        Err(e) => {
-            eprintln!("Database error: {:?} - {}", e, "creating person for new project");
-            return (StatusCode::BAD_REQUEST, Json(CreateProjectError::ServerError)).into_response();
-        }
+    let circle = Circle::new(project.typed_id());
+    if let Err(e) = insert_circle(&circle, project.typed_id(), &pool).await {
+        eprintln!("Database error: {:?} - {}", e, "inserting circle for new project");
+        return (StatusCode::BAD_REQUEST, Json(CreateProjectError::ServerError)).into_response();
+    }
+
+    if let Err(e) = create_person(project.typed_id(), user_id, input.person_name, &pool).await {
+        eprintln!("Database error: {:?} - {}", e, "creating person for new project");
+        return (StatusCode::BAD_REQUEST, Json(CreateProjectError::ServerError)).into_response();
     };
 
     (StatusCode::CREATED, Json(project)).into_response()
