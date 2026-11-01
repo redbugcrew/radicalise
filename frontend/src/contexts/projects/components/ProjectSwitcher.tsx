@@ -14,7 +14,7 @@ export default function ProjectSwitcher({ value, canCreateNew }: ProjectSwitcher
   const { myProjects } = useContext(MyProjectsContext)
 
   return (
-    <Menu shadow="md" width={200}>
+    <Menu shadow="md" width={200} data-testid="project-switcher-button">
       <Menu.Target>
         <ActionIcon color="dark">
           <IconChevronDown size={16} />
@@ -28,7 +28,13 @@ export default function ProjectSwitcher({ value, canCreateNew }: ProjectSwitcher
           </Menu.Item>
         ))}
         {canCreateNew && (
-          <Menu.Item component={Link} to="/projects/new" color="blue" leftSection={<IconPlus size={14} />}>
+          <Menu.Item
+            component={Link}
+            to="/projects/new"
+            color="blue"
+            leftSection={<IconPlus size={14} />}
+            data-testid="create-project-link"
+          >
             Create new project
           </Menu.Item>
         )}

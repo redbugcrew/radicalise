@@ -13,7 +13,7 @@ export class UserDbHelper {
     this.db = db
   }
 
-  seedUser(username: string, projectSlug: string = "foobar") {
+  seedUser(username: string, projectSlug: string | null = null) {
     const seed = USER_SEEDS[username]
     if (!seed) {
       throw new Error(`No seed data found for user: ${username}`)
@@ -29,11 +29,13 @@ export class UserDbHelper {
     const userResult = userStmt.run(seed.email, seed.passwordHash)
     const userId = userResult.lastInsertRowid
 
-    const project = this.db.prepare("SELECT id FROM projects WHERE slug = ?").get(projectSlug) as { id: number }
-    if (!project) {
-      throw new Error(`Project ${projectSlug} must be seeded before seeding a user.`)
-    }
+    if (projectSlug) {
+      const project = this.db.prepare("SELECT id FROM projects WHERE slug = ?").get(projectSlug) as { id: number }
+      if (!project) {
+        throw new Error(`Project ${projectSlug} must be seeded before seeding a user.`)
+      }
 
-    this.db.prepare("INSERT INTO people (display_name, user_id, project_id) VALUES (?, ?, ?)").run(seed.displayName, userId, project.id)
+      this.db.prepare("INSERT INTO people (display_name, user_id, project_id) VALUES (?, ?, ?)").run(seed.displayName, userId, project.id)
+    }
   }
 }

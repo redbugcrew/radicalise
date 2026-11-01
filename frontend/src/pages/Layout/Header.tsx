@@ -33,7 +33,9 @@ export default function Header({ onToggle, opened }: HeaderProps) {
       <Group h="100%" px="md" justify="space-between">
         <Group>
           <Burger opened={opened} onClick={onToggle} hiddenFrom="sm" size="sm" />
-          <Anchor href="/">{project ? project.name : "Radicalise!"}</Anchor>
+          <Anchor href="/" data-test-id="current-project-name">
+            {project ? project.name : "Radicalise!"}
+          </Anchor>
           <ProjectSwitcher value={project} canCreateNew />
         </Group>
         {person && (
