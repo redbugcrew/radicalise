@@ -153,7 +153,7 @@ pub async fn get_calendar_ics(
         }
     };
 
-    let calendar_name = format!("{} - {}", project.name.unwrap_or("Radicalize".to_string()), person.display_name);
+    let calendar_name = format!("{} - {}", project.name, person.display_name);
 
     let my_calendar = ical::get_ical_string(calendar_name, events);
 

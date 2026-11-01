@@ -14,7 +14,7 @@ type ParticipationStepProps = StepProps & {
 export function ParticipationStep({ form, readOnly, interval }: ParticipationStepProps) {
   const [intention, setIntention] = useState<ParticipationIntention | null>(form.values.participation_intention)
   const [optOutType, setOptOutType] = useState<OptOutType | null>(form.values.opt_out_type)
-  const project_noun_name = useAppSelector((state) => state.project?.noun_name || "the project")
+  const project_name = useAppSelector((state) => state.project?.name || "the project")
 
   form.watch("participation_intention", ({ value }) => {
     setIntention(value)
@@ -33,7 +33,7 @@ export function ParticipationStep({ form, readOnly, interval }: ParticipationSte
       <Stack gap="md">
         <Select
           label="Participation intention"
-          description={`Would you like to participate in ${project_noun_name} this interval?`}
+          description={`Would you like to participate in ${project_name} this interval?`}
           placeholder="Pick value"
           disabled={readOnly}
           data={[

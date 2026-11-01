@@ -56,7 +56,7 @@ pub struct InitialData {
 
 pub async fn find_project(project_id: ProjectId, pool: &SqlitePool) -> Result<Project, sqlx::Error> {
     sqlx::query!(
-        "SELECT id, name, noun_name, description, slug
+        "SELECT id, name, description, slug
         FROM projects WHERE id = ?",
         project_id.id
     )
@@ -64,8 +64,7 @@ pub async fn find_project(project_id: ProjectId, pool: &SqlitePool) -> Result<Pr
     .await
     .map(|row| Project {
         id: row.id,
-        name: Some(row.name),
-        noun_name: row.noun_name,
+        name: row.name,
         description: row.description,
         links: vec![], // Links are not fetched here, assuming they are handled elsewhere
         slug: row.slug,
@@ -74,7 +73,7 @@ pub async fn find_project(project_id: ProjectId, pool: &SqlitePool) -> Result<Pr
 
 pub async fn find_project_by_slug(project_slug: String, pool: &SqlitePool) -> Result<Project, sqlx::Error> {
     sqlx::query!(
-        "SELECT id, name, noun_name, description, slug
+        "SELECT id, name, description, slug
         FROM projects WHERE slug = ?",
         project_slug
     )
@@ -82,8 +81,7 @@ pub async fn find_project_by_slug(project_slug: String, pool: &SqlitePool) -> Re
     .await
     .map(|row| Project {
         id: row.id,
-        name: Some(row.name),
-        noun_name: row.noun_name,
+        name: row.name,
         description: row.description,
         links: vec![], // Links are not fetched here, assuming they are handled elsewhere
         slug: row.slug,
@@ -99,7 +97,7 @@ pub async fn find_project_with_links(project_id: ProjectId, pool: &SqlitePool) -
 
 pub async fn find_projects_for_user(user_id: UserId, pool: &SqlitePool) -> Result<Vec<Project>, sqlx::Error> {
     sqlx::query!(
-        "SELECT p.id as id, name, noun_name, description, slug
+        "SELECT p.id as id, name, description, slug
         FROM projects p
         JOIN people pe ON pe.project_id = p.id
         WHERE pe.user_id = ?",
@@ -111,8 +109,7 @@ pub async fn find_projects_for_user(user_id: UserId, pool: &SqlitePool) -> Resul
         rows.into_iter()
             .map(|row| Project {
                 id: row.id,
-                name: Some(row.name),
-                noun_name: row.noun_name,
+                name: row.name,
                 description: row.description,
                 links: vec![], // Links are not fetched here, assuming they are handled elsewhere
                 slug: row.slug,
@@ -210,10 +207,9 @@ pub async fn update_project(input: Project, project_id: ProjectId, pool: &Sqlite
     sqlx::query!(
         "UPDATE projects
          SET
-            name = ?, noun_name = ?, description = ?, slug = ?
+            name = ?, description = ?, slug = ?
          WHERE id = ?",
         input.name,
-        input.noun_name,
         input.description,
         input.slug,
         project_id.id

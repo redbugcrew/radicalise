@@ -46,11 +46,15 @@ impl From<repo::CreateProjectError> for CreateProjectError {
 pub async fn create_project(Extension(pool): Extension<SqlitePool>, Json(input): Json<Project>) -> impl IntoResponse {
     println!("Creating project: {:?}", input);
 
-    match repo::create_project(input, &pool).await {
-        Ok(project) => (StatusCode::CREATED, Json(project)).into_response(),
-        Err(e) => match e {
-            repo::CreateProjectError::SqlxError(e) => db_error(e, "Failed to create project with links"),
-            e => (StatusCode::BAD_REQUEST, Json(CreateProjectError::from(e))).into_response(),
-        },
-    }
+    let project = match repo::create_project(input, &pool).await {
+        Ok(project) => project,
+        Err(e) => {
+            return match e {
+                repo::CreateProjectError::SqlxError(e) => db_error(e, "Failed to create project with links"),
+                e => (StatusCode::BAD_REQUEST, Json(CreateProjectError::from(e))).into_response(),
+            };
+        }
+    };
+
+    (StatusCode::CREATED, Json(project)).into_response()
 }

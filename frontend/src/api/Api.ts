@@ -395,9 +395,8 @@ export interface Project {
   /** @format int64 */
   id: number
   links: Link[]
-  name?: string | null
-  noun_name?: string | null
-  slug?: string | null
+  name: string
+  slug: string
 }
 
 export type ProjectEvent =

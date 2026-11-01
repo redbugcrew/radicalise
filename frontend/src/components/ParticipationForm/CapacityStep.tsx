@@ -12,7 +12,7 @@ type CapacityStepProps = StepProps & {
 }
 
 export default function CapacityStep({ form, readOnly, circles }: CapacityStepProps) {
-  const project_noun_name = useAppSelector((state) => state.project?.noun_name || "the project")
+  const project_name = useAppSelector((state) => state.project?.name || "the project")
 
   return (
     <Stack gap="md">
@@ -86,7 +86,7 @@ export default function CapacityStep({ form, readOnly, circles }: CapacityStepPr
       />
       <Select
         label={form.values.capacity_planning_visibility_circle_id ? "Capacity (Shared with group)" : "Capacity"}
-        description={`Given the context of your life (above), how would you describe your capacity to participate in ${project_noun_name} this interval?`}
+        description={`Given the context of your life (above), how would you describe your capacity to participate in ${project_name} this interval?`}
         placeholder="Pick value"
         disabled={readOnly}
         data={[

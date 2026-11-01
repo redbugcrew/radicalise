@@ -17,11 +17,10 @@ impl ProjectId {
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
 pub struct Project {
     pub id: i64,
-    pub name: Option<String>,
-    pub noun_name: Option<String>,
+    pub name: String,
     pub description: Option<String>,
     pub links: Vec<Link>,
-    pub slug: Option<String>,
+    pub slug: String,
 }
 
 impl Project {

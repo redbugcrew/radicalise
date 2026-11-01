@@ -4,6 +4,7 @@ import ProjectForm from "../components/ProjectForm"
 import type { Project } from "../../../api/Api"
 import { getApi } from "../../../api"
 import { useNavigate } from "react-router-dom"
+import type { ActionPromiseResult } from "../../../components/ActionResult"
 
 export default function EditProject() {
   const project = useAppSelector((state) => state.project)
@@ -11,8 +12,8 @@ export default function EditProject() {
 
   if (!project) return <Container>Error: Project not found</Container>
 
-  const onSubmit = (values: Project) => {
-    getApi()
+  const onSubmit = async (values: Project): Promise<ActionPromiseResult> => {
+    return getApi()
       .api.updateProject(project.id, values)
       .then((response) => {
         if (response.status === 200) {

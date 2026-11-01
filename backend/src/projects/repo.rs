@@ -9,10 +9,9 @@ pub enum CreateProjectError {
 
 pub async fn create_project(project: Project, pool: &SqlitePool) -> Result<Project, CreateProjectError> {
     let result = sqlx::query!(
-        "INSERT INTO projects (name, noun_name, description, slug)
-        VALUES (?, ?, ?, ?)",
+        "INSERT INTO projects (name, description, slug)
+        VALUES (?, ?, ?)",
         project.name,
-        project.noun_name,
         project.description,
         project.slug
     )

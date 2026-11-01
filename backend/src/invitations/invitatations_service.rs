@@ -164,7 +164,7 @@ pub async fn invite_person(
     let email = invited_to_circle_email(
         input.email.clone(),
         InvitedToCircleEmailParams {
-            project_slug: project.slug.clone().unwrap_or("unknown".to_string()),
+            project_slug: project.slug.clone(),
             invitation_token: circle_invitation.invitation_token.clone(),
             invitee_name: input.name.clone(),
             inviter_name: inviting_person.display_name.clone(),

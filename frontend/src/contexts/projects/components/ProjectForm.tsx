@@ -16,7 +16,6 @@ interface ProjectFormValues {
   id: number
   links: Link[]
   name?: string | null
-  noun_name?: string | null
   slug?: string | null
 }
 
@@ -47,8 +46,11 @@ export default function ProjectForm({ project, onSubmit, noLinks }: ProjectFormP
     initialValues: { ...convertProjectToFormValues(project) },
     validate: {
       name: (value) => (value ? null : "Name is required"),
-      noun_name: (value) => (value ? null : "Noun name is required"),
-      slug: (value) => (!value || /^[a-z0-9-]+$/.test(value) ? null : "Slug may only include lowercase letters, numbers, and hyphens"),
+      slug: (value) => {
+        if (!value) return "URL name is required"
+        if (!/^[a-z0-9-]+$/.test(value)) "Slug may only include lowercase letters, numbers, and hyphens"
+        return null
+      },
       links: linksValidator,
     },
   })
