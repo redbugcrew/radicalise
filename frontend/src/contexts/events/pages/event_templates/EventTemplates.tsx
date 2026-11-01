@@ -1,6 +1,6 @@
-import { Stack, Group, Title, ActionIcon } from "@mantine/core"
+import { Stack, Group, Title, ActionIcon, Text } from "@mantine/core"
 import { IconPlus } from "@tabler/icons-react"
-import { Anchor } from "../../../../components"
+import { Anchor, NoData } from "../../../../components"
 import { useAppSelector } from "../../../../store"
 import EventTemplatesTable from "../../components/event_templates/EventTemplatesTable"
 
@@ -17,7 +17,19 @@ export default function EventTemplates() {
           </ActionIcon>
         </Anchor>
       </Group>
-      <EventTemplatesTable eventTemplates={eventTemplates} />
+      {eventTemplates.length === 0 ? (
+        <NoData title="No event templates">
+          <Stack>
+            <Text>
+              Event templates are used to create events. You can setup templates for recurring events, such as meetings, or you can create a
+              general template you use for a range of different events.
+            </Text>
+            <Anchor href="new">Create your first template</Anchor>
+          </Stack>
+        </NoData>
+      ) : (
+        <EventTemplatesTable eventTemplates={eventTemplates} />
+      )}
     </Stack>
   )
 }

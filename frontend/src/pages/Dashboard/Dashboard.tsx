@@ -192,6 +192,15 @@ export default function Dashboard() {
       </Title>
       <Stack gap="lg">
         <Stack gap="md">
+          {!currentInterval && (
+            <NoData title="No active interval">
+              <Stack>
+                <Text>There is no active interval for this project at the moment.</Text>
+                <Anchor href="../intervals">Manage project intervals</Anchor>
+              </Stack>
+            </NoData>
+          )}
+
           {myCurrentCircle && currentInterval && (
             <MyIntervalPartipationCard interval={currentInterval} circleInvolvement={myCurrentCircle} current={true} />
           )}
@@ -219,15 +228,6 @@ export default function Dashboard() {
             <Title order={2}>Resources</Title>
             <LinksStack links={project.links} />
           </Stack>
-        )}
-
-        {!currentInterval && (
-          <NoData title="No active interval">
-            <Stack>
-              <Text>There is no active interval for this project at the moment.</Text>
-              <Anchor href="../intervals">Manage project intervals</Anchor>
-            </Stack>
-          </NoData>
         )}
       </Stack>
     </Container>
