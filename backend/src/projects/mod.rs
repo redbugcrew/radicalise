@@ -93,12 +93,12 @@ pub async fn create_project(
 
     let circle = Circle::new(project.typed_id());
     if let Err(e) = insert_circle(&circle, project.typed_id(), &pool).await {
-        eprintln!("Database error: {:?} - {}", e, "inserting circle for new project");
+        eprintln!("Database error: {:?} - inserting circle for new project", e);
         return (StatusCode::BAD_REQUEST, Json(CreateProjectError::ServerError)).into_response();
     }
 
     if let Err(e) = create_person(project.typed_id(), user_id, input.person_name, &pool).await {
-        eprintln!("Database error: {:?} - {}", e, "creating person for new project");
+        eprintln!("Database error: {:?} - creating person for new project", e);
         return (StatusCode::BAD_REQUEST, Json(CreateProjectError::ServerError)).into_response();
     };
 
