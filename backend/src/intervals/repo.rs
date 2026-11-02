@@ -173,7 +173,7 @@ pub fn get_interval_type(interval: Interval) -> IntervalType {
         return IntervalType::Upcoming;
     }
 
-    if None == end_date {
+    if end_date.is_none() {
         return IntervalType::Current;
     }
 

@@ -87,10 +87,7 @@ pub struct IntervalNumber {
 
 impl IntervalNumber {
     pub fn new(number: i64, project_id: ProjectId) -> Self {
-        IntervalNumber {
-            number,
-            project_id: project_id,
-        }
+        IntervalNumber { number, project_id }
     }
 }
 
