@@ -15,9 +15,12 @@ export interface IntervalInput {
 
 export function lastIntervalToInput(interval: Interval | null | undefined): IntervalInput | null {
   if (!interval) return null
+
+  let newStartDate = interval.end_date ? dateFns.add(interval.end_date as Iso.Date, { days: 1 }) : dateFns.now()
+
   return {
     id: null,
-    start_date: dateFns.add(interval.end_date as Iso.Date, { days: 1 }),
+    start_date: newStartDate,
     end_date: null,
   } as IntervalInput
 }

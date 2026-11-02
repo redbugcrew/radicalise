@@ -142,6 +142,7 @@ pub async fn find_next_interval(
     .fetch_optional(pool)
     .await
 }
+
 pub async fn find_previous_interval(
     project_id: ProjectId,
     current_interval_id: IntervalId,
@@ -205,6 +206,20 @@ pub async fn mark_peer_roles_processed(interval_id: IntervalId, value: bool, poo
          SET processed_peer_roles = ?
          WHERE id = ?",
         value,
+        interval_id.id
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(())
+}
+
+pub async fn set_interval_end_date(interval_id: IntervalId, end_date: NaiveDate, pool: &SqlitePool) -> Result<(), sqlx::Error> {
+    sqlx::query!(
+        "UPDATE intervals
+         SET end_date = ?
+         WHERE id = ? AND end_date IS NULL",
+        end_date.to_string(),
         interval_id.id
     )
     .execute(pool)
