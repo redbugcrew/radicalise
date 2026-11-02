@@ -192,9 +192,9 @@ export default function Dashboard() {
       <Stack gap="lg">
         <Stack gap="md">
           {!currentInterval && (
-            <NoData title="No active interval">
+            <NoData title="No current interval">
               <Stack>
-                <Text>There is no active interval for this project at the moment.</Text>
+                <Text>This project has not yet started it's first interval.</Text>
                 <Anchor href="../intervals">Manage project intervals</Anchor>
               </Stack>
             </NoData>

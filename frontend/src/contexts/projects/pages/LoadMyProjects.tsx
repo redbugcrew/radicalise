@@ -13,7 +13,11 @@ export const MyProjectsContext = createContext<MyProjectsContextType>({
   addProject: () => {},
 })
 
-export default function LoadMyProjects() {
+interface LoadMyProjectsProps {
+  withRedirect?: boolean
+}
+
+export default function LoadMyProjects({ withRedirect }: LoadMyProjectsProps) {
   const [myProjects, setMyProjects] = useState<Project[] | undefined>(undefined)
   const navigate = useNavigate()
   const { projectSlug } = useParams<"projectSlug">()
@@ -28,7 +32,7 @@ export default function LoadMyProjects() {
           const projects = response.data
           setMyProjects(response.data)
 
-          if (projects.length > 0 && !projectSlug) {
+          if (projects.length > 0 && !projectSlug && withRedirect) {
             console.log("Redirecting to project: ", projects[0].slug)
             navigate(`/project/${projects[0].slug}`)
           }
