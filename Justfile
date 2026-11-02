@@ -23,6 +23,9 @@ db-dev-init:
 playwright: db-test-init
     mprocs -c mprocs.test.yaml
 
+test:
+    cd backend && cargo test
+
 format:
     cd frontend && npm run format:write
     cd backend && cargo fmt

@@ -125,7 +125,7 @@ mod tests {
     async fn no_involvements_added_when_no_previous_interval() {
         let pool = setup_db().await;
 
-        sqlx::query!("INSERT INTO intervals (id, start_date, end_date, project_id) VALUES (1, '2026-01-01', '2026-03-31', 1)")
+        sqlx::query!("INSERT INTO intervals (id, number, start_date, end_date, project_id) VALUES (1, 1, '2026-01-01', '2026-03-31', 1)")
             .execute(&pool)
             .await
             .expect("Failed to insert test interval");
@@ -162,12 +162,12 @@ mod tests {
             .await
             .expect("Failed to insert test person");
 
-        sqlx::query!("INSERT INTO intervals (id, start_date, end_date, project_id) VALUES (1, '2026-01-01', '2026-03-31', 1)")
+        sqlx::query!("INSERT INTO intervals (id, number, start_date, end_date, project_id) VALUES (1, 1, '2026-01-01', '2026-03-31', 1)")
             .execute(&pool)
             .await
             .expect("Failed to insert first interval");
 
-        sqlx::query!("INSERT INTO intervals (id, start_date, end_date, project_id) VALUES (2, '2026-04-01', '2026-06-30', 1)")
+        sqlx::query!("INSERT INTO intervals (id, number, start_date, end_date, project_id) VALUES (2, 2, '2026-04-01', '2026-06-30', 1)")
             .execute(&pool)
             .await
             .expect("Failed to insert second interval");
