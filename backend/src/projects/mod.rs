@@ -1,38 +1,19 @@
 use axum::{Extension, Json, http::StatusCode, response::IntoResponse};
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use sqlx::SqlitePool;
 use utoipa::ToSchema;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     auth::auth_backend::AuthSession,
-    circles::repo::insert_circle,
-    people::repo::create_person,
-    shared::{
-        api_helpers::db_error,
-        entities::{Circle, Project, UserId},
-    },
+    projects::repo::CreateProjectError,
+    shared::entities::{Project, UserId},
 };
 
 mod repo;
 
 pub fn router() -> OpenApiRouter {
     OpenApiRouter::new().routes(routes!(create_project))
-}
-
-#[derive(Serialize, ToSchema)]
-enum CreateProjectError {
-    SlugAlreadyTaken,
-    ServerError,
-}
-
-impl From<repo::CreateProjectError> for CreateProjectError {
-    fn from(e: repo::CreateProjectError) -> Self {
-        match e {
-            repo::CreateProjectError::SlugAlreadyTaken => CreateProjectError::SlugAlreadyTaken,
-            _ => CreateProjectError::ServerError, // Default mapping for other errors
-        }
-    }
 }
 
 #[derive(Deserialize, ToSchema, Clone)]
@@ -75,25 +56,11 @@ pub async fn create_project(
         }
     };
 
-    let project = match repo::create_project(input.clone().into(), &pool).await {
+    let project = match repo::create_project_and_dependent_records(input.clone().into(), user_id, input.person_name.clone(), &pool).await {
         Ok(project) => project,
         Err(e) => {
-            return match e {
-                repo::CreateProjectError::SqlxError(e) => db_error(e, "Failed to create project with links"),
-                e => (StatusCode::BAD_REQUEST, Json(CreateProjectError::from(e))).into_response(),
-            };
+            return (StatusCode::BAD_REQUEST, Json(CreateProjectError::from(e))).into_response();
         }
-    };
-
-    let circle = Circle::new(project.typed_id());
-    if let Err(e) = insert_circle(&circle, project.typed_id(), &pool).await {
-        eprintln!("Database error: {:?} - inserting circle for new project", e);
-        return (StatusCode::BAD_REQUEST, Json(CreateProjectError::ServerError)).into_response();
-    }
-
-    if let Err(e) = create_person(project.typed_id(), user_id, input.person_name, &pool).await {
-        eprintln!("Database error: {:?} - creating person for new project", e);
-        return (StatusCode::BAD_REQUEST, Json(CreateProjectError::ServerError)).into_response();
     };
 
     (StatusCode::CREATED, Json(project)).into_response()

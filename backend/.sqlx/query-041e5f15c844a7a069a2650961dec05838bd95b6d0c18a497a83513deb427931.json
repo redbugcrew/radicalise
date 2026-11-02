@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT id, name, description, slug\n        FROM projects WHERE slug = ?",
+  "query": "SELECT id, name, description, slug, feature_events, feature_peer_roles\n        FROM projects WHERE slug = ?",
   "describe": {
     "columns": [
       {
@@ -46,6 +46,28 @@
             "name": "slug"
           }
         }
+      },
+      {
+        "name": "feature_events",
+        "ordinal": 4,
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "projects",
+            "name": "feature_events"
+          }
+        }
+      },
+      {
+        "name": "feature_peer_roles",
+        "ordinal": 5,
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "projects",
+            "name": "feature_peer_roles"
+          }
+        }
       }
     ],
     "parameters": {
@@ -55,8 +77,10 @@
       false,
       false,
       true,
+      false,
+      false,
       false
     ]
   },
-  "hash": "0fe5830a74323345936c111d6b3f54d993b8c7ff1e4a0f58be15e812c9564a99"
+  "hash": "041e5f15c844a7a069a2650961dec05838bd95b6d0c18a497a83513deb427931"
 }

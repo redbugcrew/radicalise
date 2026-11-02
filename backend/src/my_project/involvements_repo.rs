@@ -286,10 +286,13 @@ pub async fn upsert_circle_involvement(involvement: CircleInvolvementRecord, poo
     }
 }
 
-pub async fn insert_circle_involvement(
+pub async fn insert_circle_involvement<'e, 'c: 'e, E>(
     involvement: CircleInvolvementRecord,
-    pool: &SqlitePool,
-) -> Result<CircleInvolvementRecord, InsertRecordError> {
+    pool: E,
+) -> Result<CircleInvolvementRecord, InsertRecordError>
+where
+    E: sqlx::Executor<'c, Database = sqlx::Sqlite>,
+{
     let result = sqlx::query!(
         "INSERT INTO circle_involvements (person_id, circle_id, interval_id, status, capacity_planning_visibility_circle_id, wellbeing, focus, capacity_score, capacity, participation_intention, opt_out_type, opt_out_planned_return_date,
         intention_context, implicit_counter)
@@ -310,7 +313,7 @@ pub async fn insert_circle_involvement(
         involvement.implicit_counter
     )
     .execute(pool)
-    .await.map_err(InsertRecordError::from)?;
+    .await.map_err(|e| {eprintln!("Error inserting circle involvement: {}", e); e}).map_err(InsertRecordError::from)?;
 
     if result.rows_affected() == 0 {
         Err(InsertRecordError::DatabaseError)

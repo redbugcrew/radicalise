@@ -8,7 +8,7 @@ pub enum InsertRecordError {
 
 impl From<sqlx::Error> for InsertRecordError {
     fn from(sqlx_error: sqlx::Error) -> Self {
-        eprintln!("Database error: {}", sqlx_error);
+        eprintln!("Database error inserting record: {}", sqlx_error);
 
         if matches!(sqlx_error, sqlx::Error::Database(db_err) if db_err.message().contains("UNIQUE constraint failed")) {
             InsertRecordError::RecordAlreadyExists

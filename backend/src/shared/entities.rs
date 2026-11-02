@@ -99,7 +99,7 @@ pub struct Interval {
     pub id: i64,
     pub number: i64,
     pub start_date: String,
-    pub end_date: String,
+    pub end_date: Option<String>,
 }
 
 impl Interval {

@@ -49,7 +49,8 @@ export enum EventResponseExpectation {
 
 export enum CreateProjectError {
   SlugAlreadyTaken = "SlugAlreadyTaken",
-  ServerError = "ServerError",
+  RecordAlreadyExists = "RecordAlreadyExists",
+  DatabaseError = "DatabaseError",
 }
 
 export enum AttendanceIntention {
@@ -267,7 +268,7 @@ export interface InitialData {
 }
 
 export interface Interval {
-  end_date: string
+  end_date?: string | null
   /** @format int64 */
   id: number
   /** @format int64 */
@@ -956,7 +957,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name GetIntervalData
      * @request GET:/api/projects/{project_id}/my_project/interval/{interval_number}/state
      */
-    getIntervalData: (intervalNumber: number, projectId: number, params: RequestParams = {}) =>
+    getIntervalData: (projectId: number, intervalNumber: number, params: RequestParams = {}) =>
       this.request<IntervalData, any>({
         path: `/api/projects/${projectId}/my_project/interval/${intervalNumber}/state`,
         method: "GET",

@@ -1,12 +1,36 @@
-use sqlx::SqlitePool;
-
 use crate::shared::entities::{Interval, IntervalId, IntervalNumber, ProjectId};
+use chrono::NaiveDate;
+use sqlx::SqlitePool;
 
 #[derive(PartialEq, Debug, Clone, Copy)]
 pub enum IntervalType {
     Upcoming,
     Current,
     Past,
+}
+
+pub async fn insert_zeroth_interval<'e, 'c: 'e, E>(start_date: NaiveDate, project_id: ProjectId, pool: E) -> Result<Interval, sqlx::Error>
+where
+    E: sqlx::Executor<'c, Database = sqlx::Sqlite>,
+{
+    let result = sqlx::query_as!(
+        Interval,
+        "INSERT INTO intervals (number, start_date, project_id)
+         VALUES (?, ?, ?)
+         RETURNING id AS \"id!\", number, start_date, end_date",
+        0,
+        &start_date.to_string(),
+        project_id.id
+    )
+    .fetch_one(pool)
+    .await?;
+
+    Ok(Interval {
+        id: result.id,
+        number: result.number,
+        start_date: result.start_date,
+        end_date: result.end_date,
+    })
 }
 
 pub async fn insert_interval(interval: Interval, project_id: ProjectId, pool: &SqlitePool) -> Result<Interval, sqlx::Error> {
@@ -142,10 +166,14 @@ pub async fn find_previous_interval(
 pub fn get_interval_type(interval: Interval) -> IntervalType {
     let today = chrono::Utc::now().date_naive();
     let start_date = parse_date_only(&interval.start_date).unwrap();
-    let end_date = parse_date_only(&interval.end_date);
+    let end_date = interval.end_date.as_ref().and_then(|d| parse_date_only(d));
 
     if start_date > today {
         return IntervalType::Upcoming;
+    }
+
+    if None == end_date {
+        return IntervalType::Current;
     }
 
     if let Some(end_date) = end_date
@@ -189,7 +217,10 @@ pub fn parse_date_only(date_str: &str) -> Option<chrono::NaiveDate> {
     chrono::NaiveDate::parse_from_str(date_str, "%Y-%m-%d").ok()
 }
 
-pub async fn change_project_interval(project_id: ProjectId, new_interval_id: IntervalId, pool: &SqlitePool) -> Result<(), sqlx::Error> {
+pub async fn change_project_interval<'e, 'c: 'e, E>(project_id: ProjectId, new_interval_id: IntervalId, pool: E) -> Result<(), sqlx::Error>
+where
+    E: sqlx::Executor<'c, Database = sqlx::Sqlite>,
+{
     sqlx::query!(
         "UPDATE projects
          SET current_interval_id = ?

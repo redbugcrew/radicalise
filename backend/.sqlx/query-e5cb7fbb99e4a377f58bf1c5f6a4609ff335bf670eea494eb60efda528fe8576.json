@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT p.id as id, name, description, slug\n        FROM projects p\n        JOIN people pe ON pe.project_id = p.id\n        WHERE pe.user_id = ?",
+  "query": "SELECT p.id as id, name, description, slug, feature_events, feature_peer_roles\n        FROM projects p\n        JOIN people pe ON pe.project_id = p.id\n        WHERE pe.user_id = ?",
   "describe": {
     "columns": [
       {
@@ -46,6 +46,28 @@
             "name": "slug"
           }
         }
+      },
+      {
+        "name": "feature_events",
+        "ordinal": 4,
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "projects",
+            "name": "feature_events"
+          }
+        }
+      },
+      {
+        "name": "feature_peer_roles",
+        "ordinal": 5,
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "projects",
+            "name": "feature_peer_roles"
+          }
+        }
       }
     ],
     "parameters": {
@@ -55,8 +77,10 @@
       false,
       false,
       true,
+      false,
+      false,
       false
     ]
   },
-  "hash": "f6453003a6e93ddf73b0e74d14b15f7f31bae66707947ba275dee53b3b7552f6"
+  "hash": "e5cb7fbb99e4a377f58bf1c5f6a4609ff335bf670eea494eb60efda528fe8576"
 }

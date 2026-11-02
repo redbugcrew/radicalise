@@ -440,7 +440,7 @@ mod tests {
             id: 31,
             number: 1,
             start_date: "2026-01-01".to_string(),
-            end_date: "2026-03-31".to_string(),
+            end_date: Some("2026-03-31".to_string()),
         }
     }
 
@@ -597,7 +597,7 @@ mod tests {
             id: 32,
             number: 2,
             start_date: "2026-04-01".to_string(),
-            end_date: "2026-06-30".to_string(),
+            end_date: Some("2026-06-30".to_string()),
         };
 
         // Invite the person in interval 1

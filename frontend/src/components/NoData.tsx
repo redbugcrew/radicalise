@@ -1,7 +1,7 @@
 import { Card, Stack, Title } from "@mantine/core"
 
 interface NoDataProps {
-  title: string
+  title?: string
   children: React.ReactNode
 }
 

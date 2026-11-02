@@ -134,7 +134,7 @@ mod tests {
             id: 21,
             number: 1,
             start_date: "2026-01-01".to_string(),
-            end_date: "2026-03-31".to_string(),
+            end_date: Some("2026-03-31".to_string()),
         };
 
         let result = add_interval_circle_implicit_involvements(&interval, ProjectId::new(1), CircleId::new(1), false, &pool).await;
@@ -184,7 +184,7 @@ mod tests {
             id: 22,
             number: 2,
             start_date: "2026-04-01".to_string(),
-            end_date: "2026-06-30".to_string(),
+            end_date: Some("2026-06-30".to_string()),
         };
 
         let result = add_interval_circle_implicit_involvements(&second_interval, ProjectId::new(1), CircleId::new(1), false, &pool).await;

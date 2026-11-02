@@ -22,10 +22,10 @@ function absDuration(duration: Duration): Duration {
 
 export default function IntervalChanger({ interval, nextInterval, onNextInterval }: IntervalChangerProps) {
   const now = new Date()
-  const endsInPast = interval && new Date(interval.end_date) < now
+  const endsInPast = interval?.end_date && new Date(interval.end_date) < now
   const durationOptions: FormatDurationOptions = { format: ["years", "months", "days", "hours"], delimiter: ", " }
   const duration =
-    interval &&
+    interval?.end_date &&
     intervalToDuration({
       start: now,
       end: interval.end_date,

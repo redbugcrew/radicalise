@@ -63,7 +63,7 @@ export default function IntervalSelector({ intervals, selectedInterval, currentI
       <IntervalNavigationButton variant="previous" to={previousInterval} />
       <Stack align="center" justify="center" gap={0}>
         <Text span fw="bold" size="lg">
-          Interval {selectedInterval.id}
+          Interval {selectedInterval.number}
         </Text>
 
         <Text span c="dimmed">

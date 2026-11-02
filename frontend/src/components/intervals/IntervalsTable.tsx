@@ -13,7 +13,7 @@ function IntervalTableRow({ interval, isCurrent }: { interval: Interval; isCurre
   if (!interval) return null
 
   const stateDate = dateStringToDateTime(interval.start_date)
-  const endDate = dateStringToDateTime(interval.end_date)
+  const endDate = interval.end_date ? dateStringToDateTime(interval.end_date) : null
   let duration = null
 
   if (stateDate && endDate) {

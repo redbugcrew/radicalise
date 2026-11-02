@@ -1,4 +1,4 @@
-import { ActionIcon, Button, Group, Stack, Text, Title } from "@mantine/core"
+import { ActionIcon, Group, Stack, Text, Title } from "@mantine/core"
 import { handleAppEvents, useAppSelector } from "../../store"
 import { Anchor, IntervalsTable, NoData } from "../../components"
 import { IconCalendarPlus } from "@tabler/icons-react"

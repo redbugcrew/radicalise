@@ -1,4 +1,4 @@
-use sqlx::SqlitePool;
+use sqlx::{Executor, SqlitePool};
 
 use crate::{
     repo_utilities::InsertRecordError,
@@ -25,12 +25,15 @@ pub async fn create_person_without_user(
     Ok(result)
 }
 
-pub async fn create_person(
+pub async fn create_person<'e, 'c: 'e, E>(
     project_id: ProjectId,
     user_id: UserId,
     display_name: String,
-    pool: &SqlitePool,
-) -> Result<Person, InsertRecordError> {
+    pool: E,
+) -> Result<Person, InsertRecordError>
+where
+    E: Executor<'c, Database = sqlx::Sqlite>,
+{
     let result = sqlx::query_as!(
         Person,
         "

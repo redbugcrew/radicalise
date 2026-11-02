@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use sqlx::SqlitePool;
+use sqlx::{Executor, SqlitePool};
 
 use crate::shared::entities::{Circle, CircleId, ProjectId};
 
@@ -73,7 +73,10 @@ pub async fn find_circle_by_id(circle_id: CircleId, pool: &SqlitePool) -> Result
     .await
 }
 
-pub async fn insert_circle(circle: &Circle, project_id: ProjectId, pool: &SqlitePool) -> Result<Circle, sqlx::Error> {
+pub async fn insert_circle<'e, 'c: 'e, E>(circle: &Circle, project_id: ProjectId, pool: E) -> Result<Circle, sqlx::Error>
+where
+    E: Executor<'c, Database = sqlx::Sqlite>,
+{
     let rec = sqlx::query!(
         "INSERT INTO circles (project_id, name, slug, inside_circle_id) VALUES (?, ?, ?, ?)",
         project_id.id,

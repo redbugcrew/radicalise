@@ -6,12 +6,12 @@ export type EventsState = CalendarEvent[]
 
 export function occurInInterval(events: CalendarEvent[], interval: Interval): CalendarEvent[] {
   const intervalStart = startOfDay(interval.start_date)
-  const intervalEnd = endOfDay(interval.end_date)
+  const intervalEnd = interval.end_date ? endOfDay(interval.end_date) : null
 
   return events.filter((event) => {
     const eventStart = toDate(event.start_at)
     const eventEnd = event.end_at ? toDate(event.end_at) : eventStart
-    return eventStart < intervalEnd && eventEnd > intervalStart
+    return (intervalEnd === null || eventStart < intervalEnd) && eventEnd > intervalStart
   })
 }
 
