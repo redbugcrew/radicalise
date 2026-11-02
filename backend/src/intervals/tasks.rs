@@ -162,19 +162,19 @@ mod tests {
             .await
             .expect("Failed to insert test person");
 
-        sqlx::query!("INSERT INTO intervals (id, number, start_date, end_date, project_id) VALUES (1, 1, '2026-01-01', '2026-03-31', 1)")
+        sqlx::query!("INSERT INTO intervals (id, number, start_date, end_date, project_id) VALUES (21, 1, '2026-01-01', '2026-03-31', 1)")
             .execute(&pool)
             .await
             .expect("Failed to insert first interval");
 
-        sqlx::query!("INSERT INTO intervals (id, number, start_date, end_date, project_id) VALUES (2, 2, '2026-04-01', '2026-06-30', 1)")
+        sqlx::query!("INSERT INTO intervals (id, number, start_date, end_date, project_id) VALUES (22, 2, '2026-04-01', '2026-06-30', 1)")
             .execute(&pool)
             .await
             .expect("Failed to insert second interval");
 
         // circle id=1 already exists from migrations (inserted by add-circles migration)
         sqlx::query!(
-            "INSERT INTO circle_involvements (person_id, circle_id, interval_id, status, implicit_counter) VALUES (1, 1, 1, 'Active', 0)"
+            "INSERT INTO circle_involvements (person_id, circle_id, interval_id, status, implicit_counter) VALUES (1, 1, 21, 'Active', 0)"
         )
         .execute(&pool)
         .await
@@ -190,7 +190,7 @@ mod tests {
         let result = add_interval_circle_implicit_involvements(&second_interval, ProjectId::new(1), CircleId::new(1), false, &pool).await;
         assert!(result.is_ok(), "Expected Ok(()), got {:?}", result.err());
 
-        let count = sqlx::query_scalar!("SELECT COUNT(*) FROM circle_involvements WHERE interval_id = 2 AND person_id = 1")
+        let count = sqlx::query_scalar!("SELECT COUNT(*) FROM circle_involvements WHERE interval_id = 22 AND person_id = 1")
             .fetch_one(&pool)
             .await
             .expect("Failed to count involvements");
@@ -200,7 +200,7 @@ mod tests {
         let result = add_interval_circle_implicit_involvements(&second_interval, ProjectId::new(1), CircleId::new(1), true, &pool).await;
         assert!(result.is_ok(), "Expected Ok(()), got {:?}", result.err());
 
-        let count = sqlx::query_scalar!("SELECT COUNT(*) FROM circle_involvements WHERE interval_id = 2 AND person_id = 1")
+        let count = sqlx::query_scalar!("SELECT COUNT(*) FROM circle_involvements WHERE interval_id = 22 AND person_id = 1")
             .fetch_one(&pool)
             .await
             .expect("Failed to count involvements");
