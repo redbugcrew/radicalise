@@ -59,7 +59,7 @@ pub async fn create_project(
     let project = match repo::create_project_and_dependent_records(input.clone().into(), user_id, input.person_name.clone(), &pool).await {
         Ok(project) => project,
         Err(e) => {
-            return (StatusCode::BAD_REQUEST, Json(CreateProjectError::from(e))).into_response();
+            return (StatusCode::BAD_REQUEST, Json(e)).into_response();
         }
     };
 

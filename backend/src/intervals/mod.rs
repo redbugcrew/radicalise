@@ -141,7 +141,10 @@ async fn start_next_interval(
             new_end_date = this_start_date;
         }
 
-        if let Err(_) = repo::set_interval_end_date(current_interval.typed_id(), new_end_date, &pool).await {
+        if repo::set_interval_end_date(current_interval.typed_id(), new_end_date, &pool)
+            .await
+            .is_err()
+        {
             return StartNextIntervalError::InternalServerError.into_response();
         }
     }

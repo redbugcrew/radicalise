@@ -82,10 +82,10 @@ where
     .execute(pool)
     .await
     .map_err(|e| {
-        if let sqlx::Error::Database(db_err) = &e {
-            if db_err.message().contains("UNIQUE constraint failed: projects.slug") {
-                return CreateProjectError::SlugAlreadyTaken;
-            }
+        if let sqlx::Error::Database(db_err) = &e
+            && db_err.message().contains("UNIQUE constraint failed: projects.slug")
+        {
+            return CreateProjectError::SlugAlreadyTaken;
         }
         CreateProjectError::DatabaseError
     })?;
