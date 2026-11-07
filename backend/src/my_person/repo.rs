@@ -76,7 +76,7 @@ pub async fn update_crew_involvements(
 ) -> Result<Vec<CrewId>, sqlx::Error> {
     let existing = find_my_crew_involvements(person_id.clone(), interval_number.clone(), pool).await?;
 
-    // Ensure all the involvements have the same person_id and interval_id
+    // Ensure all the involvements have the same person_id and interval
     for involvement in &involvements {
         if involvement.person_id != person_id.id || involvement.interval_number != interval_number.number {
             eprintln!("Mismatched crew involvement: {:?}", involvement);

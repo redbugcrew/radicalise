@@ -17,7 +17,7 @@ export default function PeopleForInterval({ interval }: PeopleForIntervalProps) 
             crewInvolvements={intervalData.crew_involvements || []}
             key={key}
             tableKey={key}
-            intervalId={isCurrentInterval ? undefined : interval?.id}
+            intervalNumber={isCurrentInterval ? undefined : interval?.number}
           />
         )
       }

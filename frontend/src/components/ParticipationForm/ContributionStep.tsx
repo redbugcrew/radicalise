@@ -31,9 +31,10 @@ function CrewContributions({ form, readOnly, personId, interval, crewInvolvement
 
       <CrewParticipationsInput
         personId={personId}
-        intervalId={interval.id}
+        intervalNumber={interval.number}
         crews={crews}
         people={people}
+        projectId={interval.project_id}
         disabled={readOnly}
         crewInvolvements={crewInvolvements}
         previousInvolvements={previousInvolvements}

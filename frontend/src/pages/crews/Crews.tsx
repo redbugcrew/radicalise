@@ -16,7 +16,7 @@ export default function Crews() {
       <IntervalSelector intervals={intervals} selectedInterval={selectedInterval} currentInterval={currentInterval} />
 
       {selectedInterval ? (
-        <CrewsForInterval interval={selectedInterval} key={selectedInterval.id} />
+        <CrewsForInterval interval={selectedInterval} key={selectedInterval.number} />
       ) : (
         <NoData title="No current interval">
           <Stack>

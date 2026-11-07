@@ -177,7 +177,7 @@ export interface CircleInvolvement {
   implicit_counter: number
   intention_context?: string | null
   /** @format int64 */
-  interval_id: number
+  interval_number: number
   opt_out_planned_return_date?: string | null
   opt_out_type?: OptOutType | null
   participation_intention?: ParticipationIntention | null
@@ -193,7 +193,9 @@ export interface CircleInvolvementData {
   circle_id: number
   circle_involvements: CircleInvolvement[]
   /** @format int64 */
-  interval_id: number
+  interval_number: number
+  /** @format int64 */
+  project_id: number
 }
 
 export type CirclesEvent = {
@@ -218,9 +220,11 @@ export interface CrewInvolvement {
   /** @format int64 */
   id: number
   /** @format int64 */
-  interval_id: number
+  interval_number: number
   /** @format int64 */
   person_id: number
+  /** @format int64 */
+  project_id: number
   volunteered_convenor: boolean
 }
 
@@ -270,9 +274,9 @@ export interface InitialData {
 export interface Interval {
   end_date?: string | null
   /** @format int64 */
-  id: number
-  /** @format int64 */
   number: number
+  /** @format int64 */
+  project_id: number
   start_date: string
 }
 
@@ -354,13 +358,15 @@ export interface PeerEnrollment {
   /** @format int64 */
   id: number
   /** @format int64 */
-  interval_id: number
+  interval_number: number
   /** @format int64 */
   peer_id: number
   /** @format int64 */
   peer_role_id: number
   /** @format int64 */
   person_id: number
+  /** @format int64 */
+  project_id: number
 }
 
 export interface PeerRole {
@@ -909,11 +915,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @name UpdateMyParticipation
-     * @request POST:/api/projects/{project_id}/my_person/interval/{interval_id}/my_participation
+     * @request POST:/api/projects/{project_id}/my_person/interval/{interval_number}/my_participation
      */
-    updateMyParticipation: (projectId: number, intervalId: number, data: MyParticipationInput, params: RequestParams = {}) =>
+    updateMyParticipation: (projectId: number, intervalNumber: number, data: MyParticipationInput, params: RequestParams = {}) =>
       this.request<AppEvent[], any>({
-        path: `/api/projects/${projectId}/my_person/interval/${intervalId}/my_participation`,
+        path: `/api/projects/${projectId}/my_person/interval/${intervalNumber}/my_participation`,
         method: "POST",
         body: data,
         type: ContentType.Json,
@@ -925,11 +931,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @name MyParticipation
-     * @request GET:/api/projects/{project_id}/my_person/participation/interval/{interval_id}/circle/{circle_id}
+     * @request GET:/api/projects/{project_id}/my_person/participation/interval/{interval_number}/circle/{circle_id}
      */
-    myParticipation: (projectId: number, intervalId: number, circleId: number, params: RequestParams = {}) =>
+    myParticipation: (projectId: number, intervalNumber: number, circleId: number, params: RequestParams = {}) =>
       this.request<CircleInvolvement | null, any>({
-        path: `/api/projects/${projectId}/my_person/participation/interval/${intervalId}/circle/${circleId}`,
+        path: `/api/projects/${projectId}/my_person/participation/interval/${intervalNumber}/circle/${circleId}`,
         method: "GET",
         format: "json",
         ...params,

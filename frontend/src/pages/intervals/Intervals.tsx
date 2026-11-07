@@ -52,7 +52,7 @@ export default function Intervals() {
           </Stack>
         </NoData>
       ) : (
-        <IntervalsTable intervals={intervals} currentIntervalId={currentInterval?.id || null} />
+        <IntervalsTable intervals={intervals} currentIntervalNumber={currentInterval?.number || null} />
       )}
     </Stack>
   )

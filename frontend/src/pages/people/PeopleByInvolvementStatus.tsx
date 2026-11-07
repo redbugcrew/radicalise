@@ -35,14 +35,14 @@ interface PeopleByInvolvementStatusProps {
   involvements: CircleInvolvement[]
   crewInvolvements?: CrewInvolvement[]
   tableKey?: React.Key
-  intervalId?: number | null
+  intervalNumber?: number | null
 }
 
 export default function PeopleByInvolvementStatus({
   involvements,
   crewInvolvements,
   tableKey,
-  intervalId,
+  intervalNumber,
 }: PeopleByInvolvementStatusProps) {
   const states = [InvolvementStatus.Active]
   involvements.forEach((involvement) => {
@@ -84,7 +84,7 @@ export default function PeopleByInvolvementStatus({
           <PeopleTable
             key={tableKey}
             people={peopleForInvolvements(hashedInvolvements.get(state) || [], hashedCrewInvolvements, allPeople, allCrews)}
-            intervalId={intervalId}
+            intervalNumber={intervalNumber}
           />
         </Tabs.Panel>
       ))}

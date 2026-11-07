@@ -15,25 +15,25 @@ interface WithPageIntervalDataProps {
   children: (props: WithIntervalDataChildProps) => React.ReactNode
 }
 
-const useHashIntervalId = (): number | null => {
+const useHashIntervalNumber = (): number | null => {
   const location = useLocation()
   const hash = location.hash
   if (hash.startsWith("#interval")) {
-    const idStr = hash.replace("#interval", "")
-    const id = parseInt(idStr, 10)
-    if (!isNaN(id)) {
-      return id
+    const numberStr = hash.replace("#interval", "")
+    const number = parseInt(numberStr, 10)
+    if (!isNaN(number)) {
+      return number
     }
   }
   return null
 }
 
 export const useSelectedInterval = (): Interval | null => {
-  const pathIntervalId = useHashIntervalId()
+  const pathIntervalNumber = useHashIntervalNumber()
   const currentInterval = useCurrentInterval()
   const allIntervals = useAppSelector((state) => state.intervals)
   const selectedInterval: Interval | null =
-    pathIntervalId == null ? currentInterval : allIntervals.find((i) => i.id === pathIntervalId) || null
+    pathIntervalNumber == null ? currentInterval : allIntervals.find((i) => i.number === pathIntervalNumber) || null
   return selectedInterval
 }
 

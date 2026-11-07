@@ -177,7 +177,7 @@ pub async fn find_all_circle_involvements(
         FROM circle_involvements
         INNER JOIN circles ON circle_involvements.circle_id = circles.id
         WHERE
-            project_id = ",
+            circle_involvements.project_id = ",
     );
 
     query_builder.push_bind(interval_number.project_id.id);

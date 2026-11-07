@@ -14,26 +14,26 @@ export default function MyParticipation() {
   const project = useAppSelector((state) => state.project)
   const circle = useAppSelector((state) => state.circles.rootCircles[0])
   const personId = useAppSelector((state) => state.me?.person_id)
-  const { intervalId } = useParams()
-  const intervalIdNumber = Number(intervalId)
+  const { intervalNumber } = useParams()
+  const parsedIntervalNumber = Number(intervalNumber)
   const navigate = useNavigate()
   const api = getApi()
 
-  const interval = allIntervals.find((i) => i.id === intervalIdNumber)
+  const interval = allIntervals.find((i) => i.number === parsedIntervalNumber)
   const [involvement, setInvolvement] = useState<CircleInvolvement | null>(null)
 
   useEffect(() => {
     if (!interval || !circle || !project) return
 
     api.api
-      .myParticipation(project.id, interval.id, circle.id)
+      .myParticipation(project.id, interval.number, circle.id)
       .then((response) => {
         setInvolvement(response.data)
       })
       .catch((error) => {
         console.error("Error fetching participation data:", error)
       })
-  }, [api, interval?.id, circle.id, project?.id])
+  }, [api, interval?.number, circle.id, project?.id])
 
   if (!project) return <Text>Error: Project not found.</Text>
   if (!circle) return <Text>Error: Circle not found.</Text>
@@ -46,7 +46,7 @@ export default function MyParticipation() {
     return <Text>Error: Current interval not found.</Text>
   }
 
-  const readOnly = intervalIdNumber < currentInterval.id
+  const readOnly = parsedIntervalNumber < currentInterval.number
 
   if (readOnly && !involvement) {
     return <Text>Error: You were not participating in this interval.</Text>
@@ -62,7 +62,7 @@ export default function MyParticipation() {
     }
 
     api.api
-      .updateMyParticipation(project.id, interval.id, inputData)
+      .updateMyParticipation(project.id, interval.number, inputData)
       .then((response) => {
         console.log("Participation updated successfully", response)
         handleAppEvents(response.data)
@@ -77,7 +77,7 @@ export default function MyParticipation() {
     <Container>
       <Stack gap={0} mb="xl">
         <Title order={1} size="h2">
-          Participating in Interval {interval.id}
+          Participating in Interval {interval.number}
         </Title>
         <Text>
           <DateText date={interval.start_date} /> - <DateText date={interval.end_date} />
@@ -87,7 +87,7 @@ export default function MyParticipation() {
         readOnly={readOnly}
         personId={personId}
         involvement={involvement}
-        key={involvement?.id || `fresh-${interval.id}`}
+        key={involvement?.id || `fresh-${interval.number}`}
         onSubmit={onSubmit}
         interval={interval}
       />
