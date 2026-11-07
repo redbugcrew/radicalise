@@ -1,0 +1,62 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO crews (name, description, project_id)\n        VALUES (?, ?, ?)\n        RETURNING id AS \"id!\", name, description, project_id",
+  "describe": {
+    "columns": [
+      {
+        "name": "id!",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "crews",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "name",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "crews",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "name": "description",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "crews",
+            "name": "description"
+          }
+        }
+      },
+      {
+        "name": "project_id",
+        "ordinal": 3,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "crews",
+            "name": "project_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": [
+      null,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "10736c4b4db858ad5ac71d172bd0240eb43ca2fe2b998975e7f20998ea116f54"
+}
