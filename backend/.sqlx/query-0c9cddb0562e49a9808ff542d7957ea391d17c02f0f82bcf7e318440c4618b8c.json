@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE projects\n         SET current_interval_number = ?\n         WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "0c9cddb0562e49a9808ff542d7957ea391d17c02f0f82bcf7e318440c4618b8c"
+}

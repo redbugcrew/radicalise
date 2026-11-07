@@ -2,31 +2,34 @@ use sqlx::SqlitePool;
 
 use crate::{
     peer_roles::algorithms::{IntervalsAgo, MatchHistory},
-    shared::entities::{IntervalId, PeerEnrollment, PersonId},
+    shared::entities::{IntervalNumber, PeerEnrollment, PeerRoleId, PersonId},
 };
 
 pub async fn upsert_peer_enrollments(
-    interval_id: i64,
-    peer_role_id: i64,
+    interval_number: IntervalNumber,
+    peer_role_id: PeerRoleId,
     edges: Vec<(i64, i64)>,
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
     let mut transaction = pool.begin().await?;
 
     sqlx::query!(
-        "DELETE FROM peer_enrollments WHERE interval_id = ? AND peer_role_id = ?",
-        interval_id,
-        peer_role_id
+        "DELETE FROM peer_enrollments
+        WHERE interval_number = ? AND project_id = ? AND peer_role_id = ?",
+        interval_number.number,
+        interval_number.project_id.id,
+        peer_role_id.id
     )
     .execute(&mut *transaction)
     .await?;
 
     for (person_id, peer_id) in edges {
         sqlx::query!(
-            "INSERT INTO peer_enrollments (peer_role_id, interval_id, person_id, peer_id)
-            VALUES (?, ?, ?, ?)",
-            peer_role_id,
-            interval_id,
+            "INSERT INTO peer_enrollments (peer_role_id, interval_number, project_id, person_id, peer_id)
+            VALUES (?, ?, ?, ?, ?)",
+            peer_role_id.id,
+            interval_number.number,
+            interval_number.project_id.id,
             person_id,
             peer_id
         )
@@ -39,33 +42,42 @@ pub async fn upsert_peer_enrollments(
     Ok(())
 }
 
-pub async fn load_match_history(peer_role_id: i64, current_interval_id: i64, pool: &SqlitePool) -> Result<MatchHistory<i64>, sqlx::Error> {
+pub async fn load_match_history(
+    peer_role_id: PeerRoleId,
+    current_interval_number: IntervalNumber,
+    pool: &SqlitePool,
+) -> Result<MatchHistory<i64>, sqlx::Error> {
     let rows = sqlx::query!(
         r#"
-        SELECT person_id AS "person_id!: i64", peer_id AS "peer_id!: i64", MAX(interval_id) AS "last_interval!: i64"
+        SELECT person_id AS "person_id!: i64", peer_id AS "peer_id!: i64", MAX(interval_number) AS "last_interval!: i64"
         FROM peer_enrollments
         WHERE peer_role_id = ?
         GROUP BY person_id, peer_id
         "#,
-        peer_role_id
+        peer_role_id.id
     )
     .fetch_all(pool)
     .await?;
 
     let mut history: MatchHistory<i64> = MatchHistory::new();
     for row in rows {
-        let intervals_ago = IntervalsAgo(current_interval_id - row.last_interval);
+        let intervals_ago = IntervalsAgo(current_interval_number.number - row.last_interval);
         history.record(row.person_id, row.peer_id, intervals_ago);
     }
 
     Ok(history)
 }
 
-pub async fn find_peer_enrollments_for_interval(interval_id: &IntervalId, pool: &SqlitePool) -> Result<Vec<PeerEnrollment>, sqlx::Error> {
+pub async fn find_peer_enrollments_for_interval(
+    interval_number: &IntervalNumber,
+    pool: &SqlitePool,
+) -> Result<Vec<PeerEnrollment>, sqlx::Error> {
     let enrollments = sqlx::query_as!(
         PeerEnrollment,
-        "SELECT * FROM peer_enrollments WHERE interval_id = ?",
-        interval_id.id
+        "SELECT * FROM peer_enrollments
+        WHERE interval_number = ? AND project_id = ?",
+        interval_number.number,
+        interval_number.project_id.id
     )
     .fetch_all(pool)
     .await?;
@@ -74,14 +86,15 @@ pub async fn find_peer_enrollments_for_interval(interval_id: &IntervalId, pool: 
 }
 
 pub async fn find_peer_enrollments_for_interval_and_person(
-    interval_id: &IntervalId,
+    interval_number: &IntervalNumber,
     person_id: &PersonId,
     pool: &SqlitePool,
 ) -> Result<Vec<PeerEnrollment>, sqlx::Error> {
     let enrollments = sqlx::query_as!(
         PeerEnrollment,
-        "SELECT * FROM peer_enrollments WHERE interval_id = ? AND (person_id = ? OR peer_id = ?)",
-        interval_id.id,
+        "SELECT * FROM peer_enrollments WHERE interval_number = ? AND project_id = ? AND (person_id = ? OR peer_id = ?)",
+        interval_number.number,
+        interval_number.project_id.id,
         person_id.id,
         person_id.id
     )

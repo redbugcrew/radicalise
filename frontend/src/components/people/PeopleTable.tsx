@@ -38,14 +38,14 @@ interface PersonLinkWithCapacityProps {
   avatarId: number
   capacityScore: number | null
   dimmed?: boolean
-  intervalId?: number | null
+  intervalNumber?: number | null
 }
 
-function PersonLinkWithCapacity({ personId, personName, avatarId, capacityScore, dimmed, intervalId }: PersonLinkWithCapacityProps) {
+function PersonLinkWithCapacity({ personId, personName, avatarId, capacityScore, dimmed, intervalNumber }: PersonLinkWithCapacityProps) {
   const projectSlug = useCurrentProjectSlug()
   let link = `/people/${personId}`
-  if (intervalId) {
-    link += `#interval${intervalId}`
+  if (intervalNumber) {
+    link += `#interval${intervalNumber}`
   }
 
   return (
@@ -67,10 +67,10 @@ export interface SortableRowData {
 
 interface PeopleTableProps {
   people: PeopleTableRow[]
-  intervalId?: number | null
+  intervalNumber?: number | null
 }
 
-export default function PeopleTable({ people, intervalId }: PeopleTableProps) {
+export default function PeopleTable({ people, intervalNumber }: PeopleTableProps) {
   const [search, setSearch] = useState("")
   const [sortedData, setSortedData] = useState(people)
   const [sortBy, setSortBy] = useState<keyof SortableRowData | null>(null)
@@ -98,7 +98,7 @@ export default function PeopleTable({ people, intervalId }: PeopleTableProps) {
             avatarId={item.avatar_id}
             capacityScore={item.capacity_score}
             dimmed={item.dimmed}
-            intervalId={intervalId}
+            intervalNumber={intervalNumber}
           />
           {item.counter > 0 ? (
             <Text c="dimmed" size="sm">

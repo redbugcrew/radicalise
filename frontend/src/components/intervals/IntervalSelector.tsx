@@ -54,7 +54,7 @@ export default function IntervalSelector({ intervals, selectedInterval, currentI
     return null
   }
 
-  const selectedntervalIndex = intervals.findIndex((interval) => interval.id === selectedInterval.id)
+  const selectedntervalIndex = intervals.findIndex((interval) => interval.number === selectedInterval.number)
   const previousInterval = selectedntervalIndex > 0 ? intervals[selectedntervalIndex - 1] : null
   const nextInterval = selectedntervalIndex < intervals.length - 1 ? intervals[selectedntervalIndex + 1] : null
 
@@ -69,7 +69,7 @@ export default function IntervalSelector({ intervals, selectedInterval, currentI
         <Text span c="dimmed">
           <DateText date={selectedInterval.start_date} /> - <DateText date={selectedInterval.end_date} />
         </Text>
-        {currentInterval && selectedInterval.id !== currentInterval.id && <ReturnToCurrentButton />}
+        {currentInterval && selectedInterval.number !== currentInterval.number && <ReturnToCurrentButton />}
       </Stack>
       <IntervalNavigationButton variant="next" to={nextInterval} />
     </Group>

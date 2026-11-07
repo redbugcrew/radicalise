@@ -1,0 +1,86 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT * FROM peer_enrollments\n        WHERE interval_number = ? AND project_id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "peer_enrollments",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "peer_role_id",
+        "ordinal": 1,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "peer_enrollments",
+            "name": "peer_role_id"
+          }
+        }
+      },
+      {
+        "name": "interval_number",
+        "ordinal": 2,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "peer_enrollments",
+            "name": "interval_number"
+          }
+        }
+      },
+      {
+        "name": "project_id",
+        "ordinal": 3,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "peer_enrollments",
+            "name": "project_id"
+          }
+        }
+      },
+      {
+        "name": "person_id",
+        "ordinal": 4,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "peer_enrollments",
+            "name": "person_id"
+          }
+        }
+      },
+      {
+        "name": "peer_id",
+        "ordinal": 5,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "peer_enrollments",
+            "name": "peer_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "6120f476094724bb6254786e4618cfa4e55148775f86f5cdc3c1d72a5c7aaae5"
+}

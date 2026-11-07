@@ -1,0 +1,98 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT id, person_id, crew_id, interval_number, project_id, convenor, volunteered_convenor\n        FROM crew_involvements\n        WHERE crew_id = ? AND interval_number = ? AND project_id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "crew_involvements",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "person_id",
+        "ordinal": 1,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "crew_involvements",
+            "name": "person_id"
+          }
+        }
+      },
+      {
+        "name": "crew_id",
+        "ordinal": 2,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "crew_involvements",
+            "name": "crew_id"
+          }
+        }
+      },
+      {
+        "name": "interval_number",
+        "ordinal": 3,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "crew_involvements",
+            "name": "interval_number"
+          }
+        }
+      },
+      {
+        "name": "project_id",
+        "ordinal": 4,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "crew_involvements",
+            "name": "project_id"
+          }
+        }
+      },
+      {
+        "name": "convenor",
+        "ordinal": 5,
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "crew_involvements",
+            "name": "convenor"
+          }
+        }
+      },
+      {
+        "name": "volunteered_convenor",
+        "ordinal": 6,
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "crew_involvements",
+            "name": "volunteered_convenor"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "6de117a62c088f9ce2a57efdcddbfecbc939cff2f3226697b1e7612afb860212"
+}

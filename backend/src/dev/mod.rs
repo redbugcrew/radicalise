@@ -36,9 +36,9 @@ async fn recompute_implicit_involvements(Path(project_id): Path<i64>, Extension(
     }
 
     for interval in intervals {
-        println!("Recomputing implicit involvements for interval {}", interval.id);
+        println!("Recomputing implicit involvements for interval {}", interval.number);
         if let Err(e) = add_interval_implicit_involvements(&interval, ProjectId::new(project_id), true, &pool).await {
-            eprintln!("Error recomputing implicit involvements for interval {}: {:?}", interval.id, e);
+            eprintln!("Error recomputing implicit involvements for interval {}: {:?}", interval.number, e);
         }
     }
 

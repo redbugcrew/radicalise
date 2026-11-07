@@ -13,7 +13,7 @@ use crate::{
     people::repo::find_all_people,
     shared::{
         entities::{
-            CalendarEvent, Circle, CircleId, CircleInvolvement, CrewInvolvement, CrewWithLinks, EventTemplate, Interval, IntervalId,
+            CalendarEvent, Circle, CircleId, CircleInvolvement, CrewInvolvement, CrewWithLinks, EventTemplate, Interval, IntervalNumber,
             PeerEnrollment, PeerRole, Person, PersonId, Project, ProjectId, UserId,
         },
         links_repo::{find_all_links_for_owner, update_links_for_owner},
@@ -23,12 +23,14 @@ use crate::{
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
 pub struct CircleInvolvementData {
     pub circle_id: i64,
-    pub interval_id: i64,
+    pub interval_number: i64,
+    pub project_id: i64,
     pub circle_involvements: Vec<CircleInvolvement>,
 }
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
 pub struct IntervalInvolvementData {
-    pub interval_id: i64,
+    pub interval_number: i64,
+    pub project_id: i64,
     pub crew_involvements: Vec<CrewInvolvement>,
     pub involvements_for_circles: Vec<CircleInvolvementData>,
 }
@@ -124,58 +126,97 @@ pub async fn find_projects_for_user(user_id: UserId, pool: &SqlitePool) -> Resul
     })
 }
 
-pub async fn find_all_crew_involvements(interval_id: IntervalId, pool: &SqlitePool) -> Result<Vec<CrewInvolvement>, sqlx::Error> {
+pub async fn find_all_crew_involvements(interval_number: IntervalNumber, pool: &SqlitePool) -> Result<Vec<CrewInvolvement>, sqlx::Error> {
     sqlx::query_as!(
         CrewInvolvement,
-        "SELECT crew_involvements.id, person_id, crew_id, interval_id, convenor, volunteered_convenor
+        "SELECT crew_involvements.id, person_id, crew_id, interval_number, project_id, convenor, volunteered_convenor
         FROM crew_involvements
         WHERE
-          interval_id = ?",
-        interval_id.id
+          interval_number = ? AND project_id = ?",
+        interval_number.number,
+        interval_number.project_id.id
     )
     .fetch_all(pool)
     .await
 }
 
 pub async fn find_interval_involvement_data(
-    interval_id: IntervalId,
-    project_id: ProjectId,
+    interval_number: IntervalNumber,
     pool: &SqlitePool,
 ) -> Result<IntervalInvolvementData, sqlx::Error> {
-    let circle_ids = find_all_circles_ids(project_id.clone(), pool).await?;
+    let circle_ids = find_all_circles_ids(interval_number.project_id.clone(), pool).await.map_err(|e| {
+        println!("find_all_circles_ids: {:?}", e);
+        e
+    })?;
 
-    let circle_involvements_result = find_interval_involvement_data_for_circles(circle_ids, interval_id.clone(), project_id, pool).await?;
+    let circle_involvements_result = find_interval_involvement_data_for_circles(circle_ids, interval_number.clone(), pool)
+        .await
+        .map_err(|e| {
+            println!("find_interval_involvement_data_for_circles: {:?}", e);
+            e
+        })?;
 
     let result = IntervalInvolvementData {
-        interval_id: interval_id.id,
+        interval_number: interval_number.number,
+        project_id: interval_number.project_id.id,
         involvements_for_circles: circle_involvements_result,
-        crew_involvements: find_all_crew_involvements(interval_id, pool).await?,
+        crew_involvements: find_all_crew_involvements(interval_number, pool).await?,
     };
 
     Ok(result)
 }
 
 pub async fn find_initial_data_for_project(project: Project, pool: &SqlitePool) -> Result<InitialData, sqlx::Error> {
-    let circles = find_all_circles(project.typed_id(), pool).await?;
+    let circles = find_all_circles(project.typed_id(), pool).await.map_err(|e| {
+        println!("find_all_circles: {:?}", e);
+        e
+    })?;
 
-    let people = find_all_people(project.typed_id(), pool).await?;
+    let people = find_all_people(project.typed_id(), pool).await.map_err(|e| {
+        println!("find_all_people: {:?}", e);
+        e
+    })?;
 
-    let crews = find_all_crews_with_links(project.typed_id(), pool).await?;
+    let crews = find_all_crews_with_links(project.typed_id(), pool).await.map_err(|e| {
+        println!("find_all_crews_with_links: {:?}", e);
+        e
+    })?;
 
-    let intervals = find_all_intervals(project.typed_id(), pool).await?;
+    let intervals = find_all_intervals(project.typed_id(), pool).await.map_err(|e| {
+        println!("find_all_intervals: {:?}", e);
+        e
+    })?;
 
-    let event_templates = find_all_event_templates(project.typed_id(), pool).await?;
-    let calendar_events = list_calendar_events_with_attendances(project.typed_id(), pool).await?;
+    let event_templates = find_all_event_templates(project.typed_id(), pool).await.map_err(|e| {
+        println!("find_all_event_templates: {:?}", e);
+        e
+    })?;
+    let calendar_events = list_calendar_events_with_attendances(project.typed_id(), pool).await.map_err(|e| {
+        println!("list_calendar_events_with_attendances: {:?}", e);
+        e
+    })?;
 
-    let current_interval = find_current_interval(project.typed_id(), pool).await?;
+    let current_interval = find_current_interval(project.typed_id(), pool).await.map_err(|e| {
+        println!("find_current_interval: {:?}", e);
+        e
+    })?;
 
     let current_interval_data = if let Some(interval) = &current_interval {
-        find_interval_data(interval, project.typed_id(), pool).await?.into()
+        find_interval_data(interval, pool)
+            .await
+            .map_err(|e| {
+                println!("find_interval_data: {:?}", e);
+                e
+            })?
+            .into()
     } else {
         None
     };
 
-    let peer_roles = find_all_peer_roles(project.typed_id(), pool).await?;
+    let peer_roles = find_all_peer_roles(project.typed_id(), pool).await.map_err(|e| {
+        println!("find_all_peer_roles: {:?}", e);
+        e
+    })?;
 
     Ok(InitialData {
         project,
@@ -190,10 +231,18 @@ pub async fn find_initial_data_for_project(project: Project, pool: &SqlitePool) 
     })
 }
 
-pub async fn find_interval_data(interval: &Interval, project_id: ProjectId, pool: &SqlitePool) -> Result<IntervalData, sqlx::Error> {
-    let involvements = find_interval_involvement_data(interval.typed_id(), project_id, pool).await?;
+pub async fn find_interval_data(interval: &Interval, pool: &SqlitePool) -> Result<IntervalData, sqlx::Error> {
+    let involvements = find_interval_involvement_data(interval.typed_number(), pool).await.map_err(|e| {
+        println!("find_interval_involvement_data: {:?}", e);
+        e
+    })?;
 
-    let enrollments = find_peer_enrollments_for_interval(&interval.typed_id(), pool).await?;
+    let enrollments = find_peer_enrollments_for_interval(&interval.typed_number(), pool)
+        .await
+        .map_err(|e| {
+            println!("find_peer_enrollments_for_interval: {:?}", e);
+            e
+        })?;
 
     Ok(IntervalData {
         interval: interval.clone(),
@@ -234,15 +283,15 @@ pub async fn update_project_with_links(input: Project, project_id: ProjectId, po
 
 pub async fn find_interval_involvement_data_for_circle(
     circle_id: CircleId,
-    interval_id: IntervalId,
-    project_id: ProjectId,
+    interval_number: IntervalNumber,
     pool: &SqlitePool,
 ) -> Result<CircleInvolvementData, sqlx::Error> {
-    let circle_involvements = find_all_circle_involvements(project_id.clone(), circle_id.clone(), interval_id.clone(), None, pool).await?;
+    let circle_involvements = find_all_circle_involvements(circle_id.clone(), interval_number.clone(), None, pool).await?;
 
     Ok(CircleInvolvementData {
         circle_id: circle_id.id,
-        interval_id: interval_id.id,
+        interval_number: interval_number.number,
+        project_id: interval_number.project_id.id,
         circle_involvements,
     })
 }
@@ -250,30 +299,28 @@ pub async fn find_interval_involvement_data_for_circle(
 async fn find_interval_involvement_data_for_circle_and_person(
     person_id: PersonId,
     circle_id: CircleId,
-    interval_id: IntervalId,
-    project_id: ProjectId,
+    interval_number: IntervalNumber,
     pool: &SqlitePool,
 ) -> Result<CircleInvolvementData, sqlx::Error> {
     let circle_involvements =
-        find_all_circle_involvements_for_person(person_id.clone(), project_id.clone(), circle_id.clone(), interval_id.clone(), pool)
-            .await?;
+        find_all_circle_involvements_for_person(person_id.clone(), circle_id.clone(), interval_number.clone(), pool).await?;
 
     Ok(CircleInvolvementData {
         circle_id: circle_id.id,
-        interval_id: interval_id.id,
+        interval_number: interval_number.number,
+        project_id: interval_number.project_id.id,
         circle_involvements,
     })
 }
 
 pub async fn find_interval_involvement_data_for_circles(
     circle_ids: Vec<CircleId>,
-    interval_id: IntervalId,
-    project_id: ProjectId,
+    interval_number: IntervalNumber,
     pool: &SqlitePool,
 ) -> Result<Vec<CircleInvolvementData>, sqlx::Error> {
     let mut results = Vec::new();
     for circle_id in circle_ids {
-        let data = find_interval_involvement_data_for_circle(circle_id.clone(), interval_id.clone(), project_id.clone(), pool).await?;
+        let data = find_interval_involvement_data_for_circle(circle_id.clone(), interval_number.clone(), pool).await?;
         results.push(data);
     }
     Ok(results)
@@ -282,20 +329,14 @@ pub async fn find_interval_involvement_data_for_circles(
 pub async fn find_interval_involvement_data_for_circles_and_person(
     person_id: PersonId,
     circle_ids: Vec<CircleId>,
-    interval_id: IntervalId,
-    project_id: ProjectId,
+    interval_number: IntervalNumber,
     pool: &SqlitePool,
 ) -> Result<Vec<CircleInvolvementData>, sqlx::Error> {
     let mut results = Vec::new();
     for circle_id in circle_ids {
-        let data = find_interval_involvement_data_for_circle_and_person(
-            person_id.clone(),
-            circle_id.clone(),
-            interval_id.clone(),
-            project_id.clone(),
-            pool,
-        )
-        .await?;
+        let data =
+            find_interval_involvement_data_for_circle_and_person(person_id.clone(), circle_id.clone(), interval_number.clone(), pool)
+                .await?;
         results.push(data);
     }
     Ok(results)

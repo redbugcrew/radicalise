@@ -55,7 +55,7 @@ function MyIntervalPartipationCard({ interval, circleInvolvement, current = true
       <Group justify="space-between" align="flex-start">
         <Stack gap={0}>
           <Title order={2} size="md">
-            {current ? "Current" : "Next"} interval #{interval.id}
+            {current ? "Current" : "Next"} interval #{interval.number}
           </Title>
           <Text>
             <DateText date={interval.start_date} /> - <DateText date={interval.end_date} />
@@ -64,7 +64,12 @@ function MyIntervalPartipationCard({ interval, circleInvolvement, current = true
         <ParticipationBadge involvement={circleInvolvement || null} />
       </Group>
 
-      <Button variant={current ? "outline" : "filled"} mt="md" radius="md" onClick={() => navigate(`../my_participation/${interval.id}`)}>
+      <Button
+        variant={current ? "outline" : "filled"}
+        mt="md"
+        radius="md"
+        onClick={() => navigate(`../my_participation/${interval.number}`)}
+      >
         {current ? "Update" : "Plan"} your participation
       </Button>
     </Card>

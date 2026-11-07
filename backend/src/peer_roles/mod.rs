@@ -10,7 +10,7 @@ use crate::{
         enrollments_repo::{load_match_history, upsert_peer_enrollments},
         peer_roles_repo::find_all_peer_roles,
     },
-    shared::entities::{CircleId, Interval, IntervalId, InvolvementStatus, PeerRole, ProjectId},
+    shared::entities::{CircleId, Interval, InvolvementStatus, PeerRole, ProjectId},
 };
 
 mod algorithms;
@@ -42,7 +42,7 @@ impl From<sqlx::Error> for AssignPeerRolesError {
 }
 
 pub async fn assign_interval_peer_roles(interval: &Interval, project_id: ProjectId, pool: &SqlitePool) -> Result<(), AssignPeerRolesError> {
-    println!("Assigning peer roles for interval {}", interval.id);
+    println!("Assigning peer roles for interval {}", interval.number);
 
     let peer_roles = find_all_peer_roles(project_id, pool).await?;
     let ordered_roles = order_peer_roles(peer_roles).map_err(|message| {
@@ -62,7 +62,7 @@ pub async fn assign_interval_peer_roles(interval: &Interval, project_id: Project
         computed_edges.insert(peer_role.id, edges);
     }
 
-    mark_peer_roles_processed(interval.typed_id(), true, pool).await?;
+    mark_peer_roles_processed(interval.typed_number(), true, pool).await?;
 
     Ok(())
 }
@@ -122,9 +122,8 @@ async fn assign_interval_peer_role(
     pool: &SqlitePool,
 ) -> Result<Vec<(i64, i64)>, AssignPeerRolesError> {
     let involvements = find_all_circle_involvements(
-        ProjectId::new(peer_role.project_id),
         CircleId::new(peer_role.circle_id),
-        IntervalId::new(interval.id),
+        interval.typed_number(),
         Some(&[InvolvementStatus::Onboarding, InvolvementStatus::Active]),
         pool,
     )
@@ -147,12 +146,12 @@ async fn assign_interval_peer_role(
     println!(
         "Assigning peer role for people ids '{:?}' in interval {} ({} people)",
         people,
-        interval.id,
+        interval.number,
         people.len()
     );
 
     let history = if peer_role.distribution_type.requires_match_history() {
-        Some(load_match_history(peer_role.id, interval.id, pool).await?)
+        Some(load_match_history(peer_role.typed_id(), interval.typed_number(), pool).await?)
     } else {
         None
     };
@@ -168,10 +167,10 @@ async fn assign_interval_peer_role(
         AssignPeerRolesError::ConstraintViolation(error.to_string())
     })?;
 
-    println!("Peer role '{}' (interval {}): {}", peer_role.name, interval.id, results);
+    println!("Peer role '{}' (interval {}): {}", peer_role.name, interval.number, results);
 
     let edges = results.edges();
-    upsert_peer_enrollments(interval.id, peer_role.id, edges.clone(), pool).await?;
+    upsert_peer_enrollments(interval.typed_number(), peer_role.typed_id(), edges.clone(), pool).await?;
 
     Ok(edges)
 }

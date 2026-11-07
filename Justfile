@@ -1,5 +1,6 @@
 setup:
     npm install && cd frontend && npm install
+    cd backend && cargo sqlx migrate run
 
 dev:
     mprocs

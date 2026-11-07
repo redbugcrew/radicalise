@@ -20,7 +20,8 @@ interface GetInputPropsReturnType {
 
 type CrewParticipationsInputProps = GetInputPropsReturnType & {
   personId: number
-  intervalId: number
+  projectId: number
+  intervalNumber: number
   crews: CrewWithLinks[]
   people: PeopleObjectMap
   disabled?: boolean
@@ -57,11 +58,12 @@ function toControlData(data: CrewInvolvement[], crewId: number): CrewParticipati
 export default function CrewParticipationsInput({
   crews,
   personId,
-  intervalId,
+  intervalNumber,
   people,
   disabled,
   crewInvolvements,
   previousInvolvements,
+  projectId,
   ...rest
 }: CrewParticipationsInputProps) {
   const [value, setValue] = useUncontrolled<CrewInvolvement[]>({
@@ -77,7 +79,8 @@ export default function CrewParticipationsInput({
         id: 0, // This will be set by the backend
         crew_id: crewId,
         person_id: personId,
-        interval_id: intervalId,
+        interval_number: intervalNumber,
+        project_id: projectId,
         convenor: false,
         volunteered_convenor: itemValue.volunteered_convenor,
       }
@@ -106,6 +109,7 @@ export default function CrewParticipationsInput({
             <CrewParticipationControl
               key={crew.id}
               personId={personId}
+              projectId={projectId}
               value={toControlData(value, crew.id)}
               crew={crew}
               crewInvolvements={forCrew(crewInvolvements, crew.id)}

@@ -15,6 +15,7 @@ export interface CrewParticipationControlData {
 interface CrewParticipationToggleProps {
   value: CrewParticipationControlData
   personId: number
+  projectId: number
   crew: CrewWithLinks
   crewInvolvements: CrewInvolvement[]
   previousInvolvements?: CrewInvolvement[] | null | undefined
@@ -27,13 +28,15 @@ function applyValue(
   crewInvolvements: CrewInvolvement[],
   crewId: number,
   personId: number,
+  projectId: number,
   value: CrewParticipationControlData,
 ): CrewInvolvement[] {
   const result = crewInvolvements.filter((involvement) => involvement.person_id !== personId)
   if (value.participating) {
     result.push({
       id: 0, // dummy value
-      interval_id: 0, // dummy value
+      interval_number: 0, // dummy value
+      project_id: projectId,
       crew_id: crewId,
       person_id: personId,
       convenor: value.convenor,
@@ -69,6 +72,7 @@ function hasOverlappingPeople(involvements1: CrewInvolvement[], involvements2: C
 export default function CrewParticipationControl({
   value,
   personId,
+  projectId,
   crew,
   crewInvolvements,
   people,
@@ -79,7 +83,7 @@ export default function CrewParticipationControl({
   const person = people[personId]
   if (!person) return <p>Person not found</p>
 
-  const formInvolvements = applyValue(crewInvolvements, crew.id, personId, value)
+  const formInvolvements = applyValue(crewInvolvements, crew.id, personId, projectId, value)
 
   const handleOnChangeParticipating = (event: React.ChangeEvent<HTMLInputElement>) => {
     const checked = event.target.checked

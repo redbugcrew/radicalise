@@ -1,4 +1,4 @@
-use crate::shared::entities::{Interval, IntervalId, IntervalNumber, ProjectId};
+use crate::shared::entities::{Interval, IntervalNumber, ProjectId};
 use chrono::NaiveDate;
 use sqlx::SqlitePool;
 
@@ -17,7 +17,7 @@ where
         Interval,
         "INSERT INTO intervals (number, start_date, project_id)
          VALUES (?, ?, ?)
-         RETURNING id AS \"id!\", number, start_date, end_date",
+         RETURNING number, start_date, end_date, project_id",
         0,
         &start_date.to_string(),
         project_id.id
@@ -26,10 +26,10 @@ where
     .await?;
 
     Ok(Interval {
-        id: result.id,
         number: result.number,
         start_date: result.start_date,
         end_date: result.end_date,
+        project_id: result.project_id,
     })
 }
 
@@ -53,7 +53,7 @@ pub async fn insert_interval(interval: Interval, project_id: ProjectId, pool: &S
         Interval,
         "INSERT INTO intervals (number, start_date, end_date, project_id)
          VALUES (?, ?, ?, ?)
-         RETURNING id AS \"id!\", number, start_date, end_date",
+         RETURNING number, start_date, end_date, project_id",
         next_number,
         interval.start_date,
         interval.end_date,
@@ -65,41 +65,33 @@ pub async fn insert_interval(interval: Interval, project_id: ProjectId, pool: &S
     transaction.commit().await?;
 
     Ok(Interval {
-        id: result.id,
         number: result.number,
         start_date: result.start_date,
         end_date: result.end_date,
+        project_id: result.project_id,
     })
 }
 
 pub async fn find_all_intervals(project_id: ProjectId, pool: &SqlitePool) -> Result<Vec<Interval>, sqlx::Error> {
     sqlx::query_as!(
         Interval,
-        "SELECT id, number, start_date, end_date
+        "SELECT number, start_date, end_date, project_id
         FROM intervals
         WHERE
           project_id = ?
-        ORDER BY id ASC",
+        ORDER BY number ASC",
         project_id.id
     )
     .fetch_all(pool)
     .await
 }
 
-pub async fn find_interval(interval_id: IntervalId, pool: &SqlitePool) -> Result<Interval, sqlx::Error> {
+pub async fn find_interval(interval_number: IntervalNumber, pool: &SqlitePool) -> Result<Interval, sqlx::Error> {
     sqlx::query_as!(
         Interval,
-        "SELECT id, number, start_date, end_date FROM intervals WHERE id = ?",
-        interval_id.id
-    )
-    .fetch_one(pool)
-    .await
-}
-
-pub async fn find_interval_by_number(interval_number: IntervalNumber, pool: &SqlitePool) -> Result<Interval, sqlx::Error> {
-    sqlx::query_as!(
-        Interval,
-        "SELECT id, number, start_date, end_date FROM intervals WHERE number = ? AND project_id = ?",
+        "SELECT number, start_date, end_date, project_id
+        FROM intervals
+        WHERE number = ? AND project_id = ?",
         interval_number.number,
         interval_number.project_id.id
     )
@@ -110,11 +102,11 @@ pub async fn find_interval_by_number(interval_number: IntervalNumber, pool: &Sql
 pub async fn find_current_interval(project_id: ProjectId, pool: &SqlitePool) -> Result<Option<Interval>, sqlx::Error> {
     sqlx::query_as!(
         Interval,
-        "SELECT intervals.id, intervals.number, intervals.start_date, intervals.end_date
-        FROM intervals
-        INNER JOIN projects ON projects.current_interval_id = intervals.id AND projects.id = intervals.project_id
-        WHERE projects.id = ?
-        ORDER BY intervals.id ASC
+        "SELECT i.number, i.start_date, i.end_date, i.project_id
+        FROM intervals i
+        INNER JOIN projects p ON p.current_interval_number = i.number AND p.id = i.project_id
+        WHERE p.id = ?
+        ORDER BY i.number ASC
         LIMIT 1",
         project_id.id
     )
@@ -124,20 +116,20 @@ pub async fn find_current_interval(project_id: ProjectId, pool: &SqlitePool) -> 
 
 pub async fn find_next_interval(
     project_id: ProjectId,
-    current_interval_id: IntervalId,
+    current_interval_number: IntervalNumber,
     pool: &SqlitePool,
 ) -> Result<Option<Interval>, sqlx::Error> {
     sqlx::query_as!(
         Interval,
-        "SELECT id, number, start_date, end_date
+        "SELECT number, start_date, end_date, project_id
         FROM intervals
         WHERE
             project_id = ? AND
-            id > ?
-        ORDER BY id ASC
+            number > ?
+        ORDER BY number ASC
         LIMIT 1",
         project_id.id,
-        current_interval_id.id
+        current_interval_number.number
     )
     .fetch_optional(pool)
     .await
@@ -145,20 +137,20 @@ pub async fn find_next_interval(
 
 pub async fn find_previous_interval(
     project_id: ProjectId,
-    current_interval_id: IntervalId,
+    current_interval_number: IntervalNumber,
     pool: &SqlitePool,
 ) -> Result<Option<Interval>, sqlx::Error> {
     sqlx::query_as!(
         Interval,
-        "SELECT id, number, start_date, end_date
+        "SELECT number, start_date, end_date, project_id
         FROM intervals
         WHERE
             project_id = ? AND
-            id < ?
-        ORDER BY id DESC
+            number < ?
+        ORDER BY number DESC
         LIMIT 1",
         project_id.id,
-        current_interval_id.id
+        current_interval_number.number
     )
     .fetch_optional(pool)
     .await
@@ -186,13 +178,18 @@ pub fn get_interval_type(interval: Interval) -> IntervalType {
     IntervalType::Current
 }
 
-pub async fn mark_implicit_involvements_processed(interval_id: IntervalId, value: bool, pool: &SqlitePool) -> Result<(), sqlx::Error> {
+pub async fn mark_implicit_involvements_processed(
+    interval_number: IntervalNumber,
+    value: bool,
+    pool: &SqlitePool,
+) -> Result<(), sqlx::Error> {
     sqlx::query!(
         "UPDATE intervals
          SET processed_implicit_involvements = ?
-         WHERE id = ?",
+         WHERE number = ? AND project_id = ?",
         value,
-        interval_id.id
+        interval_number.number,
+        interval_number.project_id.id
     )
     .execute(pool)
     .await?;
@@ -200,13 +197,14 @@ pub async fn mark_implicit_involvements_processed(interval_id: IntervalId, value
     Ok(())
 }
 
-pub async fn mark_peer_roles_processed(interval_id: IntervalId, value: bool, pool: &SqlitePool) -> Result<(), sqlx::Error> {
+pub async fn mark_peer_roles_processed(interval_number: IntervalNumber, value: bool, pool: &SqlitePool) -> Result<(), sqlx::Error> {
     sqlx::query!(
         "UPDATE intervals
          SET processed_peer_roles = ?
-         WHERE id = ?",
+         WHERE number = ? AND project_id = ?",
         value,
-        interval_id.id
+        interval_number.number,
+        interval_number.project_id.id
     )
     .execute(pool)
     .await?;
@@ -214,13 +212,17 @@ pub async fn mark_peer_roles_processed(interval_id: IntervalId, value: bool, poo
     Ok(())
 }
 
-pub async fn set_interval_end_date(interval_id: IntervalId, end_date: NaiveDate, pool: &SqlitePool) -> Result<(), sqlx::Error> {
+pub async fn set_interval_end_date(interval_number: IntervalNumber, end_date: NaiveDate, pool: &SqlitePool) -> Result<(), sqlx::Error> {
     sqlx::query!(
         "UPDATE intervals
          SET end_date = ?
-         WHERE id = ? AND end_date IS NULL",
+         WHERE
+            number = ? AND
+            project_id = ? AND
+            end_date IS NULL",
         end_date.to_string(),
-        interval_id.id
+        interval_number.number,
+        interval_number.project_id.id
     )
     .execute(pool)
     .await?;
@@ -232,16 +234,20 @@ pub fn parse_date_only(date_str: &str) -> Option<chrono::NaiveDate> {
     chrono::NaiveDate::parse_from_str(date_str, "%Y-%m-%d").ok()
 }
 
-pub async fn change_project_interval<'e, 'c: 'e, E>(project_id: ProjectId, new_interval_id: IntervalId, pool: E) -> Result<(), sqlx::Error>
+pub async fn change_project_interval<'e, 'c: 'e, E>(
+    project_id: ProjectId,
+    new_interval_number: IntervalNumber,
+    pool: E,
+) -> Result<(), sqlx::Error>
 where
     E: sqlx::Executor<'c, Database = sqlx::Sqlite>,
 {
     sqlx::query!(
         "UPDATE projects
-         SET current_interval_id = ?
+         SET current_interval_number = ?
          WHERE id = ?",
-        new_interval_id.id,
-        project_id.id
+        new_interval_number.number,
+        project_id.id,
     )
     .execute(pool)
     .await?;

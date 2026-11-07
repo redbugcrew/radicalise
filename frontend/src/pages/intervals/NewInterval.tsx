@@ -51,7 +51,12 @@ export default function NewInterval() {
           </Group>
         )}
       </Stack>
-      <IntervalForm value={lastIntervalToInput(lastInterval)} minDate={(lastInterval?.end_date as Iso.Date) || null} onSubmit={onSubmit} />
+      <IntervalForm
+        projectId={projectId}
+        value={lastIntervalToInput(lastInterval)}
+        minDate={(lastInterval?.end_date as Iso.Date) || null}
+        onSubmit={onSubmit}
+      />
     </Container>
   )
 }

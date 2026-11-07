@@ -6,7 +6,7 @@ use crate::{
     intervals::repo::{IntervalType, find_interval, get_interval_type},
     my_person::repo::{self},
     my_project::involvements_repo::{CircleInvolvementRecord, upsert_circle_involvement},
-    shared::entities::{CrewId, CrewInvolvement, IntervalId, InvolvementStatus, OptOutType, ParticipationIntention, PersonId},
+    shared::entities::{CrewId, CrewInvolvement, IntervalNumber, InvolvementStatus, OptOutType, ParticipationIntention, PersonId},
 };
 
 #[derive(Serialize, Deserialize, ToSchema)]
@@ -39,13 +39,13 @@ pub fn calculate_status(participation_intention: Option<ParticipationIntention>,
 
 pub async fn update_my_involvements(
     person_id: PersonId,
-    interval_id: IntervalId,
+    interval_number: IntervalNumber,
     input: MyParticipationInput,
     pool: &sqlx::SqlitePool,
 ) -> Result<(), sqlx::Error> {
     let status: InvolvementStatus = calculate_status(input.participation_intention.clone(), input.opt_out_type.clone());
 
-    let interval = find_interval(interval_id.clone(), pool).await?;
+    let interval = find_interval(interval_number.clone(), pool).await?;
     let interval_type = get_interval_type(interval);
 
     if interval_type == IntervalType::Past {
@@ -56,9 +56,9 @@ pub async fn update_my_involvements(
         CircleInvolvementRecord {
             id: -1, // ID will be auto-generated
             person_id: person_id.id,
-            project_id: input.project_id,
+            project_id: interval_number.project_id.id,
             circle_id: input.circle_id,
-            interval_id: interval_id.id,
+            interval_number: interval_number.number,
             status,
             capacity_planning_visibility_circle_id: input.capacity_planning_visibility_circle_id,
             wellbeing: input.wellbeing,
@@ -77,10 +77,10 @@ pub async fn update_my_involvements(
 
     if let Some(crew_involvements) = input.crew_involvements {
         // Update crew involvements
-        let impacted_crew_ids = repo::update_crew_involvements(person_id, interval_id.clone(), crew_involvements, pool).await?;
+        let impacted_crew_ids = repo::update_crew_involvements(person_id, interval_number.clone(), crew_involvements, pool).await?;
 
         for crew_id in impacted_crew_ids {
-            update_convenor_if_needed(crew_id, interval_id.clone(), interval_type, pool).await?;
+            update_convenor_if_needed(crew_id, interval_number.clone(), interval_type, pool).await?;
         }
     }
     Ok(())
@@ -88,7 +88,7 @@ pub async fn update_my_involvements(
 
 async fn update_convenor_if_needed(
     crew_id: CrewId,
-    interval_id: IntervalId,
+    interval_number: IntervalNumber,
     interval_type: IntervalType,
     pool: &sqlx::SqlitePool,
 ) -> Result<(), sqlx::Error> {
@@ -96,7 +96,7 @@ async fn update_convenor_if_needed(
         return Err(past_interval_error());
     }
 
-    let crew_involvements = find_crew_involvements(crew_id.clone(), interval_id.clone(), pool).await?;
+    let crew_involvements = find_crew_involvements(crew_id.clone(), interval_number.clone(), pool).await?;
     let convenor_involvements: Vec<&CrewInvolvement> = crew_involvements.iter().filter(|involvement| involvement.convenor).collect();
 
     let volunteered_convenor_involvements: Vec<&CrewInvolvement> = crew_involvements
@@ -108,7 +108,7 @@ async fn update_convenor_if_needed(
     if interval_type == IntervalType::Current && !convenor_involvements.is_empty() {
         println!(
             "Crew {} already has a convenor for interval {} of type {:?}",
-            crew_id.id, interval_id.id, interval_type
+            crew_id.id, interval_number.number, interval_type
         );
         return Ok(());
     }
@@ -117,16 +117,16 @@ async fn update_convenor_if_needed(
         .iter()
         .map(|involvement| involvement.person_id)
         .collect::<Vec<i64>>();
-    let best_convenor = get_best_convenor_person_id(crew_id.clone(), interval_id.clone(), person_ids, pool).await?;
+    let best_convenor = get_best_convenor_person_id(crew_id.clone(), interval_number.clone(), person_ids, pool).await?;
 
-    set_crew_convenor(crew_id, interval_id, best_convenor, pool).await?;
+    set_crew_convenor(crew_id, interval_number, best_convenor, pool).await?;
 
     Ok(())
 }
 
 async fn get_best_convenor_person_id(
     crew_id: CrewId,
-    interval_id: IntervalId,
+    interval_number: IntervalNumber,
     mut person_ids: Vec<i64>,
     pool: &sqlx::SqlitePool,
 ) -> Result<Option<i64>, sqlx::Error> {
@@ -140,7 +140,7 @@ async fn get_best_convenor_person_id(
         return Ok(Some(person_ids[0]));
     }
 
-    person_ids = filter_by_longest_since_convened_this_crew(person_ids, crew_id, interval_id, pool).await?;
+    person_ids = filter_by_longest_since_convened_this_crew(person_ids, crew_id, interval_number, pool).await?;
     if person_ids.len() == 1 {
         return Ok(Some(person_ids[0]));
     }
@@ -160,10 +160,10 @@ fn past_interval_error() -> sqlx::Error {
 async fn filter_by_longest_since_convened_this_crew(
     person_ids: Vec<i64>,
     crew_id: CrewId,
-    current_interval_id: IntervalId,
+    current_interval_number: IntervalNumber,
     pool: &sqlx::SqlitePool,
 ) -> Result<Vec<i64>, sqlx::Error> {
-    let data = intervals_since_last_convened(person_ids.clone(), crew_id.clone(), current_interval_id, pool).await?;
+    let data = intervals_since_last_convened(person_ids.clone(), crew_id.clone(), current_interval_number, pool).await?;
 
     let most_intervals: i64 = data.iter().map(|result| result.intervals_since_convened).max().unwrap_or_else(|| {
         eprintln!(
@@ -197,10 +197,10 @@ struct IntervalLastConvenedResult {
 async fn intervals_since_last_convened(
     person_ids: Vec<i64>,
     crew_id: CrewId,
-    current_interval_id: IntervalId,
+    current_interval_number: IntervalNumber,
     pool: &sqlx::SqlitePool,
 ) -> Result<Vec<IntervalLastConvenedResult>, sqlx::Error> {
-    let data = intervals_participated_since_last_convened(crew_id, current_interval_id, pool).await?;
+    let data = intervals_participated_since_last_convened(crew_id, current_interval_number, pool).await?;
 
     let result: Vec<IntervalLastConvenedResult> = person_ids
         .into_iter()

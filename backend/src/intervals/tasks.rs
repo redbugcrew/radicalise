@@ -18,7 +18,7 @@ pub async fn add_interval_implicit_involvements(
     println!(
         "{} implicit involvements for interval {}",
         if recompute { "Recomputing" } else { "Adding" },
-        interval.id,
+        interval.number,
     );
 
     let circles = find_all_circles(project_id.clone(), pool).await?;
@@ -27,7 +27,7 @@ pub async fn add_interval_implicit_involvements(
         if let Err(e) = add_interval_circle_implicit_involvements(interval, project_id.clone(), circle.typed_id(), recompute, pool).await {
             eprintln!(
                 "Error adding implicit involvements for interval {}, circle {}: {:?}",
-                interval.id, circle.id, e
+                interval.number, circle.id, e
             );
         }
     }
@@ -45,21 +45,21 @@ async fn add_interval_circle_implicit_involvements(
     println!(
         "{} implicit involvements for interval {}, circle {}",
         if recompute { "Recomputing" } else { "Adding" },
-        interval.id,
+        interval.number,
         circle_id.id
     );
 
-    let previous_interval = match find_previous_interval(project_id.clone(), interval.typed_id(), pool).await? {
+    let previous_interval = match find_previous_interval(project_id.clone(), interval.typed_number(), pool).await? {
         Some(prev) => prev,
         None => return Ok(()),
     };
 
     let previous_circle_involvements =
-        find_all_circle_involvements(project_id.clone(), circle_id.clone(), previous_interval.typed_id(), None, pool).await?;
+        find_all_circle_involvements(circle_id.clone(), previous_interval.typed_number(), None, pool).await?;
 
     if recompute {
         println!("  - deleting implicit involvements");
-        delete_implicit_circle_involvements(circle_id.clone(), interval.typed_id(), pool).await?;
+        delete_implicit_circle_involvements(circle_id.clone(), interval.typed_number(), pool).await?;
         println!("  - done deleting implicit involvements");
     }
 
@@ -76,18 +76,16 @@ async fn add_interval_circle_implicit_involvements(
         let new_involvement = CircleInvolvement {
             id: -1, // -1 indicates a new record
             person_id: previous_involvement.person_id,
-            project_id: previous_involvement.project_id,
             circle_id: previous_involvement.circle_id,
-            interval_id: interval.id,
             status: previous_involvement.status,
             implicit_counter: new_counter,
-            ..CircleInvolvement::default()
+            ..CircleInvolvement::new(interval.typed_number())
         };
 
         println!(
             "  - inserting implicit involvement for person_id: {} in interval {}... ",
             new_involvement.person_id.clone(),
-            interval.id
+            interval.number
         );
 
         let result = insert_circle_involvement_if_missing(new_involvement.into(), pool).await;
@@ -95,14 +93,14 @@ async fn add_interval_circle_implicit_involvements(
             eprintln!(
                 "Error inserting implicit involvement for person_id: {} in interval {}: {:?}",
                 previous_involvement.person_id.clone(),
-                interval.id,
+                interval.number,
                 result
             );
         }
     }
 
     println!("  - marking implicit involvements as processed");
-    mark_implicit_involvements_processed(interval.typed_id(), true, pool).await?;
+    mark_implicit_involvements_processed(interval.typed_number(), true, pool).await?;
 
     Ok(())
 }
@@ -125,14 +123,14 @@ mod tests {
     async fn no_involvements_added_when_no_previous_interval() {
         let pool = setup_db().await;
 
-        sqlx::query!("INSERT INTO intervals (id, number, start_date, end_date, project_id) VALUES (1, 1, '2026-01-01', '2026-03-31', 1)")
+        sqlx::query!("INSERT INTO intervals (number, start_date, end_date, project_id) VALUES (1, '2026-01-01', '2026-03-31', 1)")
             .execute(&pool)
             .await
             .expect("Failed to insert test interval");
 
         let interval = Interval {
-            id: 21,
             number: 1,
+            project_id: 1,
             start_date: "2026-01-01".to_string(),
             end_date: Some("2026-03-31".to_string()),
         };
@@ -152,6 +150,11 @@ mod tests {
     async fn implicit_involvement_added_for_second_interval() {
         let pool = setup_db().await;
 
+        sqlx::query!("INSERT INTO projects (id, name, description, slug) VALUES (1, 'Test Project', 'Description', 'test-project')")
+            .execute(&pool)
+            .await
+            .expect("Failed to insert test project");
+
         sqlx::query!("INSERT INTO users (id, email, hashed_password) VALUES (1, 'test@example.com', 'hashed')")
             .execute(&pool)
             .await
@@ -162,27 +165,27 @@ mod tests {
             .await
             .expect("Failed to insert test person");
 
-        sqlx::query!("INSERT INTO intervals (id, number, start_date, end_date, project_id) VALUES (21, 1, '2026-01-01', '2026-03-31', 1)")
+        sqlx::query!("INSERT INTO intervals (number, start_date, end_date, project_id) VALUES (1, '2026-01-01', '2026-03-31', 1)")
             .execute(&pool)
             .await
             .expect("Failed to insert first interval");
 
-        sqlx::query!("INSERT INTO intervals (id, number, start_date, end_date, project_id) VALUES (22, 2, '2026-04-01', '2026-06-30', 1)")
+        sqlx::query!("INSERT INTO intervals (number, start_date, end_date, project_id) VALUES (2, '2026-04-01', '2026-06-30', 1)")
             .execute(&pool)
             .await
             .expect("Failed to insert second interval");
 
         // circle id=1 already exists from migrations (inserted by add-circles migration)
         sqlx::query!(
-            "INSERT INTO circle_involvements (person_id, circle_id, interval_id, status, implicit_counter) VALUES (1, 1, 21, 'Active', 0)"
+            "INSERT INTO circle_involvements (person_id, circle_id, interval_number, project_id, status, implicit_counter) VALUES (1, 1, 1, 1, 'Active', 0)"
         )
         .execute(&pool)
         .await
         .expect("Failed to insert circle involvement in first interval");
 
         let second_interval = Interval {
-            id: 22,
             number: 2,
+            project_id: 1,
             start_date: "2026-04-01".to_string(),
             end_date: Some("2026-06-30".to_string()),
         };
@@ -190,20 +193,22 @@ mod tests {
         let result = add_interval_circle_implicit_involvements(&second_interval, ProjectId::new(1), CircleId::new(1), false, &pool).await;
         assert!(result.is_ok(), "Expected Ok(()), got {:?}", result.err());
 
-        let count = sqlx::query_scalar!("SELECT COUNT(*) FROM circle_involvements WHERE interval_id = 22 AND person_id = 1")
-            .fetch_one(&pool)
-            .await
-            .expect("Failed to count involvements");
+        let count =
+            sqlx::query_scalar!("SELECT COUNT(*) FROM circle_involvements WHERE interval_number = 2 AND person_id = 1 AND project_id = 1")
+                .fetch_one(&pool)
+                .await
+                .expect("Failed to count involvements");
         assert_eq!(count, 1, "Expected one implicit involvement for person in second interval");
 
         // If we run it again with recompute=true, it should not create duplicates and should keep the same implicit_counter value
         let result = add_interval_circle_implicit_involvements(&second_interval, ProjectId::new(1), CircleId::new(1), true, &pool).await;
         assert!(result.is_ok(), "Expected Ok(()), got {:?}", result.err());
 
-        let count = sqlx::query_scalar!("SELECT COUNT(*) FROM circle_involvements WHERE interval_id = 22 AND person_id = 1")
-            .fetch_one(&pool)
-            .await
-            .expect("Failed to count involvements");
+        let count =
+            sqlx::query_scalar!("SELECT COUNT(*) FROM circle_involvements WHERE interval_number = 2 AND person_id = 1 AND project_id = 1")
+                .fetch_one(&pool)
+                .await
+                .expect("Failed to count involvements");
         assert_eq!(count, 1, "Expected one implicit involvement for person in second interval");
     }
 }

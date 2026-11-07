@@ -26,12 +26,13 @@ export function lastIntervalToInput(interval: Interval | null | undefined): Inte
 }
 
 interface IntervalFormProps {
+  projectId: number
   value?: IntervalInput | null
   minDate?: Iso.Date | null
   onSubmit: (data: Interval) => void
 }
 
-export default function IntervalForm({ value, minDate, onSubmit }: IntervalFormProps) {
+export default function IntervalForm({ projectId, value, minDate, onSubmit }: IntervalFormProps) {
   const form = useForm<IntervalInput>({
     mode: "controlled",
     initialValues:
@@ -58,8 +59,8 @@ export default function IntervalForm({ value, minDate, onSubmit }: IntervalFormP
 
   const handleSubmit = (values: IntervalInput) => {
     const interval: Interval = {
-      id: values.id || 0,
       number: values.number || 0,
+      project_id: projectId,
       start_date: values.start_date as Iso.Date,
       end_date: values.end_date as Iso.Date,
     }

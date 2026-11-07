@@ -10,10 +10,10 @@ interface PeopleByCircleProps {
   involvementByCircle: CircleInvolvementDataMap
   crewInvolvements: CrewInvolvement[]
   tableKey?: React.Key
-  intervalId?: number | null
+  intervalNumber?: number | null
 }
 
-export default function PeopleByCircle({ involvementByCircle, crewInvolvements, tableKey, intervalId }: PeopleByCircleProps) {
+export default function PeopleByCircle({ involvementByCircle, crewInvolvements, tableKey, intervalNumber }: PeopleByCircleProps) {
   const circles = useAppSelector((state) => state.circles.rootCircles)
   const navigate = useNavigate()
   const { hash, search } = useLocation()
@@ -55,7 +55,7 @@ export default function PeopleByCircle({ involvementByCircle, crewInvolvements, 
         crewInvolvements={crewInvolvements}
         key={newKey}
         tableKey={newKey}
-        intervalId={intervalId}
+        intervalNumber={intervalNumber}
       />
     </Stack>
   )

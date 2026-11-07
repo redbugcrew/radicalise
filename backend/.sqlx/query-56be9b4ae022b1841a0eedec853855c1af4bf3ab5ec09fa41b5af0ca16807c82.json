@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE intervals\n         SET end_date = ?\n         WHERE\n            number = ? AND\n            project_id = ? AND\n            end_date IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "56be9b4ae022b1841a0eedec853855c1af4bf3ab5ec09fa41b5af0ca16807c82"
+}

@@ -6,7 +6,7 @@ import { differenceInDays } from "date-fns"
 
 interface IntervalsTableProps {
   intervals: Interval[]
-  currentIntervalId: number | null
+  currentIntervalNumber: number | null
 }
 
 function IntervalTableRow({ interval, isCurrent }: { interval: Interval; isCurrent: boolean }) {
@@ -34,7 +34,7 @@ function IntervalTableRow({ interval, isCurrent }: { interval: Interval; isCurre
   )
 }
 
-export default function IntervalsTable({ intervals, currentIntervalId }: IntervalsTableProps) {
+export default function IntervalsTable({ intervals, currentIntervalNumber }: IntervalsTableProps) {
   return (
     <Table>
       <Table.Thead>
@@ -47,7 +47,7 @@ export default function IntervalsTable({ intervals, currentIntervalId }: Interva
       </Table.Thead>
       <Table.Tbody>
         {intervals.map((interval) => (
-          <IntervalTableRow key={interval.number} interval={interval} isCurrent={currentIntervalId === interval.id} />
+          <IntervalTableRow key={interval.number} interval={interval} isCurrent={currentIntervalNumber === interval.number} />
         ))}
       </Table.Tbody>
     </Table>

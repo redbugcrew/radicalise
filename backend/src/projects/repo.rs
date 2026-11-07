@@ -40,28 +40,52 @@ pub async fn create_project_and_dependent_records(
 ) -> Result<Project, CreateProjectError> {
     let mut transaction = pool.begin().await?;
 
-    let project = create_project(project, &mut *transaction).await?;
+    let project = create_project(project, &mut *transaction).await.map_err(|e| {
+        println!("create_project: {:?}", e);
+        e
+    })?;
 
     let circle = Circle::new(project.typed_id());
-    let circle = insert_circle(&circle, project.typed_id(), &mut *transaction).await?;
+    let circle = insert_circle(&circle, project.typed_id(), &mut *transaction).await.map_err(|e| {
+        println!("insert_circle: {:?}", e);
+        e
+    })?;
 
-    let person = create_person(project.typed_id(), user_id, person_name, &mut *transaction).await?;
+    let person = create_person(project.typed_id(), user_id, person_name, &mut *transaction)
+        .await
+        .map_err(|e| {
+            println!("create_person: {:?}", e);
+            e
+        })?;
 
     let today = chrono::Utc::now().date_naive();
-    let interval = insert_zeroth_interval(today, project.typed_id(), &mut *transaction).await?;
+    let interval = insert_zeroth_interval(today, project.typed_id(), &mut *transaction)
+        .await
+        .map_err(|e| {
+            println!("insert_zeroth_interval: {:?}", e);
+            e
+        })?;
 
-    change_project_interval(project.typed_id(), interval.typed_id(), &mut *transaction).await?;
+    change_project_interval(project.typed_id(), interval.typed_number(), &mut *transaction)
+        .await
+        .map_err(|e| {
+            println!("change_project_interval: {:?}", e);
+            e
+        })?;
 
     let involvement = CircleInvolvement {
         person_id: person.id,
-        project_id: project.id,
         circle_id: circle.id,
-        interval_id: interval.id,
         status: InvolvementStatus::Active,
         participation_intention: Some(ParticipationIntention::OptIn),
-        ..CircleInvolvement::default()
+        ..CircleInvolvement::new(interval.typed_number())
     };
-    insert_circle_involvement(involvement.into(), &mut *transaction).await?;
+    insert_circle_involvement(involvement.into(), &mut *transaction)
+        .await
+        .map_err(|e| {
+            println!("insert_circle_involvement: {:?}", e);
+            e
+        })?;
 
     transaction.commit().await?;
 

@@ -15,7 +15,7 @@ use crate::{
     },
     realtime::RealtimeState,
     shared::{
-        entities::{CircleId, CircleInvolvement, IntervalId, ProjectId, UserId},
+        entities::{CircleId, CircleInvolvement, IntervalNumber, ProjectId, UserId},
         events::AppEvent,
     },
 };
@@ -62,10 +62,10 @@ async fn get_my_state(Extension(pool): Extension<SqlitePool>, auth_session: Auth
 
 #[utoipa::path(
     get,
-    path = "/participation/interval/{interval_id}/circle/{circle_id}",
+    path = "/participation/interval/{interval_number}/circle/{circle_id}",
     params(
         ("project_id" = i64, Path, description = "Project ID"),
-        ("interval_id" = i64, Path, description = "Interval ID"),
+        ("interval_number" = i64, Path, description = "Interval Number"),
         ("circle_id" = i64, Path, description = "Circle ID"),
     ),
     responses(
@@ -74,7 +74,7 @@ async fn get_my_state(Extension(pool): Extension<SqlitePool>, auth_session: Auth
     ),
 )]
 async fn my_participation(
-    Path((project_id, interval_id, circle_id)): Path<(i64, i64, i64)>,
+    Path((project_id, interval_number, circle_id)): Path<(i64, i64, i64)>,
     Extension(pool): Extension<SqlitePool>,
     auth_session: AuthSession,
 ) -> impl IntoResponse {
@@ -85,15 +85,16 @@ async fn my_participation(
                 return (StatusCode::NOT_FOUND, ()).into_response();
             }
             let person_id = person_id.unwrap();
-            let interval_id = IntervalId::new(interval_id);
+            let project_id = ProjectId::new(project_id);
+            let interval_number = IntervalNumber::new(interval_number, project_id);
             let circle_id = CircleId::new(circle_id);
 
             println!(
-                "Fetching my participation for person_id={:?}, interval_id={:?}, circle_id={:?}",
-                person_id, interval_id, circle_id
+                "Fetching my participation for person_id={:?}, interval_number={:?}, circle_id={:?}",
+                person_id, interval_number.number, circle_id
             );
 
-            let result = find_circle_involvement(ProjectId::new(project_id), circle_id, person_id, interval_id, &pool).await;
+            let result = find_circle_involvement(circle_id, person_id, interval_number, &pool).await;
 
             match result {
                 Ok(Some(data)) => (StatusCode::OK, Json(data)).into_response(),
@@ -107,10 +108,10 @@ async fn my_participation(
 
 #[utoipa::path(
     post,
-    path = "/interval/{interval_id}/my_participation",
+    path = "/interval/{interval_number}/my_participation",
     params(
         ("project_id" = i64, Path, description = "Project ID"),
-        ("interval_id" = i64, Path, description = "Interval ID")
+        ("interval_number" = i64, Path, description = "Interval Number")
     ),
     request_body(
         content = MyParticipationInput,
@@ -122,7 +123,7 @@ async fn my_participation(
     ),
 )]
 async fn update_my_participation(
-    Path((project_id, interval_id)): Path<(i64, i64)>,
+    Path((project_id, interval_number)): Path<(i64, i64)>,
     Extension(pool): Extension<SqlitePool>,
     Extension(realtime_state): Extension<RealtimeState>,
     auth_session: AuthSession,
@@ -140,14 +141,14 @@ async fn update_my_participation(
         Err(_) => return (StatusCode::NOT_FOUND, ()).into_response(),
     };
 
-    let interval_id = IntervalId::new(interval_id);
+    let interval_number = IntervalNumber::new(interval_number, project_id);
 
-    let circles = match find_circles_for_person_in_interval(person_id.clone(), interval_id.clone(), &pool).await {
+    let circles = match find_circles_for_person_in_interval(person_id.clone(), interval_number.clone(), &pool).await {
         Ok(circles) => circles,
         Err(_) => return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
     };
 
-    let update_result = update_my_involvements(person_id.clone(), interval_id.clone(), input, &pool).await;
+    let update_result = update_my_involvements(person_id.clone(), interval_number.clone(), input, &pool).await;
 
     if update_result.is_err() {
         eprintln!("Error updating my involvements: {:?}", update_result.err());
@@ -155,7 +156,7 @@ async fn update_my_participation(
     }
 
     // Fetch the updated involvement to return
-    let output_result = repo::find_interval_data_for_person(project_id, person_id.clone(), interval_id, &pool).await;
+    let output_result = repo::find_interval_data_for_person(person_id.clone(), interval_number, &pool).await;
     match output_result {
         Ok(interval_data) => {
             let public_interval_data = strip_private_data(&interval_data, &circles, &person_id);

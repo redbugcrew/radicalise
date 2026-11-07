@@ -59,14 +59,14 @@ export default function WithIntervalData({ interval, children }: WithIntervalDat
       return
     }
 
-    if (currentIntervalData?.interval.id === interval.id) {
+    if (currentIntervalData?.interval.number === interval.number) {
       setIntervalData(currentIntervalData)
     } else {
       console.log("fetching interval involvements from API")
       const api = getApi()
 
       api.api
-        .getIntervalData(interval.number, currentProjectId)
+        .getIntervalData(currentProjectId, interval.number)
         .then((response) => {
           setIntervalData(response.data)
         })
@@ -81,5 +81,10 @@ export default function WithIntervalData({ interval, children }: WithIntervalDat
 
   if (!interval) return null
 
-  return children({ interval: interval, intervalData, key: tableKey, isCurrentInterval: interval.id === currentIntervalData?.interval.id })
+  return children({
+    interval: interval,
+    intervalData,
+    key: tableKey,
+    isCurrentInterval: interval.number === currentIntervalData?.interval.number,
+  })
 }

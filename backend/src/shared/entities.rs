@@ -69,17 +69,6 @@ impl Person {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct IntervalId {
-    pub id: i64,
-}
-
-impl IntervalId {
-    pub fn new(id: i64) -> Self {
-        IntervalId { id }
-    }
-}
-
-#[derive(Clone, Debug, PartialEq)]
 pub struct IntervalNumber {
     pub number: i64,
     pub project_id: ProjectId,
@@ -93,15 +82,15 @@ impl IntervalNumber {
 
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
 pub struct Interval {
-    pub id: i64,
     pub number: i64,
+    pub project_id: i64,
     pub start_date: String,
     pub end_date: Option<String>,
 }
 
 impl Interval {
-    pub fn typed_id(&self) -> IntervalId {
-        IntervalId::new(self.id)
+    pub fn typed_number(&self) -> IntervalNumber {
+        IntervalNumber::new(self.number, ProjectId::new(self.project_id))
     }
 }
 
@@ -233,7 +222,8 @@ pub struct CrewInvolvement {
     pub id: i64,
     pub person_id: i64,
     pub crew_id: i64,
-    pub interval_id: i64,
+    pub interval_number: i64,
+    pub project_id: i64,
     pub convenor: bool,
     pub volunteered_convenor: bool,
 }
@@ -251,7 +241,7 @@ pub struct CircleInvolvement {
     pub person_id: i64,
     pub project_id: i64,
     pub circle_id: i64,
-    pub interval_id: i64,
+    pub interval_number: i64,
     pub status: InvolvementStatus,
     pub capacity_planning_visibility_circle_id: Option<i64>,
     pub capacity_planning: Option<CapacityPlanning>,
@@ -263,14 +253,14 @@ pub struct CircleInvolvement {
     pub implicit_counter: i64,
 }
 
-impl Default for CircleInvolvement {
-    fn default() -> Self {
+impl CircleInvolvement {
+    pub fn new(interval_number: IntervalNumber) -> Self {
         CircleInvolvement {
             id: 0,
             person_id: 0,
-            project_id: 0,
+            project_id: interval_number.project_id.id,
             circle_id: 0,
-            interval_id: 0,
+            interval_number: interval_number.number,
             status: InvolvementStatus::Active,
             capacity_planning_visibility_circle_id: None,
             capacity_planning: None,
@@ -504,11 +494,29 @@ pub struct PeerRole {
     pub max_intervals: Option<i64>,
 }
 
+#[derive(Clone, Debug, PartialEq)]
+pub struct PeerRoleId {
+    pub id: i64,
+}
+
+impl PeerRoleId {
+    pub fn new(id: i64) -> Self {
+        PeerRoleId { id }
+    }
+}
+
+impl PeerRole {
+    pub fn typed_id(&self) -> PeerRoleId {
+        PeerRoleId::new(self.id)
+    }
+}
+
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
 pub struct PeerEnrollment {
     pub id: i64,
     pub peer_role_id: i64,
-    pub interval_id: i64,
+    pub interval_number: i64,
+    pub project_id: i64,
     pub person_id: i64,
     pub peer_id: i64,
 }

@@ -1,0 +1,74 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT circles.id as \"id: i64\", circles.project_id as \"project_id: i64\", name, slug, inside_circle_id\n        FROM circle_involvements\n        INNER JOIN circles ON circle_involvements.circle_id = circles.id\n        WHERE\n            circle_involvements.person_id = ? AND\n            circle_involvements.interval_number = ? AND\n            circle_involvements.project_id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "id: i64",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "circles",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "project_id: i64",
+        "ordinal": 1,
+        "type_info": "Null",
+        "origin": {
+          "Table": {
+            "table": "circles",
+            "name": "project_id"
+          }
+        }
+      },
+      {
+        "name": "name",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "circles",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "name": "slug",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "circles",
+            "name": "slug"
+          }
+        }
+      },
+      {
+        "name": "inside_circle_id",
+        "ordinal": 4,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "circles",
+            "name": "inside_circle_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "a6fc7fee6f404cb75e29f0d643c3f7330a897273a144c92361c7da96fd78d1d1"
+}

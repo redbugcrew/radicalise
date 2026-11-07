@@ -24,7 +24,7 @@ export default function People() {
       <IntervalSelector intervals={intervals} selectedInterval={selectedInterval} currentInterval={currentInterval} />
 
       {selectedInterval ? (
-        <PeopleForInterval interval={selectedInterval} key={selectedInterval.id} />
+        <PeopleForInterval interval={selectedInterval} key={selectedInterval.number} />
       ) : (
         <NoData title="No current interval">
           <Stack>

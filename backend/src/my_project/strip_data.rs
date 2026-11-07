@@ -36,7 +36,8 @@ fn strip_private_data_from_circle_involvements_datas(
         .iter()
         .map(|involvements_data| CircleInvolvementData {
             circle_id: involvements_data.circle_id,
-            interval_id: involvements_data.interval_id,
+            interval_number: involvements_data.interval_number,
+            project_id: involvements_data.project_id,
             circle_involvements: strip_private_data_from_circle_involvements(
                 &involvements_data.circle_involvements,
                 viewer_circles,

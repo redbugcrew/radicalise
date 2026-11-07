@@ -107,7 +107,7 @@ async fn start_next_interval(
         }
     };
 
-    let next_interval = match repo::find_next_interval(project_id.clone(), current_interval.typed_id(), &pool).await {
+    let next_interval = match repo::find_next_interval(project_id.clone(), current_interval.typed_number(), &pool).await {
         Ok(Some(interval)) => interval,
         Ok(None) => {
             return StartNextIntervalError::NextIntervalNotFound.into_response();
@@ -141,7 +141,7 @@ async fn start_next_interval(
             new_end_date = this_start_date;
         }
 
-        if repo::set_interval_end_date(current_interval.typed_id(), new_end_date, &pool)
+        if repo::set_interval_end_date(current_interval.typed_number(), new_end_date, &pool)
             .await
             .is_err()
         {
@@ -149,7 +149,7 @@ async fn start_next_interval(
         }
     }
 
-    match repo::change_project_interval(project_id.clone(), next_interval.typed_id(), &pool).await {
+    match repo::change_project_interval(project_id.clone(), next_interval.typed_number(), &pool).await {
         Ok(_) => {
             let event = AppEvent::IntervalsEvent(IntervalsEvent::IntervalStarted(next_interval));
             realtime_state.broadcast_app_event(Some(auth_session), event.clone()).await;

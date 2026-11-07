@@ -17,7 +17,7 @@ const currentIntervalSlice = createSlice({
       const involvement = action.payload
       if (!state || !involvement) return state
 
-      if (state.interval.id !== involvement.interval_id) return state
+      if (state.interval.number !== involvement.interval_number) return state
 
       const circleData = forCircle(state.circle_involvements, involvement.circle_id)
       if (!circleData) return state
@@ -35,9 +35,8 @@ const currentIntervalSlice = createSlice({
       if (!state || !payload) return state
 
       const person_id = payload.person_id
-      const interval_id = payload.data.interval.id
 
-      if (state.interval.id !== interval_id) return state
+      if (state.interval.number !== payload.data.interval.number) return state
 
       return {
         ...state,

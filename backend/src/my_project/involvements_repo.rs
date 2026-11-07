@@ -4,8 +4,8 @@ use crate::{
     circles::repo::add_inside_circles,
     repo_utilities::InsertRecordError,
     shared::entities::{
-        Circle, CircleId, CircleInvolvement, CircleInvolvementId, IntervalId, InvolvementStatus, OptOutType, ParticipationIntention,
-        PersonId, ProjectId,
+        Circle, CircleId, CircleInvolvement, CircleInvolvementId, IntervalNumber, InvolvementStatus, OptOutType, ParticipationIntention,
+        PersonId,
     },
 };
 
@@ -15,7 +15,7 @@ pub struct CircleInvolvementRecord {
     pub person_id: i64,
     pub project_id: i64,
     pub circle_id: i64,
-    pub interval_id: i64,
+    pub interval_number: i64,
     pub status: InvolvementStatus,
     pub capacity_planning_visibility_circle_id: Option<i64>,
     pub wellbeing: Option<String>,
@@ -36,7 +36,7 @@ impl From<CircleInvolvementRecord> for CircleInvolvement {
             person_id: record.person_id,
             project_id: record.project_id,
             circle_id: record.circle_id,
-            interval_id: record.interval_id,
+            interval_number: record.interval_number,
             status: record.status,
             capacity_planning_visibility_circle_id: record.capacity_planning_visibility_circle_id,
             capacity_planning: Some(crate::shared::entities::CapacityPlanning {
@@ -61,7 +61,7 @@ impl From<CircleInvolvement> for CircleInvolvementRecord {
             person_id: involvement.person_id,
             project_id: involvement.project_id,
             circle_id: involvement.circle_id,
-            interval_id: involvement.interval_id,
+            interval_number: involvement.interval_number,
             status: involvement.status,
             capacity_planning_visibility_circle_id: involvement.capacity_planning_visibility_circle_id,
             wellbeing: involvement.capacity_planning.as_ref().and_then(|cp| cp.wellbeing.clone()),
@@ -78,10 +78,9 @@ impl From<CircleInvolvement> for CircleInvolvementRecord {
 }
 
 pub async fn find_circle_involvement(
-    project_id: ProjectId,
     circle_id: CircleId,
     person_id: PersonId,
-    interval_id: IntervalId,
+    interval_number: IntervalNumber,
     pool: &SqlitePool,
 ) -> Result<Option<CircleInvolvement>, sqlx::Error> {
     let record: Option<CircleInvolvementRecord> = sqlx::query_as!(
@@ -91,7 +90,7 @@ pub async fn find_circle_involvement(
             person_id,
             circles.project_id AS \"project_id: i64\",
             circle_id,
-            interval_id,
+            interval_number,
             status as \"status: InvolvementStatus\",
             capacity_planning_visibility_circle_id,
             wellbeing,
@@ -108,11 +107,11 @@ pub async fn find_circle_involvement(
             circles.project_id = ? AND
             circles.id = ? AND
             person_id = ? AND
-            interval_id = ?",
-        project_id.id,
+            interval_number = ?",
+        interval_number.project_id.id,
         circle_id.id,
         person_id.id,
-        interval_id.id,
+        interval_number.number,
     )
     .fetch_optional(pool)
     .await?;
@@ -128,7 +127,7 @@ pub async fn find_circle_involvement_by_id(id: CircleInvolvementId, pool: &Sqlit
             person_id,
             circles.project_id AS \"project_id: i64\",
             circle_id,
-            interval_id,
+            interval_number,
             status as \"status: InvolvementStatus\",
             capacity_planning_visibility_circle_id,
             wellbeing,
@@ -152,9 +151,8 @@ pub async fn find_circle_involvement_by_id(id: CircleInvolvementId, pool: &Sqlit
 }
 
 pub async fn find_all_circle_involvements(
-    project_id: ProjectId,
     circle_id: CircleId,
-    interval_id: IntervalId,
+    interval_number: IntervalNumber,
     include_statuses: Option<&[InvolvementStatus]>,
     pool: &SqlitePool,
 ) -> Result<Vec<CircleInvolvement>, sqlx::Error> {
@@ -164,7 +162,7 @@ pub async fn find_all_circle_involvements(
             person_id,
             circles.project_id,
             circle_id,
-            interval_id,
+            interval_number,
             status,
             capacity_planning_visibility_circle_id,
             wellbeing,
@@ -179,14 +177,14 @@ pub async fn find_all_circle_involvements(
         FROM circle_involvements
         INNER JOIN circles ON circle_involvements.circle_id = circles.id
         WHERE
-            project_id = ",
+            circle_involvements.project_id = ",
     );
 
-    query_builder.push_bind(project_id.id);
+    query_builder.push_bind(interval_number.project_id.id);
     query_builder.push(" AND circles.id = ");
     query_builder.push_bind(circle_id.id);
-    query_builder.push(" AND interval_id = ");
-    query_builder.push_bind(interval_id.id);
+    query_builder.push(" AND interval_number = ");
+    query_builder.push_bind(interval_number.number);
 
     if let Some(statuses) = include_statuses {
         query_builder.push(" AND status IN (");
@@ -204,9 +202,8 @@ pub async fn find_all_circle_involvements(
 
 pub async fn find_all_circle_involvements_for_person(
     person_id: PersonId,
-    project_id: ProjectId,
     circle_id: CircleId,
-    interval_id: IntervalId,
+    interval_number: IntervalNumber,
     pool: &SqlitePool,
 ) -> Result<Vec<CircleInvolvement>, sqlx::Error> {
     let records = sqlx::query_as!(
@@ -216,7 +213,7 @@ pub async fn find_all_circle_involvements_for_person(
             person_id,
             circles.project_id AS \"project_id: i64\",
             circle_id,
-            interval_id,
+            interval_number,
             status as \"status: InvolvementStatus\",
             capacity_planning_visibility_circle_id,
             wellbeing,
@@ -232,13 +229,13 @@ pub async fn find_all_circle_involvements_for_person(
         INNER JOIN circles ON circle_involvements.circle_id = circles.id
         WHERE
             person_id = ? AND
-            project_id = ? AND
+            circle_involvements.project_id = ? AND
             circles.id = ? AND
-            interval_id = ?",
+            interval_number = ?",
         person_id.id,
-        project_id.id,
+        interval_number.project_id.id,
         circle_id.id,
-        interval_id.id,
+        interval_number.number,
     )
     .fetch_all(pool)
     .await?;
@@ -248,10 +245,10 @@ pub async fn find_all_circle_involvements_for_person(
 
 pub async fn upsert_circle_involvement(involvement: CircleInvolvementRecord, pool: &SqlitePool) -> Result<(), sqlx::Error> {
     let result = sqlx::query!(
-        "INSERT INTO circle_involvements (person_id, circle_id, interval_id, status, capacity_planning_visibility_circle_id, wellbeing, focus, capacity_score, capacity, participation_intention, opt_out_type, opt_out_planned_return_date,
+        "INSERT INTO circle_involvements (person_id, circle_id, interval_number, project_id, status, capacity_planning_visibility_circle_id, wellbeing, focus, capacity_score, capacity, participation_intention, opt_out_type, opt_out_planned_return_date,
         intention_context)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(person_id, circle_id, interval_id) DO UPDATE SET
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(person_id, circle_id, interval_number, project_id) DO UPDATE SET
             status = excluded.status,
             capacity_planning_visibility_circle_id = excluded.capacity_planning_visibility_circle_id,
             wellbeing = excluded.wellbeing,
@@ -264,7 +261,8 @@ pub async fn upsert_circle_involvement(involvement: CircleInvolvementRecord, poo
             intention_context = excluded.intention_context",
         involvement.person_id,
         involvement.circle_id,
-        involvement.interval_id,
+        involvement.interval_number,
+        involvement.project_id,
         involvement.status,
         involvement.capacity_planning_visibility_circle_id,
         involvement.wellbeing,
@@ -294,12 +292,13 @@ where
     E: sqlx::Executor<'c, Database = sqlx::Sqlite>,
 {
     let result = sqlx::query!(
-        "INSERT INTO circle_involvements (person_id, circle_id, interval_id, status, capacity_planning_visibility_circle_id, wellbeing, focus, capacity_score, capacity, participation_intention, opt_out_type, opt_out_planned_return_date,
+        "INSERT INTO circle_involvements (person_id, circle_id, interval_number, project_id, status, capacity_planning_visibility_circle_id, wellbeing, focus, capacity_score, capacity, participation_intention, opt_out_type, opt_out_planned_return_date,
         intention_context, implicit_counter)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         involvement.person_id,
         involvement.circle_id,
-        involvement.interval_id,
+        involvement.interval_number,
+        involvement.project_id,
         involvement.status,
         involvement.capacity_planning_visibility_circle_id,
         involvement.wellbeing,
@@ -331,13 +330,14 @@ pub async fn insert_circle_involvement_if_missing(
     pool: &SqlitePool,
 ) -> Result<(), InsertRecordError> {
     sqlx::query!(
-        "INSERT INTO circle_involvements (person_id, circle_id, interval_id, status, capacity_planning_visibility_circle_id, wellbeing, focus, capacity_score, capacity, participation_intention, opt_out_type, opt_out_planned_return_date,
+        "INSERT INTO circle_involvements (person_id, circle_id, interval_number, project_id, status, capacity_planning_visibility_circle_id, wellbeing, focus, capacity_score, capacity, participation_intention, opt_out_type, opt_out_planned_return_date,
         intention_context, implicit_counter)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(person_id, circle_id, interval_id) DO NOTHING",
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(person_id, circle_id, interval_number, project_id) DO NOTHING",
         involvement.person_id,
         involvement.circle_id,
-        involvement.interval_id,
+        involvement.interval_number,
+        involvement.project_id,
         involvement.status,
         involvement.capacity_planning_visibility_circle_id,
         involvement.wellbeing,
@@ -358,16 +358,18 @@ pub async fn insert_circle_involvement_if_missing(
 
 pub async fn delete_implicit_circle_involvements(
     circle_id: CircleId,
-    interval_id: IntervalId,
+    interval_number: IntervalNumber,
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(
         "DELETE FROM circle_involvements
         WHERE
-            interval_id = ? AND
+            interval_number = ? AND
+            project_id = ? AND
             circle_id = ? AND
             participation_intention IS NULL",
-        interval_id.id,
+        interval_number.number,
+        interval_number.project_id.id,
         circle_id.id
     )
     .execute(pool)
@@ -422,7 +424,7 @@ pub async fn set_implicit_counter_to_zero(circle_id: CircleId, pool: &SqlitePool
 
 pub async fn find_circles_for_person_in_interval(
     person_id: PersonId,
-    interval_id: IntervalId,
+    interval_number: IntervalNumber,
     pool: &SqlitePool,
 ) -> Result<Vec<Circle>, sqlx::Error> {
     let records = sqlx::query_as!(
@@ -432,9 +434,11 @@ pub async fn find_circles_for_person_in_interval(
         INNER JOIN circles ON circle_involvements.circle_id = circles.id
         WHERE
             circle_involvements.person_id = ? AND
-            circle_involvements.interval_id = ?",
+            circle_involvements.interval_number = ? AND
+            circle_involvements.project_id = ?",
         person_id.id,
-        interval_id.id,
+        interval_number.number,
+        interval_number.project_id.id,
     )
     .fetch_all(pool)
     .await?;
