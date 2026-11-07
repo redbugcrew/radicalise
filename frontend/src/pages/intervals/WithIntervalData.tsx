@@ -66,7 +66,7 @@ export default function WithIntervalData({ interval, children }: WithIntervalDat
       const api = getApi()
 
       api.api
-        .getIntervalData(interval.number, currentProjectId)
+        .getIntervalData(currentProjectId, interval.number)
         .then((response) => {
           setIntervalData(response.data)
         })

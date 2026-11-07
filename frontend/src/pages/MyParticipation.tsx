@@ -25,6 +25,8 @@ export default function MyParticipation() {
   useEffect(() => {
     if (!interval || !circle || !project) return
 
+    console.log("Fetching participation data for interval:", interval.number, circle.id, project.id)
+
     api.api
       .myParticipation(project.id, interval.number, circle.id)
       .then((response) => {
@@ -33,7 +35,7 @@ export default function MyParticipation() {
       .catch((error) => {
         console.error("Error fetching participation data:", error)
       })
-  }, [api, interval?.number, circle.id, project?.id])
+  }, [interval?.number, circle.id, project?.id])
 
   if (!project) return <Text>Error: Project not found.</Text>
   if (!circle) return <Text>Error: Circle not found.</Text>
