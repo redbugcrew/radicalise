@@ -1,22 +1,11 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT intervals.id, intervals.number, intervals.start_date, intervals.end_date\n        FROM intervals\n        INNER JOIN projects ON projects.current_interval_id = intervals.id AND projects.id = intervals.project_id\n        WHERE projects.id = ?\n        ORDER BY intervals.id ASC\n        LIMIT 1",
+  "query": "SELECT number, start_date, end_date, project_id\n        FROM intervals\n        WHERE\n            project_id = ? AND\n            number < ?\n        ORDER BY number DESC\n        LIMIT 1",
   "describe": {
     "columns": [
       {
-        "name": "id",
-        "ordinal": 0,
-        "type_info": "Integer",
-        "origin": {
-          "Table": {
-            "table": "intervals",
-            "name": "id"
-          }
-        }
-      },
-      {
         "name": "number",
-        "ordinal": 1,
+        "ordinal": 0,
         "type_info": "Integer",
         "origin": {
           "Table": {
@@ -27,7 +16,7 @@
       },
       {
         "name": "start_date",
-        "ordinal": 2,
+        "ordinal": 1,
         "type_info": "Text",
         "origin": {
           "Table": {
@@ -38,7 +27,7 @@
       },
       {
         "name": "end_date",
-        "ordinal": 3,
+        "ordinal": 2,
         "type_info": "Text",
         "origin": {
           "Table": {
@@ -46,17 +35,28 @@
             "name": "end_date"
           }
         }
+      },
+      {
+        "name": "project_id",
+        "ordinal": 3,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "intervals",
+            "name": "project_id"
+          }
+        }
       }
     ],
     "parameters": {
-      "Right": 1
+      "Right": 2
     },
     "nullable": [
       false,
       false,
       false,
-      true
+      false
     ]
   },
-  "hash": "cbca3bb28fdc89fd48bc1f13007c17feacf32c0235d8c93ba8e710ecc0705307"
+  "hash": "de96b2402efcab57f80056384ff185cf15a300a25cf14cbe27754432571bf6be"
 }

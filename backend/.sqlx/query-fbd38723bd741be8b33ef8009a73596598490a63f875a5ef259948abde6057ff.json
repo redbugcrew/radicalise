@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE intervals\n         SET processed_peer_roles = ?\n         WHERE number = ? AND project_id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "fbd38723bd741be8b33ef8009a73596598490a63f875a5ef259948abde6057ff"
+}

@@ -1,22 +1,11 @@
 {
   "db_name": "SQLite",
-  "query": "INSERT INTO intervals (number, start_date, project_id)\n         VALUES (?, ?, ?)\n         RETURNING id AS \"id!\", number, start_date, end_date",
+  "query": "INSERT INTO intervals (number, start_date, end_date, project_id)\n         VALUES (?, ?, ?, ?)\n         RETURNING number, start_date, end_date, project_id",
   "describe": {
     "columns": [
       {
-        "name": "id!",
-        "ordinal": 0,
-        "type_info": "Integer",
-        "origin": {
-          "Table": {
-            "table": "intervals",
-            "name": "id"
-          }
-        }
-      },
-      {
         "name": "number",
-        "ordinal": 1,
+        "ordinal": 0,
         "type_info": "Integer",
         "origin": {
           "Table": {
@@ -27,7 +16,7 @@
       },
       {
         "name": "start_date",
-        "ordinal": 2,
+        "ordinal": 1,
         "type_info": "Text",
         "origin": {
           "Table": {
@@ -38,7 +27,7 @@
       },
       {
         "name": "end_date",
-        "ordinal": 3,
+        "ordinal": 2,
         "type_info": "Text",
         "origin": {
           "Table": {
@@ -46,17 +35,28 @@
             "name": "end_date"
           }
         }
+      },
+      {
+        "name": "project_id",
+        "ordinal": 3,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "intervals",
+            "name": "project_id"
+          }
+        }
       }
     ],
     "parameters": {
-      "Right": 3
+      "Right": 4
     },
     "nullable": [
       false,
       false,
       false,
-      true
+      false
     ]
   },
-  "hash": "ee06b99bd526411b56133f94d9fd1bb4d5e982b70fb6d53b29280986208c6b89"
+  "hash": "ca0f4af69fb38f82fe9f120168bd596ac3414bf934f068e8106baf61c59f125f"
 }

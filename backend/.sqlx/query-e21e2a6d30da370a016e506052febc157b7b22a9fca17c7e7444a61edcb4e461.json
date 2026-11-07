@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO circle_involvements (person_id, circle_id, interval_number, project_id, status, capacity_planning_visibility_circle_id, wellbeing, focus, capacity_score, capacity, participation_intention, opt_out_type, opt_out_planned_return_date,\n        intention_context, implicit_counter)\n        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)\n        ON CONFLICT(person_id, circle_id, interval_number, project_id) DO NOTHING",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 15
+    },
+    "nullable": []
+  },
+  "hash": "e21e2a6d30da370a016e506052febc157b7b22a9fca17c7e7444a61edcb4e461"
+}

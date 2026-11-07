@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "\n        SELECT person_id AS \"person_id!: i64\", peer_id AS \"peer_id!: i64\", MAX(interval_id) AS \"last_interval!: i64\"\n        FROM peer_enrollments\n        WHERE peer_role_id = ?\n        GROUP BY person_id, peer_id\n        ",
+  "query": "\n        SELECT person_id AS \"person_id!: i64\", peer_id AS \"peer_id!: i64\", MAX(interval_number) AS \"last_interval!: i64\"\n        FROM peer_enrollments\n        WHERE peer_role_id = ?\n        GROUP BY person_id, peer_id\n        ",
   "describe": {
     "columns": [
       {
@@ -41,5 +41,5 @@
       false
     ]
   },
-  "hash": "b358ede63ceae536e7262627ba600212c5896292a67b6ee761c2c1b85e85fc5e"
+  "hash": "042edbb12e1a7251b0cb3f2249a89b029085cffef8545f899bfda01e32c6a681"
 }

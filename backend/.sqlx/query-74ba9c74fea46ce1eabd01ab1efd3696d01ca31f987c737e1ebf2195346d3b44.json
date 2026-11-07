@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO peer_enrollments (peer_role_id, interval_number, project_id, person_id, peer_id)\n            VALUES (?, ?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 5
+    },
+    "nullable": []
+  },
+  "hash": "74ba9c74fea46ce1eabd01ab1efd3696d01ca31f987c737e1ebf2195346d3b44"
+}

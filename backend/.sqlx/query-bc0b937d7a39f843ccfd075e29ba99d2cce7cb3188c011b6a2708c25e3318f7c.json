@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT * FROM peer_enrollments WHERE interval_id = ? AND (person_id = ? OR peer_id = ?)",
+  "query": "SELECT * FROM peer_enrollments WHERE interval_number = ? AND project_id = ? AND (person_id = ? OR peer_id = ?)",
   "describe": {
     "columns": [
       {
@@ -26,19 +26,30 @@
         }
       },
       {
-        "name": "interval_id",
+        "name": "interval_number",
         "ordinal": 2,
         "type_info": "Integer",
         "origin": {
           "Table": {
             "table": "peer_enrollments",
-            "name": "interval_id"
+            "name": "interval_number"
+          }
+        }
+      },
+      {
+        "name": "project_id",
+        "ordinal": 3,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "peer_enrollments",
+            "name": "project_id"
           }
         }
       },
       {
         "name": "person_id",
-        "ordinal": 3,
+        "ordinal": 4,
         "type_info": "Integer",
         "origin": {
           "Table": {
@@ -49,7 +60,7 @@
       },
       {
         "name": "peer_id",
-        "ordinal": 4,
+        "ordinal": 5,
         "type_info": "Integer",
         "origin": {
           "Table": {
@@ -60,9 +71,10 @@
       }
     ],
     "parameters": {
-      "Right": 3
+      "Right": 4
     },
     "nullable": [
+      false,
       false,
       false,
       false,
@@ -70,5 +82,5 @@
       false
     ]
   },
-  "hash": "d169a2846f6ba255dbff6981a02c5905ff5f7ea1abed6783adc770b146e317dc"
+  "hash": "bc0b937d7a39f843ccfd075e29ba99d2cce7cb3188c011b6a2708c25e3318f7c"
 }

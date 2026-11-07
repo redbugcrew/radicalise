@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE intervals\n         SET processed_implicit_involvements = ?\n         WHERE number = ? AND project_id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "d50f2eb233f43430241f5bcf318efce78570a308d8affcee7054af5d95e8d482"
+}
