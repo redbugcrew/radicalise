@@ -415,6 +415,10 @@ mod tests {
             .expect("Failed to create in-memory database");
         sqlx::migrate!().run(&pool).await.expect("Failed to run migrations");
 
+        sqlx::query!("INSERT INTO projects (id, name, description, slug) VALUES (1, 'Test Project', 'Description', 'test-project')")
+            .execute(&pool)
+            .await
+            .expect("Failed to insert test project");
         sqlx::query!("INSERT INTO users (email, hashed_password) VALUES ('test@example.com', 'hashed')")
             .execute(&pool)
             .await
@@ -491,6 +495,7 @@ mod tests {
     #[tokio::test]
     async fn accept_invitation_with_invalid_token_returns_error() {
         let pool = setup_db().await;
+
         let result = accept_invitation(&pool, "dummy-token".to_string(), UserId::new(1), interval_1()).await;
         assert!(result.is_err());
     }

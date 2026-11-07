@@ -150,6 +150,11 @@ mod tests {
     async fn implicit_involvement_added_for_second_interval() {
         let pool = setup_db().await;
 
+        sqlx::query!("INSERT INTO projects (id, name, description, slug) VALUES (1, 'Test Project', 'Description', 'test-project')")
+            .execute(&pool)
+            .await
+            .expect("Failed to insert test project");
+
         sqlx::query!("INSERT INTO users (id, email, hashed_password) VALUES (1, 'test@example.com', 'hashed')")
             .execute(&pool)
             .await
@@ -172,7 +177,7 @@ mod tests {
 
         // circle id=1 already exists from migrations (inserted by add-circles migration)
         sqlx::query!(
-            "INSERT INTO circle_involvements (person_id, circle_id, interval_number, status, implicit_counter) VALUES (1, 1, 1, 'Active', 0)"
+            "INSERT INTO circle_involvements (person_id, circle_id, interval_number, project_id, status, implicit_counter) VALUES (1, 1, 1, 1, 'Active', 0)"
         )
         .execute(&pool)
         .await
