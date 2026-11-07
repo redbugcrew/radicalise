@@ -120,7 +120,7 @@ ALTER TABLE peer_enrollments_copy RENAME TO peer_enrollments;
 CREATE TABLE intervals_copy (
   number INTEGER NOT NULL,
 	start_date TEXT NOT NULL,
-	end_date TEXT NOT NULL,
+	end_date TEXT,
 	project_id INTEGER NOT NULL,
   processed_implicit_involvements BOOLEAN DEFAULT FALSE,
   processed_peer_roles BOOLEAN DEFAULT FALSE,

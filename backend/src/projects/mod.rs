@@ -51,7 +51,7 @@ pub async fn create_project(
     let user_id = match auth_session.user().await {
         Some(user) => UserId::new(user.id),
         None => {
-            eprintln!("Unauthorized access to get_visible_projects");
+            println!("Unauthorized access to get_visible_projects");
             return (StatusCode::UNAUTHORIZED, ()).into_response();
         }
     };
