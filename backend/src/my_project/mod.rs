@@ -4,7 +4,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     auth::auth_backend::AuthSession,
-    intervals::repo::find_interval_by_number,
+    intervals::repo::find_interval,
     my_project::{
         events::ProjectEvent,
         repo::{InitialData, IntervalData, find_interval_data},
@@ -77,10 +77,10 @@ async fn get_project_state(
     let initial_data = match &initial_data.current_interval_data {
         Some(current_interval_data) => {
             // Fetch the circles for this person
-            let current_interval_id = current_interval_data.interval.typed_id();
+            let current_interval_number = current_interval_data.interval.typed_number();
 
             let my_circles =
-                match involvements_repo::find_circles_for_person_in_interval(person.typed_id(), current_interval_id, &pool).await {
+                match involvements_repo::find_circles_for_person_in_interval(person.typed_id(), current_interval_number, &pool).await {
                     Ok(circles) => circles,
                     Err(e) => return db_error(e, "Failed to find circles for person in interval"),
                 };
@@ -114,12 +114,12 @@ async fn get_interval_data(
     let project_id = ProjectId::new(project_id);
     let interval_number = IntervalNumber::new(interval_number, project_id.clone());
 
-    let interval: Interval = match find_interval_by_number(interval_number, &pool).await {
+    let interval: Interval = match find_interval(interval_number, &pool).await {
         Ok(interval) => interval,
         Err(e) => return db_error(e, "Failed to find interval"),
     };
 
-    let interval_data = match find_interval_data(&interval, project_id.clone(), &pool).await {
+    let interval_data = match find_interval_data(&interval, &pool).await {
         Ok(data) => data,
         Err(e) => return db_error(e, "Failed to find interval data"),
     };
@@ -140,7 +140,8 @@ async fn get_interval_data(
     };
 
     let my_circles =
-        match involvements_repo::find_circles_for_person_in_interval(person.typed_id(), interval_data.interval.typed_id(), &pool).await {
+        match involvements_repo::find_circles_for_person_in_interval(person.typed_id(), interval_data.interval.typed_number(), &pool).await
+        {
             Ok(circles) => circles,
             Err(e) => return db_error(e, "Failed to find circles for person in interval"),
         };

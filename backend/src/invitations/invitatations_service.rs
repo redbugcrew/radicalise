@@ -115,17 +115,15 @@ pub async fn invite_person(
     let new_involvement = CircleInvolvement {
         person_id: person.id,
         circle_id: circle.id,
-        interval_id: current_interval.id,
         status: InvolvementStatus::Invited,
-        ..Default::default()
+        ..CircleInvolvement::new(current_interval.typed_number())
     };
     let involvement_record = match insert_circle_involvement(new_involvement.clone().into(), pool).await {
         Ok(record) => record,
         Err(InsertRecordError::RecordAlreadyExists) => find_circle_involvement(
-            project_id.clone(),
             CircleId::new(circle.id),
             PersonId::new(person.id),
-            current_interval.typed_id(),
+            current_interval.typed_number(),
             pool,
         )
         .await
@@ -349,10 +347,10 @@ async fn reconcile_involvement(
 
     // If involvement is for the wrong interval, don't delete it, just clear the local var
     maybe_involvement = match maybe_involvement {
-        Some(inv) if inv.interval_id != current_interval.id => {
+        Some(inv) if inv.interval_number != current_interval.number => {
             println!(
-                "Involvement interval_id {:?} does not match current interval_id {:?}, ignoring involvement",
-                inv.interval_id, current_interval.id
+                "Involvement interval_number {:?} does not match current interval_number {:?}, ignoring involvement",
+                inv.interval_number, current_interval.number
             );
             None
         }
@@ -367,9 +365,8 @@ async fn reconcile_involvement(
             CircleInvolvement {
                 person_id: person.id,
                 circle_id: circle_id.id,
-                interval_id: current_interval.id,
                 status: InvolvementStatus::Onboarding,
-                ..Default::default()
+                ..CircleInvolvement::new(current_interval.typed_number())
             }
             .into(),
             pool,
@@ -427,7 +424,7 @@ mod tests {
             .await
             .expect("Failed to insert test person");
         sqlx::query!(
-            "INSERT INTO intervals (id, number, start_date, end_date, project_id) VALUES (1, 1, date('now', '-1 day'), date('now', '+30 days'), 1)"
+            "INSERT INTO intervals (number, start_date, end_date, project_id) VALUES (1, date('now', '-1 day'), date('now', '+30 days'), 1)"
         )
         .execute(&pool)
         .await
@@ -437,8 +434,8 @@ mod tests {
 
     fn interval_1() -> Interval {
         Interval {
-            id: 1,
             number: 1,
+            project_id: 1,
             start_date: "2026-01-01".to_string(),
             end_date: Some("2026-03-31".to_string()),
         }
@@ -546,8 +543,9 @@ mod tests {
 
         // Verify a circle_involvement exists for this person in the correct circle and current interval, in Onboarding status
         let involvement_row = sqlx::query!(
-            "SELECT ci.status FROM circle_involvements ci
-             JOIN intervals i ON ci.interval_id = i.id
+            "SELECT ci.status
+             FROM circle_involvements ci
+             JOIN intervals i ON ci.interval_number = i.number
              WHERE ci.person_id = ?
                AND ci.circle_id = 1
                AND i.start_date <= date('now')
@@ -588,16 +586,16 @@ mod tests {
         };
 
         // Insert interval 2
-        sqlx::query!("INSERT INTO intervals (id, number, start_date, end_date, project_id) VALUES (32, 2,'2026-04-01', '2026-06-30', 1)")
+        sqlx::query!("INSERT INTO intervals (number, start_date, end_date, project_id) VALUES (2,'2026-04-01', '2026-06-30', 1)")
             .execute(&pool)
             .await
             .expect("Failed to insert interval 2");
 
         let interval_2 = Interval {
-            id: 32,
             number: 2,
             start_date: "2026-04-01".to_string(),
             end_date: Some("2026-06-30".to_string()),
+            project_id: 1,
         };
 
         // Invite the person in interval 1
@@ -637,7 +635,7 @@ mod tests {
             "SELECT ci.status FROM circle_involvements ci
              WHERE ci.person_id = ?
                AND ci.circle_id = 1
-               AND ci.interval_id = 32",
+               AND ci.interval_number = 2",
             person_row.id
         )
         .fetch_one(&pool)
@@ -722,7 +720,7 @@ mod tests {
 
         // The accepter should now have an onboarding involvement in circle 1, interval 1.
         let accepter_involvement = sqlx::query!(
-            "SELECT status FROM circle_involvements WHERE person_id = ? AND circle_id = 1 AND interval_id = 1",
+            "SELECT status FROM circle_involvements WHERE person_id = ? AND circle_id = 1 AND interval_number = 1",
             accepter_person.id
         )
         .fetch_one(&pool)

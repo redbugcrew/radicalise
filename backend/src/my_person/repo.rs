@@ -7,7 +7,7 @@ use crate::{
     intervals::repo::find_interval,
     my_project::repo::{IntervalData, find_all_crew_involvements, find_interval_involvement_data_for_circles_and_person},
     peer_roles::enrollments_repo::find_peer_enrollments_for_interval_and_person,
-    shared::entities::{CrewId, CrewInvolvement, IntervalId, Person, PersonId, ProjectId, UserId},
+    shared::entities::{CrewId, CrewInvolvement, IntervalNumber, Person, PersonId, ProjectId, UserId},
 };
 
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
@@ -23,21 +23,20 @@ pub struct MyInitialData {
 }
 
 pub async fn find_interval_data_for_person(
-    project_id: ProjectId,
     person_id: PersonId,
-    interval_id: IntervalId,
+    interval_number: IntervalNumber,
     pool: &SqlitePool,
 ) -> Result<PersonIntervalData, sqlx::Error> {
-    let interval = find_interval(interval_id.clone(), pool).await?;
+    let interval = find_interval(interval_number.clone(), pool).await?;
 
-    let circle_ids = find_all_circles_ids(project_id.clone(), pool).await?;
+    let circle_ids = find_all_circles_ids(interval_number.project_id.clone(), pool).await?;
 
     let circle_involvements_result =
-        find_interval_involvement_data_for_circles_and_person(person_id.clone(), circle_ids, interval_id.clone(), project_id, pool).await?;
+        find_interval_involvement_data_for_circles_and_person(person_id.clone(), circle_ids, interval_number.clone(), pool).await?;
 
-    let crew_involvements_result = find_all_crew_involvements(interval_id.clone(), pool).await?;
+    let crew_involvements_result = find_all_crew_involvements(interval_number.clone(), pool).await?;
 
-    let enrollments = find_peer_enrollments_for_interval_and_person(&interval_id, &person_id, pool).await?;
+    let enrollments = find_peer_enrollments_for_interval_and_person(&interval_number, &person_id, pool).await?;
 
     let result = IntervalData {
         interval,
@@ -71,15 +70,15 @@ pub async fn find_initial_data_for_user(project_id: ProjectId, user_id: UserId, 
 // Returns the ids of all potentially impacted crews
 pub async fn update_crew_involvements(
     person_id: PersonId,
-    interval_id: IntervalId,
+    interval_number: IntervalNumber,
     involvements: Vec<CrewInvolvement>,
     pool: &SqlitePool,
 ) -> Result<Vec<CrewId>, sqlx::Error> {
-    let existing = find_my_crew_involvements(person_id.clone(), interval_id.clone(), pool).await?;
+    let existing = find_my_crew_involvements(person_id.clone(), interval_number.clone(), pool).await?;
 
     // Ensure all the involvements have the same person_id and interval_id
     for involvement in &involvements {
-        if involvement.person_id != person_id.id || involvement.interval_id != interval_id.id {
+        if involvement.person_id != person_id.id || involvement.interval_number != interval_number.number {
             eprintln!("Mismatched crew involvement: {:?}", involvement);
             return Err(sqlx::Error::RowNotFound);
         }
@@ -109,16 +108,17 @@ pub async fn update_crew_involvements(
 
 pub async fn find_my_crew_involvements(
     person_id: PersonId,
-    interval_id: IntervalId,
+    interval_number: IntervalNumber,
     pool: &SqlitePool,
 ) -> Result<Vec<CrewInvolvement>, sqlx::Error> {
     sqlx::query_as!(
         CrewInvolvement,
-        "SELECT id, person_id, crew_id, interval_id, convenor, volunteered_convenor
+        "SELECT id, person_id, crew_id, interval_number, project_id, convenor, volunteered_convenor
         FROM crew_involvements
-        WHERE person_id = ? AND interval_id = ?",
+        WHERE person_id = ? AND interval_number = ? AND project_id = ?",
         person_id.id,
-        interval_id.id
+        interval_number.number,
+        interval_number.project_id.id
     )
     .fetch_all(pool)
     .await
@@ -151,14 +151,15 @@ pub async fn upsert_crew_involvements(involvements: Vec<CrewInvolvement>, pool: 
 
     for involvement in involvements {
         sqlx::query!(
-            "INSERT INTO crew_involvements (person_id, crew_id, interval_id, convenor, volunteered_convenor)
-            VALUES (?, ?, ?, ?, ?)
-            ON CONFLICT (person_id, crew_id, interval_id) DO UPDATE SET
+            "INSERT INTO crew_involvements (person_id, crew_id, interval_number, project_id, convenor, volunteered_convenor)
+            VALUES (?, ?, ?, ?, ?, ?)
+            ON CONFLICT (person_id, crew_id, interval_number, project_id) DO UPDATE SET
                 convenor = excluded.convenor,
                 volunteered_convenor = excluded.volunteered_convenor",
             involvement.person_id,
             involvement.crew_id,
-            involvement.interval_id,
+            involvement.interval_number,
+            involvement.project_id,
             involvement.convenor,
             involvement.volunteered_convenor
         )

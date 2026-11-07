@@ -50,16 +50,14 @@ pub async fn create_project_and_dependent_records(
     let today = chrono::Utc::now().date_naive();
     let interval = insert_zeroth_interval(today, project.typed_id(), &mut *transaction).await?;
 
-    change_project_interval(project.typed_id(), interval.typed_id(), &mut *transaction).await?;
+    change_project_interval(project.typed_id(), interval.typed_number(), &mut *transaction).await?;
 
     let involvement = CircleInvolvement {
         person_id: person.id,
-        project_id: project.id,
         circle_id: circle.id,
-        interval_id: interval.id,
         status: InvolvementStatus::Active,
         participation_intention: Some(ParticipationIntention::OptIn),
-        ..CircleInvolvement::default()
+        ..CircleInvolvement::new(interval.typed_number())
     };
     insert_circle_involvement(involvement.into(), &mut *transaction).await?;
 
