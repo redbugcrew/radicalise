@@ -1,9 +1,10 @@
-import { Stack, Title, Text } from "@mantine/core"
+import { Stack, Title, Text, Group, ActionIcon } from "@mantine/core"
 import CrewsForInterval from "./CrewsForInterval"
 import { Anchor, IntervalSelector, NoData } from "../../components"
 import { useAppSelector } from "../../store"
 import { useSelectedInterval } from "../intervals/WithIntervalData"
 import { useCurrentInterval } from "../../store/current_interval"
+import { IconPlus } from "@tabler/icons-react"
 
 export default function Crews() {
   const intervals = useAppSelector((state) => state.intervals)
@@ -12,7 +13,15 @@ export default function Crews() {
 
   return (
     <Stack>
-      <Title order={1}>Crews</Title>
+      <Group justify="space-between">
+        <Title order={1}>Crews</Title>
+        <Anchor href="new">
+          <ActionIcon variant="filled" aria-label="Create new Crew" size="lg">
+            <IconPlus style={{ width: "70%", height: "70%" }} stroke={2} />
+          </ActionIcon>
+        </Anchor>
+      </Group>
+
       <IntervalSelector intervals={intervals} selectedInterval={selectedInterval} currentInterval={currentInterval} />
 
       {selectedInterval ? (

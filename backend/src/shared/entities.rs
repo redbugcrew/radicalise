@@ -424,6 +424,18 @@ pub struct CrewWithLinks {
     pub links: Option<Vec<Link>>,
 }
 
+impl CrewWithLinks {
+    pub fn new(crew: Crew, links: Option<Vec<Link>>) -> Self {
+        CrewWithLinks {
+            id: crew.id,
+            name: crew.name,
+            description: crew.description,
+            project_id: crew.project_id,
+            links,
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, ToSchema, sqlx::Type, Debug, Clone)]
 pub enum EventResponseExpectation {
     Expected,

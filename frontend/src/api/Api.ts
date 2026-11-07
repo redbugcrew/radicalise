@@ -570,7 +570,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 1.6.1
+ * @version 1.6.2
  * @license
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
@@ -783,6 +783,22 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<AppEvent[], string>({
         path: `/api/projects/${projectId}/circles/${circleId}`,
         method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CreateCrew
+     * @request POST:/api/projects/{project_id}/crews
+     */
+    createCrew: (projectId: number, data: CrewWithLinks, params: RequestParams = {}) =>
+      this.request<AppEvent[], any>({
+        path: `/api/projects/${projectId}/crews`,
+        method: "POST",
         body: data,
         type: ContentType.Json,
         format: "json",

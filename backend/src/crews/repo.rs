@@ -47,6 +47,26 @@ pub async fn update_crew(project_id: ProjectId, crew: Crew, pool: &SqlitePool) -
         project_id.id
     )
     .execute(pool)
+    .await
+    .map_err(|e| {
+        println!("Error updating crew: {:?}", e);
+        e
+    })?;
+
+    Ok(crew)
+}
+
+pub async fn create_crew(project_id: ProjectId, crew: Crew, pool: &SqlitePool) -> Result<Crew, sqlx::Error> {
+    let crew = sqlx::query_as!(
+        Crew,
+        "INSERT INTO crews (name, description, project_id)
+        VALUES (?, ?, ?)
+        RETURNING id AS \"id!\", name, description, project_id",
+        crew.name,
+        crew.description,
+        project_id.id
+    )
+    .fetch_one(pool)
     .await?;
 
     Ok(crew)
@@ -67,13 +87,25 @@ pub async fn update_crew_with_links(project_id: ProjectId, crew: CrewWithLinks, 
 
     let links = update_links_for_owner(crew.id, "crews".to_string(), crew.links, pool).await?;
 
-    Ok(CrewWithLinks {
-        id: crew_result.id,
-        name: crew_result.name,
-        description: crew_result.description,
-        project_id: crew_result.project_id,
-        links,
-    })
+    Ok(CrewWithLinks::new(crew_result, links))
+}
+
+pub async fn create_crew_with_links(project_id: ProjectId, crew: CrewWithLinks, pool: &SqlitePool) -> Result<CrewWithLinks, sqlx::Error> {
+    let crew_result = create_crew(
+        project_id,
+        Crew {
+            id: crew.id,
+            name: crew.name,
+            description: crew.description,
+            project_id: crew.project_id,
+        },
+        pool,
+    )
+    .await?;
+
+    let links = update_links_for_owner(crew_result.id, "crews".to_string(), crew.links, pool).await?;
+
+    Ok(CrewWithLinks::new(crew_result, links))
 }
 
 pub async fn find_crew_involvements(
