@@ -21,35 +21,45 @@ function absDuration(duration: Duration): Duration {
 }
 
 export default function IntervalChanger({ interval, nextInterval, onNextInterval }: IntervalChangerProps) {
-  if (!interval) return null
-
   const now = new Date()
-  const duration = intervalToDuration({
-    start: now,
-    end: interval.end_date,
-  })
-  const endsInPast = new Date(interval.end_date) < now
+  const endsInPast = interval?.end_date && new Date(interval.end_date) < now
   const durationOptions: FormatDurationOptions = { format: ["years", "months", "days", "hours"], delimiter: ", " }
+  const duration =
+    interval?.end_date &&
+    intervalToDuration({
+      start: now,
+      end: interval.end_date,
+    })
 
   return (
     <Card>
       <Group justify="space-between" align="flex-start">
         <Stack gap={0}>
           <Title order={2} size="md">
-            Current interval{" "}
-            <Text span c="blue" fw={700}>
-              {interval.id}
-            </Text>
+            {!interval ? (
+              "No current interval"
+            ) : (
+              <>
+                Current interval{" "}
+                <Text span c="blue" fw={700}>
+                  {interval.number}
+                </Text>
+              </>
+            )}
           </Title>
-          {endsInPast ? (
-            <Text c="red">Was due to end {formatDuration(absDuration(duration), durationOptions)} ago</Text>
+          {interval && duration ? (
+            endsInPast ? (
+              <Text c="red">Was due to end {formatDuration(absDuration(duration), durationOptions)} ago</Text>
+            ) : (
+              <Text>Due to end in {formatDuration(duration, durationOptions)}</Text>
+            )
           ) : (
-            <Text>Due to end in {formatDuration(duration, durationOptions)}</Text>
+            <Text>When you're ready, you can kick things off</Text>
           )}
         </Stack>
         {nextInterval && (
           <ActionButton color="blue" onClick={onNextInterval}>
-            Start interval {nextInterval.id}
+            Start interval {nextInterval.number}
           </ActionButton>
         )}
       </Group>

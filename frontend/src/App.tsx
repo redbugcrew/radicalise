@@ -86,7 +86,7 @@ const router = createBrowserRouter([
   },
   {
     path: "project",
-    element: <LoadMyProjects />,
+    element: <LoadMyProjects withRedirect />,
 
     children: [
       {

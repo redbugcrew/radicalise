@@ -1,5 +1,5 @@
 import { useForm } from "@mantine/form"
-import { Button, Stack, Textarea, TextInput } from "@mantine/core"
+import { Button, Stack, Switch, Textarea, TextInput } from "@mantine/core"
 import type { Project, Link } from "../../../api/Api"
 import LinksInput, { linksValidator } from "../../../components/links/LinksInput/LinksInput"
 import { DisplayActionResult, DisplayFormError, useOnSubmitWithResult, type ActionPromiseResult } from "../../../components/ActionResult"
@@ -17,6 +17,8 @@ interface ProjectFormValues {
   links: Link[]
   name?: string | null
   slug?: string | null
+  feature_events: boolean
+  feature_peer_roles: boolean
 }
 
 function convertProjectToFormValues(input?: Project | null | undefined): ProjectFormValues {
@@ -24,6 +26,8 @@ function convertProjectToFormValues(input?: Project | null | undefined): Project
     return {
       id: 0,
       links: [],
+      feature_events: false,
+      feature_peer_roles: false,
     }
   } else {
     return {
@@ -78,6 +82,21 @@ export default function ProjectForm({ project, onSubmit, noLinks }: ProjectFormP
             key="description"
             {...form.getInputProps("description")}
           />
+
+          <Switch
+            label="Enable Events"
+            key="feature_events"
+            {...form.getInputProps("feature_events", { type: "checkbox" })}
+            description="Enable the event management feature"
+          />
+
+          <Switch
+            label="Enable Peer Roles"
+            key="feature_peer_roles"
+            {...form.getInputProps("feature_peer_roles", { type: "checkbox" })}
+            description="Enable the peer roles feature"
+          />
+
           {!noLinks && <LinksInput label="Links" placeholder="Add a link" key="links" {...form.getInputProps("links")} />}
         </Stack>
 

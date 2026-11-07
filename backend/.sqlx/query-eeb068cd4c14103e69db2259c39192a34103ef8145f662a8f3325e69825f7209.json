@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE projects\n         SET\n            name = ?, description = ?, slug = ?, feature_events = ?, feature_peer_roles = ?\n         WHERE id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 6
+    },
+    "nullable": []
+  },
+  "hash": "eeb068cd4c14103e69db2259c39192a34103ef8145f662a8f3325e69825f7209"
+}

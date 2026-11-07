@@ -1,6 +1,6 @@
-import { ActionIcon, Group, Stack, Title } from "@mantine/core"
+import { ActionIcon, Group, Stack, Text, Title } from "@mantine/core"
 import { handleAppEvents, useAppSelector } from "../../store"
-import { Anchor, IntervalsTable } from "../../components"
+import { Anchor, IntervalsTable, NoData } from "../../components"
 import { IconCalendarPlus } from "@tabler/icons-react"
 import IntervalChanger from "../../components/intervals/IntervalChanger"
 import { useNextInterval } from "../../store/intervals"
@@ -44,7 +44,16 @@ export default function Intervals() {
 
       <IntervalChanger interval={currentInterval} nextInterval={nextInterval} onNextInterval={onNextInterval} />
 
-      <IntervalsTable intervals={intervals} currentIntervalId={currentInterval?.id || null} />
+      {intervals.length === 0 ? (
+        <NoData title="This project has no intervals yet">
+          <Stack>
+            <Text>Intervals are the time periods that we plan participation around.</Text>
+            <Anchor href="new">Create the first interval</Anchor>
+          </Stack>
+        </NoData>
+      ) : (
+        <IntervalsTable intervals={intervals} currentIntervalId={currentInterval?.id || null} />
+      )}
     </Stack>
   )
 }

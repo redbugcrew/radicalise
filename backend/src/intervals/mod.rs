@@ -4,10 +4,11 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
     auth::auth_backend::AuthSession,
-    intervals::{events::IntervalsEvent, tasks::add_interval_implicit_involvements},
+    intervals::{events::IntervalsEvent, repo::parse_date_only, tasks::add_interval_implicit_involvements},
     peer_roles::{AssignPeerRolesError, assign_interval_peer_roles},
     realtime::RealtimeState,
     shared::{
+        api_helpers::db_error,
         entities::{Interval, ProjectId},
         events::AppEvent,
     },
@@ -52,7 +53,7 @@ async fn create_interval(
             realtime_state.broadcast_app_event(Some(auth_session), event.clone()).await;
             (StatusCode::CREATED, Json(vec![event])).into_response()
         }
-        Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
+        Err(e) => db_error(e, "inserting interval"),
     }
 }
 
@@ -131,6 +132,22 @@ async fn start_next_interval(
             return StartNextIntervalError::InternalServerError.into_response();
         }
     };
+
+    if current_interval.end_date.is_none() {
+        let next_start_date = parse_date_only(&next_interval.start_date).unwrap_or(chrono::Utc::now().date_naive());
+        let this_start_date = parse_date_only(&current_interval.start_date).unwrap_or(chrono::Utc::now().date_naive());
+        let mut new_end_date = next_start_date - chrono::Duration::days(1);
+        if new_end_date < this_start_date {
+            new_end_date = this_start_date;
+        }
+
+        if repo::set_interval_end_date(current_interval.typed_id(), new_end_date, &pool)
+            .await
+            .is_err()
+        {
+            return StartNextIntervalError::InternalServerError.into_response();
+        }
+    }
 
     match repo::change_project_interval(project_id.clone(), next_interval.typed_id(), &pool).await {
         Ok(_) => {

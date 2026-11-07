@@ -15,14 +15,15 @@ export function findPreviousInterval(intervals: Interval[], currentIntervalId: n
 }
 
 const intervalsSlice = createSlice({
-  name: "people",
+  name: "intervals",
   initialState: [] as IntervalsState,
   reducers: {
     intervalsLoaded: (_state: IntervalsState, action: PayloadAction<IntervalsState>) => action.payload,
     intervalCreated: (state, action: PayloadAction<Interval>) => {
+      const withoutNew = state.filter((interval) => interval.id !== action.payload.id)
       const newInterval = action.payload
-      state.push(newInterval)
-      return state
+
+      return withoutNew.concat(newInterval)
     },
   },
 })
@@ -38,7 +39,9 @@ export function useNextInterval(): Interval | null {
   const allIntervals = useAppSelector((state) => state.intervals)
   const currentInterval = useAppSelector((state) => state.currentInterval?.interval)
 
-  if (!currentInterval) return null
+  if (!currentInterval) {
+    return allIntervals.length === 0 ? null : allIntervals[0]
+  }
 
   const currentIntervalIndex = allIntervals.findIndex((i) => i.id === currentInterval.id)
   if (currentIntervalIndex === -1 || currentIntervalIndex === allIntervals.length - 1) {

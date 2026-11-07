@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE intervals\n         SET end_date = ?\n         WHERE id = ? AND end_date IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "3bbcf63a1f79f1b3b807a60884c12a3bcce94aa7fe1b24eeddcf32b2da739f4b"
+}

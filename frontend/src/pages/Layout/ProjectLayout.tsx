@@ -49,13 +49,17 @@ export default function ProjectLayout() {
           <NavLink label="Dashboard" href="dashboard" leftSection={<IconHome2 size={18} />} onClick={toggle} />
           <NavLink label="People" href="people" leftSection={<IconUsers size={18} />} onClick={toggle} />
           <NavLink label="Crews" href="crews" leftSection={<IconUsersGroup size={18} />} onClick={toggle} />
-          <NavLink label="Events" href="events" leftSection={<IconCalendar size={18} />} onClick={toggle} />
+          {project?.feature_events && <NavLink label="Events" href="events" leftSection={<IconCalendar size={18} />} onClick={toggle} />}
         </AppShell.Section>
         <AppShell.Section className={classes.settings_section}>
           <h3 className={classes.section_title}>Settings</h3>
           <NavLink label="Intervals" href="intervals" leftSection={<IconCalendarMonth size={18} />} onClick={toggle} />
-          <NavLink label="Peer Roles" href="peer_roles" leftSection={<IconUsersGroup size={18} />} onClick={toggle} />
-          <NavLink label="Event Templates" href="events/event_templates" leftSection={<IconCalendarCog size={18} />} onClick={toggle} />
+          {project?.feature_peer_roles && (
+            <NavLink label="Peer Roles" href="peer_roles" leftSection={<IconUsersGroup size={18} />} onClick={toggle} />
+          )}
+          {project?.feature_events && (
+            <NavLink label="Event Templates" href="events/event_templates" leftSection={<IconCalendarCog size={18} />} onClick={toggle} />
+          )}
         </AppShell.Section>
 
         <AppShell.Section className={classes.footer_section}>

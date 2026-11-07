@@ -427,7 +427,7 @@ mod tests {
             .await
             .expect("Failed to insert test person");
         sqlx::query!(
-            "INSERT INTO intervals (id, start_date, end_date, project_id) VALUES (1, date('now', '-1 day'), date('now', '+30 days'), 1)"
+            "INSERT INTO intervals (id, number, start_date, end_date, project_id) VALUES (1, 1, date('now', '-1 day'), date('now', '+30 days'), 1)"
         )
         .execute(&pool)
         .await
@@ -438,8 +438,9 @@ mod tests {
     fn interval_1() -> Interval {
         Interval {
             id: 1,
+            number: 1,
             start_date: "2026-01-01".to_string(),
-            end_date: "2026-03-31".to_string(),
+            end_date: Some("2026-03-31".to_string()),
         }
     }
 
@@ -587,15 +588,16 @@ mod tests {
         };
 
         // Insert interval 2
-        sqlx::query!("INSERT INTO intervals (id, start_date, end_date, project_id) VALUES (2, '2026-04-01', '2026-06-30', 1)")
+        sqlx::query!("INSERT INTO intervals (id, number, start_date, end_date, project_id) VALUES (32, 2,'2026-04-01', '2026-06-30', 1)")
             .execute(&pool)
             .await
             .expect("Failed to insert interval 2");
 
         let interval_2 = Interval {
-            id: 2,
+            id: 32,
+            number: 2,
             start_date: "2026-04-01".to_string(),
-            end_date: "2026-06-30".to_string(),
+            end_date: Some("2026-06-30".to_string()),
         };
 
         // Invite the person in interval 1
@@ -635,7 +637,7 @@ mod tests {
             "SELECT ci.status FROM circle_involvements ci
              WHERE ci.person_id = ?
                AND ci.circle_id = 1
-               AND ci.interval_id = 2",
+               AND ci.interval_id = 32",
             person_row.id
         )
         .fetch_one(&pool)

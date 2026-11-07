@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT id, name, description, slug\n        FROM projects WHERE id = ?",
+  "query": "SELECT id, number, start_date, end_date FROM intervals WHERE number = ? AND project_id = ?",
   "describe": {
     "columns": [
       {
@@ -9,54 +9,54 @@
         "type_info": "Integer",
         "origin": {
           "Table": {
-            "table": "projects",
+            "table": "intervals",
             "name": "id"
           }
         }
       },
       {
-        "name": "name",
+        "name": "number",
         "ordinal": 1,
-        "type_info": "Text",
+        "type_info": "Integer",
         "origin": {
           "Table": {
-            "table": "projects",
-            "name": "name"
+            "table": "intervals",
+            "name": "number"
           }
         }
       },
       {
-        "name": "description",
+        "name": "start_date",
         "ordinal": 2,
         "type_info": "Text",
         "origin": {
           "Table": {
-            "table": "projects",
-            "name": "description"
+            "table": "intervals",
+            "name": "start_date"
           }
         }
       },
       {
-        "name": "slug",
+        "name": "end_date",
         "ordinal": 3,
         "type_info": "Text",
         "origin": {
           "Table": {
-            "table": "projects",
-            "name": "slug"
+            "table": "intervals",
+            "name": "end_date"
           }
         }
       }
     ],
     "parameters": {
-      "Right": 1
+      "Right": 2
     },
     "nullable": [
       false,
       false,
-      true,
-      false
+      false,
+      true
     ]
   },
-  "hash": "b1c8ee465cefc85e4905a896c08b733d74ef79a89189a6994d80cf573ea4ef5a"
+  "hash": "e3c5e1a81143e1adb2019bba564829f0c922a5eaad477b0e34f937f42abedad6"
 }

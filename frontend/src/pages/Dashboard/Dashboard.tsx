@@ -4,7 +4,7 @@ import { useAppSelector } from "../../store"
 import { AttendanceIntention, type CalendarEvent, type CircleInvolvement, type CrewInvolvement, type Interval } from "../../api/Api"
 import DateText from "../../components/DateText"
 import classes from "./Dashboard.module.css"
-import { CrewsList, LinksStack } from "../../components"
+import { Anchor, CrewsList, LinksStack, NoData } from "../../components"
 import { compareStrings } from "../../utilities/comparison"
 import { isFuture } from "date-fns"
 import EventsList from "../../contexts/events/components/EventsList"
@@ -191,6 +191,15 @@ export default function Dashboard() {
       </Title>
       <Stack gap="lg">
         <Stack gap="md">
+          {!currentInterval && (
+            <NoData title="No current interval">
+              <Stack>
+                <Text>This project has not yet started it's first interval.</Text>
+                <Anchor href="../intervals">Manage project intervals</Anchor>
+              </Stack>
+            </NoData>
+          )}
+
           {myCurrentCircle && currentInterval && (
             <MyIntervalPartipationCard interval={currentInterval} circleInvolvement={myCurrentCircle} current={true} />
           )}
@@ -206,13 +215,19 @@ export default function Dashboard() {
             }}
           </WithIntervalData>
         </Stack>
-        <MyEvents personId={personId} />
-        <MyPeerRoles personId={personId} />
+
+        {project.feature_events && <MyEvents personId={personId} />}
+
+        {project.feature_peer_roles && <MyPeerRoles personId={personId} />}
+
         {myCurrentCrewInvolvements && <MyCrews personId={myData.person_id} myInvolvements={myCurrentCrewInvolvements} />}
-        <Stack gap="md">
-          <Title order={2}>Resources</Title>
-          <LinksStack links={project.links} />
-        </Stack>
+
+        {project.links.length > 0 && (
+          <Stack gap="md">
+            <Title order={2}>Resources</Title>
+            <LinksStack links={project.links} />
+          </Stack>
+        )}
       </Stack>
     </Container>
   )

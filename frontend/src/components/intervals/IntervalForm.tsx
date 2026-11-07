@@ -8,15 +8,19 @@ import { formDateFormat } from "../../utilities/date"
 
 export interface IntervalInput {
   id: number | null
+  number: number | null
   start_date: Iso.Date | null
   end_date: Iso.Date | null
 }
 
 export function lastIntervalToInput(interval: Interval | null | undefined): IntervalInput | null {
   if (!interval) return null
+
+  const newStartDate = interval.end_date ? dateFns.add(interval.end_date as Iso.Date, { days: 1 }) : dateFns.now()
+
   return {
     id: null,
-    start_date: dateFns.add(interval.end_date as Iso.Date, { days: 1 }),
+    start_date: newStartDate,
     end_date: null,
   } as IntervalInput
 }
@@ -34,6 +38,7 @@ export default function IntervalForm({ value, minDate, onSubmit }: IntervalFormP
       value ||
       ({
         id: 0,
+        number: 0,
         start_date: dateFns.now(),
         end_date: null,
       } as IntervalInput),
@@ -54,6 +59,7 @@ export default function IntervalForm({ value, minDate, onSubmit }: IntervalFormP
   const handleSubmit = (values: IntervalInput) => {
     const interval: Interval = {
       id: values.id || 0,
+      number: values.number || 0,
       start_date: values.start_date as Iso.Date,
       end_date: values.end_date as Iso.Date,
     }

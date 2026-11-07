@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT MAX(id) AS id\n        FROM intervals\n        WHERE\n            project_id = ?",
+  "query": "SELECT MAX(number) AS id\n        FROM intervals\n        WHERE\n            project_id = ?",
   "describe": {
     "columns": [
       {
@@ -17,5 +17,5 @@
       true
     ]
   },
-  "hash": "3bd2af3b147cfc9e7a8fa42c98d8e8120572fe02cd2add6829b4283069fe198c"
+  "hash": "5cfb138c4ee97fd6b8864dd8c0d94f0f51f23d4449fd4fe55f331ea6adca75b7"
 }

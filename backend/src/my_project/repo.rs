@@ -7,7 +7,7 @@ use crate::{
     circles::repo::{find_all_circles, find_all_circles_ids},
     crews::repo::find_all_crews_with_links,
     event_templates::repo::find_all_event_templates,
-    intervals::repo::find_current_interval,
+    intervals::repo::{find_all_intervals, find_current_interval},
     my_project::involvements_repo::{find_all_circle_involvements, find_all_circle_involvements_for_person},
     peer_roles::{enrollments_repo::find_peer_enrollments_for_interval, peer_roles_repo::find_all_peer_roles},
     people::repo::find_all_people,
@@ -56,7 +56,7 @@ pub struct InitialData {
 
 pub async fn find_project(project_id: ProjectId, pool: &SqlitePool) -> Result<Project, sqlx::Error> {
     sqlx::query!(
-        "SELECT id, name, description, slug
+        "SELECT id, name, description, slug, feature_events, feature_peer_roles
         FROM projects WHERE id = ?",
         project_id.id
     )
@@ -68,12 +68,14 @@ pub async fn find_project(project_id: ProjectId, pool: &SqlitePool) -> Result<Pr
         description: row.description,
         links: vec![], // Links are not fetched here, assuming they are handled elsewhere
         slug: row.slug,
+        feature_events: row.feature_events,
+        feature_peer_roles: row.feature_peer_roles,
     })
 }
 
 pub async fn find_project_by_slug(project_slug: String, pool: &SqlitePool) -> Result<Project, sqlx::Error> {
     sqlx::query!(
-        "SELECT id, name, description, slug
+        "SELECT id, name, description, slug, feature_events, feature_peer_roles
         FROM projects WHERE slug = ?",
         project_slug
     )
@@ -85,6 +87,8 @@ pub async fn find_project_by_slug(project_slug: String, pool: &SqlitePool) -> Re
         description: row.description,
         links: vec![], // Links are not fetched here, assuming they are handled elsewhere
         slug: row.slug,
+        feature_events: row.feature_events,
+        feature_peer_roles: row.feature_peer_roles,
     })
 }
 
@@ -97,7 +101,7 @@ pub async fn find_project_with_links(project_id: ProjectId, pool: &SqlitePool) -
 
 pub async fn find_projects_for_user(user_id: UserId, pool: &SqlitePool) -> Result<Vec<Project>, sqlx::Error> {
     sqlx::query!(
-        "SELECT p.id as id, name, description, slug
+        "SELECT p.id as id, name, description, slug, feature_events, feature_peer_roles
         FROM projects p
         JOIN people pe ON pe.project_id = p.id
         WHERE pe.user_id = ?",
@@ -113,6 +117,8 @@ pub async fn find_projects_for_user(user_id: UserId, pool: &SqlitePool) -> Resul
                 description: row.description,
                 links: vec![], // Links are not fetched here, assuming they are handled elsewhere
                 slug: row.slug,
+                feature_events: row.feature_events,
+                feature_peer_roles: row.feature_peer_roles,
             })
             .collect::<Vec<Project>>()
     })
@@ -156,13 +162,7 @@ pub async fn find_initial_data_for_project(project: Project, pool: &SqlitePool) 
 
     let crews = find_all_crews_with_links(project.typed_id(), pool).await?;
 
-    let intervals = sqlx::query_as!(
-        Interval,
-        "SELECT id, start_date, end_date FROM intervals WHERE project_id = ?",
-        project.id
-    )
-    .fetch_all(pool)
-    .await?;
+    let intervals = find_all_intervals(project.typed_id(), pool).await?;
 
     let event_templates = find_all_event_templates(project.typed_id(), pool).await?;
     let calendar_events = list_calendar_events_with_attendances(project.typed_id(), pool).await?;
@@ -207,12 +207,14 @@ pub async fn update_project(input: Project, project_id: ProjectId, pool: &Sqlite
     sqlx::query!(
         "UPDATE projects
          SET
-            name = ?, description = ?, slug = ?
+            name = ?, description = ?, slug = ?, feature_events = ?, feature_peer_roles = ?
          WHERE id = ?",
         input.name,
         input.description,
         input.slug,
-        project_id.id
+        input.feature_events,
+        input.feature_peer_roles,
+        project_id.id,
     )
     .execute(pool)
     .await?;

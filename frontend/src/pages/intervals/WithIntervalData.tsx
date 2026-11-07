@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { type Interval, type IntervalData } from "../../api/Api"
+import { type Interval } from "../../api/Api"
 import { useAppSelector } from "../../store"
 import { getApi } from "../../api"
 import { useLocation } from "react-router-dom"
@@ -17,38 +17,26 @@ interface WithIntervalDataProps {
   children: (props: WithIntervalDataChildProps) => React.ReactNode
 }
 
-const useHashIntervalId = (): number | null => {
+const useHashIntervalNumber = (): number | null => {
   const location = useLocation()
   const hash = location.hash
   if (hash.startsWith("#interval")) {
-    const idStr = hash.replace("#interval", "")
-    const id = parseInt(idStr, 10)
-    if (!isNaN(id)) {
-      return id
+    const numberStr = hash.replace("#interval", "")
+    const number = parseInt(numberStr, 10)
+    if (!isNaN(number)) {
+      return number
     }
   }
   return null
 }
 
 export const useSelectedInterval = (): Interval | null => {
-  const pathIntervalId = useHashIntervalId()
+  const pathIntervalNumber = useHashIntervalNumber()
   const currentInterval = useCurrentInterval()
   const allIntervals = useAppSelector((state) => state.intervals)
   const selectedInterval: Interval | null =
-    pathIntervalId == null ? currentInterval : allIntervals.find((i) => i.id === pathIntervalId) || null
+    pathIntervalNumber == null ? currentInterval : allIntervals.find((i) => i.number === pathIntervalNumber) || null
   return selectedInterval
-}
-
-export async function fetchIntervalData(intervalId: number, projectId: number): Promise<IntervalData | null> {
-  return getApi()
-    .api.getIntervalData(intervalId, projectId)
-    .then((data) => {
-      return data.data
-    })
-    .catch((error) => {
-      console.error("Error fetching interval data:", error)
-      return null
-    })
 }
 
 export default function WithIntervalData({ interval, children }: WithIntervalDataProps) {
@@ -63,7 +51,7 @@ export default function WithIntervalData({ interval, children }: WithIntervalDat
     setCacheKey((prevKey) => prevKey + 1)
   }
 
-  const tableKey = interval ? `${interval.id}-${cacheKey}` : "no-interval"
+  const tableKey = interval ? `${interval.number}-${cacheKey}` : "no-interval"
 
   useEffect(() => {
     if (!interval || !currentProjectId) {
@@ -78,7 +66,7 @@ export default function WithIntervalData({ interval, children }: WithIntervalDat
       const api = getApi()
 
       api.api
-        .getIntervalData(interval.id, currentProjectId)
+        .getIntervalData(interval.number, currentProjectId)
         .then((response) => {
           setIntervalData(response.data)
         })

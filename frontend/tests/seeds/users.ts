@@ -19,10 +19,11 @@ export class UserDbHelper {
       throw new Error(`No seed data found for user: ${username}`)
     }
 
-    this.db.prepare("DELETE FROM users WHERE email = ?").run(seed.email)
     const existingUser = this.db.prepare("SELECT id FROM users WHERE email = ?").get(seed.email) as { id: number }
     if (existingUser) {
-      this.db.prepare("DELETE FROM people WHERE user_id = ?").run(existingUser.id)
+      const userId = existingUser.id
+      this.db.prepare("DELETE FROM people WHERE user_id = ?").run(userId)
+      this.db.prepare("DELETE FROM users WHERE id = ?").run(userId)
     }
 
     const userStmt = this.db.prepare("INSERT INTO users (email, hashed_password) VALUES (?, ?)")

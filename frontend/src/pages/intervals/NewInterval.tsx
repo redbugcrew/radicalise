@@ -42,7 +42,7 @@ export default function NewInterval() {
           <Group>
             <Card withBorder bg="dark">
               <Title order={2} size="md">
-                Last interval #{lastInterval.id}
+                Last interval #{lastInterval.number}
               </Title>
               <Text>
                 <DateText date={lastInterval.start_date} /> - <DateText date={lastInterval.end_date} />
