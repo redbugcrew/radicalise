@@ -21,12 +21,8 @@ export default function EditCrew() {
     getApi()
       .api.updateCrew(projectId, values.id, values)
       .then((response) => {
-        if (response.status === 200) {
-          handleAppEvents(response.data)
-          navigate("/crews")
-        } else {
-          console.error("Failed to update crew:", response)
-        }
+        handleAppEvents(response.data)
+        navigate("../")
       })
       .catch((error) => {
         console.error("Error updating crew:", error)
@@ -39,7 +35,7 @@ export default function EditCrew() {
       <Title order={2} size="h4" mb="lg">
         {crew.name}
       </Title>
-      <CrewForm crew={crew} onSubmit={onSubmit} />
+      <CrewForm projectId={projectId} crew={crew} onSubmit={onSubmit} />
     </Container>
   )
 }

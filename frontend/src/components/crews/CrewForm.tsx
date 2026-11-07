@@ -4,15 +4,26 @@ import LinksInput, { optionalLinksValidator } from "../links/LinksInput/LinksInp
 import type { CrewWithLinks } from "../../store/crews"
 
 interface CrewFormProps {
-  crew: CrewWithLinks
+  crew?: CrewWithLinks
+  projectId: number
 
   onSubmit: (values: CrewWithLinks) => void
 }
 
-export default function CrewForm({ crew, onSubmit }: CrewFormProps) {
+function defaultValue(projectId: number): CrewWithLinks {
+  return {
+    id: -1,
+    project_id: projectId,
+    name: "",
+    description: "",
+    links: [],
+  }
+}
+
+export default function CrewForm({ crew, projectId, onSubmit }: CrewFormProps) {
   const form = useForm<CrewWithLinks>({
     mode: "controlled",
-    initialValues: { ...crew },
+    initialValues: { ...(crew ?? defaultValue(projectId)) },
     validate: {
       name: (value) => (value ? null : "Name is required"),
       description: (value) => (value ? null : "Description is required"),

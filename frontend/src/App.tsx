@@ -17,6 +17,7 @@ import {
   AcceptInvitation,
   BlankLayout,
   ProjectLayout,
+  NewCrew,
 } from "./pages"
 import { LoadSelectedProject, LoadProjectState, LoadMyProjects } from "./contexts/projects"
 import { buildRoutes as buildAuthRoutes } from "./contexts/auth"
@@ -141,6 +142,10 @@ const router = createBrowserRouter([
                       {
                         path: "",
                         element: <Crews />,
+                      },
+                      {
+                        path: "new",
+                        element: <NewCrew />,
                       },
                       {
                         path: ":crewId/edit",
