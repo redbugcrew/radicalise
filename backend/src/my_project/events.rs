@@ -4,6 +4,7 @@ use utoipa::ToSchema;
 use crate::shared::entities::{CircleInvolvement, CrewState, Project};
 
 #[derive(Serialize, Deserialize, ToSchema, Clone, Debug)]
+#[allow(clippy::enum_variant_names)]
 pub enum ProjectEvent {
     ProjectUpdated(Project),
     CircleInvolvementUpdated(CircleInvolvement),
