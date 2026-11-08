@@ -1,9 +1,9 @@
 import { Stack, Title, Text, Group, ActionIcon } from "@mantine/core"
 import CrewsForInterval from "./CrewsForInterval"
-import { Anchor, IntervalSelector, NoData } from "../../components"
-import { useAppSelector } from "../../store"
-import { useSelectedInterval } from "../intervals/WithIntervalData"
-import { useCurrentInterval } from "../../store/current_interval"
+import { Anchor, IntervalSelector, NoData } from "../../../components"
+import { useAppSelector } from "../../../store"
+import { useSelectedInterval } from "../../../pages/intervals/WithIntervalData"
+import { useCurrentInterval } from "../../../store/current_interval"
 import { IconPlus } from "@tabler/icons-react"
 
 export default function Crews() {

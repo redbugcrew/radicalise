@@ -1,7 +1,7 @@
-import type { Interval } from "../../api/Api"
-import { CrewsList } from "../../components"
-import { useAppSelector } from "../../store"
-import WithIntervalData from "../intervals/WithIntervalData"
+import type { Interval } from "../../../api/Api"
+import { default as CrewsList } from "../components/CrewsList"
+import { useAppSelector } from "../../../store"
+import WithIntervalData from "../../../pages/intervals/WithIntervalData"
 
 interface CrewsForIntervalProps {
   interval: Interval

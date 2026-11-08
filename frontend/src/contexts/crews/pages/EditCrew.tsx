@@ -1,9 +1,9 @@
 import { Container, Title } from "@mantine/core"
 import { useNavigate, useParams } from "react-router-dom"
-import { handleAppEvents, useAppSelector } from "../../store"
-import { CrewForm } from "../../components"
-import type { CrewWithLinks } from "../../api/Api"
-import { getApi } from "../../api"
+import { handleAppEvents, useAppSelector } from "../../../store"
+import { default as CrewForm } from "../components/CrewForm"
+import type { CrewWithLinks } from "../../../api/Api"
+import { getApi } from "../../../api"
 
 export default function EditCrew() {
   const { crewId } = useParams<"crewId">()

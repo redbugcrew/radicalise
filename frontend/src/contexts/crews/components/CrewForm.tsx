@@ -1,7 +1,7 @@
 import { useForm } from "@mantine/form"
 import { Button, Stack, TextInput } from "@mantine/core"
-import LinksInput, { optionalLinksValidator } from "../links/LinksInput/LinksInput"
-import type { CrewWithLinks } from "../../store/crews"
+import LinksInput, { optionalLinksValidator } from "../../../components/links/LinksInput/LinksInput"
+import type { CrewWithLinks } from "../../../store/crews"
 
 interface CrewFormProps {
   crew?: CrewWithLinks

@@ -1,12 +1,12 @@
 import { Card, Group, Stack, Title, Text, Badge } from "@mantine/core"
-import type { CrewInvolvement, Person } from "../../../api/Api"
-import PersonBadge from "../../people/PersonBadge/PersonBadge"
-import type { PeopleObjectMap } from "../../../store/people"
+import type { CrewInvolvement, Person } from "../../../../api/Api"
+import PersonBadge from "../../../../components/people/PersonBadge/PersonBadge"
+import type { PeopleObjectMap } from "../../../../store/people"
 import styles from "./CrewCard.module.css"
-import Anchor from "../../Anchor"
-import type { CrewWithLinks } from "../../../store/crews"
-import LinksStack from "../../links/LinksDisplay/LinksStack"
-import { currentProjectPath, useCurrentProjectSlug } from "../../../contexts/projects"
+import Anchor from "../../../../components/Anchor"
+import type { CrewWithLinks } from "../../../../store/crews"
+import LinksStack from "../../../../components/links/LinksDisplay/LinksStack"
+import { currentProjectPath, useCurrentProjectSlug } from "../../../projects"
 
 interface CrewCardProps {
   crew: CrewWithLinks

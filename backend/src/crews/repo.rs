@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use sqlx::SqlitePool;
 
 use crate::shared::{
-    entities::{Crew, CrewId, CrewInvolvement, CrewWithLinks, IntervalNumber, ProjectId},
+    entities::{Crew, CrewId, CrewInvolvement, CrewStatus, CrewWithLinks, IntervalNumber, ProjectId},
     links_repo::{find_all_links_for_owner_type, hash_links_by_owner, update_links_for_owner},
 };
 
@@ -88,6 +88,38 @@ pub async fn update_crew_with_links(project_id: ProjectId, crew: CrewWithLinks, 
     let links = update_links_for_owner(crew.id, "crews".to_string(), crew.links, pool).await?;
 
     Ok(CrewWithLinks::new(crew_result, links))
+}
+
+pub async fn create_active_crew_with_links(
+    interval_number: IntervalNumber,
+    crew: CrewWithLinks,
+    pool: &SqlitePool,
+) -> Result<CrewWithLinks, sqlx::Error> {
+    let crew = create_crew_with_links(interval_number.project_id.clone(), crew, pool).await?;
+
+    set_crew_status(crew.typed_id(), interval_number, CrewStatus::Active, pool).await?;
+
+    Ok(crew)
+}
+
+pub async fn set_crew_status(
+    crew_id: CrewId,
+    interval_number: IntervalNumber,
+    state: CrewStatus,
+    pool: &SqlitePool,
+) -> Result<(), sqlx::Error> {
+    sqlx::query!(
+        "UPDATE crew_states SET state = ?
+        WHERE crew_id = ? AND interval_number = ? AND project_id = ?",
+        state as i32,
+        crew_id.id,
+        interval_number.number,
+        interval_number.project_id.id
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(())
 }
 
 pub async fn create_crew_with_links(project_id: ProjectId, crew: CrewWithLinks, pool: &SqlitePool) -> Result<CrewWithLinks, sqlx::Error> {

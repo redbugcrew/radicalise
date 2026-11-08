@@ -228,6 +228,21 @@ pub struct CrewInvolvement {
     pub volunteered_convenor: bool,
 }
 
+#[derive(Serialize, Deserialize, ToSchema, sqlx::Type, Debug, Clone)]
+pub enum CrewStatus {
+    Archived, // 0
+    Active,   // 1
+}
+
+#[derive(Serialize, Deserialize, ToSchema, Clone, Debug)]
+pub struct CrewState {
+    pub id: i64,
+    pub crew_id: i64,
+    pub state: CrewStatus,
+    pub interval_number: i64,
+    pub project_id: i64,
+}
+
 #[derive(Serialize, Deserialize, ToSchema, Clone, Debug, sqlx::Type, sqlx::Decode)]
 pub struct CapacityPlanning {
     pub wellbeing: Option<String>,
@@ -387,6 +402,12 @@ pub struct Crew {
     pub project_id: i64,
 }
 
+impl Crew {
+    pub fn typed_id(&self) -> CrewId {
+        CrewId { id: self.id }
+    }
+}
+
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
 pub struct Link {
     pub link_type: String,
@@ -433,6 +454,10 @@ impl CrewWithLinks {
             project_id: crew.project_id,
             links,
         }
+    }
+
+    pub fn typed_id(&self) -> CrewId {
+        CrewId { id: self.id }
     }
 }
 

@@ -4,7 +4,7 @@ import { useAppSelector } from "../../store"
 import { AttendanceIntention, type CalendarEvent, type CircleInvolvement, type CrewInvolvement, type Interval } from "../../api/Api"
 import DateText from "../../components/DateText"
 import classes from "./Dashboard.module.css"
-import { Anchor, CrewsList, LinksStack, NoData } from "../../components"
+import { Anchor, LinksStack, NoData } from "../../components"
 import { compareStrings } from "../../utilities/comparison"
 import { isFuture } from "date-fns"
 import EventsList from "../../contexts/events/components/EventsList"
@@ -18,6 +18,7 @@ import { forPerson } from "../../store/current_interval/crew_involvements"
 import { circleInvolvementforCircleAndPerson } from "../../store/current_interval/circle_involvements"
 import WithIntervalData from "../intervals/WithIntervalData"
 import { PersonEnrollmentsForInterval } from "../../contexts/peer_roles"
+import { CrewsList } from "../../contexts/crews"
 
 function ParticipationBadge({ involvement }: { involvement: CircleInvolvement | null }) {
   if (!involvement) return <Badge color="gray">No intention</Badge>

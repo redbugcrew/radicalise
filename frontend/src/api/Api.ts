@@ -208,6 +208,16 @@ export interface CreateAttendanceRequest {
   intention?: AttendanceIntention | null
 }
 
+export interface CreateCrewData {
+  description?: string | null
+  /** @format int64 */
+  id: number
+  links?: Link[] | null
+  name: string
+  /** @format int64 */
+  project_id: number
+}
+
 export interface Credentials {
   email: string
   password: string
@@ -570,7 +580,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 1.6.2
+ * @version 1.6.3
  * @license
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
@@ -795,7 +805,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name CreateCrew
      * @request POST:/api/projects/{project_id}/crews
      */
-    createCrew: (projectId: number, data: CrewWithLinks, params: RequestParams = {}) =>
+    createCrew: (projectId: number, data: CreateCrewData, params: RequestParams = {}) =>
       this.request<AppEvent[], any>({
         path: `/api/projects/${projectId}/crews`,
         method: "POST",
@@ -811,7 +821,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name UpdateCrew
      * @request PUT:/api/projects/{project_id}/crews/{crew_id}
      */
-    updateCrew: (projectId: number, crewId: number, data: CrewWithLinks, params: RequestParams = {}) =>
+    updateCrew: (crewId: number, projectId: number, data: CrewWithLinks, params: RequestParams = {}) =>
       this.request<AppEvent[], any>({
         path: `/api/projects/${projectId}/crews/${crewId}`,
         method: "PUT",
