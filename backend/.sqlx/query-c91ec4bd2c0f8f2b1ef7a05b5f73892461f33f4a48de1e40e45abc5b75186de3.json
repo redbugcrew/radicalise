@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "INSERT INTO crew_states (crew_id, interval_number, project_id, state)\n        VALUES (?, ?, ?, ?)\n        ON CONFLICT(crew_id, interval_number, project_id) DO UPDATE SET state = excluded.state\n        RETURNING *",
+  "query": "INSERT INTO crew_states (crew_id, interval_number, project_id, state)\n        SELECT c.id as crew_id, i.number as interval_number, i.project_id, ? as state\n        FROM intervals i\n        JOIN crews c ON c.project_id = i.project_id\n        WHERE i.number >= ? AND i.project_id = ? AND c.id = ?\n        ON CONFLICT(crew_id, interval_number, project_id) DO UPDATE SET state = excluded.state\n        RETURNING *",
   "describe": {
     "columns": [
       {
@@ -70,5 +70,5 @@
       false
     ]
   },
-  "hash": "26dda540cf9201307b9e3aaad820f8f6304a6a97204095fb75cc21ae003d21b1"
+  "hash": "c91ec4bd2c0f8f2b1ef7a05b5f73892461f33f4a48de1e40e45abc5b75186de3"
 }

@@ -97,7 +97,7 @@ pub async fn create_available_crew_with_links(
 ) -> Result<CrewWithLinks, sqlx::Error> {
     let crew = create_crew_with_links(interval_number.project_id.clone(), crew, pool).await?;
 
-    set_crew_status(crew.typed_id(), interval_number, CrewStatus::Available, pool).await?;
+    set_crew_status_from_interval(crew.typed_id(), interval_number, CrewStatus::Available, pool).await?;
 
     Ok(crew)
 }
@@ -226,29 +226,32 @@ pub async fn intervals_participated_since_last_convened(
     Ok(map)
 }
 
-pub async fn set_crew_status(
+pub async fn set_crew_status_from_interval(
     crew_id: CrewId,
-    interval_number: IntervalNumber,
+    start_interval_number: IntervalNumber,
     state: CrewStatus,
     pool: &SqlitePool,
-) -> Result<CrewState, sqlx::Error> {
+) -> Result<Vec<CrewState>, sqlx::Error> {
     let result = sqlx::query_as!(
         CrewState,
         "INSERT INTO crew_states (crew_id, interval_number, project_id, state)
-        VALUES (?, ?, ?, ?)
+        SELECT c.id as crew_id, i.number as interval_number, i.project_id, ? as state
+        FROM intervals i
+        JOIN crews c ON c.project_id = i.project_id
+        WHERE i.number >= ? AND i.project_id = ? AND c.id = ?
         ON CONFLICT(crew_id, interval_number, project_id) DO UPDATE SET state = excluded.state
         RETURNING *",
-        crew_id.id,
-        interval_number.number,
-        interval_number.project_id.id,
         state,
+        start_interval_number.number,
+        start_interval_number.project_id.id,
+        crew_id.id
     )
-    .fetch_one(pool)
+    .fetch_all(pool)
     .await
     .map_err(|e| {
         println!(
-            "Error setting crew status: {:?} with crew_id: {:?}, interval_number: {:?}, state: {:?}",
-            e, crew_id, interval_number, state
+            "Error setting crew status from interval: {:?} with crew_id: {:?}, start_interval_number: {:?}, state: {:?}",
+            e, crew_id, start_interval_number, state
         );
         e
     })?;

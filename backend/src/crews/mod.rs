@@ -1,3 +1,5 @@
+use std::iter::once;
+
 use axum::{Extension, Json, extract::Path, http::StatusCode, response::IntoResponse};
 use serde::Deserialize;
 use sqlx::SqlitePool;
@@ -75,11 +77,22 @@ pub async fn create_crew(
         return (StatusCode::BAD_REQUEST, "Project ID mismatch").into_response();
     }
 
-    match repo::create_available_crew_with_links(interval_number, input.into(), &pool).await {
-        Ok(response) => {
-            let event = AppEvent::CrewsEvent(CrewsEvent::CrewUpdated(response));
-            realtime_state.broadcast_app_event(Some(auth_session), event.clone()).await;
-            (StatusCode::CREATED, Json(vec![event])).into_response()
+    let crew = match repo::create_available_crew_with_links(interval_number.clone(), input.into(), &pool).await {
+        Ok(crew) => crew,
+        Err(_) => return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
+    };
+
+    match repo::set_crew_status_from_interval(crew.typed_id(), interval_number, CrewStatus::Available, &pool).await {
+        Ok(crew_states) => {
+            let crew_updated = AppEvent::CrewsEvent(CrewsEvent::CrewUpdated(crew));
+            let crew_status_events = crew_states
+                .iter()
+                .map(|state| AppEvent::ProjectEvent(ProjectEvent::CrewStateUpdated(state.clone())))
+                .collect::<Vec<_>>();
+            let events = once(crew_updated).chain(crew_status_events).collect::<Vec<_>>();
+
+            realtime_state.broadcast_app_events(Some(auth_session), events.clone()).await;
+            (StatusCode::CREATED, Json(events)).into_response()
         }
         Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
     }
@@ -160,11 +173,15 @@ pub async fn update_crew_status(
         crew_id.id, project_id.id, input
     );
 
-    match repo::set_crew_status(crew_id, interval_number, input.new_status, &pool).await {
-        Ok(response) => {
-            let event = AppEvent::ProjectEvent(ProjectEvent::CrewStateUpdated(response));
-            realtime_state.broadcast_app_event(Some(auth_session), event.clone()).await;
-            (StatusCode::OK, Json(vec![event])).into_response()
+    match repo::set_crew_status_from_interval(crew_id, interval_number, input.new_status, &pool).await {
+        Ok(states) => {
+            let events = states
+                .iter()
+                .map(|state| AppEvent::ProjectEvent(ProjectEvent::CrewStateUpdated(state.clone())))
+                .collect::<Vec<_>>();
+
+            realtime_state.broadcast_app_events(Some(auth_session), events.clone()).await;
+            (StatusCode::OK, Json(events)).into_response()
         }
         Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
     }
