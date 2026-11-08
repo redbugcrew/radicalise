@@ -412,12 +412,6 @@ pub struct Crew {
     pub project_id: i64,
 }
 
-impl Crew {
-    pub fn typed_id(&self) -> CrewId {
-        CrewId { id: self.id }
-    }
-}
-
 #[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
 pub struct Link {
     pub link_type: String,

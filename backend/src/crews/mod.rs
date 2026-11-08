@@ -7,6 +7,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 use crate::{
     auth::auth_backend::AuthSession,
     crews::events::CrewsEvent,
+    my_project::events::ProjectEvent,
     realtime::RealtimeState,
     shared::{
         entities::{CrewId, CrewStatus, CrewWithLinks, IntervalNumber, Link, ProjectId},
@@ -144,18 +145,27 @@ pub struct UpdateCrewStatusRequest {
     )
 )]
 pub async fn update_crew_status(
-    Path((crew_id, project_id)): Path<(i64, i64)>,
+    Path((project_id, crew_id)): Path<(i64, i64)>,
     Extension(pool): Extension<SqlitePool>,
+    Extension(realtime_state): Extension<RealtimeState>,
+    auth_session: AuthSession,
     Json(input): Json<UpdateCrewStatusRequest>,
 ) -> impl IntoResponse {
     let project_id = ProjectId::new(project_id);
     let crew_id = CrewId::new(crew_id);
     let interval_number = IntervalNumber::new(input.interval_number, project_id.clone());
 
-    println!("Updating crew status with ID {}: {:?}", crew_id.id, input);
+    println!(
+        "Updating crew status with ID {} for project {}: {:?}",
+        crew_id.id, project_id.id, input
+    );
 
     match repo::set_crew_status(crew_id, interval_number, input.new_status, &pool).await {
-        Ok(_) => (StatusCode::OK, ()).into_response(),
+        Ok(response) => {
+            let event = AppEvent::ProjectEvent(ProjectEvent::CrewStateUpdated(response));
+            realtime_state.broadcast_app_event(Some(auth_session), event.clone()).await;
+            (StatusCode::OK, Json(vec![event])).into_response()
+        }
         Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
     }
 }

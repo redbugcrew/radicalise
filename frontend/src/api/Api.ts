@@ -452,6 +452,9 @@ export type ProjectEvent =
   | {
       CircleInvolvementUpdated: CircleInvolvement
     }
+  | {
+      CrewStateUpdated: CrewState
+    }
 
 export interface ResetPasswordRequest {
   password: string

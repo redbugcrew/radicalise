@@ -231,20 +231,29 @@ pub async fn set_crew_status(
     interval_number: IntervalNumber,
     state: CrewStatus,
     pool: &SqlitePool,
-) -> Result<(), sqlx::Error> {
-    sqlx::query!(
-        "INSERT INTO crew_states (state, crew_id, interval_number, project_id)
+) -> Result<CrewState, sqlx::Error> {
+    let result = sqlx::query_as!(
+        CrewState,
+        "INSERT INTO crew_states (crew_id, interval_number, project_id, state)
         VALUES (?, ?, ?, ?)
-        ON CONFLICT(crew_id, interval_number, project_id) DO UPDATE SET state = excluded.state",
-        state as i32,
+        ON CONFLICT(crew_id, interval_number, project_id) DO UPDATE SET state = excluded.state
+        RETURNING *",
         crew_id.id,
         interval_number.number,
-        interval_number.project_id.id
+        interval_number.project_id.id,
+        state
     )
-    .execute(pool)
-    .await?;
+    .fetch_one(pool)
+    .await
+    .map_err(|e| {
+        println!(
+            "Error setting crew status: {:?} with crew_id: {:?}, interval_number: {:?}, state: {:?}",
+            e, crew_id, interval_number, state
+        );
+        e
+    })?;
 
-    Ok(())
+    Ok(result)
 }
 
 pub async fn find_crew_states_for_interval(interval_number: IntervalNumber, pool: &SqlitePool) -> Result<Vec<CrewState>, sqlx::Error> {
