@@ -118,6 +118,15 @@ impl<'a> AuthRepo<'a> {
         .await
         .map_err(log_and_return_db_insert_error)
     }
+
+    pub async fn has_users(&self) -> Result<bool, AuthRepoError> {
+        let result = sqlx::query!("SELECT id FROM users LIMIT 1")
+            .fetch_optional(self.pool)
+            .await
+            .map_err(log_and_return_db_error)?;
+
+        Ok(result.is_some())
+    }
 }
 
 fn log_and_return_db_error(error: sqlx::Error) -> AuthRepoError {

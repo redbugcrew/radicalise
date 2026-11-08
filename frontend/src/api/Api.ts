@@ -342,6 +342,10 @@ export interface Link {
   url: string
 }
 
+export interface LoginConfig {
+  signup_enabled: boolean
+}
+
 export interface LoginResponse {
   /** @format int64 */
   user_id: number
@@ -607,7 +611,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 1.6.3
+ * @version 1.6.4
  * @license
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
@@ -667,6 +671,20 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "POST",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LoginConfig
+     * @request GET:/api/auth/login_config
+     */
+    loginConfig: (params: RequestParams = {}) =>
+      this.request<LoginConfig | null, any>({
+        path: `/api/auth/login_config`,
+        method: "GET",
         format: "json",
         ...params,
       }),

@@ -24,6 +24,7 @@ pub fn auth_router() -> OpenApiRouter {
         .routes(routes!(log_out))
         .routes(routes!(sign_up))
         .routes(routes!(get_current_user))
+        .routes(routes!(login_config))
 }
 
 #[derive(ToSchema, Deserialize)]
@@ -214,6 +215,29 @@ async fn get_current_user(auth_session: AuthSession) -> impl IntoResponse {
         Some(user) => (StatusCode::OK, Json(Some(LoginResponse { user_id: user.id }))).into_response(),
         None => (StatusCode::OK, Json::<Option<LoginResponse>>(None)).into_response(),
     }
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct LoginConfig {
+    pub signup_enabled: bool,
+}
+
+#[utoipa::path(
+    get,
+    path = "/login_config",
+    responses(
+        (status = OK, body = Option<LoginConfig>),
+    )
+)]
+async fn login_config(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse {
+    let repo = AuthRepo::new(&pool);
+
+    let has_users = repo.has_users().await.unwrap_or(false);
+
+    let login_config = LoginConfig {
+        signup_enabled: !has_users,
+    };
+    (StatusCode::OK, Json(Some(login_config))).into_response()
 }
 
 fn repo_error_handler(error: AuthRepoError) -> Response<axum::body::Body> {
