@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use sqlx::{Sqlite, encode::IsNull, error::BoxDynError};
 use std::str::FromStr;
 use utoipa::ToSchema;
 
@@ -228,6 +229,53 @@ pub struct CrewInvolvement {
     pub volunteered_convenor: bool,
 }
 
+#[derive(Serialize, Deserialize, ToSchema, Debug, Clone)]
+pub enum CrewStatus {
+    Archived,  // 0
+    Available, // 1
+}
+
+impl From<i64> for CrewStatus {
+    fn from(value: i64) -> Self {
+        match value {
+            0 => CrewStatus::Archived,
+            1 => CrewStatus::Available,
+            _ => panic!("Invalid value for CrewStatus"),
+        }
+    }
+}
+
+impl Into<i64> for CrewStatus {
+    fn into(self) -> i64 {
+        match self {
+            CrewStatus::Archived => 0,
+            CrewStatus::Available => 1,
+        }
+    }
+}
+
+impl sqlx::Encode<'_, Sqlite> for CrewStatus {
+    fn encode_by_ref(&self, buf: &mut <Sqlite as sqlx::Database>::ArgumentBuffer) -> Result<IsNull, BoxDynError> {
+        let value: i64 = (*self).clone().into();
+        sqlx::Encode::<Sqlite>::encode_by_ref(&value, buf)
+    }
+}
+
+impl sqlx::Type<Sqlite> for CrewStatus {
+    fn type_info() -> <Sqlite as sqlx::Database>::TypeInfo {
+        <i64 as sqlx::Type<Sqlite>>::type_info()
+    }
+}
+
+#[derive(Serialize, Deserialize, ToSchema, Clone, Debug)]
+pub struct CrewState {
+    pub id: i64,
+    pub crew_id: i64,
+    pub state: CrewStatus,
+    pub interval_number: i64,
+    pub project_id: i64,
+}
+
 #[derive(Serialize, Deserialize, ToSchema, Clone, Debug, sqlx::Type, sqlx::Decode)]
 pub struct CapacityPlanning {
     pub wellbeing: Option<String>,
@@ -433,6 +481,10 @@ impl CrewWithLinks {
             project_id: crew.project_id,
             links,
         }
+    }
+
+    pub fn typed_id(&self) -> CrewId {
+        CrewId { id: self.id }
     }
 }
 

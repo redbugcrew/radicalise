@@ -1,7 +1,7 @@
 import { useForm } from "@mantine/form"
 import { Button, Stack, TextInput } from "@mantine/core"
-import LinksInput, { optionalLinksValidator } from "../links/LinksInput/LinksInput"
-import type { CrewWithLinks } from "../../store/crews"
+import LinksInput, { optionalLinksValidator } from "../../../components/links/LinksInput/LinksInput"
+import type { CrewWithLinks } from "../../../store/crews"
 
 interface CrewFormProps {
   crew?: CrewWithLinks
@@ -39,7 +39,7 @@ export default function CrewForm({ crew, projectId, onSubmit }: CrewFormProps) {
           <TextInput label="Description" placeholder="Crew Description" key="description" {...form.getInputProps("description")} />
           <LinksInput label="Links" placeholder="Add a link" key="links" {...form.getInputProps("links")} />
         </Stack>
-        <Button type="submit">Submit</Button>
+        <Button type="submit">Update</Button>
       </Stack>
     </form>
   )

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO crew_states (crew_id, interval_number, project_id, state)\n        SELECT crew_id, ?, project_id, state\n        FROM crew_states\n        WHERE interval_number = ? AND project_id = ?\n        ON CONFLICT(crew_id, interval_number, project_id) DO UPDATE SET state = excluded.state",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "ff59f27e7fdd9fb9038bf8b7a0752ced0d7ce2b875c6e9a07017b42f944143ad"
+}

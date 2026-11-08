@@ -4,7 +4,7 @@ import { useAppSelector } from "../../store"
 import { AttendanceIntention, type CalendarEvent, type CircleInvolvement, type CrewInvolvement, type Interval } from "../../api/Api"
 import DateText from "../../components/DateText"
 import classes from "./Dashboard.module.css"
-import { Anchor, CrewsList, LinksStack, NoData } from "../../components"
+import { Anchor, LinksStack, NoData } from "../../components"
 import { compareStrings } from "../../utilities/comparison"
 import { isFuture } from "date-fns"
 import EventsList from "../../contexts/events/components/EventsList"
@@ -18,6 +18,8 @@ import { forPerson } from "../../store/current_interval/crew_involvements"
 import { circleInvolvementforCircleAndPerson } from "../../store/current_interval/circle_involvements"
 import WithIntervalData from "../intervals/WithIntervalData"
 import { PersonEnrollmentsForInterval } from "../../contexts/peer_roles"
+import { CrewsList } from "../../contexts/crews"
+import { appendCrewStatus } from "../../store/crews"
 
 function ParticipationBadge({ involvement }: { involvement: CircleInvolvement | null }) {
   if (!involvement) return <Badge color="gray">No intention</Badge>
@@ -79,6 +81,7 @@ function MyIntervalPartipationCard({ interval, circleInvolvement, current = true
 function MyCrews({ personId, myInvolvements }: { personId: number; myInvolvements: CrewInvolvement[] }) {
   const people = useAppSelector((state) => state.people)
   const crews = useAppSelector((state) => state.crews)
+  const intervalData = useAppSelector((state) => state.currentInterval)
   const allCrewInvolvements = useAppSelector((state) => state.currentInterval?.crew_involvements || [])
 
   const myCrews = myInvolvements
@@ -88,10 +91,12 @@ function MyCrews({ personId, myInvolvements }: { personId: number; myInvolvement
 
   if (myCrews.length === 0) return null
 
+  const myCrewsWithStatus = appendCrewStatus(myCrews, intervalData)
+
   return (
     <Stack>
       <Title order={2}>My Crews</Title>
-      <CrewsList involvements={allCrewInvolvements} people={people} crews={myCrews} highlightPersonId={personId} />
+      <CrewsList involvements={allCrewInvolvements} people={people} crews={myCrewsWithStatus} highlightPersonId={personId} />
     </Stack>
   )
 }

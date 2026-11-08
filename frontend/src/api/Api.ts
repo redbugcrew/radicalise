@@ -47,6 +47,11 @@ export enum EventResponseExpectation {
   Welcome = "Welcome",
 }
 
+export enum CrewStatus {
+  Archived = "Archived",
+  Available = "Available",
+}
+
 export enum CreateProjectError {
   SlugAlreadyTaken = "SlugAlreadyTaken",
   RecordAlreadyExists = "RecordAlreadyExists",
@@ -208,6 +213,16 @@ export interface CreateAttendanceRequest {
   intention?: AttendanceIntention | null
 }
 
+export interface CreateCrewData {
+  description?: string | null
+  links?: Link[] | null
+  name: string
+  /** @format int64 */
+  project_id: number
+  /** @format int64 */
+  start_interval_number: number
+}
+
 export interface Credentials {
   email: string
   password: string
@@ -226,6 +241,18 @@ export interface CrewInvolvement {
   /** @format int64 */
   project_id: number
   volunteered_convenor: boolean
+}
+
+export interface CrewState {
+  /** @format int64 */
+  crew_id: number
+  /** @format int64 */
+  id: number
+  /** @format int64 */
+  interval_number: number
+  /** @format int64 */
+  project_id: number
+  state: CrewStatus
 }
 
 export interface CrewWithLinks {
@@ -283,6 +310,7 @@ export interface Interval {
 export interface IntervalData {
   circle_involvements: CircleInvolvementData[]
   crew_involvements: CrewInvolvement[]
+  crew_states: CrewState[]
   interval: Interval
   peer_enrollments: PeerEnrollment[]
 }
@@ -424,6 +452,9 @@ export type ProjectEvent =
   | {
       CircleInvolvementUpdated: CircleInvolvement
     }
+  | {
+      CrewStateUpdated: CrewState
+    }
 
 export interface ResetPasswordRequest {
   password: string
@@ -433,6 +464,12 @@ export interface ResetPasswordRequest {
 export interface SignUpRequest {
   email: string
   password: string
+}
+
+export interface UpdateCrewStatusRequest {
+  /** @format int64 */
+  interval_number: number
+  new_status: CrewStatus
 }
 
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, ResponseType } from "axios"
@@ -570,7 +607,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 1.6.2
+ * @version 1.6.3
  * @license
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
@@ -795,7 +832,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name CreateCrew
      * @request POST:/api/projects/{project_id}/crews
      */
-    createCrew: (projectId: number, data: CrewWithLinks, params: RequestParams = {}) =>
+    createCrew: (projectId: number, data: CreateCrewData, params: RequestParams = {}) =>
       this.request<AppEvent[], any>({
         path: `/api/projects/${projectId}/crews`,
         method: "POST",
@@ -811,9 +848,25 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name UpdateCrew
      * @request PUT:/api/projects/{project_id}/crews/{crew_id}
      */
-    updateCrew: (projectId: number, crewId: number, data: CrewWithLinks, params: RequestParams = {}) =>
+    updateCrew: (crewId: number, projectId: number, data: CrewWithLinks, params: RequestParams = {}) =>
       this.request<AppEvent[], any>({
         path: `/api/projects/${projectId}/crews/${crewId}`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdateCrewStatus
+     * @request PUT:/api/projects/{project_id}/crews/{crew_id}/status
+     */
+    updateCrewStatus: (crewId: number, projectId: number, data: UpdateCrewStatusRequest, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/projects/${projectId}/crews/${crewId}/status`,
         method: "PUT",
         body: data,
         type: ContentType.Json,

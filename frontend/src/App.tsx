@@ -9,15 +9,12 @@ import {
   People,
   Person,
   MyParticipation,
-  Crews,
-  EditCrew,
   Intervals,
   NewInterval,
   InvitePerson,
   AcceptInvitation,
   BlankLayout,
   ProjectLayout,
-  NewCrew,
 } from "./pages"
 import { LoadSelectedProject, LoadProjectState, LoadMyProjects } from "./contexts/projects"
 import { buildRoutes as buildAuthRoutes } from "./contexts/auth"
@@ -43,6 +40,7 @@ import { Circles, EditCircle, NewCircle } from "./contexts/circles"
 import { PeerRoles } from "./contexts/peer_roles"
 import NewRole from "./contexts/peer_roles/pages/NewRole"
 import { EditProject, NewProject } from "./contexts/projects"
+import { Crews, EditCrew, NewCrew, EditCrewStatus } from "./contexts/crews"
 //import NewRole from "./contexts/peer_roles/pages/NewRole";
 
 const router = createBrowserRouter([
@@ -150,6 +148,10 @@ const router = createBrowserRouter([
                       {
                         path: ":crewId/edit",
                         element: <EditCrew />,
+                      },
+                      {
+                        path: ":crewId/edit_status",
+                        element: <EditCrewStatus />,
                       },
                     ],
                   },

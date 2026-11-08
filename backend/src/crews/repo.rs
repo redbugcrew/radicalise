@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use sqlx::SqlitePool;
 
 use crate::shared::{
-    entities::{Crew, CrewId, CrewInvolvement, CrewWithLinks, IntervalNumber, ProjectId},
+    entities::{Crew, CrewId, CrewInvolvement, CrewState, CrewStatus, CrewWithLinks, IntervalNumber, ProjectId},
     links_repo::{find_all_links_for_owner_type, hash_links_by_owner, update_links_for_owner},
 };
 
@@ -88,6 +88,18 @@ pub async fn update_crew_with_links(project_id: ProjectId, crew: CrewWithLinks, 
     let links = update_links_for_owner(crew.id, "crews".to_string(), crew.links, pool).await?;
 
     Ok(CrewWithLinks::new(crew_result, links))
+}
+
+pub async fn create_available_crew_with_links(
+    interval_number: IntervalNumber,
+    crew: CrewWithLinks,
+    pool: &SqlitePool,
+) -> Result<CrewWithLinks, sqlx::Error> {
+    let crew = create_crew_with_links(interval_number.project_id.clone(), crew, pool).await?;
+
+    set_crew_status(crew.typed_id(), interval_number, CrewStatus::Available, pool).await?;
+
+    Ok(crew)
 }
 
 pub async fn create_crew_with_links(project_id: ProjectId, crew: CrewWithLinks, pool: &SqlitePool) -> Result<CrewWithLinks, sqlx::Error> {
@@ -212,4 +224,81 @@ pub async fn intervals_participated_since_last_convened(
     }
 
     Ok(map)
+}
+
+pub async fn set_crew_status(
+    crew_id: CrewId,
+    interval_number: IntervalNumber,
+    state: CrewStatus,
+    pool: &SqlitePool,
+) -> Result<CrewState, sqlx::Error> {
+    let result = sqlx::query_as!(
+        CrewState,
+        "INSERT INTO crew_states (crew_id, interval_number, project_id, state)
+        VALUES (?, ?, ?, ?)
+        ON CONFLICT(crew_id, interval_number, project_id) DO UPDATE SET state = excluded.state
+        RETURNING *",
+        crew_id.id,
+        interval_number.number,
+        interval_number.project_id.id,
+        state,
+    )
+    .fetch_one(pool)
+    .await
+    .map_err(|e| {
+        println!(
+            "Error setting crew status: {:?} with crew_id: {:?}, interval_number: {:?}, state: {:?}",
+            e, crew_id, interval_number, state
+        );
+        e
+    })?;
+
+    Ok(result)
+}
+
+pub async fn find_crew_states_for_interval(interval_number: IntervalNumber, pool: &SqlitePool) -> Result<Vec<CrewState>, sqlx::Error> {
+    let result = sqlx::query_as!(
+        CrewState,
+        "SELECT id, crew_id, state, interval_number, project_id
+        FROM crew_states
+        WHERE interval_number = ? AND project_id = ?",
+        interval_number.number,
+        interval_number.project_id.id
+    )
+    .fetch_all(pool)
+    .await?;
+
+    Ok(result)
+}
+
+pub async fn copy_crew_states_into_interval<'e, 'c: 'e, E>(
+    new_interval_number: IntervalNumber,
+    previous_interval_number: IntervalNumber,
+    pool: E,
+) -> Result<(), sqlx::Error>
+where
+    E: sqlx::Executor<'c, Database = sqlx::Sqlite>,
+{
+    if new_interval_number.project_id.id != previous_interval_number.project_id.id {
+        println!(
+            "Error copying crew states: project ID mismatch (new: {}, previous: {})",
+            new_interval_number.project_id.id, previous_interval_number.project_id.id
+        );
+        return Err(sqlx::Error::RowNotFound);
+    }
+
+    sqlx::query!(
+        "INSERT INTO crew_states (crew_id, interval_number, project_id, state)
+        SELECT crew_id, ?, project_id, state
+        FROM crew_states
+        WHERE interval_number = ? AND project_id = ?
+        ON CONFLICT(crew_id, interval_number, project_id) DO UPDATE SET state = excluded.state",
+        new_interval_number.number,
+        previous_interval_number.number,
+        previous_interval_number.project_id.id
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(())
 }

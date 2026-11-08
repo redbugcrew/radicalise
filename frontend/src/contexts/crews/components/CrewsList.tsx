@@ -1,13 +1,13 @@
 import { Stack } from "@mantine/core"
-import type { CrewInvolvement } from "../../api/Api"
-import { hashByNumber } from "../../utilities/hashing"
-import type { PeopleObjectMap } from "../../store/people"
+import type { CrewInvolvement } from "../../../api/Api"
+import { hashByNumber } from "../../../utilities/hashing"
+import type { PeopleObjectMap } from "../../../store/people"
 
 import CrewCard from "./CrewCard/CrewCard"
-import type { CrewWithLinks } from "../../store/crews"
+import type { CrewWithStatus } from "../../../store/crews"
 
 interface CrewsTableProps {
-  crews: CrewWithLinks[]
+  crews: CrewWithStatus[]
   involvements: CrewInvolvement[]
   people: PeopleObjectMap
   highlightPersonId?: number

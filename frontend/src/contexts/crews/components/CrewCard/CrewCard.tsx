@@ -1,15 +1,17 @@
-import { Card, Group, Stack, Title, Text, Badge } from "@mantine/core"
-import type { CrewInvolvement, Person } from "../../../api/Api"
-import PersonBadge from "../../people/PersonBadge/PersonBadge"
-import type { PeopleObjectMap } from "../../../store/people"
+import { Card, Group, Stack, Title, Text, ActionIcon } from "@mantine/core"
+import type { CrewInvolvement, Person } from "../../../../api/Api"
+import PersonBadge from "../../../../components/people/PersonBadge/PersonBadge"
+import type { PeopleObjectMap } from "../../../../store/people"
 import styles from "./CrewCard.module.css"
-import Anchor from "../../Anchor"
-import type { CrewWithLinks } from "../../../store/crews"
-import LinksStack from "../../links/LinksDisplay/LinksStack"
-import { currentProjectPath, useCurrentProjectSlug } from "../../../contexts/projects"
+import Anchor from "../../../../components/Anchor"
+import type { CrewWithStatus } from "../../../../store/crews"
+import LinksStack from "../../../../components/links/LinksDisplay/LinksStack"
+import { currentProjectPath, useCurrentProjectSlug } from "../../../projects"
+import { IconEdit } from "@tabler/icons-react"
+import CrewStatusBadge from "../CrewStatusBadge"
 
 interface CrewCardProps {
-  crew: CrewWithLinks
+  crew: CrewWithStatus
   involvements: CrewInvolvement[]
   people: PeopleObjectMap
   highlightPersonId?: number
@@ -47,20 +49,21 @@ export default function CrewCard({ crew, involvements, people, highlightPersonId
   return (
     <Card className={cardStyles.join(" ")}>
       <Stack gap="md">
-        <Group justify="space-between" align="center">
+        <Group justify="space-between" align="flex-start" wrap="nowrap">
           <Stack gap={0}>
-            <Group>
-              <Title order={2} size="h4">
-                {crew.name}
-              </Title>
-              <Anchor c="dimmed" href={currentProjectPath(`/crews/${crew.id}/edit`, projectSlug)} size="xs">
-                edit
-              </Anchor>
-            </Group>
+            <Title order={2} size="h4">
+              {crew.name}
+            </Title>
             <Text>{crew.description}</Text>
           </Stack>
-          {!active && <Badge color="orange">Inactive</Badge>}
-          {active && <Badge color="green">Active</Badge>}
+          <Stack align="flex-end" style={{ flexShrink: 0 }}>
+            <Anchor href={currentProjectPath(`/crews/${crew.id}/edit`, projectSlug)}>
+              <ActionIcon variant="outline" aria-label={`Edit ${crew.name}`} size="lg">
+                <IconEdit style={{ width: "70%", height: "70%" }} stroke={2} />
+              </ActionIcon>
+            </Anchor>
+            <CrewStatusBadge active={active} status={crew.status} href={currentProjectPath(`/crews/${crew.id}/edit_status`, projectSlug)} />
+          </Stack>
         </Group>
         <Group>
           {crewPeople.map(({ person, involvement }) => {

@@ -50,3 +50,16 @@ export function useNextInterval(): Interval | null {
 
   return allIntervals[currentIntervalIndex + 1]
 }
+
+export function useFutureIntervals(includeCurrent = false): Interval[] {
+  const allIntervals = useAppSelector((state) => state.intervals)
+  const currentInterval = useAppSelector((state) => state.currentInterval?.interval)
+
+  if (!currentInterval) {
+    return allIntervals
+  }
+
+  return allIntervals.filter((interval) =>
+    includeCurrent ? interval.number >= currentInterval.number : interval.number > currentInterval.number,
+  )
+}
