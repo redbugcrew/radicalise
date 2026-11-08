@@ -230,8 +230,8 @@ pub struct CrewInvolvement {
 
 #[derive(Serialize, Deserialize, ToSchema, sqlx::Type, Debug, Clone)]
 pub enum CrewStatus {
-    Archived, // 0
-    Active,   // 1
+    Archived,  // 0
+    Available, // 1
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Clone, Debug)]

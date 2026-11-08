@@ -90,14 +90,14 @@ pub async fn update_crew_with_links(project_id: ProjectId, crew: CrewWithLinks, 
     Ok(CrewWithLinks::new(crew_result, links))
 }
 
-pub async fn create_active_crew_with_links(
+pub async fn create_available_crew_with_links(
     interval_number: IntervalNumber,
     crew: CrewWithLinks,
     pool: &SqlitePool,
 ) -> Result<CrewWithLinks, sqlx::Error> {
     let crew = create_crew_with_links(interval_number.project_id.clone(), crew, pool).await?;
 
-    set_crew_status(crew.typed_id(), interval_number, CrewStatus::Active, pool).await?;
+    set_crew_status(crew.typed_id(), interval_number, CrewStatus::Available, pool).await?;
 
     Ok(crew)
 }

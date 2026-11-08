@@ -49,14 +49,14 @@ export default function CrewCard({ crew, involvements, people, highlightPersonId
   return (
     <Card className={cardStyles.join(" ")}>
       <Stack gap="md">
-        <Group justify="space-between" align="center">
+        <Group justify="space-between" align="center" wrap="nowrap">
           <Stack gap={0}>
             <Title order={2} size="h4">
               {crew.name}
             </Title>
             <Text>{crew.description}</Text>
           </Stack>
-          <Stack align="flex-end">
+          <Stack align="flex-end" style={{ flexShrink: 0 }}>
             <Anchor href={currentProjectPath(`/crews/${crew.id}/edit`, projectSlug)}>
               <ActionIcon variant="outline" aria-label={`Edit ${crew.name}`} size="lg">
                 <IconEdit style={{ width: "70%", height: "70%" }} stroke={2} />

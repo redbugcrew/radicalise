@@ -47,6 +47,11 @@ export enum EventResponseExpectation {
   Welcome = "Welcome",
 }
 
+export enum CrewStatus {
+  Archived = "Archived",
+  Available = "Available",
+}
+
 export enum CreateProjectError {
   SlugAlreadyTaken = "SlugAlreadyTaken",
   RecordAlreadyExists = "RecordAlreadyExists",
@@ -445,6 +450,12 @@ export interface SignUpRequest {
   password: string
 }
 
+export interface UpdateCrewStatusRequest {
+  /** @format int64 */
+  interval_number: number
+  new_status: CrewStatus
+}
+
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, ResponseType } from "axios"
 import axios from "axios"
 
@@ -824,6 +835,22 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     updateCrew: (crewId: number, projectId: number, data: CrewWithLinks, params: RequestParams = {}) =>
       this.request<AppEvent[], any>({
         path: `/api/projects/${projectId}/crews/${crewId}`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UpdateCrewStatus
+     * @request PUT:/api/projects/{project_id}/crews/{crew_id}/status
+     */
+    updateCrewStatus: (crewId: number, projectId: number, data: UpdateCrewStatusRequest, params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/api/projects/${projectId}/crews/${crewId}/status`,
         method: "PUT",
         body: data,
         type: ContentType.Json,
