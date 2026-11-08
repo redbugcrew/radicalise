@@ -6,25 +6,12 @@ import type { LoginFormData } from "../components/LoginForm"
 import { actionSuccess, type ActionPromiseResult } from "../../../components/ActionResult"
 import LoginForm from "../components/LoginForm"
 import { Button, Group, Stack } from "@mantine/core"
-import { useEffect, useState } from "react"
-import type { LoginConfig } from "../../../api/Api"
+import { useLoginConfig } from "./auth_hooks"
 
 export default function Login() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const [loginConfig, setLoginConfig] = useState<LoginConfig | null>(null)
-
-  useEffect(() => {
-    getApi()
-      .api.loginConfig()
-      .then((response) => {
-        console.log("Login config:", response.data)
-        setLoginConfig(response.data)
-      })
-      .catch((error) => {
-        console.error("Failed to fetch login config:", error)
-      })
-  }, [])
+  const loginConfig = useLoginConfig()
 
   const onSubmit = ({ email, password }: LoginFormData): Promise<ActionPromiseResult> => {
     return getApi()
@@ -50,7 +37,7 @@ export default function Login() {
 
         <Group justify="space-between">
           {loginConfig?.signup_enabled && (
-            <Button variant="outline" size="sm" component={Link} to="../sign_up">
+            <Button variant="outline" size="sm" component={Link} to="../signup">
               Sign up
             </Button>
           )}

@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom"
+import { useLoginConfig } from "./auth_hooks"
 import { notifications } from "@mantine/notifications"
 import { getApi } from "../../../api"
 import { actionFailure, actionSuccess, type ActionPromiseResult } from "../../../components/ActionResult"
@@ -11,6 +12,15 @@ import type { LoginFormData } from "../components/LoginForm"
 export default function SignUp() {
   const navigate = useNavigate()
   const location = useLocation()
+  const loginConfig = useLoginConfig()
+
+  if (!loginConfig?.signup_enabled) {
+    return (
+      <AuthLayout title="Sign up disabled">
+        <Text>Sign up is currently disabled.</Text>
+      </AuthLayout>
+    )
+  }
 
   const onSubmit = (values: LoginFormData): Promise<ActionPromiseResult> => {
     return getApi()
