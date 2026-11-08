@@ -2,7 +2,7 @@ import { Container, Title } from "@mantine/core"
 import CrewStatusForm from "../components/CrewStatusForm"
 import { useNavigate, useParams } from "react-router-dom"
 import { handleAppEvents, useAppSelector } from "../../../store"
-import type { CrewStatus, UpdateCrewStatusRequest } from "../../../api/Api"
+import type { UpdateCrewStatusRequest } from "../../../api/Api"
 import { getApi } from "../../../api"
 import { useFutureIntervals } from "../../../store/intervals"
 

@@ -1,0 +1,74 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO crew_states (crew_id, interval_number, project_id, state)\n        SELECT c.id as crew_id, i.number as interval_number, i.project_id, ? as state\n        FROM intervals i\n        JOIN crews c ON c.project_id = i.project_id\n        WHERE i.number >= ? AND i.project_id = ? AND c.id = ?\n        ON CONFLICT(crew_id, interval_number, project_id) DO UPDATE SET state = excluded.state\n        RETURNING *",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "crew_states",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "crew_id",
+        "ordinal": 1,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "crew_states",
+            "name": "crew_id"
+          }
+        }
+      },
+      {
+        "name": "state",
+        "ordinal": 2,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "crew_states",
+            "name": "state"
+          }
+        }
+      },
+      {
+        "name": "interval_number",
+        "ordinal": 3,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "crew_states",
+            "name": "interval_number"
+          }
+        }
+      },
+      {
+        "name": "project_id",
+        "ordinal": 4,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "crew_states",
+            "name": "project_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "c91ec4bd2c0f8f2b1ef7a05b5f73892461f33f4a48de1e40e45abc5b75186de3"
+}

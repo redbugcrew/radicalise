@@ -1,7 +1,6 @@
 import { useForm } from "@mantine/form"
-import { Button, Group, Select, Stack, Text } from "@mantine/core"
+import { Button, Select, Stack } from "@mantine/core"
 import { CrewStatus, type Interval, type UpdateCrewStatusRequest } from "../../../api/Api"
-import CrewStatusBadge from "./CrewStatusBadge"
 
 interface CrewStatusFormProps {
   intervals: Interval[]
@@ -24,10 +23,6 @@ function defaultValue(intervals: Interval[]): CrewStatusFormData {
 function parseIntervalNumber(value?: string): number | null {
   const intervalNumber = value ? parseInt(value) : null
   return intervalNumber === null || isNaN(intervalNumber) ? null : intervalNumber
-}
-
-function existingStatus(intervalNumber: number | null, statusMap: Record<number, CrewStatus>): CrewStatus | null {
-  return intervalNumber === null ? null : statusMap[intervalNumber] || null
 }
 
 export default function CreateStatusForm({ intervals, currentIntervalNumber, onSubmit }: CrewStatusFormProps) {
