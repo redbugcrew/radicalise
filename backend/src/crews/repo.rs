@@ -97,7 +97,7 @@ pub async fn create_available_crew_with_links(
 ) -> Result<CrewWithLinks, sqlx::Error> {
     let crew = create_crew_with_links(interval_number.project_id.clone(), crew, pool).await?;
 
-    set_crew_status(crew.typed_id(), interval_number, CrewStatus::Available, pool).await?;
+    set_crew_status_from_interval(crew.typed_id(), interval_number, CrewStatus::Available, pool).await?;
 
     Ok(crew)
 }
@@ -252,36 +252,6 @@ pub async fn set_crew_status_from_interval(
         println!(
             "Error setting crew status from interval: {:?} with crew_id: {:?}, start_interval_number: {:?}, state: {:?}",
             e, crew_id, start_interval_number, state
-        );
-        e
-    })?;
-
-    Ok(result)
-}
-
-pub async fn set_crew_status(
-    crew_id: CrewId,
-    interval_number: IntervalNumber,
-    state: CrewStatus,
-    pool: &SqlitePool,
-) -> Result<CrewState, sqlx::Error> {
-    let result = sqlx::query_as!(
-        CrewState,
-        "INSERT INTO crew_states (crew_id, interval_number, project_id, state)
-        VALUES (?, ?, ?, ?)
-        ON CONFLICT(crew_id, interval_number, project_id) DO UPDATE SET state = excluded.state
-        RETURNING *",
-        crew_id.id,
-        interval_number.number,
-        interval_number.project_id.id,
-        state,
-    )
-    .fetch_one(pool)
-    .await
-    .map_err(|e| {
-        println!(
-            "Error setting crew status: {:?} with crew_id: {:?}, interval_number: {:?}, state: {:?}",
-            e, crew_id, interval_number, state
         );
         e
     })?;

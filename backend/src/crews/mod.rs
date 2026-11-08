@@ -75,11 +75,24 @@ pub async fn create_crew(
         return (StatusCode::BAD_REQUEST, "Project ID mismatch").into_response();
     }
 
-    match repo::create_available_crew_with_links(interval_number, input.into(), &pool).await {
-        Ok(response) => {
-            let event = AppEvent::CrewsEvent(CrewsEvent::CrewUpdated(response));
-            realtime_state.broadcast_app_event(Some(auth_session), event.clone()).await;
-            (StatusCode::CREATED, Json(vec![event])).into_response()
+    let crew = match repo::create_available_crew_with_links(interval_number.clone(), input.into(), &pool).await {
+        Ok(crew) => crew,
+        Err(_) => return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
+    };
+
+    match repo::set_crew_status_from_interval(crew.typed_id(), interval_number, CrewStatus::Available, &pool).await {
+        Ok(crew_states) => {
+            let crew_updated = AppEvent::CrewsEvent(CrewsEvent::CrewUpdated(crew));
+            let crew_status_events = crew_states
+                .iter()
+                .map(|state| AppEvent::ProjectEvent(ProjectEvent::CrewStateUpdated(state.clone())))
+                .collect::<Vec<_>>();
+            let events = std::iter::once(crew_updated)
+                .chain(crew_status_events.into_iter())
+                .collect::<Vec<_>>();
+
+            realtime_state.broadcast_app_events(Some(auth_session), events.clone()).await;
+            (StatusCode::CREATED, Json(events)).into_response()
         }
         Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
     }
