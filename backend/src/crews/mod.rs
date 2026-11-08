@@ -160,11 +160,15 @@ pub async fn update_crew_status(
         crew_id.id, project_id.id, input
     );
 
-    match repo::set_crew_status(crew_id, interval_number, input.new_status, &pool).await {
-        Ok(response) => {
-            let event = AppEvent::ProjectEvent(ProjectEvent::CrewStateUpdated(response));
-            realtime_state.broadcast_app_event(Some(auth_session), event.clone()).await;
-            (StatusCode::OK, Json(vec![event])).into_response()
+    match repo::set_crew_status_from_interval(crew_id, interval_number, input.new_status, &pool).await {
+        Ok(states) => {
+            let events = states
+                .iter()
+                .map(|state| AppEvent::ProjectEvent(ProjectEvent::CrewStateUpdated(state.clone())))
+                .collect::<Vec<_>>();
+
+            realtime_state.broadcast_app_events(Some(auth_session), events.clone()).await;
+            (StatusCode::OK, Json(events)).into_response()
         }
         Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
     }

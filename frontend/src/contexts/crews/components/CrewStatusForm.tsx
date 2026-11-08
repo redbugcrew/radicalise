@@ -5,7 +5,7 @@ import CrewStatusBadge from "./CrewStatusBadge"
 
 interface CrewStatusFormProps {
   intervals: Interval[]
-  statusMap: Record<number, CrewStatus>
+  currentIntervalNumber: number
   onSubmit: (values: UpdateCrewStatusRequest) => void
 }
 
@@ -30,7 +30,7 @@ function existingStatus(intervalNumber: number | null, statusMap: Record<number,
   return intervalNumber === null ? null : statusMap[intervalNumber] || null
 }
 
-export default function CreateStatusForm({ intervals, statusMap, onSubmit }: CrewStatusFormProps) {
+export default function CreateStatusForm({ intervals, currentIntervalNumber, onSubmit }: CrewStatusFormProps) {
   const form = useForm<CrewStatusFormData>({
     mode: "controlled",
     initialValues: defaultValue(intervals),
@@ -54,38 +54,38 @@ export default function CreateStatusForm({ intervals, statusMap, onSubmit }: Cre
   }
 
   const statusValues = Object.values(CrewStatus)
-  const existingStatusValue = existingStatus(parseIntervalNumber(form.values.interval_number), statusMap)
+
+  const intervalLabel = (interval: Interval) => {
+    let suffix = ""
+    if (interval.number === currentIntervalNumber) {
+      suffix = " (Current)"
+    } else if (interval.number === currentIntervalNumber + 1) {
+      suffix = " (Next)"
+    }
+    return `Interval ${interval.number}${suffix}`
+  }
 
   return (
     <form onSubmit={form.onSubmit(onSubmitForm)}>
       <Stack gap="lg">
         <Stack gap="md">
           <Select
-            label="Interval"
-            placeholder="Select an interval to apply this change"
+            label="Start From"
+            placeholder="Select an interval to apply this change from, going forwards"
             key="interval_number"
             required
-            data={intervals.map((interval) => ({ value: interval.number.toString(), label: `Interval ${interval.number}` }))}
+            data={intervals.map((interval) => ({ value: interval.number.toString(), label: intervalLabel(interval) }))}
             {...form.getInputProps("interval_number")}
           />
 
-          {existingStatusValue && (
-            <>
-              <Group gap="sm">
-                <Text>Existing Status:</Text>
-                <CrewStatusBadge status={existingStatusValue} />
-              </Group>
-
-              <Select
-                label="New Status"
-                placeholder="Select the new status"
-                key="new_status"
-                required
-                data={statusValues.map((status) => ({ value: status, label: status }))}
-                {...form.getInputProps("new_status")}
-              />
-            </>
-          )}
+          <Select
+            label="New Status"
+            placeholder="Select the new status"
+            key="new_status"
+            required
+            data={statusValues.map((status) => ({ value: status, label: status }))}
+            {...form.getInputProps("new_status")}
+          />
         </Stack>
         <Button type="submit">Update</Button>
       </Stack>

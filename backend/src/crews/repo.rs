@@ -226,6 +226,39 @@ pub async fn intervals_participated_since_last_convened(
     Ok(map)
 }
 
+pub async fn set_crew_status_from_interval(
+    crew_id: CrewId,
+    start_interval_number: IntervalNumber,
+    state: CrewStatus,
+    pool: &SqlitePool,
+) -> Result<Vec<CrewState>, sqlx::Error> {
+    let result = sqlx::query_as!(
+        CrewState,
+        "INSERT INTO crew_states (crew_id, interval_number, project_id, state)
+        SELECT c.id as crew_id, i.number as interval_number, i.project_id, ? as state
+        FROM intervals i
+        JOIN crews c ON c.project_id = i.project_id
+        WHERE i.number >= ? AND i.project_id = ? AND c.id = ?
+        ON CONFLICT(crew_id, interval_number, project_id) DO UPDATE SET state = excluded.state
+        RETURNING *",
+        state,
+        start_interval_number.number,
+        start_interval_number.project_id.id,
+        crew_id.id
+    )
+    .fetch_all(pool)
+    .await
+    .map_err(|e| {
+        println!(
+            "Error setting crew status from interval: {:?} with crew_id: {:?}, start_interval_number: {:?}, state: {:?}",
+            e, crew_id, start_interval_number, state
+        );
+        e
+    })?;
+
+    Ok(result)
+}
+
 pub async fn set_crew_status(
     crew_id: CrewId,
     interval_number: IntervalNumber,
