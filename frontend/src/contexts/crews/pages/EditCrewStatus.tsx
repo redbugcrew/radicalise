@@ -1,0 +1,40 @@
+import { Container, Title } from "@mantine/core"
+import { useNavigate, useParams } from "react-router-dom"
+import { handleAppEvents, useAppSelector } from "../../../store"
+import { default as CrewForm } from "../components/CrewForm"
+import type { CrewWithLinks } from "../../../api/Api"
+import { getApi } from "../../../api"
+
+export default function EditCrewStatus() {
+  const { crewId } = useParams<"crewId">()
+  const crewIdNum = crewId ? parseInt(crewId, 10) : undefined
+  const projectId = useAppSelector((state) => state.project?.id)
+
+  const navigate = useNavigate()
+
+  const crew = useAppSelector((state) => state.crews[crewIdNum || -1])
+
+  if (!crew) return <Container>Error: Crew not found</Container>
+  if (!projectId) return <Container>Error: Project not found</Container>
+
+  // const onSubmit = (values: CrewWithLinks) => {
+  //   getApi()
+  //     .api.updateCrew(projectId, values.id, values)
+  //     .then((response) => {
+  //       handleAppEvents(response.data)
+  //       navigate("../")
+  //     })
+  //     .catch((error) => {
+  //       console.error("Error updating crew:", error)
+  //     })
+  // }
+
+  return (
+    <Container>
+      <Title order={1}>Edit Status</Title>
+      <Title order={2} size="h4" mb="lg">
+        {crew.name}
+      </Title>
+    </Container>
+  )
+}
