@@ -49,7 +49,7 @@ export default function CrewCard({ crew, involvements, people, highlightPersonId
   return (
     <Card className={cardStyles.join(" ")}>
       <Stack gap="md">
-        <Group justify="space-between" align="center" wrap="nowrap">
+        <Group justify="space-between" align="flex-start" wrap="nowrap">
           <Stack gap={0}>
             <Title order={2} size="h4">
               {crew.name}

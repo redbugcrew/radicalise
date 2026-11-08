@@ -241,7 +241,7 @@ pub async fn set_crew_status(
         crew_id.id,
         interval_number.number,
         interval_number.project_id.id,
-        state
+        state,
     )
     .fetch_one(pool)
     .await
