@@ -210,12 +210,12 @@ export interface CreateAttendanceRequest {
 
 export interface CreateCrewData {
   description?: string | null
-  /** @format int64 */
-  id: number
   links?: Link[] | null
   name: string
   /** @format int64 */
   project_id: number
+  /** @format int64 */
+  start_interval_number: number
 }
 
 export interface Credentials {

@@ -9,7 +9,7 @@ use crate::{
     crews::events::CrewsEvent,
     realtime::RealtimeState,
     shared::{
-        entities::{CrewWithLinks, Link, ProjectId},
+        entities::{CrewWithLinks, IntervalNumber, Link, ProjectId},
         events::AppEvent,
     },
 };
@@ -23,9 +23,9 @@ pub fn router() -> OpenApiRouter {
 
 #[derive(Deserialize, ToSchema, Clone, Debug)]
 pub struct CreateCrewData {
-    pub id: i64,
     pub name: String,
     pub description: Option<String>,
+    pub start_interval_number: i64,
     pub project_id: i64,
     pub links: Option<Vec<Link>>,
 }
@@ -33,7 +33,7 @@ pub struct CreateCrewData {
 impl Into<CrewWithLinks> for CreateCrewData {
     fn into(self) -> CrewWithLinks {
         CrewWithLinks {
-            id: self.id,
+            id: -1, // dummy value
             name: self.name,
             description: self.description,
             project_id: self.project_id,
@@ -63,6 +63,7 @@ pub async fn create_crew(
     Json(input): Json<CreateCrewData>,
 ) -> impl IntoResponse {
     let project_id = ProjectId::new(project_id);
+    let interval_number = IntervalNumber::new(input.start_interval_number, project_id.clone());
 
     println!("Create crew with project ID {}: {:?}", project_id.id, input);
 
@@ -70,11 +71,11 @@ pub async fn create_crew(
         return (StatusCode::BAD_REQUEST, "Project ID mismatch").into_response();
     }
 
-    match repo::create_crew_with_links(project_id, input.into(), &pool).await {
+    match repo::create_active_crew_with_links(interval_number, input.into(), &pool).await {
         Ok(response) => {
             let event = AppEvent::CrewsEvent(CrewsEvent::CrewUpdated(response));
             realtime_state.broadcast_app_event(Some(auth_session), event.clone()).await;
-            (StatusCode::OK, Json(vec![event])).into_response()
+            (StatusCode::CREATED, Json(vec![event])).into_response()
         }
         Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
     }

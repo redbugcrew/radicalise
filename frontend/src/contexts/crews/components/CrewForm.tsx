@@ -39,7 +39,7 @@ export default function CrewForm({ crew, projectId, onSubmit }: CrewFormProps) {
           <TextInput label="Description" placeholder="Crew Description" key="description" {...form.getInputProps("description")} />
           <LinksInput label="Links" placeholder="Add a link" key="links" {...form.getInputProps("links")} />
         </Stack>
-        <Button type="submit">Submit</Button>
+        <Button type="submit">Update</Button>
       </Stack>
     </form>
   )
