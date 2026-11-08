@@ -194,6 +194,11 @@ async fn sign_up(Extension(pool): Extension<SqlitePool>, Json(data): Json<SignUp
         return (StatusCode::BAD_REQUEST, err).into_response();
     }
 
+    let login_config = load_login_config(&pool).await;
+    if !login_config.signup_enabled {
+        return (StatusCode::BAD_REQUEST, "Sign up is disabled").into_response();
+    }
+
     let hashed_password = generate_hash(&data.password);
 
     let repo = AuthRepo::new(&pool);
@@ -230,14 +235,17 @@ pub struct LoginConfig {
     )
 )]
 async fn login_config(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse {
-    let repo = AuthRepo::new(&pool);
+    let login_config = load_login_config(&pool).await;
 
-    let has_users = repo.has_users().await.unwrap_or(false);
-
-    let login_config = LoginConfig {
-        signup_enabled: !has_users,
-    };
     (StatusCode::OK, Json(Some(login_config))).into_response()
+}
+
+async fn load_login_config(pool: &SqlitePool) -> LoginConfig {
+    let repo = AuthRepo::new(pool);
+    let has_users = repo.has_users().await.unwrap_or(false);
+    LoginConfig {
+        signup_enabled: !has_users,
+    }
 }
 
 fn repo_error_handler(error: AuthRepoError) -> Response<axum::body::Body> {
