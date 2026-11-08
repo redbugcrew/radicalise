@@ -48,6 +48,10 @@ export function availableCrews(allCrews: CrewObjectMap, intervalData: CurrentInt
   return appendCrewStatus(allCrews, intervalData).filter((crew) => crew.status === "Available")
 }
 
+export function filterCrewsByStatus(crews: CrewWithStatus[], status: CrewStatus): CrewWithStatus[] {
+  return crews.filter((crew) => crew.status === status)
+}
+
 export function appendCrewStatus(allCrews: CrewObjectMap, intervalData: CurrentIntervalState): CrewWithStatus[] {
   return Object.values(allCrews).map((crew) => {
     const crewState: CrewState | undefined = intervalData?.crew_states.find((state) => state.crew_id === crew.id)

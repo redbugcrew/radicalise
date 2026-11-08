@@ -1,8 +1,8 @@
 import type { Interval } from "../../../api/Api"
-import { default as CrewsList } from "../components/CrewsList"
+import { default as CrewsByStatus } from "../components/CrewsByStatus"
 import { useAppSelector } from "../../../store"
 import WithIntervalData from "../../../pages/intervals/WithIntervalData"
-import { availableCrews } from "../../../store/crews"
+import { appendCrewStatus } from "../../../store/crews"
 
 interface CrewsForIntervalProps {
   interval: Interval
@@ -16,8 +16,8 @@ export default function CrewsForInterval({ interval }: CrewsForIntervalProps) {
     <WithIntervalData interval={interval}>
       {({ intervalData, key }) => {
         return (
-          <CrewsList
-            crews={availableCrews(allCrews, intervalData)}
+          <CrewsByStatus
+            crews={appendCrewStatus(allCrews, intervalData)}
             involvements={intervalData?.crew_involvements || []}
             people={people}
             key={key}
