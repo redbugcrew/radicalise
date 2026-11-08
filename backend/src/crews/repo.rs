@@ -270,3 +270,35 @@ pub async fn find_crew_states_for_interval(interval_number: IntervalNumber, pool
 
     Ok(result)
 }
+
+pub async fn copy_crew_states_into_interval<'e, 'c: 'e, E>(
+    new_interval_number: IntervalNumber,
+    previous_interval_number: IntervalNumber,
+    pool: E,
+) -> Result<(), sqlx::Error>
+where
+    E: sqlx::Executor<'c, Database = sqlx::Sqlite>,
+{
+    if new_interval_number.project_id.id != previous_interval_number.project_id.id {
+        println!(
+            "Error copying crew states: project ID mismatch (new: {}, previous: {})",
+            new_interval_number.project_id.id, previous_interval_number.project_id.id
+        );
+        return Err(sqlx::Error::RowNotFound);
+    }
+
+    sqlx::query!(
+        "INSERT INTO crew_states (crew_id, interval_number, project_id, state)
+        SELECT crew_id, ?, project_id, state
+        FROM crew_states
+        WHERE interval_number = ? AND project_id = ?
+        ON CONFLICT(crew_id, interval_number, project_id) DO UPDATE SET state = excluded.state",
+        new_interval_number.number,
+        previous_interval_number.number,
+        previous_interval_number.project_id.id
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(())
+}

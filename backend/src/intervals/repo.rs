@@ -1,4 +1,7 @@
-use crate::shared::entities::{Interval, IntervalNumber, ProjectId};
+use crate::{
+    crews::repo::copy_crew_states_into_interval,
+    shared::entities::{Interval, IntervalNumber, ProjectId},
+};
 use chrono::NaiveDate;
 use sqlx::SqlitePool;
 
@@ -60,6 +63,13 @@ pub async fn insert_interval(interval: Interval, project_id: ProjectId, pool: &S
         project_id.id
     )
     .fetch_one(&mut *transaction)
+    .await?;
+
+    copy_crew_states_into_interval(
+        IntervalNumber::new(next_number, project_id.clone()),
+        IntervalNumber::new(last_number.unwrap_or(0), project_id.clone()),
+        &mut *transaction,
+    )
     .await?;
 
     transaction.commit().await?;
