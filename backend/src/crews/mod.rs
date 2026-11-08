@@ -1,3 +1,5 @@
+use std::iter::once;
+
 use axum::{Extension, Json, extract::Path, http::StatusCode, response::IntoResponse};
 use serde::Deserialize;
 use sqlx::SqlitePool;
@@ -87,9 +89,7 @@ pub async fn create_crew(
                 .iter()
                 .map(|state| AppEvent::ProjectEvent(ProjectEvent::CrewStateUpdated(state.clone())))
                 .collect::<Vec<_>>();
-            let events = std::iter::once(crew_updated)
-                .chain(crew_status_events.into_iter())
-                .collect::<Vec<_>>();
+            let events = once(crew_updated).chain(crew_status_events).collect::<Vec<_>>();
 
             realtime_state.broadcast_app_events(Some(auth_session), events.clone()).await;
             (StatusCode::CREATED, Json(events)).into_response()
