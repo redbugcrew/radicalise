@@ -4,14 +4,14 @@ import PersonBadge from "../../../../components/people/PersonBadge/PersonBadge"
 import type { PeopleObjectMap } from "../../../../store/people"
 import styles from "./CrewCard.module.css"
 import Anchor from "../../../../components/Anchor"
-import type { CrewWithLinks } from "../../../../store/crews"
+import type { CrewWithStatus } from "../../../../store/crews"
 import LinksStack from "../../../../components/links/LinksDisplay/LinksStack"
 import { currentProjectPath, useCurrentProjectSlug } from "../../../projects"
 import { IconEdit } from "@tabler/icons-react"
 import CrewStatusBadge from "../CrewStatusBadge"
 
 interface CrewCardProps {
-  crew: CrewWithLinks
+  crew: CrewWithStatus
   involvements: CrewInvolvement[]
   people: PeopleObjectMap
   highlightPersonId?: number
@@ -62,7 +62,7 @@ export default function CrewCard({ crew, involvements, people, highlightPersonId
                 <IconEdit style={{ width: "70%", height: "70%" }} stroke={2} />
               </ActionIcon>
             </Anchor>
-            <CrewStatusBadge active={active} href={currentProjectPath(`/crews/${crew.id}/edit_status`, projectSlug)} />
+            <CrewStatusBadge active={active} status={crew.status} href={currentProjectPath(`/crews/${crew.id}/edit_status`, projectSlug)} />
           </Stack>
         </Group>
         <Group>

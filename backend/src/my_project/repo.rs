@@ -5,7 +5,7 @@ use utoipa::ToSchema;
 use crate::{
     calendar_events::repo::list_calendar_events_with_attendances,
     circles::repo::{find_all_circles, find_all_circles_ids},
-    crews::repo::find_all_crews_with_links,
+    crews::repo::{find_all_crews_with_links, find_crew_states_for_interval},
     event_templates::repo::find_all_event_templates,
     intervals::repo::{find_all_intervals, find_current_interval},
     my_project::involvements_repo::{find_all_circle_involvements, find_all_circle_involvements_for_person},
@@ -13,8 +13,8 @@ use crate::{
     people::repo::find_all_people,
     shared::{
         entities::{
-            CalendarEvent, Circle, CircleId, CircleInvolvement, CrewInvolvement, CrewWithLinks, EventTemplate, Interval, IntervalNumber,
-            PeerEnrollment, PeerRole, Person, PersonId, Project, ProjectId, UserId,
+            CalendarEvent, Circle, CircleId, CircleInvolvement, CrewInvolvement, CrewState, CrewWithLinks, EventTemplate, Interval,
+            IntervalNumber, PeerEnrollment, PeerRole, Person, PersonId, Project, ProjectId, UserId,
         },
         links_repo::{find_all_links_for_owner, update_links_for_owner},
     },
@@ -41,6 +41,7 @@ pub struct IntervalData {
     pub crew_involvements: Vec<CrewInvolvement>,
     pub circle_involvements: Vec<CircleInvolvementData>,
     pub peer_enrollments: Vec<PeerEnrollment>,
+    pub crew_states: Vec<CrewState>,
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Clone)]
@@ -244,11 +245,17 @@ pub async fn find_interval_data(interval: &Interval, pool: &SqlitePool) -> Resul
             e
         })?;
 
+    let crew_states = find_crew_states_for_interval(interval.typed_number(), pool).await.map_err(|e| {
+        println!("find_crew_states_for_interval: {:?}", e);
+        e
+    })?;
+
     Ok(IntervalData {
         interval: interval.clone(),
         crew_involvements: involvements.crew_involvements,
         circle_involvements: involvements.involvements_for_circles,
         peer_enrollments: enrollments,
+        crew_states,
     })
 }
 

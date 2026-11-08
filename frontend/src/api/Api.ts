@@ -243,6 +243,18 @@ export interface CrewInvolvement {
   volunteered_convenor: boolean
 }
 
+export interface CrewState {
+  /** @format int64 */
+  crew_id: number
+  /** @format int64 */
+  id: number
+  /** @format int64 */
+  interval_number: number
+  /** @format int64 */
+  project_id: number
+  state: CrewStatus
+}
+
 export interface CrewWithLinks {
   description?: string | null
   /** @format int64 */
@@ -298,6 +310,7 @@ export interface Interval {
 export interface IntervalData {
   circle_involvements: CircleInvolvementData[]
   crew_involvements: CrewInvolvement[]
+  crew_states: CrewState[]
   interval: Interval
   peer_enrollments: PeerEnrollment[]
 }

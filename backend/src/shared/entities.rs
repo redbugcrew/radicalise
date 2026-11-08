@@ -234,6 +234,16 @@ pub enum CrewStatus {
     Available, // 1
 }
 
+impl From<i64> for CrewStatus {
+    fn from(value: i64) -> Self {
+        match value {
+            0 => CrewStatus::Archived,
+            1 => CrewStatus::Available,
+            _ => panic!("Invalid value for CrewStatus"),
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, ToSchema, Clone, Debug)]
 pub struct CrewState {
     pub id: i64,

@@ -1,5 +1,7 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
-import type { CrewWithLinks as CrewWithAnyLinks, Link } from "../api/Api"
+import type { CrewStatus, CrewWithLinks as CrewWithAnyLinks, Link, CrewState } from "../api/Api"
+import { useAppSelector } from "."
+import type { CurrentIntervalState } from "./current_interval"
 
 export type CrewWithLinks = CrewWithAnyLinks & {
   links: Link[] | undefined
@@ -38,3 +40,21 @@ export const { crewsLoaded, crewUpdated } = crewsSlice.actions
 
 // Export the slice reducer as the default export
 export default crewsSlice.reducer
+
+export interface CrewWithStatus extends CrewWithLinks {
+  status: CrewStatus | undefined
+}
+
+export function availableCrews(allCrews: CrewObjectMap, intervalData: CurrentIntervalState): CrewWithStatus[] {
+  return appendCrewStatus(allCrews, intervalData).filter((crew) => crew.status === "Available")
+}
+
+export function appendCrewStatus(allCrews: CrewObjectMap, intervalData: CurrentIntervalState): CrewWithStatus[] {
+  return Object.values(allCrews).map((crew) => {
+    const crewState: CrewState | undefined = intervalData?.crew_states.find((state) => state.crew_id === crew.id)
+    return {
+      ...crew,
+      status: crewState?.state,
+    }
+  })
+}

@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use sqlx::SqlitePool;
 
 use crate::shared::{
-    entities::{Crew, CrewId, CrewInvolvement, CrewStatus, CrewWithLinks, IntervalNumber, ProjectId},
+    entities::{Crew, CrewId, CrewInvolvement, CrewState, CrewStatus, CrewWithLinks, IntervalNumber, ProjectId},
     links_repo::{find_all_links_for_owner_type, hash_links_by_owner, update_links_for_owner},
 };
 
@@ -100,26 +100,6 @@ pub async fn create_available_crew_with_links(
     set_crew_status(crew.typed_id(), interval_number, CrewStatus::Available, pool).await?;
 
     Ok(crew)
-}
-
-pub async fn set_crew_status(
-    crew_id: CrewId,
-    interval_number: IntervalNumber,
-    state: CrewStatus,
-    pool: &SqlitePool,
-) -> Result<(), sqlx::Error> {
-    sqlx::query!(
-        "UPDATE crew_states SET state = ?
-        WHERE crew_id = ? AND interval_number = ? AND project_id = ?",
-        state as i32,
-        crew_id.id,
-        interval_number.number,
-        interval_number.project_id.id
-    )
-    .execute(pool)
-    .await?;
-
-    Ok(())
 }
 
 pub async fn create_crew_with_links(project_id: ProjectId, crew: CrewWithLinks, pool: &SqlitePool) -> Result<CrewWithLinks, sqlx::Error> {
@@ -244,4 +224,40 @@ pub async fn intervals_participated_since_last_convened(
     }
 
     Ok(map)
+}
+
+pub async fn set_crew_status(
+    crew_id: CrewId,
+    interval_number: IntervalNumber,
+    state: CrewStatus,
+    pool: &SqlitePool,
+) -> Result<(), sqlx::Error> {
+    sqlx::query!(
+        "INSERT INTO crew_states (state, crew_id, interval_number, project_id)
+        VALUES (?, ?, ?, ?)
+        ON CONFLICT(crew_id, interval_number, project_id) DO UPDATE SET state = excluded.state",
+        state as i32,
+        crew_id.id,
+        interval_number.number,
+        interval_number.project_id.id
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(())
+}
+
+pub async fn find_crew_states_for_interval(interval_number: IntervalNumber, pool: &SqlitePool) -> Result<Vec<CrewState>, sqlx::Error> {
+    let result = sqlx::query_as!(
+        CrewState,
+        "SELECT id, crew_id, state, interval_number, project_id
+        FROM crew_states
+        WHERE interval_number = ? AND project_id = ?",
+        interval_number.number,
+        interval_number.project_id.id
+    )
+    .fetch_all(pool)
+    .await?;
+
+    Ok(result)
 }

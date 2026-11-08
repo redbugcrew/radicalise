@@ -4,6 +4,7 @@ use utoipa::ToSchema;
 
 use crate::{
     circles::repo::find_all_circles_ids,
+    crews::repo::find_crew_states_for_interval,
     intervals::repo::find_interval,
     my_project::repo::{IntervalData, find_all_crew_involvements, find_interval_involvement_data_for_circles_and_person},
     peer_roles::enrollments_repo::find_peer_enrollments_for_interval_and_person,
@@ -38,11 +39,14 @@ pub async fn find_interval_data_for_person(
 
     let enrollments = find_peer_enrollments_for_interval_and_person(&interval_number, &person_id, pool).await?;
 
+    let crew_states = find_crew_states_for_interval(interval_number.clone(), pool).await?;
+
     let result = IntervalData {
         interval,
         circle_involvements: circle_involvements_result,
         crew_involvements: crew_involvements_result,
         peer_enrollments: enrollments,
+        crew_states,
     };
 
     Ok(PersonIntervalData {
