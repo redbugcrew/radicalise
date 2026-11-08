@@ -1,5 +1,4 @@
 export { default as Crews } from "./pages/Crews"
-export { default as CrewsForInterval } from "./pages/CrewsForInterval"
 export { default as EditCrew } from "./pages/EditCrew"
 export { default as EditCrewStatus } from "./pages/EditCrewStatus"
 export { default as NewCrew } from "./pages/NewCrew"

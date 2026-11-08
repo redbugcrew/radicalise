@@ -1,6 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit"
 import type { CrewStatus, CrewWithLinks as CrewWithAnyLinks, Link, CrewState } from "../api/Api"
-import { useAppSelector } from "."
 import type { CurrentIntervalState } from "./current_interval"
 
 export type CrewWithLinks = CrewWithAnyLinks & {

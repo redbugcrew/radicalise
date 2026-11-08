@@ -1,5 +1,5 @@
 import { Stack, Title, Text, Group, ActionIcon } from "@mantine/core"
-import CrewsForInterval from "./CrewsForInterval"
+import CrewsForInterval from "../components/CrewsForInterval"
 import { Anchor, IntervalSelector, NoData } from "../../../components"
 import { useAppSelector } from "../../../store"
 import { useSelectedInterval } from "../../../pages/intervals/WithIntervalData"
