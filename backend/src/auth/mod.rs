@@ -28,7 +28,7 @@ pub async fn load_user_permissions(current_user: &Option<User>, pool: &SqlitePoo
     UserPermissions {
         signup_enabled: !has_users,
         first_use: !has_users,
-        is_admin: current_user.as_ref().map_or(false, |user| user.is_admin),
-        can_create_projects: current_user.as_ref().map_or(false, |user| user.can_create_projects),
+        is_admin: current_user.as_ref().is_some_and(|user| user.is_admin),
+        can_create_projects: current_user.as_ref().is_some_and(|user| user.can_create_projects),
     }
 }

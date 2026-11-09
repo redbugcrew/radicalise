@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT id, email, hashed_password\n            FROM users\n            WHERE LOWER(email) = LOWER(?)",
+  "query": "SELECT id, email, hashed_password, is_admin, can_create_projects\n            FROM users\n            WHERE LOWER(email) = LOWER(?)",
   "describe": {
     "columns": [
       {
@@ -35,6 +35,28 @@
             "name": "hashed_password"
           }
         }
+      },
+      {
+        "name": "is_admin",
+        "ordinal": 3,
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "is_admin"
+          }
+        }
+      },
+      {
+        "name": "can_create_projects",
+        "ordinal": 4,
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "can_create_projects"
+          }
+        }
       }
     ],
     "parameters": {
@@ -43,8 +65,10 @@
     "nullable": [
       false,
       true,
-      true
+      true,
+      false,
+      false
     ]
   },
-  "hash": "08a83677323833626120dc93d16768d639d6fbae4973593b5cad95e5c32f9dab"
+  "hash": "d9553999265ff9468c3b9f3516d3d3fb78bb1717382858854dece93400d35f75"
 }
