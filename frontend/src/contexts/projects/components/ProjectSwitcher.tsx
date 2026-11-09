@@ -13,6 +13,8 @@ interface ProjectSwitcherProps {
 export default function ProjectSwitcher({ value, canCreateNew }: ProjectSwitcherProps) {
   const { myProjects } = useContext(MyProjectsContext)
 
+  if (myProjects.length <= 1 && !canCreateNew) return null
+
   return (
     <Menu shadow="md" width={200} data-testid="project-switcher-button">
       <Menu.Target>
