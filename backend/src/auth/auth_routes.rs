@@ -200,9 +200,10 @@ async fn sign_up(Extension(pool): Extension<SqlitePool>, Json(data): Json<SignUp
     }
 
     let hashed_password = generate_hash(&data.password);
+    let is_admin = login_config.first_use;
 
     let repo = AuthRepo::new(&pool);
-    match repo.insert_user(data.email, hashed_password).await {
+    match repo.insert_user(data.email, hashed_password, is_admin, is_admin).await {
         Ok(_) => (StatusCode::OK, ()).into_response(),
         Err(err) => repo_insert_error_handler(err),
     }
