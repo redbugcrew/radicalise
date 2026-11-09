@@ -7,6 +7,7 @@ import { actionSuccess, type ActionPromiseResult } from "../../../components/Act
 import LoginForm from "../components/LoginForm"
 import { Button, Group, Stack } from "@mantine/core"
 import { useLoginConfig } from "./auth_hooks"
+import { useEffect } from "react"
 
 export default function Login() {
   const navigate = useNavigate()
@@ -29,6 +30,12 @@ export default function Login() {
         }
       })
   }
+
+  useEffect(() => {
+    if (loginConfig?.first_use) {
+      navigate("../signup")
+    }
+  }, [loginConfig])
 
   return (
     <AuthLayout title="Welcome back!">

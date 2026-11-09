@@ -39,16 +39,34 @@ export default function SignUp() {
   }
 
   return (
-    <AuthLayout title="Create your account">
+    <AuthLayout
+      title={loginConfig?.first_use ? "Welcome comrade 👋" : "Create your account"}
+      content={
+        loginConfig?.first_use ? (
+          <Stack mt="md">
+            <Text>
+              <Text span fw="bold">
+                Radicalise
+              </Text>{" "}
+              is an app to help your projects, groups and communities participate in active work through changing times and changing
+              capacities.
+            </Text>
+            <Text>You are creating the first admin account for this application.</Text>
+          </Stack>
+        ) : undefined
+      }
+    >
       <Stack gap="md">
         <LoginForm onSubmit={onSubmit} submitText="Sign up" />
 
-        <Text>
-          Already have an account?{" "}
-          <Anchor href={`../login${location.search}`} size="sm">
-            Log in
-          </Anchor>
-        </Text>
+        {!loginConfig?.first_use && (
+          <Text>
+            Already have an account?{" "}
+            <Anchor href={`../login${location.search}`} size="sm">
+              Log in
+            </Anchor>
+          </Text>
+        )}
       </Stack>
     </AuthLayout>
   )

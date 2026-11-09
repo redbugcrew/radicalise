@@ -343,6 +343,7 @@ export interface Link {
 }
 
 export interface LoginConfig {
+  first_use: boolean
   signup_enabled: boolean
 }
 

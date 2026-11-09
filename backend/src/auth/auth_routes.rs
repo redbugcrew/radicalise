@@ -225,6 +225,7 @@ async fn get_current_user(auth_session: AuthSession) -> impl IntoResponse {
 #[derive(Serialize, ToSchema)]
 pub struct LoginConfig {
     pub signup_enabled: bool,
+    pub first_use: bool,
 }
 
 #[utoipa::path(
@@ -245,6 +246,7 @@ async fn load_login_config(pool: &SqlitePool) -> LoginConfig {
     let has_users = repo.has_users().await.unwrap_or(false);
     LoginConfig {
         signup_enabled: !has_users,
+        first_use: !has_users,
     }
 }
 

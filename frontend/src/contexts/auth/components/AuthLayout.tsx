@@ -5,9 +5,10 @@ interface AuthLayoutProps {
   children: React.ReactNode
   title: string
   description?: string
+  content?: React.ReactNode
 }
 
-export default function AuthLayout({ children, title, description }: AuthLayoutProps) {
+export default function AuthLayout({ children, title, description, content }: AuthLayoutProps) {
   return (
     <Container size={420} my={40}>
       <Title ta="center" className={classes.title}>
@@ -18,6 +19,8 @@ export default function AuthLayout({ children, title, description }: AuthLayoutP
           {description}
         </Text>
       )}
+
+      {content}
 
       <Paper withBorder shadow="sm" p={22} mt={30} radius="md">
         {children}
