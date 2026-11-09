@@ -758,7 +758,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request POST:/api/projects
      */
     createProject: (data: NewProjectData, params: RequestParams = {}) =>
-      this.request<Project, CreateProjectError>({
+      this.request<Project, CreateProjectError | string>({
         path: `/api/projects`,
         method: "POST",
         body: data,

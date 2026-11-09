@@ -11,9 +11,11 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 use uuid::Uuid;
 
 use crate::auth::{
-    auth_backend::{AuthSession, Credentials, User},
+    UserPermissions,
+    auth_backend::{AuthSession, Credentials},
     auth_email::reset_password_email,
     auth_repo::{AuthRepo, AuthRepoError, AuthRepoInsertError},
+    load_user_permissions,
 };
 
 pub fn auth_router() -> OpenApiRouter {
@@ -224,14 +226,6 @@ async fn get_current_user(auth_session: AuthSession) -> impl IntoResponse {
     }
 }
 
-#[derive(Serialize, ToSchema)]
-pub struct UserPermissions {
-    pub signup_enabled: bool,
-    pub first_use: bool,
-    pub is_admin: bool,
-    pub can_create_projects: bool,
-}
-
 #[utoipa::path(
     get,
     path = "/user_permissions",
@@ -244,18 +238,6 @@ async fn user_permissions(auth_session: AuthSession, Extension(pool): Extension<
     let user_permissions = load_user_permissions(&current_user, &pool).await;
 
     (StatusCode::OK, Json(Some(user_permissions))).into_response()
-}
-
-async fn load_user_permissions(current_user: &Option<User>, pool: &SqlitePool) -> UserPermissions {
-    let repo = AuthRepo::new(pool);
-    let has_users = repo.has_users().await.unwrap_or(false);
-
-    UserPermissions {
-        signup_enabled: !has_users,
-        first_use: !has_users,
-        is_admin: current_user.as_ref().map_or(false, |user| user.is_admin),
-        can_create_projects: current_user.as_ref().map_or(false, |user| user.can_create_projects),
-    }
 }
 
 fn repo_error_handler(error: AuthRepoError) -> Response<axum::body::Body> {
