@@ -38,22 +38,24 @@ export default function Header({ onToggle, opened }: HeaderProps) {
           </Anchor>
           <ProjectSwitcher value={project} canCreateNew />
         </Group>
-        {person && (
-          <Menu shadow="md" width={200}>
-            <Menu.Target>
-              <div>
-                <PersonBadge person={person} variant="transparent" noText />
-              </div>
-            </Menu.Target>
 
-            <Menu.Dropdown>
+        <Menu shadow="md" width={200}>
+          <Menu.Target>
+            <div>
+              <PersonBadge person={person} variant="transparent" noText allowNull textOverride={person?.display_name ?? "Your user"} />
+            </div>
+          </Menu.Target>
+
+          <Menu.Dropdown>
+            {person && (
               <Menu.Item component={Link} to={currentProjectPath(`/people/${person.id}`, projectSlug)}>
                 Profile
               </Menu.Item>
-              <Menu.Item onClick={onLogout}>Logout</Menu.Item>
-            </Menu.Dropdown>
-          </Menu>
-        )}
+            )}
+
+            <Menu.Item onClick={onLogout}>Logout</Menu.Item>
+          </Menu.Dropdown>
+        </Menu>
       </Group>
     </AppShell.Header>
   )
