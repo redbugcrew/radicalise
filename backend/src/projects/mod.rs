@@ -5,7 +5,7 @@ use utoipa::ToSchema;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
-    auth::auth_backend::AuthSession,
+    auth::{auth_backend::AuthSession, load_user_permissions},
     projects::repo::CreateProjectError,
     shared::entities::{Project, UserId},
 };
@@ -41,6 +41,7 @@ impl Into<Project> for NewProjectData {
         (status = BAD_REQUEST, description = "Bad request", body = CreateProjectError),
         (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
         (status = UNAUTHORIZED, body = ()),
+        (status = FORBIDDEN, description = "Forbidden", body = String),
     )
 )]
 pub async fn create_project(
@@ -48,13 +49,19 @@ pub async fn create_project(
     auth_session: AuthSession,
     Json(input): Json<NewProjectData>,
 ) -> impl IntoResponse {
-    let user_id = match auth_session.user().await {
-        Some(user) => UserId::new(user.id),
+    let current_user = match auth_session.user().await {
+        Some(user) => user,
         None => {
             println!("Unauthorized access to get_visible_projects");
             return (StatusCode::UNAUTHORIZED, ()).into_response();
         }
     };
+    let user_id = UserId::new(current_user.id);
+    let user_permissions = load_user_permissions(&Some(current_user), &pool).await;
+
+    if !user_permissions.can_create_projects {
+        return (StatusCode::FORBIDDEN, "This user does not have permission to create projects").into_response();
+    }
 
     let project = match repo::create_project_and_dependent_records(input.clone().into(), user_id, input.person_name.clone(), &pool).await {
         Ok(project) => project,

@@ -10,9 +10,10 @@ export const avatarUrl = (id: number) => {
 }
 
 interface AvatarProps {
-  avatarId: number
+  avatarId?: number
+  alt?: string
 }
 
-export default function Avatar({ avatarId }: AvatarProps) {
-  return <MantineAvatar size={30} src={avatarUrl(avatarId)} radius={30} />
+export default function Avatar({ avatarId, alt }: AvatarProps) {
+  return <MantineAvatar size={30} src={avatarId ? avatarUrl(avatarId) : undefined} alt={alt} radius={30} />
 }

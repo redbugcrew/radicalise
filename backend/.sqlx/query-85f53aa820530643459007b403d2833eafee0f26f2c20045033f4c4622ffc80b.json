@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "INSERT INTO users (email, hashed_password)\n            VALUES (?, ?)\n            RETURNING id AS \"id!\", email, hashed_password",
+  "query": "INSERT INTO users (email, hashed_password, is_admin, can_create_projects)\n            VALUES (?, ?, ?, ?)\n            RETURNING id AS \"id!\", email, hashed_password, is_admin, can_create_projects",
   "describe": {
     "columns": [
       {
@@ -35,16 +35,40 @@
             "name": "hashed_password"
           }
         }
+      },
+      {
+        "name": "is_admin",
+        "ordinal": 3,
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "is_admin"
+          }
+        }
+      },
+      {
+        "name": "can_create_projects",
+        "ordinal": 4,
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "can_create_projects"
+          }
+        }
       }
     ],
     "parameters": {
-      "Right": 2
+      "Right": 4
     },
     "nullable": [
       false,
       true,
-      true
+      true,
+      false,
+      false
     ]
   },
-  "hash": "de60469254bcac56b5aaba793f6d5407daf8a89297cda0512da69446e8ec8d2e"
+  "hash": "85f53aa820530643459007b403d2833eafee0f26f2c20045033f4c4622ffc80b"
 }

@@ -4,6 +4,7 @@ import { Anchor, PersonBadge } from "../../components"
 import { useAppSelector } from "../../store"
 import { currentProjectPath, useCurrentProjectSlug, ProjectSwitcher } from "../../contexts/projects"
 import { getApi } from "../../api"
+import { useUserPermissions } from "../../contexts/auth/pages/auth_hooks"
 
 interface HeaderProps {
   onToggle: () => void
@@ -16,6 +17,7 @@ export default function Header({ onToggle, opened }: HeaderProps) {
   const person = useAppSelector((state) => state.people[person_id || -1])
   const projectSlug = useCurrentProjectSlug()
   const navigate = useNavigate()
+  const userPermissions = useUserPermissions()
 
   const onLogout = () => {
     getApi()
@@ -36,24 +38,27 @@ export default function Header({ onToggle, opened }: HeaderProps) {
           <Anchor href="/" data-test-id="current-project-name">
             {project ? project.name : "Radicalise!"}
           </Anchor>
-          <ProjectSwitcher value={project} canCreateNew />
-        </Group>
-        {person && (
-          <Menu shadow="md" width={200}>
-            <Menu.Target>
-              <div>
-                <PersonBadge person={person} variant="transparent" noText />
-              </div>
-            </Menu.Target>
 
-            <Menu.Dropdown>
+          <ProjectSwitcher value={project} canCreateNew={userPermissions?.can_create_projects} />
+        </Group>
+
+        <Menu shadow="md" width={200}>
+          <Menu.Target>
+            <div>
+              <PersonBadge person={person} variant="transparent" noText allowNull textOverride={person?.display_name ?? "Your user"} />
+            </div>
+          </Menu.Target>
+
+          <Menu.Dropdown>
+            {person && (
               <Menu.Item component={Link} to={currentProjectPath(`/people/${person.id}`, projectSlug)}>
                 Profile
               </Menu.Item>
-              <Menu.Item onClick={onLogout}>Logout</Menu.Item>
-            </Menu.Dropdown>
-          </Menu>
-        )}
+            )}
+
+            <Menu.Item onClick={onLogout}>Logout</Menu.Item>
+          </Menu.Dropdown>
+        </Menu>
       </Group>
     </AppShell.Header>
   )

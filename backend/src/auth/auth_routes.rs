@@ -11,9 +11,11 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 use uuid::Uuid;
 
 use crate::auth::{
+    UserPermissions,
     auth_backend::{AuthSession, Credentials},
     auth_email::reset_password_email,
     auth_repo::{AuthRepo, AuthRepoError, AuthRepoInsertError},
+    load_user_permissions,
 };
 
 pub fn auth_router() -> OpenApiRouter {
@@ -24,6 +26,7 @@ pub fn auth_router() -> OpenApiRouter {
         .routes(routes!(log_out))
         .routes(routes!(sign_up))
         .routes(routes!(get_current_user))
+        .routes(routes!(user_permissions))
 }
 
 #[derive(ToSchema, Deserialize)]
@@ -187,16 +190,23 @@ impl SignUpRequest {
         (status = BAD_REQUEST, body = String)
     )
 )]
-async fn sign_up(Extension(pool): Extension<SqlitePool>, Json(data): Json<SignUpRequest>) -> impl IntoResponse {
+async fn sign_up(auth_session: AuthSession, Extension(pool): Extension<SqlitePool>, Json(data): Json<SignUpRequest>) -> impl IntoResponse {
     // Validate the incoming data
     if let Err(err) = data.validate() {
         return (StatusCode::BAD_REQUEST, err).into_response();
     }
 
+    let current_user = auth_session.user().await;
+    let login_config = load_user_permissions(&current_user, &pool).await;
+    if !login_config.signup_enabled {
+        return (StatusCode::BAD_REQUEST, "Sign up is disabled").into_response();
+    }
+
     let hashed_password = generate_hash(&data.password);
+    let is_admin = login_config.first_use;
 
     let repo = AuthRepo::new(&pool);
-    match repo.insert_user(data.email, hashed_password).await {
+    match repo.insert_user(data.email, hashed_password, is_admin, is_admin).await {
         Ok(_) => (StatusCode::OK, ()).into_response(),
         Err(err) => repo_insert_error_handler(err),
     }
@@ -214,6 +224,20 @@ async fn get_current_user(auth_session: AuthSession) -> impl IntoResponse {
         Some(user) => (StatusCode::OK, Json(Some(LoginResponse { user_id: user.id }))).into_response(),
         None => (StatusCode::OK, Json::<Option<LoginResponse>>(None)).into_response(),
     }
+}
+
+#[utoipa::path(
+    get,
+    path = "/user_permissions",
+    responses(
+        (status = OK, body = Option<UserPermissions>),
+    )
+)]
+async fn user_permissions(auth_session: AuthSession, Extension(pool): Extension<SqlitePool>) -> impl IntoResponse {
+    let current_user = auth_session.user().await;
+    let user_permissions = load_user_permissions(&current_user, &pool).await;
+
+    (StatusCode::OK, Json(Some(user_permissions))).into_response()
 }
 
 fn repo_error_handler(error: AuthRepoError) -> Response<axum::body::Body> {

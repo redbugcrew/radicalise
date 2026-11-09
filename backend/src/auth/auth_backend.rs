@@ -12,6 +12,8 @@ pub struct User {
     pub id: i64,
     pub email: String,
     password: String,
+    pub is_admin: bool,
+    pub can_create_projects: bool,
 }
 
 // Here we've implemented `Debug` manually to avoid accidentally logging the
@@ -88,6 +90,8 @@ impl AuthnBackend for AppAuthBackend {
                     id: u.id,
                     email: u.email.unwrap_or_default(),
                     password: u.hashed_password.unwrap_or_default(),
+                    is_admin: u.is_admin,
+                    can_create_projects: u.can_create_projects,
                 })
             })
             .map_err(Error::AuthRepo)?;
@@ -112,6 +116,8 @@ impl AuthnBackend for AppAuthBackend {
                     id: u.id,
                     email: u.email.unwrap_or_default(),
                     password: u.hashed_password.unwrap_or_default(),
+                    is_admin: u.is_admin,
+                    can_create_projects: u.can_create_projects,
                 })
             })
             .map_err(Error::AuthRepo)

@@ -55,6 +55,13 @@ export default function LoadMyProjects({ withRedirect }: LoadMyProjectsProps) {
 
   if (myProjects === undefined) return null
 
+  if (myProjects.length === 0) {
+    if (withRedirect) {
+      navigate("/projects/new")
+      return null
+    }
+  }
+
   return (
     <MyProjectsContext value={{ myProjects, addProject }}>
       <Outlet />

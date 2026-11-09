@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom"
+import { useUserPermissions } from "./auth_hooks"
 import { notifications } from "@mantine/notifications"
 import { getApi } from "../../../api"
 import { actionFailure, actionSuccess, type ActionPromiseResult } from "../../../components/ActionResult"
@@ -11,6 +12,15 @@ import type { LoginFormData } from "../components/LoginForm"
 export default function SignUp() {
   const navigate = useNavigate()
   const location = useLocation()
+  const userPermissions = useUserPermissions()
+
+  if (!userPermissions?.signup_enabled) {
+    return (
+      <AuthLayout title="Sign up disabled">
+        <Text>Sign up is currently disabled.</Text>
+      </AuthLayout>
+    )
+  }
 
   const onSubmit = (values: LoginFormData): Promise<ActionPromiseResult> => {
     return getApi()
@@ -29,16 +39,34 @@ export default function SignUp() {
   }
 
   return (
-    <AuthLayout title="Create your account">
+    <AuthLayout
+      title={userPermissions?.first_use ? "Welcome comrade 👋" : "Create your account"}
+      content={
+        userPermissions?.first_use ? (
+          <Stack mt="md">
+            <Text>
+              <Text span fw="bold">
+                Radicalise
+              </Text>{" "}
+              is an app to help your projects, groups and communities participate in active work through changing times and changing
+              capacities.
+            </Text>
+            <Text>You are creating the first admin account for this application.</Text>
+          </Stack>
+        ) : undefined
+      }
+    >
       <Stack gap="md">
         <LoginForm onSubmit={onSubmit} submitText="Sign up" />
 
-        <Text>
-          Already have an account?{" "}
-          <Anchor href={`../login${location.search}`} size="sm">
-            Log in
-          </Anchor>
-        </Text>
+        {!userPermissions?.first_use && (
+          <Text>
+            Already have an account?{" "}
+            <Anchor href={`../login${location.search}`} size="sm">
+              Log in
+            </Anchor>
+          </Text>
+        )}
       </Stack>
     </AuthLayout>
   )

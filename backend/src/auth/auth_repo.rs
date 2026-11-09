@@ -5,6 +5,8 @@ pub struct AuthUser {
     pub id: i64,
     pub email: Option<String>,
     pub hashed_password: Option<String>,
+    pub is_admin: bool,
+    pub can_create_projects: bool,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -35,7 +37,7 @@ impl<'a> AuthRepo<'a> {
     pub async fn user_for_email(&self, email: String) -> Result<Option<AuthUser>, AuthRepoError> {
         sqlx::query_as!(
             AuthUser,
-            "SELECT id, email, hashed_password
+            "SELECT id, email, hashed_password, is_admin, can_create_projects
             FROM users
             WHERE LOWER(email) = LOWER(?)",
             email
@@ -48,7 +50,7 @@ impl<'a> AuthRepo<'a> {
     pub async fn user_for_id(&self, user_id: i64) -> Result<Option<AuthUser>, AuthRepoError> {
         sqlx::query_as!(
             AuthUser,
-            "SELECT id, email, hashed_password
+            "SELECT id, email, hashed_password, is_admin, can_create_projects
             FROM users
             WHERE id = ?",
             user_id
@@ -105,18 +107,35 @@ impl<'a> AuthRepo<'a> {
         }
     }
 
-    pub async fn insert_user(&self, email: String, hashed_password: String) -> Result<AuthUser, AuthRepoInsertError> {
+    pub async fn insert_user(
+        &self,
+        email: String,
+        hashed_password: String,
+        is_admin: bool,
+        can_create_projects: bool,
+    ) -> Result<AuthUser, AuthRepoInsertError> {
         sqlx::query_as!(
             AuthUser,
-            "INSERT INTO users (email, hashed_password)
-            VALUES (?, ?)
-            RETURNING id AS \"id!\", email, hashed_password",
+            "INSERT INTO users (email, hashed_password, is_admin, can_create_projects)
+            VALUES (?, ?, ?, ?)
+            RETURNING id AS \"id!\", email, hashed_password, is_admin, can_create_projects",
             email,
-            hashed_password
+            hashed_password,
+            is_admin,
+            can_create_projects
         )
         .fetch_one(self.pool)
         .await
         .map_err(log_and_return_db_insert_error)
+    }
+
+    pub async fn has_users(&self) -> Result<bool, AuthRepoError> {
+        let result = sqlx::query!("SELECT id FROM users LIMIT 1")
+            .fetch_optional(self.pool)
+            .await
+            .map_err(log_and_return_db_error)?;
+
+        Ok(result.is_some())
     }
 }
 

@@ -13,12 +13,22 @@ export interface PersonBadgeProps {
   textOverride?: string
   noText?: boolean
   link?: boolean
+  allowNull?: boolean
 }
 
-export default function PersonBadge({ person, me, highlight, textOverride, noText, variant = "default", link = false }: PersonBadgeProps) {
+export default function PersonBadge({
+  person,
+  me,
+  highlight,
+  textOverride,
+  noText,
+  variant = "default",
+  link = false,
+  allowNull = false,
+}: PersonBadgeProps) {
   const projectSlug = useCurrentProjectSlug()
 
-  if (!person) {
+  if (!person && !allowNull) {
     return null
   }
 
@@ -28,19 +38,22 @@ export default function PersonBadge({ person, me, highlight, textOverride, noTex
   if (highlight) badgeClasses.push(classes.highlighted)
 
   const wrapElement = (children: React.ReactNode) => {
-    if (link) {
+    if (link && person) {
       return <Anchor href={currentProjectPath(`/people/${person.id}`, projectSlug)}>{children}</Anchor>
     } else {
       return children
     }
   }
 
+  const text = textOverride ?? person?.display_name
+
   return wrapElement(
     <Group gap="xs" className={badgeClasses.join(" ")} wrap="nowrap">
-      <Avatar avatarId={person.avatar_id ?? person.id} />
+      <Avatar avatarId={person?.avatar_id ?? person?.id} alt={text} />
+
       {!noText && (
         <Text fz="sm" fw={500} span>
-          {textOverride ?? person.display_name}
+          {text}
         </Text>
       )}
     </Group>,

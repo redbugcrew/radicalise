@@ -8,14 +8,14 @@ test.describe("Project Management", () => {
   test.beforeEach(async () => {
     seeds = dbSeeds()
     seeds.projects.seedProject("foobar")
-    seeds.users.seedUser("andi", "foobar")
+    seeds.users.seedUser("andi", "foobar", { can_create_projects: true })
   })
 
   test.afterEach(() => {
     if (seeds?.db) seeds.db.close()
   })
 
-  test("existing user should be able to create a new project", async ({ page }) => {
+  test("existing user with permission should be able to create a new project", async ({ page }) => {
     const loginPage = new LoginPage(page)
     await loginPage.goto()
     await loginPage.login("andi@example.com", "password123")

@@ -6,6 +6,10 @@ const USER_SEEDS: Record<string, { email: string; passwordHash: string; displayN
   },
 }
 
+type UserPermissions = {
+  can_create_projects?: boolean
+}
+
 export class UserDbHelper {
   private db: any
 
@@ -13,7 +17,7 @@ export class UserDbHelper {
     this.db = db
   }
 
-  seedUser(username: string, projectSlug: string | null = null) {
+  seedUser(username: string, projectSlug: string | null = null, permissions: UserPermissions = {}) {
     const seed = USER_SEEDS[username]
     if (!seed) {
       throw new Error(`No seed data found for user: ${username}`)
@@ -26,8 +30,8 @@ export class UserDbHelper {
       this.db.prepare("DELETE FROM users WHERE id = ?").run(userId)
     }
 
-    const userStmt = this.db.prepare("INSERT INTO users (email, hashed_password) VALUES (?, ?)")
-    const userResult = userStmt.run(seed.email, seed.passwordHash)
+    const userStmt = this.db.prepare("INSERT INTO users (email, hashed_password, can_create_projects) VALUES (?, ?, ?)")
+    const userResult = userStmt.run(seed.email, seed.passwordHash, permissions?.can_create_projects ? 1 : 0)
     const userId = userResult.lastInsertRowid
 
     if (projectSlug) {

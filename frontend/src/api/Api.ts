@@ -472,6 +472,13 @@ export interface UpdateCrewStatusRequest {
   new_status: CrewStatus
 }
 
+export interface UserPermissions {
+  can_create_projects: boolean
+  first_use: boolean
+  is_admin: boolean
+  signup_enabled: boolean
+}
+
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, ResponseType } from "axios"
 import axios from "axios"
 
@@ -607,7 +614,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 1.6.3
+ * @version 1.6.4
  * @license
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
@@ -705,6 +712,20 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name UserPermissions
+     * @request GET:/api/auth/user_permissions
+     */
+    userPermissions: (params: RequestParams = {}) =>
+      this.request<UserPermissions | null, any>({
+        path: `/api/auth/user_permissions`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name RecomputeImplicitInvolvements
      * @request POST:/api/dev/projects/{project_id}/recompute_implicit_involvements
      */
@@ -737,7 +758,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request POST:/api/projects
      */
     createProject: (data: NewProjectData, params: RequestParams = {}) =>
-      this.request<Project, CreateProjectError>({
+      this.request<Project, CreateProjectError | string>({
         path: `/api/projects`,
         method: "POST",
         body: data,
