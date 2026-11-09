@@ -11,7 +11,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 use uuid::Uuid;
 
 use crate::auth::{
-    auth_backend::{AuthSession, Credentials},
+    auth_backend::{AuthSession, Credentials, User},
     auth_email::reset_password_email,
     auth_repo::{AuthRepo, AuthRepoError, AuthRepoInsertError},
 };
@@ -24,7 +24,7 @@ pub fn auth_router() -> OpenApiRouter {
         .routes(routes!(log_out))
         .routes(routes!(sign_up))
         .routes(routes!(get_current_user))
-        .routes(routes!(login_config))
+        .routes(routes!(user_permissions))
 }
 
 #[derive(ToSchema, Deserialize)]
@@ -188,13 +188,14 @@ impl SignUpRequest {
         (status = BAD_REQUEST, body = String)
     )
 )]
-async fn sign_up(Extension(pool): Extension<SqlitePool>, Json(data): Json<SignUpRequest>) -> impl IntoResponse {
+async fn sign_up(auth_session: AuthSession, Extension(pool): Extension<SqlitePool>, Json(data): Json<SignUpRequest>) -> impl IntoResponse {
     // Validate the incoming data
     if let Err(err) = data.validate() {
         return (StatusCode::BAD_REQUEST, err).into_response();
     }
 
-    let login_config = load_login_config(&pool).await;
+    let current_user = auth_session.user().await;
+    let login_config = load_user_permissions(&current_user, &pool).await;
     if !login_config.signup_enabled {
         return (StatusCode::BAD_REQUEST, "Sign up is disabled").into_response();
     }
@@ -224,30 +225,36 @@ async fn get_current_user(auth_session: AuthSession) -> impl IntoResponse {
 }
 
 #[derive(Serialize, ToSchema)]
-pub struct LoginConfig {
+pub struct UserPermissions {
     pub signup_enabled: bool,
     pub first_use: bool,
+    pub is_admin: bool,
+    pub can_create_projects: bool,
 }
 
 #[utoipa::path(
     get,
-    path = "/login_config",
+    path = "/user_permissions",
     responses(
-        (status = OK, body = Option<LoginConfig>),
+        (status = OK, body = Option<UserPermissions>),
     )
 )]
-async fn login_config(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse {
-    let login_config = load_login_config(&pool).await;
+async fn user_permissions(auth_session: AuthSession, Extension(pool): Extension<SqlitePool>) -> impl IntoResponse {
+    let current_user = auth_session.user().await;
+    let user_permissions = load_user_permissions(&current_user, &pool).await;
 
-    (StatusCode::OK, Json(Some(login_config))).into_response()
+    (StatusCode::OK, Json(Some(user_permissions))).into_response()
 }
 
-async fn load_login_config(pool: &SqlitePool) -> LoginConfig {
+async fn load_user_permissions(current_user: &Option<User>, pool: &SqlitePool) -> UserPermissions {
     let repo = AuthRepo::new(pool);
     let has_users = repo.has_users().await.unwrap_or(false);
-    LoginConfig {
+
+    UserPermissions {
         signup_enabled: !has_users,
         first_use: !has_users,
+        is_admin: current_user.as_ref().map_or(false, |user| user.is_admin),
+        can_create_projects: current_user.as_ref().map_or(false, |user| user.can_create_projects),
     }
 }
 

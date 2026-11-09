@@ -12,8 +12,8 @@ pub struct User {
     pub id: i64,
     pub email: String,
     password: String,
-    is_admin: bool,
-    can_create_projects: bool,
+    pub is_admin: bool,
+    pub can_create_projects: bool,
 }
 
 // Here we've implemented `Debug` manually to avoid accidentally logging the

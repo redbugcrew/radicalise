@@ -342,11 +342,6 @@ export interface Link {
   url: string
 }
 
-export interface LoginConfig {
-  first_use: boolean
-  signup_enabled: boolean
-}
-
 export interface LoginResponse {
   /** @format int64 */
   user_id: number
@@ -475,6 +470,13 @@ export interface UpdateCrewStatusRequest {
   /** @format int64 */
   interval_number: number
   new_status: CrewStatus
+}
+
+export interface UserPermissions {
+  can_create_projects: boolean
+  first_use: boolean
+  is_admin: boolean
+  signup_enabled: boolean
 }
 
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, HeadersDefaults, ResponseType } from "axios"
@@ -679,20 +681,6 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name LoginConfig
-     * @request GET:/api/auth/login_config
-     */
-    loginConfig: (params: RequestParams = {}) =>
-      this.request<LoginConfig | null, any>({
-        path: `/api/auth/login_config`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name ResetPassword
      * @request POST:/api/auth/reset_password
      */
@@ -717,6 +705,20 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "POST",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UserPermissions
+     * @request GET:/api/auth/user_permissions
+     */
+    userPermissions: (params: RequestParams = {}) =>
+      this.request<UserPermissions | null, any>({
+        path: `/api/auth/user_permissions`,
+        method: "GET",
         format: "json",
         ...params,
       }),

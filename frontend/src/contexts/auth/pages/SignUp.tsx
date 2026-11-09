@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom"
-import { useLoginConfig } from "./auth_hooks"
+import { useUserPermissions } from "./auth_hooks"
 import { notifications } from "@mantine/notifications"
 import { getApi } from "../../../api"
 import { actionFailure, actionSuccess, type ActionPromiseResult } from "../../../components/ActionResult"
@@ -12,9 +12,9 @@ import type { LoginFormData } from "../components/LoginForm"
 export default function SignUp() {
   const navigate = useNavigate()
   const location = useLocation()
-  const loginConfig = useLoginConfig()
+  const userPermissions = useUserPermissions()
 
-  if (!loginConfig?.signup_enabled) {
+  if (!userPermissions?.signup_enabled) {
     return (
       <AuthLayout title="Sign up disabled">
         <Text>Sign up is currently disabled.</Text>
@@ -40,9 +40,9 @@ export default function SignUp() {
 
   return (
     <AuthLayout
-      title={loginConfig?.first_use ? "Welcome comrade 👋" : "Create your account"}
+      title={userPermissions?.first_use ? "Welcome comrade 👋" : "Create your account"}
       content={
-        loginConfig?.first_use ? (
+        userPermissions?.first_use ? (
           <Stack mt="md">
             <Text>
               <Text span fw="bold">
@@ -59,7 +59,7 @@ export default function SignUp() {
       <Stack gap="md">
         <LoginForm onSubmit={onSubmit} submitText="Sign up" />
 
-        {!loginConfig?.first_use && (
+        {!userPermissions?.first_use && (
           <Text>
             Already have an account?{" "}
             <Anchor href={`../login${location.search}`} size="sm">

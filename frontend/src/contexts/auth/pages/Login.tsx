@@ -6,13 +6,13 @@ import type { LoginFormData } from "../components/LoginForm"
 import { actionSuccess, type ActionPromiseResult } from "../../../components/ActionResult"
 import LoginForm from "../components/LoginForm"
 import { Button, Group, Stack } from "@mantine/core"
-import { useLoginConfig } from "./auth_hooks"
+import { useUserPermissions } from "./auth_hooks"
 import { useEffect } from "react"
 
 export default function Login() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const loginConfig = useLoginConfig()
+  const userPermissions = useUserPermissions()
 
   const onSubmit = ({ email, password }: LoginFormData): Promise<ActionPromiseResult> => {
     return getApi()
@@ -32,10 +32,10 @@ export default function Login() {
   }
 
   useEffect(() => {
-    if (loginConfig?.first_use) {
+    if (userPermissions?.first_use) {
       navigate("../signup")
     }
-  }, [loginConfig])
+  }, [userPermissions])
 
   return (
     <AuthLayout title="Welcome back!">
@@ -43,7 +43,7 @@ export default function Login() {
         <LoginForm onSubmit={onSubmit} />
 
         <Group justify="space-between">
-          {loginConfig?.signup_enabled && (
+          {userPermissions?.signup_enabled && (
             <Button variant="outline" size="sm" component={Link} to="../signup">
               Sign up
             </Button>

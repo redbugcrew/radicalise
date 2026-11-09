@@ -1,21 +1,20 @@
 import { useEffect, useState } from "react"
-import type { LoginConfig } from "../../../api/Api"
+import type { UserPermissions } from "../../../api/Api"
 import { getApi } from "../../../api"
 
-export function useLoginConfig() {
-  const [loginConfig, setLoginConfig] = useState<LoginConfig | null>(null)
+export function useUserPermissions() {
+  const [userPermissions, setUserPermissions] = useState<UserPermissions | null>(null)
 
   useEffect(() => {
     getApi()
-      .api.loginConfig()
+      .api.userPermissions()
       .then((response) => {
-        console.log("Login config:", response.data)
-        setLoginConfig(response.data)
+        setUserPermissions(response.data)
       })
       .catch((error) => {
         console.error("Failed to fetch login config:", error)
       })
   }, [])
 
-  return loginConfig
+  return userPermissions
 }
