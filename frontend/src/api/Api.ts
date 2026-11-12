@@ -614,7 +614,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 1.6.4
+ * @version 1.6.5
  * @license
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
@@ -1123,11 +1123,11 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * No description
      *
      * @name GetCalendarIcs
-     * @request GET:/api/public/{calendar_token}/calendar.ics
+     * @request GET:/api/public/projects/{project_slug}/public/{calendar_token}/calendar.ics
      */
-    getCalendarIcs: (projectId: number, calendarToken: string, params: RequestParams = {}) =>
+    getCalendarIcs: (projectSlug: string, calendarToken: string, params: RequestParams = {}) =>
       this.request<string, any>({
-        path: `/api/public/${calendarToken}/calendar.ics`,
+        path: `/api/public/projects/${projectSlug}/public/${calendarToken}/calendar.ics`,
         method: "GET",
         ...params,
       }),

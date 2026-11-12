@@ -10,7 +10,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 use crate::{
     auth::auth_backend::AuthSession,
     calendar_events::repo::list_calendar_events_person_attending,
-    my_project::repo::find_project,
+    my_project::repo::find_project_by_slug,
     people::repo::find_person_by_calendar_token,
     realtime::RealtimeState,
     shared::{
@@ -115,7 +115,7 @@ async fn update_calendar_event(
     get,
     path = "/{calendar_token}/calendar.ics",
     params(
-        ("project_id" = i64, Path, description = "Project ID"),
+        ("project_slug" = String, Path, description = "Project slug"),
         ("calendar_token" = String, Path, description = "Calendar token")
     ),
     responses(
@@ -124,12 +124,12 @@ async fn update_calendar_event(
     ),
 )]
 pub async fn get_calendar_ics(
-    Path((project_id, calendar_token)): Path<(i64, String)>,
+    Path((project_slug, calendar_token)): Path<(String, String)>,
     Extension(pool): Extension<SqlitePool>,
 ) -> impl IntoResponse {
     tracing::info!("Received request for calendar ICS with token: {}", calendar_token);
 
-    let project = match find_project(ProjectId::new(project_id), &pool).await {
+    let project = match find_project_by_slug(project_slug, &pool).await {
         Ok(project) => project,
         Err(err) => {
             tracing::error!("Error looking up project: {}", err);
