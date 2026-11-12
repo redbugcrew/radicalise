@@ -108,7 +108,9 @@ async fn update_convenor_if_needed(
     if interval_type == IntervalType::Current && !convenor_involvements.is_empty() {
         tracing::info!(
             "Crew {} already has a convenor for interval {} of type {:?}",
-            crew_id.id, interval_number.number, interval_type
+            crew_id.id,
+            interval_number.number,
+            interval_type
         );
         return Ok(());
     }
@@ -168,7 +170,8 @@ async fn filter_by_longest_since_convened_this_crew(
     let most_intervals: i64 = data.iter().map(|result| result.intervals_since_convened).max().unwrap_or_else(|| {
         tracing::error!(
             "No intervals since convened found for crew {} with person_ids {:?}",
-            crew_id.id, person_ids
+            crew_id.id,
+            person_ids
         );
         0
     });

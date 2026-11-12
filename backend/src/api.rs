@@ -23,5 +23,7 @@ pub fn private_project_api_router() -> OpenApiRouter {
 }
 
 pub fn public_api_router() -> OpenApiRouter {
-    OpenApiRouter::new().nest("/public", crate::public::router())
+    OpenApiRouter::new()
+        .nest("/public", crate::public::router())
+        .nest("/public/projects/{project_slug}", crate::public::project_router())
 }

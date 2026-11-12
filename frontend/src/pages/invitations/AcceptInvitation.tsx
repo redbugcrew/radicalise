@@ -37,7 +37,7 @@ function AcceptInvitationLoggedIn({ token, onAuthFailure, onAccepted, projectId 
   const handleAccept = () => {
     setLoading(true)
     getApi()
-      .api.acceptInvitation(token, projectId)
+      .api.acceptInvitation(projectId, token)
       .then(() => {
         setResult(actionSuccess())
         onAccepted()
@@ -89,13 +89,13 @@ function InvitationNotFound() {
 export default function AcceptInvitation() {
   const navigate = useNavigate()
 
-  const onAccepted = () => {
+  const buildOnAccepted = (projectSlug: string) => () => {
     notifications.show({
       title: "Invitation Accepted",
       message: "You have successfully accepted the invitation.",
       color: "green",
     })
-    navigate("/people")
+    navigate(`/project/${projectSlug}`)
   }
 
   return (
@@ -109,7 +109,7 @@ export default function AcceptInvitation() {
           <Container maw={600} my={40}>
             <TokenOrRedirect redirectTo="/">
               {(token) => (
-                <InvitationOrError token={token} onNotFound={<InvitationNotFound />} projectId={selectedProject.project.id}>
+                <InvitationOrError token={token} onNotFound={<InvitationNotFound />} projectSlug={selectedProject.project.slug}>
                   {({ project, circle }) => (
                     <MaybeLoggedIn>
                       {(loggedIn, handleAuthFailure) => (
@@ -136,7 +136,7 @@ export default function AcceptInvitation() {
                             <AcceptInvitationLoggedIn
                               token={token}
                               onAuthFailure={handleAuthFailure}
-                              onAccepted={onAccepted}
+                              onAccepted={buildOnAccepted(selectedProject.project.slug)}
                               projectId={selectedProject.project.id}
                             />
                           ) : (

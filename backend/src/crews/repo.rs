@@ -146,7 +146,9 @@ pub async fn set_crew_convenor(
 ) -> Result<(), sqlx::Error> {
     tracing::info!(
         "Setting crew {} convenor for interval {} to person {:?}",
-        crew_id.id, interval_number.number, person_id
+        crew_id.id,
+        interval_number.number,
+        person_id
     );
 
     let mut transaction = pool.begin().await?;
@@ -251,7 +253,10 @@ pub async fn set_crew_status_from_interval(
     .map_err(|e| {
         tracing::info!(
             "Error setting crew status from interval: {:?} with crew_id: {:?}, start_interval_number: {:?}, state: {:?}",
-            e, crew_id, start_interval_number, state
+            e,
+            crew_id,
+            start_interval_number,
+            state
         );
         e
     })?;
@@ -285,7 +290,8 @@ where
     if new_interval_number.project_id.id != previous_interval_number.project_id.id {
         tracing::info!(
             "Error copying crew states: project ID mismatch (new: {}, previous: {})",
-            new_interval_number.project_id.id, previous_interval_number.project_id.id
+            new_interval_number.project_id.id,
+            previous_interval_number.project_id.id
         );
         return Err(sqlx::Error::RowNotFound);
     }

@@ -101,14 +101,14 @@ function MyCrews({ personId, myInvolvements }: { personId: number; myInvolvement
   )
 }
 
-function SubscribeDetails({ calendarToken }: { calendarToken: string }) {
+function SubscribeDetails({ calendarToken, projectSlug }: { calendarToken: string; projectSlug: string }) {
   let apiUrl = getApiUrl()
   if (apiUrl === "/") {
     apiUrl = window.location.origin
   }
   apiUrl = apiUrl.replace(/\/?$/, "")
 
-  const calendarUrl = `${apiUrl}/api/public/${calendarToken}/calendar.ics`
+  const calendarUrl = `${apiUrl}/api/public/projects/${projectSlug}/${calendarToken}/calendar.ics`
 
   return (
     <Card mb="md">
@@ -135,7 +135,7 @@ function SubscribeDetails({ calendarToken }: { calendarToken: string }) {
   )
 }
 
-function MyEvents({ personId }: { personId: number }) {
+function MyEvents({ personId, projectSlug }: { personId: number; projectSlug: string }) {
   const events = useAppSelector((state) => myUpcomingEvents(state.events, personId))
   const [opened, { toggle }] = useDisclosure(false)
   const calendarToken = useAppSelector((state) => state.me?.calendar_token)
@@ -153,7 +153,7 @@ function MyEvents({ personId }: { personId: number }) {
       <Stack gap={0}>
         {calendarToken && (
           <Collapse expanded={opened}>
-            <SubscribeDetails calendarToken={calendarToken} />
+            <SubscribeDetails calendarToken={calendarToken} projectSlug={projectSlug} />
           </Collapse>
         )}
         <EventsList events={events} noDataMessage="No upcoming events found" />
@@ -226,7 +226,7 @@ export default function Dashboard() {
           </WithIntervalData>
         </Stack>
 
-        {project.feature_events && <MyEvents personId={personId} />}
+        {project.feature_events && <MyEvents personId={personId} projectSlug={project.slug} />}
 
         {project.feature_peer_roles && <MyPeerRoles personId={personId} />}
 

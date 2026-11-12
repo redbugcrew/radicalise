@@ -7,16 +7,16 @@ export interface InvitationOrErrorProps {
   token: string
   children: (details: CircleInvitationDetails) => JSX.Element
   onNotFound: JSX.Element
-  projectId: number
+  projectSlug: string
 }
 
-export default function InvitationOrError({ token, children, onNotFound, projectId }: InvitationOrErrorProps) {
+export default function InvitationOrError({ token, children, onNotFound, projectSlug }: InvitationOrErrorProps) {
   const [invitation, setInvitation] = useState<CircleInvitationDetails | null>(null)
   const [actionResult, setActionResult] = useState<ActionResult | null>(null)
 
   useEffect(() => {
     getApi()
-      .api.getInvitation(token, projectId)
+      .api.getInvitation(projectSlug, token)
       .then((response) => {
         setInvitation(response.data)
         setActionResult(actionSuccess() || null)
@@ -24,7 +24,7 @@ export default function InvitationOrError({ token, children, onNotFound, project
       .catch((error) => {
         setActionResult(actionFailure(error) || null)
       })
-  }, [token, projectId])
+  }, [token, projectSlug])
 
   if (actionResult) {
     if (!actionResult.success) {

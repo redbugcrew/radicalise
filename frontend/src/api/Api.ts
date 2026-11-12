@@ -614,7 +614,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 1.6.4
+ * @version 1.6.5
  * @license
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
@@ -979,7 +979,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name AcceptInvitation
      * @request POST:/api/projects/{project_id}/invitations/invitation/{token}/accept
      */
-    acceptInvitation: (token: string, projectId: number, params: RequestParams = {}) =>
+    acceptInvitation: (projectId: number, token: string, params: RequestParams = {}) =>
       this.request<any, string>({
         path: `/api/projects/${projectId}/invitations/invitation/${token}/accept`,
         method: "POST",
@@ -1081,26 +1081,12 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name UpdatePerson
      * @request PUT:/api/projects/{project_id}/people/{person_id}
      */
-    updatePerson: (projectId: number, personId: string, data: Person, params: RequestParams = {}) =>
+    updatePerson: (projectId: number, personId: number, data: Person, params: RequestParams = {}) =>
       this.request<AppEvent[], any>({
         path: `/api/projects/${projectId}/people/${personId}`,
         method: "PUT",
         body: data,
         type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name GetInvitation
-     * @request GET:/api/public/invitation/{token}
-     */
-    getInvitation: (token: string, projectId: number, params: RequestParams = {}) =>
-      this.request<CircleInvitationDetails, string>({
-        path: `/api/public/invitation/${token}`,
-        method: "GET",
         format: "json",
         ...params,
       }),
@@ -1122,12 +1108,26 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name GetCalendarIcs
-     * @request GET:/api/public/{calendar_token}/calendar.ics
+     * @name GetInvitation
+     * @request GET:/api/public/projects/{project_slug}/invitation/{token}
      */
-    getCalendarIcs: (projectId: number, calendarToken: string, params: RequestParams = {}) =>
+    getInvitation: (projectSlug: string, token: string, params: RequestParams = {}) =>
+      this.request<CircleInvitationDetails, string>({
+        path: `/api/public/projects/${projectSlug}/invitation/${token}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GetCalendarIcs
+     * @request GET:/api/public/projects/{project_slug}/{calendar_token}/calendar.ics
+     */
+    getCalendarIcs: (projectSlug: string, calendarToken: string, params: RequestParams = {}) =>
       this.request<string, any>({
-        path: `/api/public/${calendarToken}/calendar.ics`,
+        path: `/api/public/projects/${projectSlug}/${calendarToken}/calendar.ics`,
         method: "GET",
         ...params,
       }),
