@@ -40,7 +40,7 @@ pub async fn update_person(
     auth_session: AuthSession,
     Json(input): Json<Person>,
 ) -> impl IntoResponse {
-    println!("Updating person with ID {}: {:?}", person_id, input);
+    tracing::info!("Updating person with ID {}: {:?}", person_id, input);
     let project_id = ProjectId::new(project_id);
 
     if input.id != person_id {

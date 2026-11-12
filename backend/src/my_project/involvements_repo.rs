@@ -312,7 +312,7 @@ where
         involvement.implicit_counter
     )
     .execute(pool)
-    .await.map_err(|e| {eprintln!("Error inserting circle involvement: {}", e); e}).map_err(InsertRecordError::from)?;
+    .await.map_err(|e| {tracing::error!("Error inserting circle involvement: {}", e); e}).map_err(InsertRecordError::from)?;
 
     if result.rows_affected() == 0 {
         Err(InsertRecordError::DatabaseError)

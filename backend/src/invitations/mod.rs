@@ -58,7 +58,7 @@ pub async fn invite_person(
     Extension(resend): Extension<Resend>,
     Json(input): Json<InvitePersonRequest>,
 ) -> impl IntoResponse {
-    println!("Inviting person: {:?}", input);
+    tracing::info!("Inviting person: {:?}", input);
 
     let current_user_id = match auth_session.user().await {
         Some(user) => UserId::new(user.id),

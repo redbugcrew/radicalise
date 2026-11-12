@@ -39,7 +39,7 @@ async fn create_circle(
     auth_session: AuthSession,
     axum::extract::Json(data): axum::extract::Json<Circle>,
 ) -> impl IntoResponse {
-    println!("Creating circle: {:?}", data);
+    tracing::info!("Creating circle: {:?}", data);
 
     match repo::insert_circle(&data, ProjectId::new(project_id), &pool).await {
         Ok(circle) => {
@@ -55,7 +55,7 @@ async fn create_circle(
                     .into_response();
             }
 
-            eprintln!("Failed to create circle: {}", err);
+            tracing::error!("Failed to create circle: {}", err);
             (StatusCode::INTERNAL_SERVER_ERROR, "Failed to create circle").into_response()
         }
     }
@@ -83,7 +83,7 @@ async fn update_circle(
     auth_session: AuthSession,
     axum::extract::Json(data): axum::extract::Json<Circle>,
 ) -> impl IntoResponse {
-    println!("Updating circle with ID {}: {:?}", circle_id, data);
+    tracing::info!("Updating circle with ID {}: {:?}", circle_id, data);
 
     match repo::update_circle(CircleId::new(circle_id), &data, ProjectId::new(project_id), &pool).await {
         Ok(circle) => {
@@ -99,7 +99,7 @@ async fn update_circle(
                     .into_response();
             }
 
-            eprintln!("Failed to create circle: {}", err);
+            tracing::error!("Failed to create circle: {}", err);
             (StatusCode::INTERNAL_SERVER_ERROR, "Failed to create circle").into_response()
         }
     }

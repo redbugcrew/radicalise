@@ -55,16 +55,16 @@ async fn create_calendar_event_attendance(
     let person = match find_person_by_user_id(user_id.clone(), project_id, &pool).await {
         Ok(Some(person)) => person,
         Ok(None) => {
-            println!("no person found for user_id {:?}", user_id);
+            tracing::info!("no person found for user_id {:?}", user_id);
             return (StatusCode::NOT_FOUND, ()).into_response();
         }
         Err(e) => {
-            println!("error finding person for user_id {:?}: {}", user_id, e);
+            tracing::info!("error finding person for user_id {:?}: {}", user_id, e);
             return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
         }
     };
 
-    println!(
+    tracing::info!(
         "updating calendar event attendance with: intention: {:?}, calendar_event_id:{}, person_id: {}",
         input.intention, input.calendar_event_id, person.id
     );
@@ -79,7 +79,7 @@ async fn create_calendar_event_attendance(
             (StatusCode::CREATED, Json(vec![event])).into_response()
         }
         Err(e) => {
-            println!("error updating calender event attendance: {}", e);
+            tracing::info!("error updating calender event attendance: {}", e);
             (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response()
         }
     }

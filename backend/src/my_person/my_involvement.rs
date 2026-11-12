@@ -106,7 +106,7 @@ async fn update_convenor_if_needed(
 
     // If this is the current interval, and there's already a convenor, do nothing
     if interval_type == IntervalType::Current && !convenor_involvements.is_empty() {
-        println!(
+        tracing::info!(
             "Crew {} already has a convenor for interval {} of type {:?}",
             crew_id.id, interval_number.number, interval_type
         );
@@ -153,7 +153,7 @@ async fn get_best_convenor_person_id(
 
 fn past_interval_error() -> sqlx::Error {
     let result = sqlx::Error::InvalidArgument("Cannot update involvements for a past interval".to_string());
-    eprintln!("error: {}", result);
+    tracing::error!("error: {}", result);
     result
 }
 
@@ -166,7 +166,7 @@ async fn filter_by_longest_since_convened_this_crew(
     let data = intervals_since_last_convened(person_ids.clone(), crew_id.clone(), current_interval_number, pool).await?;
 
     let most_intervals: i64 = data.iter().map(|result| result.intervals_since_convened).max().unwrap_or_else(|| {
-        eprintln!(
+        tracing::error!(
             "No intervals since convened found for crew {} with person_ids {:?}",
             crew_id.id, person_ids
         );

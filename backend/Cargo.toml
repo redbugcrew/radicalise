@@ -38,6 +38,8 @@ openssl = { version = "0.10", features = ["vendored"] }
 icalendar = { version = "0.17", default-features = false }
 futures-util = "0.3"
 rand = "0.10"
+tracing = "0.1.44"
+tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
 
 [lints.clippy]
 from_over_into = "allow"

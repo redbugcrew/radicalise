@@ -51,7 +51,7 @@ async fn get_my_state(Extension(pool): Extension<SqlitePool>, auth_session: Auth
             match result {
                 Ok(initial_data) => (StatusCode::OK, Json(initial_data)).into_response(),
                 Err(err) => {
-                    eprintln!("Error fetching initial data: {:?}", err);
+                    tracing::error!("Error fetching initial data: {:?}", err);
                     (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response()
                 }
             }
@@ -89,7 +89,7 @@ async fn my_participation(
             let interval_number = IntervalNumber::new(interval_number, project_id);
             let circle_id = CircleId::new(circle_id);
 
-            println!(
+            tracing::info!(
                 "Fetching my participation for person_id={:?}, interval_number={:?}, circle_id={:?}",
                 person_id, interval_number.number, circle_id
             );
@@ -151,7 +151,7 @@ async fn update_my_participation(
     let update_result = update_my_involvements(person_id.clone(), interval_number.clone(), input, &pool).await;
 
     if update_result.is_err() {
-        eprintln!("Error updating my involvements: {:?}", update_result.err());
+        tracing::error!("Error updating my involvements: {:?}", update_result.err());
         return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
     }
 

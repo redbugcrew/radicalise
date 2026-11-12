@@ -41,20 +41,20 @@ pub async fn create_project_and_dependent_records(
     let mut transaction = pool.begin().await?;
 
     let project = create_project(project, &mut *transaction).await.map_err(|e| {
-        println!("create_project: {:?}", e);
+        tracing::info!("create_project: {:?}", e);
         e
     })?;
 
     let circle = Circle::new(project.typed_id());
     let circle = insert_circle(&circle, project.typed_id(), &mut *transaction).await.map_err(|e| {
-        println!("insert_circle: {:?}", e);
+        tracing::info!("insert_circle: {:?}", e);
         e
     })?;
 
     let person = create_person(project.typed_id(), user_id, person_name, &mut *transaction)
         .await
         .map_err(|e| {
-            println!("create_person: {:?}", e);
+            tracing::info!("create_person: {:?}", e);
             e
         })?;
 
@@ -62,14 +62,14 @@ pub async fn create_project_and_dependent_records(
     let interval = insert_zeroth_interval(today, project.typed_id(), &mut *transaction)
         .await
         .map_err(|e| {
-            println!("insert_zeroth_interval: {:?}", e);
+            tracing::info!("insert_zeroth_interval: {:?}", e);
             e
         })?;
 
     change_project_interval(project.typed_id(), interval.typed_number(), &mut *transaction)
         .await
         .map_err(|e| {
-            println!("change_project_interval: {:?}", e);
+            tracing::info!("change_project_interval: {:?}", e);
             e
         })?;
 
@@ -83,7 +83,7 @@ pub async fn create_project_and_dependent_records(
     insert_circle_involvement(involvement.into(), &mut *transaction)
         .await
         .map_err(|e| {
-            println!("insert_circle_involvement: {:?}", e);
+            tracing::info!("insert_circle_involvement: {:?}", e);
             e
         })?;
 

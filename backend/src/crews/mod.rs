@@ -71,7 +71,7 @@ pub async fn create_crew(
     let project_id = ProjectId::new(project_id);
     let interval_number = IntervalNumber::new(input.start_interval_number, project_id.clone());
 
-    println!("Create crew with project ID {}: {:?}", project_id.id, input);
+    tracing::info!("Create crew with project ID {}: {:?}", project_id.id, input);
 
     if input.project_id != project_id.id {
         return (StatusCode::BAD_REQUEST, "Project ID mismatch").into_response();
@@ -121,7 +121,7 @@ pub async fn update_crew(
 ) -> impl IntoResponse {
     let project_id = ProjectId::new(project_id);
 
-    println!("Updating crew with ID {}: {:?}", crew_id, input);
+    tracing::info!("Updating crew with ID {}: {:?}", crew_id, input);
 
     if input.id != crew_id {
         return (StatusCode::BAD_REQUEST, "Crew ID mismatch").into_response();
@@ -168,7 +168,7 @@ pub async fn update_crew_status(
     let crew_id = CrewId::new(crew_id);
     let interval_number = IntervalNumber::new(input.interval_number, project_id.clone());
 
-    println!(
+    tracing::info!(
         "Updating crew status with ID {} for project {}: {:?}",
         crew_id.id, project_id.id, input
     );

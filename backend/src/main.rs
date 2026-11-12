@@ -10,6 +10,9 @@ use axum_login::{
 use resend_rs::Resend;
 use std::env;
 use time::Duration;
+use tracing::info;
+use tracing_subscriber::{EnvFilter, fmt, prelude::*};
+
 use tower_http::cors::CorsLayer;
 use tower_sessions_sqlx_store::SqliteStore;
 use utoipa::OpenApi;
@@ -52,6 +55,12 @@ extern crate lazy_static;
 
 #[tokio::main]
 async fn main() {
+    // Initialize tracing
+    tracing_subscriber::registry()
+        .with(fmt::layer())
+        .with(EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")))
+        .init();
+
     #[derive(OpenApi)]
     #[openapi()]
     struct ApiDoc;
@@ -119,7 +128,7 @@ async fn main() {
     // run our app with hyper, listening globally on port 8200
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8200").await.unwrap();
 
-    println!("Listening on http://localhost:8200, Ctrl+C to stop");
+    info!("Listening on http://localhost:8200, Ctrl+C to stop");
 
     axum::serve(listener, app).await.unwrap();
 }

@@ -15,7 +15,7 @@ pub async fn prepare_database() -> anyhow::Result<Pool<Sqlite>> {
         .strip_prefix("sqlite:")
         .ok_or_else(|| anyhow::anyhow!("DATABASE_URL must start with 'sqlite:'"))?;
 
-    println!("Using database file: {}", filename);
+    tracing::info!("Using database file: {}", filename);
 
     // create database if it does not exist
     let options = SqliteConnectOptions::new().filename(filename).create_if_missing(true);
@@ -24,7 +24,7 @@ pub async fn prepare_database() -> anyhow::Result<Pool<Sqlite>> {
     let pool = SqlitePool::connect_with(options).await?;
 
     // prepare schema in db if it does not yet exist
-    println!("Running migrations");
+    tracing::info!("Running migrations");
     sqlx::migrate!().run(&pool).await?;
 
     Ok(pool)

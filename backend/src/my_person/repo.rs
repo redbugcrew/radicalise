@@ -83,7 +83,7 @@ pub async fn update_crew_involvements(
     // Ensure all the involvements have the same person_id and interval
     for involvement in &involvements {
         if involvement.person_id != person_id.id || involvement.interval_number != interval_number.number {
-            eprintln!("Mismatched crew involvement: {:?}", involvement);
+            tracing::error!("Mismatched crew involvement: {:?}", involvement);
             return Err(sqlx::Error::RowNotFound);
         }
     }
@@ -99,10 +99,10 @@ pub async fn update_crew_involvements(
 
     let removed_crew_ids: Vec<CrewId> = to_remove.iter().map(|i| CrewId::new(i.id)).collect();
 
-    println!("Deleting crew participations {:?}", to_remove);
+    tracing::info!("Deleting crew participations {:?}", to_remove);
     delete_crew_involvements(to_remove, pool).await?;
 
-    println!("Upserting crew participations {:?}", involvements);
+    tracing::info!("Upserting crew participations {:?}", involvements);
     upsert_crew_involvements(involvements, pool).await?;
 
     let impacted_crew_ids: Vec<CrewId> = crew_ids.into_iter().chain(removed_crew_ids).collect();
@@ -130,7 +130,7 @@ pub async fn find_my_crew_involvements(
 
 pub async fn delete_crew_involvements(involvements: Vec<CrewInvolvement>, pool: &SqlitePool) -> Result<(), sqlx::Error> {
     if involvements.is_empty() {
-        println!("No crew involvements to delete");
+        tracing::info!("No crew involvements to delete");
         return Ok(()); // Nothing to delete
     }
 

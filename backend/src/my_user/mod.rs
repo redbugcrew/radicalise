@@ -26,7 +26,7 @@ async fn get_visible_projects(auth_session: AuthSession, Extension(pool): Extens
     let user_id = match auth_session.user().await {
         Some(user) => UserId::new(user.id),
         None => {
-            eprintln!("Unauthorized access to get_visible_projects");
+            tracing::error!("Unauthorized access to get_visible_projects");
             return (StatusCode::UNAUTHORIZED, ()).into_response();
         }
     };

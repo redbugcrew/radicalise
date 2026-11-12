@@ -50,7 +50,7 @@ async fn get_project_state(
     let user_id = match auth_session.user().await {
         Some(user) => UserId::new(user.id),
         None => {
-            eprintln!("Unauthorized access to get_project_state with no user");
+            tracing::error!("Unauthorized access to get_project_state with no user");
             return (StatusCode::UNAUTHORIZED, ()).into_response();
         }
     };
@@ -127,7 +127,7 @@ async fn get_interval_data(
     let user_id = match auth_session.user().await {
         Some(user) => UserId::new(user.id),
         None => {
-            eprintln!("Unauthorized access to get_interval_data with no user");
+            tracing::error!("Unauthorized access to get_interval_data with no user");
             return (StatusCode::UNAUTHORIZED, ()).into_response();
         }
     };
@@ -170,7 +170,7 @@ pub async fn update_project(
 ) -> impl IntoResponse {
     let project_id = ProjectId::new(project_id);
 
-    println!("Updating project: {:?}", input);
+    tracing::info!("Updating project: {:?}", input);
 
     match repo::update_project_with_links(input, project_id, &pool).await {
         Ok(response) => {

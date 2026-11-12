@@ -15,7 +15,7 @@ pub async fn add_interval_implicit_involvements(
     recompute: bool,
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
-    println!(
+    tracing::info!(
         "{} implicit involvements for interval {}",
         if recompute { "Recomputing" } else { "Adding" },
         interval.number,
@@ -25,7 +25,7 @@ pub async fn add_interval_implicit_involvements(
 
     for circle in circles {
         if let Err(e) = add_interval_circle_implicit_involvements(interval, project_id.clone(), circle.typed_id(), recompute, pool).await {
-            eprintln!(
+            tracing::error!(
                 "Error adding implicit involvements for interval {}, circle {}: {:?}",
                 interval.number, circle.id, e
             );
@@ -42,7 +42,7 @@ async fn add_interval_circle_implicit_involvements(
     recompute: bool,
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
-    println!(
+    tracing::info!(
         "{} implicit involvements for interval {}, circle {}",
         if recompute { "Recomputing" } else { "Adding" },
         interval.number,
@@ -58,9 +58,9 @@ async fn add_interval_circle_implicit_involvements(
         find_all_circle_involvements(circle_id.clone(), previous_interval.typed_number(), None, pool).await?;
 
     if recompute {
-        println!("  - deleting implicit involvements");
+        tracing::info!("  - deleting implicit involvements");
         delete_implicit_circle_involvements(circle_id.clone(), interval.typed_number(), pool).await?;
-        println!("  - done deleting implicit involvements");
+        tracing::info!("  - done deleting implicit involvements");
     }
 
     for previous_involvement in previous_circle_involvements {
@@ -82,7 +82,7 @@ async fn add_interval_circle_implicit_involvements(
             ..CircleInvolvement::new(interval.typed_number())
         };
 
-        println!(
+        tracing::info!(
             "  - inserting implicit involvement for person_id: {} in interval {}... ",
             new_involvement.person_id.clone(),
             interval.number
@@ -90,7 +90,7 @@ async fn add_interval_circle_implicit_involvements(
 
         let result = insert_circle_involvement_if_missing(new_involvement.into(), pool).await;
         if result.is_err() {
-            eprintln!(
+            tracing::error!(
                 "Error inserting implicit involvement for person_id: {} in interval {}: {:?}",
                 previous_involvement.person_id.clone(),
                 interval.number,
@@ -99,7 +99,7 @@ async fn add_interval_circle_implicit_involvements(
         }
     }
 
-    println!("  - marking implicit involvements as processed");
+    tracing::info!("  - marking implicit involvements as processed");
     mark_implicit_involvements_processed(interval.typed_number(), true, pool).await?;
 
     Ok(())

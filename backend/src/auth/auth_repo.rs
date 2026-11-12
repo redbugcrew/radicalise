@@ -140,12 +140,12 @@ impl<'a> AuthRepo<'a> {
 }
 
 fn log_and_return_db_error(error: sqlx::Error) -> AuthRepoError {
-    eprintln!("Database error: {}", error);
+    tracing::error!("Database error: {}", error);
     AuthRepoError::DatabaseError
 }
 
 fn log_and_return_db_insert_error(error: sqlx::Error) -> AuthRepoInsertError {
-    eprintln!("Database error: {}", error);
+    tracing::error!("Database error: {}", error);
 
     if matches!(error, sqlx::Error::Database(db_err) if db_err.message().contains("UNIQUE constraint failed")) {
         AuthRepoInsertError::EmailAlreadyExists

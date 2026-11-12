@@ -15,7 +15,7 @@ lazy_static! {
 
 pub async fn frontend_handler(uri: Uri) -> Result<Response<Body>, (StatusCode, String)> {
     if uri.path().starts_with("/api") {
-        println!("API call detected, not serving static files for URI: {}", uri);
+        tracing::info!("API call detected, not serving static files for URI: {}", uri);
         return Err((StatusCode::NOT_FOUND, "API endpoint not found".to_string()));
     }
 
@@ -30,7 +30,7 @@ pub async fn frontend_handler(uri: Uri) -> Result<Response<Body>, (StatusCode, S
         StatusCode::NOT_FOUND => {
             // serve the HTML file for SPA routing
             let spa_file_path_string = FRONTEND_PATH.clone() + "/index.html";
-            println!(
+            tracing::info!(
                 "Serving SPA index.html for URI: {}, using path {}",
                 uri.clone(),
                 spa_file_path_string
@@ -41,7 +41,7 @@ pub async fn frontend_handler(uri: Uri) -> Result<Response<Body>, (StatusCode, S
         }
         other => {
             // If the status is not OK or NOT_FOUND, return the response as is
-            println!("Got other status: {}", other);
+            tracing::info!("Got other status: {}", other);
             Ok(res)
         }
     }
@@ -53,7 +53,7 @@ async fn serve_file(uri: Uri, spa_file_path_string: String) -> Result<Response<B
     match ServeFile::new(spa_file_path_string).oneshot(req).await {
         Ok(res) => Ok(res.map(Body::new)),
         Err(err) => {
-            println!("Error serving static file: {}", err);
+            tracing::info!("Error serving static file: {}", err);
             Err((StatusCode::INTERNAL_SERVER_ERROR, format!("Something went wrong: {}", err)))
         }
     }
@@ -66,7 +66,7 @@ async fn serve_dir(uri: Uri, static_dir: String) -> Result<Response<Body>, (Stat
     match ServeDir::new(static_dir).oneshot(req).await {
         Ok(res) => Ok(res.map(Body::new)),
         Err(err) => {
-            println!("Error serving static file: {}", err);
+            tracing::info!("Error serving static file: {}", err);
             Err((StatusCode::INTERNAL_SERVER_ERROR, format!("Something went wrong: {}", err)))
         }
     }

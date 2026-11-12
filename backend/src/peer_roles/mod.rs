@@ -42,11 +42,11 @@ impl From<sqlx::Error> for AssignPeerRolesError {
 }
 
 pub async fn assign_interval_peer_roles(interval: &Interval, project_id: ProjectId, pool: &SqlitePool) -> Result<(), AssignPeerRolesError> {
-    println!("Assigning peer roles for interval {}", interval.number);
+    tracing::info!("Assigning peer roles for interval {}", interval.number);
 
     let peer_roles = find_all_peer_roles(project_id, pool).await?;
     let ordered_roles = order_peer_roles(peer_roles).map_err(|message| {
-        println!("{}", message);
+        tracing::info!("{}", message);
         AssignPeerRolesError::ConstraintViolation(message)
     })?;
 
@@ -135,7 +135,7 @@ async fn assign_interval_peer_role(
         let allowed: HashSet<i64> = edges.iter().flat_map(|(a, b)| [*a, *b]).collect();
         people.retain(|person_id| allowed.contains(person_id));
 
-        println!(
+        tracing::info!(
             "Peer role '{}' constrained by role {}; filtered to {} people",
             peer_role.name,
             peer_role.constrained_by_id.unwrap(),
@@ -143,7 +143,7 @@ async fn assign_interval_peer_role(
         );
     }
 
-    println!(
+    tracing::info!(
         "Assigning peer role for people ids '{:?}' in interval {} ({} people)",
         people,
         interval.number,
@@ -163,11 +163,11 @@ async fn assign_interval_peer_role(
             .distribute(people, history.as_ref(), constraint_edges, peer_role.max_intervals, &mut rng)
     }
     .map_err(|error| {
-        println!("Constraint violation while assigning peer role '{}': {}", peer_role.name, error);
+        tracing::info!("Constraint violation while assigning peer role '{}': {}", peer_role.name, error);
         AssignPeerRolesError::ConstraintViolation(error.to_string())
     })?;
 
-    println!("Peer role '{}' (interval {}): {}", peer_role.name, interval.number, results);
+    tracing::info!("Peer role '{}' (interval {}): {}", peer_role.name, interval.number, results);
 
     let edges = results.edges();
     upsert_peer_enrollments(interval.typed_number(), peer_role.typed_id(), edges.clone(), pool).await?;

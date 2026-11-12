@@ -52,7 +52,7 @@ pub async fn create_project(
     let current_user = match auth_session.user().await {
         Some(user) => user,
         None => {
-            println!("Unauthorized access to get_visible_projects");
+            tracing::info!("Unauthorized access to get_visible_projects");
             return (StatusCode::UNAUTHORIZED, ()).into_response();
         }
     };

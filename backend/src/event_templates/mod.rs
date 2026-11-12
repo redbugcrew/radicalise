@@ -41,7 +41,7 @@ async fn create_event_template(
     auth_session: AuthSession,
     axum::extract::Json(data): axum::extract::Json<EventTemplate>,
 ) -> impl IntoResponse {
-    println!("Creating event template: {:?}", data);
+    tracing::info!("Creating event template: {:?}", data);
 
     let project_id = ProjectId::new(project_id);
 
@@ -52,7 +52,7 @@ async fn create_event_template(
             (StatusCode::OK, Json(vec![event])).into_response()
         }
         Err(err) => {
-            eprintln!("Failed to create event template: {}", err);
+            tracing::error!("Failed to create event template: {}", err);
             (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response()
         }
     }
@@ -79,7 +79,7 @@ async fn update_event_template(
     auth_session: AuthSession,
     axum::extract::Json(data): axum::extract::Json<EventTemplate>,
 ) -> impl IntoResponse {
-    println!("Updating event template with ID {}: {:?}", event_template_id, data);
+    tracing::info!("Updating event template with ID {}: {:?}", event_template_id, data);
 
     let project_id = ProjectId::new(project_id);
 
@@ -90,7 +90,7 @@ async fn update_event_template(
             (StatusCode::OK, Json(vec![event])).into_response()
         }
         Err(err) => {
-            eprintln!("Failed to create event template: {}", err);
+            tracing::error!("Failed to create event template: {}", err);
             (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response()
         }
     }

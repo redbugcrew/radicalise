@@ -4,6 +4,6 @@ use axum::{
 };
 
 pub fn db_error(e: impl std::fmt::Debug, msg: &str) -> Response {
-    eprintln!("Database error: {:?} - {}", e, msg);
+    tracing::error!("Database error: {:?} - {}", e, msg);
     (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response()
 }

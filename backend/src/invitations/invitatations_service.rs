@@ -52,12 +52,12 @@ pub enum InvitePersonError {
 }
 
 fn db_err<E: std::fmt::Debug>(e: E) -> InvitePersonError {
-    eprintln!("Database error: {:?}", e);
+    tracing::error!("Database error: {:?}", e);
     InvitePersonError::DatabaseError
 }
 
 fn ctx_err<E: std::fmt::Debug>(e: E) -> InvitePersonError {
-    eprintln!("Context error: {:?}", e);
+    tracing::error!("Context error: {:?}", e);
     InvitePersonError::ContextInvalid
 }
 
@@ -70,24 +70,24 @@ pub async fn invite_person(
     interval: Interval,
 ) -> Result<InvitePersonResult, InvitePersonError> {
     // Find the inviting person
-    println!("Finding inviting person for user_id: {:?}", inviting_user_id);
+    tracing::info!("Finding inviting person for user_id: {:?}", inviting_user_id);
     let inviting_person = find_person_by_user_id(inviting_user_id, project_id.clone(), pool)
         .await
         .map_err(ctx_err)?
         .ok_or(InvitePersonError::ContextInvalid)?;
 
     // Find the project
-    println!("Finding project with id: {:?}", project_id);
+    tracing::info!("Finding project with id: {:?}", project_id);
     let project = find_project(project_id.clone(), pool).await.map_err(ctx_err)?;
 
     // Find the circle
-    println!("Finding circle with id: {:?}", input.circle_id);
+    tracing::info!("Finding circle with id: {:?}", input.circle_id);
     let circle = find_circle_by_id(CircleId::new(input.circle_id), pool).await.map_err(ctx_err)?;
 
     let current_interval = interval;
 
     // Load the invitation if we already have one, so that we can update it instead of creating a duplicate if the same person is invited again to the same circle
-    println!(
+    tracing::info!(
         "Looking up existing invitation for email: {:?}, circle_id: {:?}",
         input.email, input.circle_id
     );
@@ -105,10 +105,10 @@ pub async fn invite_person(
             })?,
     };
 
-    println!("Created person: {:?}", person);
+    tracing::info!("Created person: {:?}", person);
 
     // Create the circle involvement
-    println!(
+    tracing::info!(
         "Inserting circle involvement for person_id: {:?}, circle_id: {:?}",
         person.id, circle.id
     );
@@ -136,7 +136,7 @@ pub async fn invite_person(
     };
 
     // Create the circle invitation
-    println!(
+    tracing::info!(
         "Upserting circle invitation for person_id: {:?}, circle_id: {:?}",
         person.id, circle.id
     );
@@ -155,10 +155,10 @@ pub async fn invite_person(
     .await
     .map_err(db_err)?;
 
-    println!("Created circle invitation: {:?}", circle_invitation);
+    tracing::info!("Created circle invitation: {:?}", circle_invitation);
 
     // Send invitation email
-    println!("Sending invitation email to: {:?}", input.email);
+    tracing::info!("Sending invitation email to: {:?}", input.email);
     let email = invited_to_circle_email(
         input.email.clone(),
         InvitedToCircleEmailParams {
@@ -171,12 +171,12 @@ pub async fn invite_person(
         },
     );
     email_sender.send_email(email).await.map_err(|err| {
-        eprintln!("Error sending invitation email: {:?}", err);
+        tracing::error!("Error sending invitation email: {:?}", err);
         InvitePersonError::EmailError
     })?;
 
     // Mark the invitation as sent
-    println!("Marking invitation {:?} as sent", circle_invitation.id);
+    tracing::info!("Marking invitation {:?} as sent", circle_invitation.id);
     mark_circle_invitation_as_sent(circle_invitation.id, pool).await.map_err(db_err)?;
 
     Ok(InvitePersonResult {
@@ -332,7 +332,7 @@ async fn reconcile_involvement(
     // If involvement is now for the wrong person, delete it
     maybe_involvement = match maybe_involvement {
         Some(inv) if inv.person_id != person.id => {
-            println!(
+            tracing::info!(
                 "Involvement person_id {:?} does not match accepting person_id {:?}, deleting involvement",
                 inv.person_id, person.id
             );
@@ -348,7 +348,7 @@ async fn reconcile_involvement(
     // If involvement is for the wrong interval, don't delete it, just clear the local var
     maybe_involvement = match maybe_involvement {
         Some(inv) if inv.interval_number != current_interval.number => {
-            println!(
+            tracing::info!(
                 "Involvement interval_number {:?} does not match current interval_number {:?}, ignoring involvement",
                 inv.interval_number, current_interval.number
             );
@@ -373,7 +373,7 @@ async fn reconcile_involvement(
         )
         .await
         .map_err(|err| {
-            eprintln!("Database error: {:?}", err);
+            tracing::error!("Database error: {:?}", err);
             AcceptInvitationError::DatabaseError
         })?
         .into(),
@@ -382,7 +382,7 @@ async fn reconcile_involvement(
     // If our involvement is Invited or Exiting, move it to Onboarding
     match involvement.status {
         InvolvementStatus::Invited | InvolvementStatus::Exiting => {
-            println!("Updating involvement status from {:?} to Onboarding", involvement.status);
+            tracing::info!("Updating involvement status from {:?} to Onboarding", involvement.status);
             update_involvement_status(involvement.typed_id(), InvolvementStatus::Onboarding, pool)
                 .await
                 .map_err(handle_accept_database_error)?;
@@ -398,7 +398,7 @@ async fn reconcile_involvement(
 }
 
 fn handle_accept_database_error(err: sqlx::Error) -> AcceptInvitationError {
-    eprintln!("Database error: {:?}", err);
+    tracing::error!("Database error: {:?}", err);
     AcceptInvitationError::DatabaseError
 }
 

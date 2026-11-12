@@ -50,7 +50,7 @@ async fn create_calendar_event(
     auth_session: AuthSession,
     axum::extract::Json(data): axum::extract::Json<CalendarEvent>,
 ) -> impl IntoResponse {
-    println!("Creating calendar event: {:?}", data);
+    tracing::info!("Creating calendar event: {:?}", data);
 
     let project_id = ProjectId::new(project_id);
 
@@ -61,7 +61,7 @@ async fn create_calendar_event(
             (StatusCode::CREATED, Json(vec![event])).into_response()
         }
         Err(err) => {
-            eprintln!("Failed to create calendar event: {}", err);
+            tracing::error!("Failed to create calendar event: {}", err);
             (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response()
         }
     }
@@ -88,7 +88,7 @@ async fn update_calendar_event(
     auth_session: AuthSession,
     axum::extract::Json(data): axum::extract::Json<CalendarEvent>,
 ) -> impl IntoResponse {
-    println!("Updating calendar event with ID {}: {:?}", event_id, data);
+    tracing::info!("Updating calendar event with ID {}: {:?}", event_id, data);
 
     match repo::update_calendar_event_with_links(
         CalendarEventId::new(event_id),
@@ -105,7 +105,7 @@ async fn update_calendar_event(
             (StatusCode::OK, Json(vec![event])).into_response()
         }
         Err(err) => {
-            eprintln!("Failed to update calendar event: {}", err);
+            tracing::error!("Failed to update calendar event: {}", err);
             (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response()
         }
     }
@@ -127,12 +127,12 @@ pub async fn get_calendar_ics(
     Path((project_id, calendar_token)): Path<(i64, String)>,
     Extension(pool): Extension<SqlitePool>,
 ) -> impl IntoResponse {
-    println!("Received request for calendar ICS with token: {}", calendar_token);
+    tracing::info!("Received request for calendar ICS with token: {}", calendar_token);
 
     let project = match find_project(ProjectId::new(project_id), &pool).await {
         Ok(project) => project,
         Err(err) => {
-            eprintln!("Error looking up project: {}", err);
+            tracing::error!("Error looking up project: {}", err);
             return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
         }
     };
@@ -140,7 +140,7 @@ pub async fn get_calendar_ics(
     let person = match find_person_by_calendar_token(&calendar_token, &pool).await {
         Ok(person) => person,
         Err(err) => {
-            eprintln!("Error looking up person by calendar token: {}", err);
+            tracing::error!("Error looking up person by calendar token: {}", err);
             return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
         }
     };
@@ -148,7 +148,7 @@ pub async fn get_calendar_ics(
     let events = match list_calendar_events_person_attending(project.typed_id(), person.typed_id(), &pool).await {
         Ok(events) => events,
         Err(err) => {
-            eprintln!("Error listing calendar events for person: {}", err);
+            tracing::error!("Error listing calendar events for person: {}", err);
             return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response();
         }
     };

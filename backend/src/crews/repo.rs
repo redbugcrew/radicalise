@@ -49,7 +49,7 @@ pub async fn update_crew(project_id: ProjectId, crew: Crew, pool: &SqlitePool) -
     .execute(pool)
     .await
     .map_err(|e| {
-        println!("Error updating crew: {:?}", e);
+        tracing::info!("Error updating crew: {:?}", e);
         e
     })?;
 
@@ -144,7 +144,7 @@ pub async fn set_crew_convenor(
     person_id: Option<i64>,
     pool: &SqlitePool,
 ) -> Result<(), sqlx::Error> {
-    println!(
+    tracing::info!(
         "Setting crew {} convenor for interval {} to person {:?}",
         crew_id.id, interval_number.number, person_id
     );
@@ -249,7 +249,7 @@ pub async fn set_crew_status_from_interval(
     .fetch_all(pool)
     .await
     .map_err(|e| {
-        println!(
+        tracing::info!(
             "Error setting crew status from interval: {:?} with crew_id: {:?}, start_interval_number: {:?}, state: {:?}",
             e, crew_id, start_interval_number, state
         );
@@ -283,7 +283,7 @@ where
     E: sqlx::Executor<'c, Database = sqlx::Sqlite>,
 {
     if new_interval_number.project_id.id != previous_interval_number.project_id.id {
-        println!(
+        tracing::info!(
             "Error copying crew states: project ID mismatch (new: {}, previous: {})",
             new_interval_number.project_id.id, previous_interval_number.project_id.id
         );

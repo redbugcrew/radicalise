@@ -146,14 +146,14 @@ pub async fn find_interval_involvement_data(
     pool: &SqlitePool,
 ) -> Result<IntervalInvolvementData, sqlx::Error> {
     let circle_ids = find_all_circles_ids(interval_number.project_id.clone(), pool).await.map_err(|e| {
-        println!("find_all_circles_ids: {:?}", e);
+        tracing::info!("find_all_circles_ids: {:?}", e);
         e
     })?;
 
     let circle_involvements_result = find_interval_involvement_data_for_circles(circle_ids, interval_number.clone(), pool)
         .await
         .map_err(|e| {
-            println!("find_interval_involvement_data_for_circles: {:?}", e);
+            tracing::info!("find_interval_involvement_data_for_circles: {:?}", e);
             e
         })?;
 
@@ -169,36 +169,36 @@ pub async fn find_interval_involvement_data(
 
 pub async fn find_initial_data_for_project(project: Project, pool: &SqlitePool) -> Result<InitialData, sqlx::Error> {
     let circles = find_all_circles(project.typed_id(), pool).await.map_err(|e| {
-        println!("find_all_circles: {:?}", e);
+        tracing::info!("find_all_circles: {:?}", e);
         e
     })?;
 
     let people = find_all_people(project.typed_id(), pool).await.map_err(|e| {
-        println!("find_all_people: {:?}", e);
+        tracing::info!("find_all_people: {:?}", e);
         e
     })?;
 
     let crews = find_all_crews_with_links(project.typed_id(), pool).await.map_err(|e| {
-        println!("find_all_crews_with_links: {:?}", e);
+        tracing::info!("find_all_crews_with_links: {:?}", e);
         e
     })?;
 
     let intervals = find_all_intervals(project.typed_id(), pool).await.map_err(|e| {
-        println!("find_all_intervals: {:?}", e);
+        tracing::info!("find_all_intervals: {:?}", e);
         e
     })?;
 
     let event_templates = find_all_event_templates(project.typed_id(), pool).await.map_err(|e| {
-        println!("find_all_event_templates: {:?}", e);
+        tracing::info!("find_all_event_templates: {:?}", e);
         e
     })?;
     let calendar_events = list_calendar_events_with_attendances(project.typed_id(), pool).await.map_err(|e| {
-        println!("list_calendar_events_with_attendances: {:?}", e);
+        tracing::info!("list_calendar_events_with_attendances: {:?}", e);
         e
     })?;
 
     let current_interval = find_current_interval(project.typed_id(), pool).await.map_err(|e| {
-        println!("find_current_interval: {:?}", e);
+        tracing::info!("find_current_interval: {:?}", e);
         e
     })?;
 
@@ -206,7 +206,7 @@ pub async fn find_initial_data_for_project(project: Project, pool: &SqlitePool) 
         find_interval_data(interval, pool)
             .await
             .map_err(|e| {
-                println!("find_interval_data: {:?}", e);
+                tracing::info!("find_interval_data: {:?}", e);
                 e
             })?
             .into()
@@ -215,7 +215,7 @@ pub async fn find_initial_data_for_project(project: Project, pool: &SqlitePool) 
     };
 
     let peer_roles = find_all_peer_roles(project.typed_id(), pool).await.map_err(|e| {
-        println!("find_all_peer_roles: {:?}", e);
+        tracing::info!("find_all_peer_roles: {:?}", e);
         e
     })?;
 
@@ -234,19 +234,19 @@ pub async fn find_initial_data_for_project(project: Project, pool: &SqlitePool) 
 
 pub async fn find_interval_data(interval: &Interval, pool: &SqlitePool) -> Result<IntervalData, sqlx::Error> {
     let involvements = find_interval_involvement_data(interval.typed_number(), pool).await.map_err(|e| {
-        println!("find_interval_involvement_data: {:?}", e);
+        tracing::info!("find_interval_involvement_data: {:?}", e);
         e
     })?;
 
     let enrollments = find_peer_enrollments_for_interval(&interval.typed_number(), pool)
         .await
         .map_err(|e| {
-            println!("find_peer_enrollments_for_interval: {:?}", e);
+            tracing::info!("find_peer_enrollments_for_interval: {:?}", e);
             e
         })?;
 
     let crew_states = find_crew_states_for_interval(interval.typed_number(), pool).await.map_err(|e| {
-        println!("find_crew_states_for_interval: {:?}", e);
+        tracing::info!("find_crew_states_for_interval: {:?}", e);
         e
     })?;
 

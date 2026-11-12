@@ -30,15 +30,15 @@ async fn recompute_implicit_involvements(Path(project_id): Path<i64>, Extension(
     let circles = find_all_circles(ProjectId::new(project_id), &pool).await.unwrap();
 
     for circle in &circles {
-        println!("Recomputing implicit involvements for circle {}", circle.id);
+        tracing::info!("Recomputing implicit involvements for circle {}", circle.id);
 
         set_implicit_counter_to_zero(circle.typed_id(), &pool).await.unwrap();
     }
 
     for interval in intervals {
-        println!("Recomputing implicit involvements for interval {}", interval.number);
+        tracing::info!("Recomputing implicit involvements for interval {}", interval.number);
         if let Err(e) = add_interval_implicit_involvements(&interval, ProjectId::new(project_id), true, &pool).await {
-            eprintln!("Error recomputing implicit involvements for interval {}: {:?}", interval.number, e);
+            tracing::error!("Error recomputing implicit involvements for interval {}: {:?}", interval.number, e);
         }
     }
 

@@ -60,7 +60,7 @@ async fn forgot_password(
             .await
             .map_err(repo_error_handler)?;
 
-        println!(
+        tracing::info!(
             "We got the user: with email: {}, set token: {}",
             user.email.as_deref().unwrap_or("No email provided"),
             password_reset_token
@@ -69,7 +69,7 @@ async fn forgot_password(
         reset_password_email(&resend, payload.email.clone(), password_reset_token.clone())
             .await
             .map_err(|e| {
-                eprintln!("Failed to send reset password email: {}", e);
+                tracing::error!("Failed to send reset password email: {}", e);
                 (StatusCode::INTERNAL_SERVER_ERROR, "Failed to send email").into_response()
             })?;
 

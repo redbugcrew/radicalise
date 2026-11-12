@@ -43,7 +43,7 @@ async fn create_interval(
     Path(project_id): Path<i64>,
     axum::extract::Json(interval): axum::extract::Json<Interval>,
 ) -> impl IntoResponse {
-    println!("Creating interval: {:?}", interval);
+    tracing::info!("Creating interval: {:?}", interval);
 
     let project_id = ProjectId::new(project_id);
 
@@ -93,7 +93,7 @@ async fn start_next_interval(
     Path(project_id): Path<i64>,
     auth_session: AuthSession,
 ) -> impl IntoResponse {
-    println!("Starting next interval");
+    tracing::info!("Starting next interval");
 
     let project_id = ProjectId::new(project_id);
 
@@ -125,7 +125,7 @@ async fn start_next_interval(
     match assign_interval_peer_roles(&next_interval, project_id.clone(), &pool).await {
         Ok(_) => (),
         Err(AssignPeerRolesError::ConstraintViolation(message)) => {
-            println!("Constraint violation while assigning peer roles: {}", message);
+            tracing::info!("Constraint violation while assigning peer roles: {}", message);
             return StartNextIntervalError::CouldntSetUpInterval.into_response();
         }
         Err(AssignPeerRolesError::Database(_)) => {
