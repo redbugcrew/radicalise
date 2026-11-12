@@ -16,11 +16,11 @@ export default function EditPerson() {
 
   const onSubmit = (values: Person) => {
     getApi()
-      .api.updatePerson(projectId, values.id.toString(), values)
+      .api.updatePerson(projectId, values.id, values)
       .then((response) => {
         if (response.status === 200) {
           handleAppEvents(response.data)
-          navigate(`/people/${values.id}`)
+          navigate(`../${values.id}`)
         } else {
           console.error("Failed to update person:", response)
         }

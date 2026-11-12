@@ -1081,7 +1081,7 @@ export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name UpdatePerson
      * @request PUT:/api/projects/{project_id}/people/{person_id}
      */
-    updatePerson: (projectId: number, personId: string, data: Person, params: RequestParams = {}) =>
+    updatePerson: (projectId: number, personId: number, data: Person, params: RequestParams = {}) =>
       this.request<AppEvent[], any>({
         path: `/api/projects/${projectId}/people/${personId}`,
         method: "PUT",

@@ -24,7 +24,8 @@ pub fn router() -> OpenApiRouter {
     path = "/{person_id}",
     request_body(content = Person, content_type = "application/json"),
     params(
-        ("project_id" = i64, Path, description = "Project ID")
+        ("project_id" = i64, Path, description = "Project ID"),
+        ("person_id" = i64, Path, description = "Person ID")
     ),
     responses(
         (status = 200, body = Vec<AppEvent>),
@@ -33,8 +34,7 @@ pub fn router() -> OpenApiRouter {
     ),
 )]
 pub async fn update_person(
-    Path(person_id): Path<i64>,
-    Path(project_id): Path<i64>,
+    Path((project_id, person_id)): Path<(i64, i64)>,
     Extension(pool): Extension<SqlitePool>,
     Extension(realtime_state): Extension<RealtimeState>,
     auth_session: AuthSession,
