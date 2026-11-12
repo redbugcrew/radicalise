@@ -89,7 +89,8 @@ pub async fn invite_person(
     // Load the invitation if we already have one, so that we can update it instead of creating a duplicate if the same person is invited again to the same circle
     tracing::info!(
         "Looking up existing invitation for email: {:?}, circle_id: {:?}",
-        input.email, input.circle_id
+        input.email,
+        input.circle_id
     );
     let existing_invitation = find_circle_invitation_by_email_and_circle_id(CircleId::new(circle.id), input.email.clone(), pool)
         .await
@@ -110,7 +111,8 @@ pub async fn invite_person(
     // Create the circle involvement
     tracing::info!(
         "Inserting circle involvement for person_id: {:?}, circle_id: {:?}",
-        person.id, circle.id
+        person.id,
+        circle.id
     );
     let new_involvement = CircleInvolvement {
         person_id: person.id,
@@ -138,7 +140,8 @@ pub async fn invite_person(
     // Create the circle invitation
     tracing::info!(
         "Upserting circle invitation for person_id: {:?}, circle_id: {:?}",
-        person.id, circle.id
+        person.id,
+        circle.id
     );
     let invitation_token = Uuid::new_v4().to_string();
     let expires_at = (chrono::Utc::now() + Duration::days(INVITATION_EXPIRATION_DAYS)).to_rfc3339();
@@ -334,7 +337,8 @@ async fn reconcile_involvement(
         Some(inv) if inv.person_id != person.id => {
             tracing::info!(
                 "Involvement person_id {:?} does not match accepting person_id {:?}, deleting involvement",
-                inv.person_id, person.id
+                inv.person_id,
+                person.id
             );
             delete_circle_involvement_by_id(CircleInvolvementId::new(inv.id), pool)
                 .await
@@ -350,7 +354,8 @@ async fn reconcile_involvement(
         Some(inv) if inv.interval_number != current_interval.number => {
             tracing::info!(
                 "Involvement interval_number {:?} does not match current interval_number {:?}, ignoring involvement",
-                inv.interval_number, current_interval.number
+                inv.interval_number,
+                current_interval.number
             );
             None
         }

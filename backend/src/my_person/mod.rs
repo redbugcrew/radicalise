@@ -91,7 +91,9 @@ async fn my_participation(
 
             tracing::info!(
                 "Fetching my participation for person_id={:?}, interval_number={:?}, circle_id={:?}",
-                person_id, interval_number.number, circle_id
+                person_id,
+                interval_number.number,
+                circle_id
             );
 
             let result = find_circle_involvement(circle_id, person_id, interval_number, &pool).await;

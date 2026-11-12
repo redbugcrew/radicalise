@@ -27,7 +27,9 @@ pub async fn add_interval_implicit_involvements(
         if let Err(e) = add_interval_circle_implicit_involvements(interval, project_id.clone(), circle.typed_id(), recompute, pool).await {
             tracing::error!(
                 "Error adding implicit involvements for interval {}, circle {}: {:?}",
-                interval.number, circle.id, e
+                interval.number,
+                circle.id,
+                e
             );
         }
     }

@@ -170,7 +170,9 @@ pub async fn update_crew_status(
 
     tracing::info!(
         "Updating crew status with ID {} for project {}: {:?}",
-        crew_id.id, project_id.id, input
+        crew_id.id,
+        project_id.id,
+        input
     );
 
     match repo::set_crew_status_from_interval(crew_id, interval_number, input.new_status, &pool).await {

@@ -66,7 +66,9 @@ async fn create_calendar_event_attendance(
 
     tracing::info!(
         "updating calendar event attendance with: intention: {:?}, calendar_event_id:{}, person_id: {}",
-        input.intention, input.calendar_event_id, person.id
+        input.intention,
+        input.calendar_event_id,
+        person.id
     );
 
     let result = upsert_event_attendance(input.calendar_event_id, input.intention, person.typed_id(), &pool).await;
