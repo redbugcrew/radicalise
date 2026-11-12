@@ -1,9 +1,10 @@
-import { Group, Stack, Text, Title } from "@mantine/core"
+import { ActionIcon, Group, Stack, Text, Title } from "@mantine/core"
 import { Anchor, IntervalSelector, NoData } from "../../components"
 import { useAppSelector } from "../../store"
 import PeopleForInterval from "./PeopleForInterval"
 import { useSelectedInterval } from "../intervals/WithIntervalData"
 import { useCurrentInterval } from "../../store/current_interval"
+import { IconUserPlus } from "@tabler/icons-react"
 
 export default function People() {
   const intervals = useAppSelector((state) => state.intervals)
@@ -14,11 +15,11 @@ export default function People() {
     <Stack>
       <Group justify="space-between">
         <Title order={1}>People</Title>
-        {/* <Anchor href="new">
+        <Anchor href="../invitations/new">
           <ActionIcon variant="filled" aria-label="Add Person" size="lg">
             <IconUserPlus style={{ width: "70%", height: "70%" }} stroke={2} />
           </ActionIcon>
-        </Anchor> */}
+        </Anchor>
       </Group>
 
       <IntervalSelector intervals={intervals} selectedInterval={selectedInterval} currentInterval={currentInterval} />

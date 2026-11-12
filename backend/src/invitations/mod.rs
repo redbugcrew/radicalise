@@ -2,6 +2,7 @@ use axum::{Extension, Json, extract::Path, http::StatusCode, response::IntoRespo
 use resend_rs::Resend;
 use serde::Serialize;
 use sqlx::SqlitePool;
+use tracing::info;
 use utoipa::ToSchema;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
@@ -132,11 +133,16 @@ pub struct CircleInvitationDetails {
         (status = BAD_REQUEST,  body = String),
     ),
     params(
+        ("project_slug" = String, Path, description = "Project slug"),
         ("token" = String, Path, description = "Invitation token"),
-        ("project_id" = i64, Path, description = "Project ID")
     )
 )]
-pub async fn get_invitation(Path((token, project_id)): Path<(String, i64)>, Extension(pool): Extension<SqlitePool>) -> impl IntoResponse {
+pub async fn get_invitation(
+    Path((project_slug, token)): Path<(String, String)>,
+    Extension(pool): Extension<SqlitePool>,
+) -> impl IntoResponse {
+    info!("Fetching invitation with token: {} and project_slug: {}", token, project_slug);
+
     let invitation = match find_circle_invitation_by_token(token, &pool).await {
         Ok(invitation) => invitation,
         Err(_) => return (StatusCode::NOT_FOUND, ()).into_response(),
@@ -152,8 +158,8 @@ pub async fn get_invitation(Path((token, project_id)): Path<(String, i64)>, Exte
         Err(_) => return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
     };
 
-    if project.id != project_id {
-        return (StatusCode::BAD_REQUEST, "Project ID does not match invitation").into_response();
+    if project.slug != project_slug {
+        return (StatusCode::BAD_REQUEST, "Project slug does not match invitation").into_response();
     }
 
     (
@@ -171,8 +177,8 @@ pub async fn get_invitation(Path((token, project_id)): Path<(String, i64)>, Exte
     post,
     path = "/invitation/{token}/accept",
     params(
-        ("token" = String, Path, description = "Invitation token"),
-        ("project_id" = i64, Path, description = "Project ID")
+        ("project_id" = i64, Path, description = "Project ID"),
+        ("token" = String, Path, description = "Invitation token")
     ),
     responses(
         (status = 200, body = ()),
@@ -181,16 +187,23 @@ pub async fn get_invitation(Path((token, project_id)): Path<(String, i64)>, Exte
     ),
 )]
 pub async fn accept_invitation(
-    Path((token, project_id)): Path<(String, i64)>,
+    Path((project_id, token)): Path<(i64, String)>,
     Extension(pool): Extension<SqlitePool>,
     auth_session: AuthSession,
 ) -> impl IntoResponse {
+    info!("Accepting invitation with token: {} for project_id: {}", token, project_id);
+
     let current_user_id = match auth_session.user().await {
         Some(user) => UserId::new(user.id),
         None => return (StatusCode::UNAUTHORIZED, "Unauthorized").into_response(),
     };
 
-    let current_interval = match find_current_interval(ProjectId::new(project_id), &pool).await {
+    let project = match find_project(ProjectId::new(project_id), &pool).await {
+        Ok(project) => project,
+        Err(_) => return (StatusCode::INTERNAL_SERVER_ERROR, ()).into_response(),
+    };
+
+    let current_interval = match find_current_interval(project.typed_id(), &pool).await {
         Ok(Some(interval)) => interval,
         Ok(None) => {
             return (StatusCode::INTERNAL_SERVER_ERROR, "No current interval").into_response();
