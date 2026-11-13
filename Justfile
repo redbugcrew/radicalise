@@ -9,7 +9,7 @@ release:
     npm run release
 
 db-schema table="":
-    sqlite3 backend/data/dev/radicalise.sqlite ".schema {{table}}"
+    sqlite3 backend/data/dev/radicalise.sqlite ".schema {{table}}" | sed '/CREATE TABLE _sqlx_migrations/,/^);$/d; /CREATE TABLE sqlite_sequence/d'
 
 db-test-init:
     mkdir -p backend/data/test
