@@ -1,4 +1,8 @@
-# RADicalise
+# Radicalise
+
+## Licence
+
+Radicalise is available to use under the [Anti-Capitalist Licence](./LICENCE.md).
 
 ## Development
 
