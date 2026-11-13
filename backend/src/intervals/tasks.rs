@@ -177,7 +177,11 @@ mod tests {
             .await
             .expect("Failed to insert second interval");
 
-        // circle id=1 already exists from migrations (inserted by add-circles migration)
+        sqlx::query!("INSERT INTO circles (id, project_id, name, slug) VALUES (1, 1, 'Test Circle', 'test-circle')")
+            .execute(&pool)
+            .await
+            .expect("Failed to insert test circle");
+
         sqlx::query!(
             "INSERT INTO circle_involvements (person_id, circle_id, interval_number, project_id, status, implicit_counter) VALUES (1, 1, 1, 1, 'Active', 0)"
         )
