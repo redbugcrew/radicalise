@@ -105,12 +105,6 @@ CREATE TABLE peer_roles(
     FOREIGN KEY (constrained_by_id) REFERENCES peer_roles(id),
     PRIMARY KEY (id AUTOINCREMENT)
 );
-CREATE TABLE tower_sessions
-            (
-                id text primary key not null,
-                data blob not null,
-                expiry_date integer not null
-            );
 CREATE TABLE IF NOT EXISTS "projects" (
 	"id"	INTEGER NOT NULL,
 	"name"	TEXT NOT NULL DEFAULT '',

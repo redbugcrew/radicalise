@@ -424,6 +424,10 @@ mod tests {
             .execute(&pool)
             .await
             .expect("Failed to insert test project");
+        sqlx::query!("INSERT INTO circles (id, project_id, name, slug) VALUES (1, 1, 'Test Circle', 'test-circle')")
+            .execute(&pool)
+            .await
+            .expect("Failed to insert test circle");
         sqlx::query!("INSERT INTO users (email, hashed_password) VALUES ('test@example.com', 'hashed')")
             .execute(&pool)
             .await
