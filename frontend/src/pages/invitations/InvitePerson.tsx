@@ -6,18 +6,20 @@ import { getApi } from "../../api"
 import { actionFailure } from "../../components/ActionResult"
 import { useNavigate } from "react-router-dom"
 import { notifications } from "@mantine/notifications"
+import { currentProjectPath } from "../../contexts/projects"
 
 export default function InvitePerson() {
   const circles = useAppSelector((state) => state.circles.rootCircles)
-  const projectId = useAppSelector((state) => state.project?.id)
+  const project = useAppSelector((state) => state.project)
   const navigate = useNavigate()
+  const projectId = project?.id
 
   if (!projectId) {
     console.error("Project ID is not available.")
     return null
   }
 
-  const onSubmit = (values: InvitePersonRequest) => {
+  const onSubmit = async (values: InvitePersonRequest) => {
     return getApi()
       .api.invitePerson(projectId, values)
       .then((response) => {
@@ -28,7 +30,7 @@ export default function InvitePerson() {
           message: `${person.display_name} has been invited successfully.`,
           color: "green",
         })
-        navigate("/people")
+        navigate(currentProjectPath("/people", project.slug))
       })
       .catch((error) => {
         return actionFailure(error)
