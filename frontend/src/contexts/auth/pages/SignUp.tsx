@@ -1,4 +1,4 @@
-import { useLocation, useNavigate } from "react-router-dom"
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom"
 import { useUserPermissions } from "./auth_hooks"
 import { notifications } from "@mantine/notifications"
 import { getApi } from "../../../api"
@@ -8,13 +8,17 @@ import LoginForm from "../components/LoginForm"
 import { Stack, Text } from "@mantine/core"
 import { Anchor } from "../../../components"
 import type { LoginFormData } from "../components/LoginForm"
+import type { SignUpRequest } from "../../../api/Api"
 
 export default function SignUp() {
   const navigate = useNavigate()
   const location = useLocation()
+  const [searchParams] = useSearchParams()
   const userPermissions = useUserPermissions()
 
-  if (!userPermissions?.signup_enabled) {
+  const invitation_token = searchParams.get("invitation")
+
+  if (!userPermissions?.signup_enabled && !invitation_token) {
     return (
       <AuthLayout title="Sign up disabled">
         <Text>Sign up is currently disabled.</Text>
@@ -22,7 +26,12 @@ export default function SignUp() {
     )
   }
 
-  const onSubmit = (values: LoginFormData): Promise<ActionPromiseResult> => {
+  const onSubmit = async (formValues: LoginFormData): Promise<ActionPromiseResult> => {
+    const values: SignUpRequest = {
+      ...formValues,
+      invite_token: invitation_token || null,
+    }
+
     return getApi()
       .api.signUp(values)
       .then((response) => {
@@ -35,7 +44,9 @@ export default function SignUp() {
         navigate(`../login${location.search}`)
         return actionSuccess()
       })
-      .catch(actionFailure)
+      .catch((error) => {
+        return actionFailure(error)
+      })
   }
 
   return (

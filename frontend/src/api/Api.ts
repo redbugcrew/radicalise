@@ -463,6 +463,7 @@ export interface ResetPasswordRequest {
 
 export interface SignUpRequest {
   email: string
+  invite_token?: string | null
   password: string
 }
 
@@ -614,7 +615,7 @@ export class HttpClient<SecurityDataType = unknown> {
 
 /**
  * @title radicalise
- * @version 1.6.5
+ * @version 1.7.2
  * @license
  */
 export class Api<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {

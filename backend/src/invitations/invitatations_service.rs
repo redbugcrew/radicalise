@@ -240,6 +240,18 @@ pub async fn accept_invitation(
     Ok(())
 }
 
+pub async fn is_invite_token_valid(token: String, pool: &SqlitePool) -> Result<(), AcceptInvitationError> {
+    let invitation = find_circle_invitation_by_token(token, pool)
+        .await
+        .map_err(handle_accept_database_error)?;
+
+    if invitation.has_expired(Utc::now()) {
+        return Err(AcceptInvitationError::InvitationExpired);
+    }
+
+    Ok(())
+}
+
 struct AcceptInvitationContext {
     invitation: CircleInvitation,
     current_interval: Interval,
