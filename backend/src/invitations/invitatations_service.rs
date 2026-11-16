@@ -8,6 +8,7 @@ use uuid::Uuid;
 use crate::invitations::circle_invitations_repo::delete_circle_invitation;
 use crate::my_project::repo::find_project;
 use crate::shared::email_sender::EmailSender;
+use crate::shared::entities::Circle;
 use crate::{
     circles::repo::find_circle_by_id,
     invitations::{
@@ -227,6 +228,7 @@ pub async fn accept_invitation(
         context.invitation.circle_involvement_id.map(CircleInvolvementId::new),
         CircleId::new(context.invitation.circle_id),
         &context.current_interval,
+        context.circle.initial_involvement_status,
         &context.invitation_person,
         pool,
     )
@@ -253,6 +255,7 @@ pub async fn is_invite_token_valid(token: String, pool: &SqlitePool) -> Result<(
 
 struct AcceptInvitationContext {
     invitation: CircleInvitation,
+    circle: Circle,
     current_interval: Interval,
     user_person: Option<Person>,
     invitation_person: Person,
@@ -295,6 +298,7 @@ async fn load_accept_invitation_context(
         current_interval,
         user_person,
         invitation_person,
+        circle,
     })
 }
 
@@ -329,6 +333,7 @@ async fn reconcile_involvement(
     circle_involvement_id: Option<CircleInvolvementId>,
     circle_id: CircleId,
     current_interval: &Interval,
+    initial_status: InvolvementStatus,
     person: &Person,
     pool: &SqlitePool,
 ) -> Result<(), AcceptInvitationError> {
@@ -379,7 +384,7 @@ async fn reconcile_involvement(
             CircleInvolvement {
                 person_id: person.id,
                 circle_id: circle_id.id,
-                status: InvolvementStatus::Onboarding,
+                status: initial_status.clone(),
                 ..CircleInvolvement::new(current_interval.typed_number())
             }
             .into(),
@@ -393,15 +398,19 @@ async fn reconcile_involvement(
         .into(),
     };
 
-    // If our involvement is Invited or Exiting, move it to Onboarding
+    // If our involvement is Invited or Exiting, move it to the initial status
     match involvement.status {
         InvolvementStatus::Invited | InvolvementStatus::Exiting => {
-            info!("Updating involvement status from {:?} to Onboarding", involvement.status);
-            update_involvement_status(involvement.typed_id(), InvolvementStatus::Onboarding, pool)
+            info!(
+                "Updating involvement status from {:?} to {:?}",
+                involvement.status,
+                initial_status.clone()
+            );
+            update_involvement_status(involvement.typed_id(), initial_status.clone(), pool)
                 .await
                 .map_err(handle_accept_database_error)?;
             CircleInvolvement {
-                status: InvolvementStatus::Onboarding,
+                status: initial_status,
                 ..involvement
             }
         }
