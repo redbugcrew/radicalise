@@ -573,7 +573,7 @@ mod tests {
             .await
             .expect("No person record found for the new user");
 
-        // Verify a circle_involvement exists for this person in the correct circle and current interval, in Onboarding status
+        // Verify a circle_involvement exists for this person in the correct circle and current interval
         let involvement_row = sqlx::query!(
             "SELECT ci.status
              FROM circle_involvements ci
@@ -589,8 +589,8 @@ mod tests {
         .expect("No circle_involvement found for the accepted person in the current interval");
 
         assert_eq!(
-            involvement_row.status, "Onboarding",
-            "Expected involvement status to be Onboarding, got {:?}",
+            involvement_row.status, "Active",
+            "Expected involvement status to be Active, got {:?}",
             involvement_row.status
         );
 
@@ -662,7 +662,7 @@ mod tests {
             .await
             .expect("No person record found for the new user");
 
-        // Verify a circle_involvement exists in interval 2 for this person, in Onboarding status
+        // Verify a circle_involvement exists in interval 2 for this person
         let involvement_row = sqlx::query!(
             "SELECT ci.status FROM circle_involvements ci
              WHERE ci.person_id = ?
@@ -675,8 +675,8 @@ mod tests {
         .expect("No circle_involvement found for the accepted person in interval 2");
 
         assert_eq!(
-            involvement_row.status, "Onboarding",
-            "Expected involvement status to be Onboarding in interval 2, got {:?}",
+            involvement_row.status, "Active",
+            "Expected involvement status to be Active in interval 2, got {:?}",
             involvement_row.status
         );
     }
@@ -750,7 +750,7 @@ mod tests {
             .expect("Failed to check placeholder person");
         assert!(placeholder_person.is_none(), "Expected placeholder invited person to be deleted");
 
-        // The accepter should now have an onboarding involvement in circle 1, interval 1.
+        // The accepter should now have an active involvement in circle 1, interval 1.
         let accepter_involvement = sqlx::query!(
             "SELECT status FROM circle_involvements WHERE person_id = ? AND circle_id = 1 AND interval_number = 1",
             accepter_person.id
@@ -759,8 +759,8 @@ mod tests {
         .await
         .expect("Expected accepter person to have a circle involvement after acceptance");
         assert_eq!(
-            accepter_involvement.status, "Onboarding",
-            "Expected accepter involvement status to be Onboarding"
+            accepter_involvement.status, "Active",
+            "Expected accepter involvement status to be Active"
         );
 
         // No involvement should remain for the deleted placeholder person.
