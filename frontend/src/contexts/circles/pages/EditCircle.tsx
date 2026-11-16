@@ -10,6 +10,9 @@ export default function EditCircle() {
   const { circleSlug } = useParams<"circleSlug">()
   const rootCircles = useAppSelector((state) => state.circles.rootCircles)
   const navigate = useNavigate()
+  const projectId = useAppSelector((state) => state.project?.id)
+
+  if (!projectId) return <Title>No project id selected</Title>
 
   const circle = rootCircles?.find((c) => c.slug === circleSlug)
   const otherCircles = rootCircles?.filter((c) => c.id !== circle?.id) || []
@@ -25,7 +28,7 @@ export default function EditCircle() {
 
   const handleSubmit = async (data: Circle): Promise<ActionPromiseResult> => {
     return getApi()
-      .api.updateCircle(circle.project_id, circle.id, data)
+      .api.updateCircle(projectId, circle.id, data)
       .then((response) => {
         handleAppEvents(response.data)
         navigate("..")

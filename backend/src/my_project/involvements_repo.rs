@@ -429,13 +429,13 @@ pub async fn find_circles_for_person_in_interval(
 ) -> Result<Vec<Circle>, sqlx::Error> {
     let records = sqlx::query_as!(
         Circle,
-        "SELECT circles.id as \"id: i64\", circles.project_id as \"project_id: i64\", name, slug, inside_circle_id
-        FROM circle_involvements
-        INNER JOIN circles ON circle_involvements.circle_id = circles.id
+        "SELECT c.id as \"id: i64\", c.project_id as \"project_id: i64\", name, slug, inside_circle_id, initial_involvement_status
+        FROM circle_involvements AS i
+        INNER JOIN circles AS c ON i.circle_id = c.id
         WHERE
-            circle_involvements.person_id = ? AND
-            circle_involvements.interval_number = ? AND
-            circle_involvements.project_id = ?",
+            i.person_id = ? AND
+            i.interval_number = ? AND
+            i.project_id = ?",
         person_id.id,
         interval_number.number,
         interval_number.project_id.id,

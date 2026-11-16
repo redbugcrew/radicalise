@@ -76,14 +76,13 @@ async fn create_circle(
     ),
 )]
 async fn update_circle(
-    Path(circle_id): Path<i64>,
-    Path(project_id): Path<i64>,
+    Path((project_id, circle_id)): Path<(i64, i64)>,
     Extension(pool): Extension<SqlitePool>,
     Extension(realtime_state): Extension<RealtimeState>,
     auth_session: AuthSession,
     axum::extract::Json(data): axum::extract::Json<Circle>,
 ) -> impl IntoResponse {
-    tracing::info!("Updating circle with ID {}: {:?}", circle_id, data);
+    tracing::info!("Updating circle with ID {} and project ID {}: {:?}", circle_id, project_id, data);
 
     match repo::update_circle(CircleId::new(circle_id), &data, ProjectId::new(project_id), &pool).await {
         Ok(circle) => {

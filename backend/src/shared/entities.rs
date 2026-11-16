@@ -2,6 +2,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::{Sqlite, encode::IsNull, error::BoxDynError};
 use std::str::FromStr;
+use tracing::warn;
 use utoipa::ToSchema;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -119,11 +120,15 @@ impl FromStr for InvolvementStatus {
     }
 }
 
-impl TryFrom<String> for InvolvementStatus {
-    type Error = ();
-
-    fn try_from(value: String) -> Result<Self, Self::Error> {
-        InvolvementStatus::from_str(&value)
+impl From<String> for InvolvementStatus {
+    fn from(value: String) -> Self {
+        match InvolvementStatus::from_str(&value) {
+            Ok(status) => status,
+            Err(e) => {
+                warn!("Parsing invalid involvement status {} gives error: {:?}", value, e);
+                InvolvementStatus::Active
+            }
+        }
     }
 }
 
@@ -346,6 +351,7 @@ pub struct Circle {
     pub name: String,
     pub slug: String,
     pub inside_circle_id: Option<i64>,
+    pub initial_involvement_status: InvolvementStatus,
 }
 
 impl Circle {
@@ -356,6 +362,7 @@ impl Circle {
             name: "Participants".to_string(),
             slug: "participants".to_string(),
             inside_circle_id: None,
+            initial_involvement_status: InvolvementStatus::Active,
         }
     }
 

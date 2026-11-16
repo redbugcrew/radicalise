@@ -1,6 +1,7 @@
 use chrono::{Duration, Utc};
 use serde::Deserialize;
 use sqlx::SqlitePool;
+use tracing::info;
 use utoipa::ToSchema;
 use uuid::Uuid;
 
@@ -70,31 +71,31 @@ pub async fn invite_person(
     interval: Interval,
 ) -> Result<InvitePersonResult, InvitePersonError> {
     // Find the inviting person
-    tracing::info!("Finding inviting person for user_id: {:?}", inviting_user_id);
+    info!("Finding inviting person for user_id: {:?}", inviting_user_id);
     let inviting_person = find_person_by_user_id(inviting_user_id, project_id.clone(), pool)
         .await
         .map_err(ctx_err)?
         .ok_or(InvitePersonError::ContextInvalid)?;
 
     // Find the project
-    tracing::info!("Finding project with id: {:?}", project_id);
+    info!("Finding project with id: {:?}", project_id);
     let project = find_project(project_id.clone(), pool).await.map_err(ctx_err)?;
 
     // Find the circle
-    tracing::info!("Finding circle with id: {:?}", input.circle_id);
+    info!("Finding circle with id: {:?}", input.circle_id);
     let circle = find_circle_by_id(CircleId::new(input.circle_id), pool).await.map_err(ctx_err)?;
 
     let current_interval = interval;
 
     // Load the invitation if we already have one, so that we can update it instead of creating a duplicate if the same person is invited again to the same circle
-    tracing::info!(
+    info!(
         "Looking up existing invitation for email: {:?}, circle_id: {:?}",
-        input.email,
-        input.circle_id
+        input.email, input.circle_id
     );
     let existing_invitation = find_circle_invitation_by_email_and_circle_id(CircleId::new(circle.id), input.email.clone(), pool)
         .await
         .map_err(db_err)?;
+    info!("Has existing invitation {:?}", existing_invitation);
 
     let person = match existing_invitation {
         Some(invitation) => find_person_by_id(PersonId::new(invitation.person_id), pool).await.map_err(db_err)?,
@@ -106,13 +107,12 @@ pub async fn invite_person(
             })?,
     };
 
-    tracing::info!("Created person: {:?}", person);
+    info!("Created person: {:?}", person);
 
     // Create the circle involvement
-    tracing::info!(
+    info!(
         "Inserting circle involvement for person_id: {:?}, circle_id: {:?}",
-        person.id,
-        circle.id
+        person.id, circle.id
     );
     let new_involvement = CircleInvolvement {
         person_id: person.id,
@@ -138,10 +138,9 @@ pub async fn invite_person(
     };
 
     // Create the circle invitation
-    tracing::info!(
+    info!(
         "Upserting circle invitation for person_id: {:?}, circle_id: {:?}",
-        person.id,
-        circle.id
+        person.id, circle.id
     );
     let invitation_token = Uuid::new_v4().to_string();
     let expires_at = (chrono::Utc::now() + Duration::days(INVITATION_EXPIRATION_DAYS)).to_rfc3339();
@@ -158,10 +157,10 @@ pub async fn invite_person(
     .await
     .map_err(db_err)?;
 
-    tracing::info!("Created circle invitation: {:?}", circle_invitation);
+    info!("Created circle invitation: {:?}", circle_invitation);
 
     // Send invitation email
-    tracing::info!("Sending invitation email to: {:?}", input.email);
+    info!("Sending invitation email to: {:?}", input.email);
     let email = invited_to_circle_email(
         input.email.clone(),
         InvitedToCircleEmailParams {
@@ -179,7 +178,7 @@ pub async fn invite_person(
     })?;
 
     // Mark the invitation as sent
-    tracing::info!("Marking invitation {:?} as sent", circle_invitation.id);
+    info!("Marking invitation {:?} as sent", circle_invitation.id);
     mark_circle_invitation_as_sent(circle_invitation.id, pool).await.map_err(db_err)?;
 
     Ok(InvitePersonResult {
@@ -347,10 +346,9 @@ async fn reconcile_involvement(
     // If involvement is now for the wrong person, delete it
     maybe_involvement = match maybe_involvement {
         Some(inv) if inv.person_id != person.id => {
-            tracing::info!(
+            info!(
                 "Involvement person_id {:?} does not match accepting person_id {:?}, deleting involvement",
-                inv.person_id,
-                person.id
+                inv.person_id, person.id
             );
             delete_circle_involvement_by_id(CircleInvolvementId::new(inv.id), pool)
                 .await
@@ -364,10 +362,9 @@ async fn reconcile_involvement(
     // If involvement is for the wrong interval, don't delete it, just clear the local var
     maybe_involvement = match maybe_involvement {
         Some(inv) if inv.interval_number != current_interval.number => {
-            tracing::info!(
+            info!(
                 "Involvement interval_number {:?} does not match current interval_number {:?}, ignoring involvement",
-                inv.interval_number,
-                current_interval.number
+                inv.interval_number, current_interval.number
             );
             None
         }
@@ -399,7 +396,7 @@ async fn reconcile_involvement(
     // If our involvement is Invited or Exiting, move it to Onboarding
     match involvement.status {
         InvolvementStatus::Invited | InvolvementStatus::Exiting => {
-            tracing::info!("Updating involvement status from {:?} to Onboarding", involvement.status);
+            info!("Updating involvement status from {:?} to Onboarding", involvement.status);
             update_involvement_status(involvement.typed_id(), InvolvementStatus::Onboarding, pool)
                 .await
                 .map_err(handle_accept_database_error)?;

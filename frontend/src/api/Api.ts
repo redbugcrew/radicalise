@@ -137,6 +137,7 @@ export interface CapacityPlanning {
 export interface Circle {
   /** @format int64 */
   id: number
+  initial_involvement_status: InvolvementStatus
   /** @format int64 */
   inside_circle_id?: number | null
   name: string
