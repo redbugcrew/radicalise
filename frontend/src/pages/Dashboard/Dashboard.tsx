@@ -43,13 +43,13 @@ function ParticipationBadge({ involvement }: { involvement: CircleInvolvement | 
   }
 }
 
-interface MyIntervalPartipationCardProps {
+interface MyIntervalParticipationCardProps {
   interval: Interval
   circleInvolvement: CircleInvolvement | null
   current: boolean
 }
 
-function MyIntervalPartipationCard({ interval, circleInvolvement, current = true }: MyIntervalPartipationCardProps) {
+function MyIntervalParticipationCard({ interval, circleInvolvement, current = true }: MyIntervalParticipationCardProps) {
   const navigate = useNavigate()
 
   return (
@@ -191,8 +191,8 @@ export default function Dashboard() {
   const personId = myData.person_id
 
   const myCurrentCircle = circleInvolvementforCircleAndPerson(currentIntervalData?.circle_involvements, circleId, personId)
-
   const myCurrentCrewInvolvements = forPerson(currentIntervalData?.crew_involvements || [], personId)
+  const currentRealInterval = currentInterval?.number === 0 ? null : currentInterval
 
   return (
     <Container>
@@ -201,7 +201,7 @@ export default function Dashboard() {
       </Title>
       <Stack gap="lg">
         <Stack gap="md">
-          {!currentInterval && (
+          {!currentRealInterval && (
             <NoData title="No current interval">
               <Stack>
                 <Text>This project has not yet started it's first interval.</Text>
@@ -210,8 +210,8 @@ export default function Dashboard() {
             </NoData>
           )}
 
-          {myCurrentCircle && currentInterval && (
-            <MyIntervalPartipationCard interval={currentInterval} circleInvolvement={myCurrentCircle} current={true} />
+          {myCurrentCircle && currentRealInterval && (
+            <MyIntervalParticipationCard interval={currentRealInterval} circleInvolvement={myCurrentCircle} current={true} />
           )}
 
           <WithIntervalData interval={nextInterval}>
@@ -220,7 +220,7 @@ export default function Dashboard() {
 
               return (
                 (myCurrentCircle || myNextCircle) &&
-                nextInterval && <MyIntervalPartipationCard interval={nextInterval} circleInvolvement={myNextCircle} current={false} />
+                nextInterval && <MyIntervalParticipationCard interval={nextInterval} circleInvolvement={myNextCircle} current={false} />
               )
             }}
           </WithIntervalData>
