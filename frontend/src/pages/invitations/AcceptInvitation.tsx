@@ -10,7 +10,11 @@ import { useState } from "react"
 import { notifications } from "@mantine/notifications"
 import { SelectedProjectContext } from "../../contexts/projects"
 
-function AcceptInvitationLoggedOut() {
+interface AcceptInvitationLoggedOutProps {
+  token: string
+}
+
+function AcceptInvitationLoggedOut({ token }: AcceptInvitationLoggedOutProps) {
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -18,7 +22,15 @@ function AcceptInvitationLoggedOut() {
     <Stack gap="md">
       <Text>To accept this invitation, please create an account here, or log in if you already have one.</Text>
 
-      <Button onClick={() => navigate(`/auth/signup?redirect=${encodeURIComponent(location.pathname + location.search)}`)}>Sign up</Button>
+      <Button
+        onClick={() =>
+          navigate(
+            `/auth/signup?invitation=${encodeURIComponent(token)}&redirect=${encodeURIComponent(location.pathname + location.search)}`,
+          )
+        }
+      >
+        Sign up
+      </Button>
     </Stack>
   )
 }
@@ -140,7 +152,7 @@ export default function AcceptInvitation() {
                               projectId={selectedProject.project.id}
                             />
                           ) : (
-                            <AcceptInvitationLoggedOut />
+                            <AcceptInvitationLoggedOut token={token} />
                           )}
                         </Stack>
                       )}

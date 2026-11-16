@@ -1,12 +1,14 @@
 use chrono::{Duration, Utc};
 use serde::Deserialize;
 use sqlx::SqlitePool;
+use tracing::info;
 use utoipa::ToSchema;
 use uuid::Uuid;
 
 use crate::invitations::circle_invitations_repo::delete_circle_invitation;
 use crate::my_project::repo::find_project;
 use crate::shared::email_sender::EmailSender;
+use crate::shared::entities::Circle;
 use crate::{
     circles::repo::find_circle_by_id,
     invitations::{
@@ -70,31 +72,31 @@ pub async fn invite_person(
     interval: Interval,
 ) -> Result<InvitePersonResult, InvitePersonError> {
     // Find the inviting person
-    tracing::info!("Finding inviting person for user_id: {:?}", inviting_user_id);
+    info!("Finding inviting person for user_id: {:?}", inviting_user_id);
     let inviting_person = find_person_by_user_id(inviting_user_id, project_id.clone(), pool)
         .await
         .map_err(ctx_err)?
         .ok_or(InvitePersonError::ContextInvalid)?;
 
     // Find the project
-    tracing::info!("Finding project with id: {:?}", project_id);
+    info!("Finding project with id: {:?}", project_id);
     let project = find_project(project_id.clone(), pool).await.map_err(ctx_err)?;
 
     // Find the circle
-    tracing::info!("Finding circle with id: {:?}", input.circle_id);
+    info!("Finding circle with id: {:?}", input.circle_id);
     let circle = find_circle_by_id(CircleId::new(input.circle_id), pool).await.map_err(ctx_err)?;
 
     let current_interval = interval;
 
     // Load the invitation if we already have one, so that we can update it instead of creating a duplicate if the same person is invited again to the same circle
-    tracing::info!(
+    info!(
         "Looking up existing invitation for email: {:?}, circle_id: {:?}",
-        input.email,
-        input.circle_id
+        input.email, input.circle_id
     );
     let existing_invitation = find_circle_invitation_by_email_and_circle_id(CircleId::new(circle.id), input.email.clone(), pool)
         .await
         .map_err(db_err)?;
+    info!("Has existing invitation {:?}", existing_invitation);
 
     let person = match existing_invitation {
         Some(invitation) => find_person_by_id(PersonId::new(invitation.person_id), pool).await.map_err(db_err)?,
@@ -106,13 +108,12 @@ pub async fn invite_person(
             })?,
     };
 
-    tracing::info!("Created person: {:?}", person);
+    info!("Created person: {:?}", person);
 
     // Create the circle involvement
-    tracing::info!(
+    info!(
         "Inserting circle involvement for person_id: {:?}, circle_id: {:?}",
-        person.id,
-        circle.id
+        person.id, circle.id
     );
     let new_involvement = CircleInvolvement {
         person_id: person.id,
@@ -138,10 +139,9 @@ pub async fn invite_person(
     };
 
     // Create the circle invitation
-    tracing::info!(
+    info!(
         "Upserting circle invitation for person_id: {:?}, circle_id: {:?}",
-        person.id,
-        circle.id
+        person.id, circle.id
     );
     let invitation_token = Uuid::new_v4().to_string();
     let expires_at = (chrono::Utc::now() + Duration::days(INVITATION_EXPIRATION_DAYS)).to_rfc3339();
@@ -158,10 +158,10 @@ pub async fn invite_person(
     .await
     .map_err(db_err)?;
 
-    tracing::info!("Created circle invitation: {:?}", circle_invitation);
+    info!("Created circle invitation: {:?}", circle_invitation);
 
     // Send invitation email
-    tracing::info!("Sending invitation email to: {:?}", input.email);
+    info!("Sending invitation email to: {:?}", input.email);
     let email = invited_to_circle_email(
         input.email.clone(),
         InvitedToCircleEmailParams {
@@ -179,7 +179,7 @@ pub async fn invite_person(
     })?;
 
     // Mark the invitation as sent
-    tracing::info!("Marking invitation {:?} as sent", circle_invitation.id);
+    info!("Marking invitation {:?} as sent", circle_invitation.id);
     mark_circle_invitation_as_sent(circle_invitation.id, pool).await.map_err(db_err)?;
 
     Ok(InvitePersonResult {
@@ -228,6 +228,7 @@ pub async fn accept_invitation(
         context.invitation.circle_involvement_id.map(CircleInvolvementId::new),
         CircleId::new(context.invitation.circle_id),
         &context.current_interval,
+        context.circle.initial_involvement_status,
         &context.invitation_person,
         pool,
     )
@@ -240,8 +241,21 @@ pub async fn accept_invitation(
     Ok(())
 }
 
+pub async fn is_invite_token_valid(token: String, pool: &SqlitePool) -> Result<(), AcceptInvitationError> {
+    let invitation = find_circle_invitation_by_token(token, pool)
+        .await
+        .map_err(handle_accept_database_error)?;
+
+    if invitation.has_expired(Utc::now()) {
+        return Err(AcceptInvitationError::InvitationExpired);
+    }
+
+    Ok(())
+}
+
 struct AcceptInvitationContext {
     invitation: CircleInvitation,
+    circle: Circle,
     current_interval: Interval,
     user_person: Option<Person>,
     invitation_person: Person,
@@ -284,6 +298,7 @@ async fn load_accept_invitation_context(
         current_interval,
         user_person,
         invitation_person,
+        circle,
     })
 }
 
@@ -318,6 +333,7 @@ async fn reconcile_involvement(
     circle_involvement_id: Option<CircleInvolvementId>,
     circle_id: CircleId,
     current_interval: &Interval,
+    initial_status: InvolvementStatus,
     person: &Person,
     pool: &SqlitePool,
 ) -> Result<(), AcceptInvitationError> {
@@ -335,10 +351,9 @@ async fn reconcile_involvement(
     // If involvement is now for the wrong person, delete it
     maybe_involvement = match maybe_involvement {
         Some(inv) if inv.person_id != person.id => {
-            tracing::info!(
+            info!(
                 "Involvement person_id {:?} does not match accepting person_id {:?}, deleting involvement",
-                inv.person_id,
-                person.id
+                inv.person_id, person.id
             );
             delete_circle_involvement_by_id(CircleInvolvementId::new(inv.id), pool)
                 .await
@@ -352,10 +367,9 @@ async fn reconcile_involvement(
     // If involvement is for the wrong interval, don't delete it, just clear the local var
     maybe_involvement = match maybe_involvement {
         Some(inv) if inv.interval_number != current_interval.number => {
-            tracing::info!(
+            info!(
                 "Involvement interval_number {:?} does not match current interval_number {:?}, ignoring involvement",
-                inv.interval_number,
-                current_interval.number
+                inv.interval_number, current_interval.number
             );
             None
         }
@@ -370,7 +384,7 @@ async fn reconcile_involvement(
             CircleInvolvement {
                 person_id: person.id,
                 circle_id: circle_id.id,
-                status: InvolvementStatus::Onboarding,
+                status: initial_status.clone(),
                 ..CircleInvolvement::new(current_interval.typed_number())
             }
             .into(),
@@ -384,15 +398,19 @@ async fn reconcile_involvement(
         .into(),
     };
 
-    // If our involvement is Invited or Exiting, move it to Onboarding
+    // If our involvement is Invited or Exiting, move it to the initial status
     match involvement.status {
         InvolvementStatus::Invited | InvolvementStatus::Exiting => {
-            tracing::info!("Updating involvement status from {:?} to Onboarding", involvement.status);
-            update_involvement_status(involvement.typed_id(), InvolvementStatus::Onboarding, pool)
+            info!(
+                "Updating involvement status from {:?} to {:?}",
+                involvement.status,
+                initial_status.clone()
+            );
+            update_involvement_status(involvement.typed_id(), initial_status.clone(), pool)
                 .await
                 .map_err(handle_accept_database_error)?;
             CircleInvolvement {
-                status: InvolvementStatus::Onboarding,
+                status: initial_status,
                 ..involvement
             }
         }
@@ -555,7 +573,7 @@ mod tests {
             .await
             .expect("No person record found for the new user");
 
-        // Verify a circle_involvement exists for this person in the correct circle and current interval, in Onboarding status
+        // Verify a circle_involvement exists for this person in the correct circle and current interval
         let involvement_row = sqlx::query!(
             "SELECT ci.status
              FROM circle_involvements ci
@@ -571,8 +589,8 @@ mod tests {
         .expect("No circle_involvement found for the accepted person in the current interval");
 
         assert_eq!(
-            involvement_row.status, "Onboarding",
-            "Expected involvement status to be Onboarding, got {:?}",
+            involvement_row.status, "Active",
+            "Expected involvement status to be Active, got {:?}",
             involvement_row.status
         );
 
@@ -644,7 +662,7 @@ mod tests {
             .await
             .expect("No person record found for the new user");
 
-        // Verify a circle_involvement exists in interval 2 for this person, in Onboarding status
+        // Verify a circle_involvement exists in interval 2 for this person
         let involvement_row = sqlx::query!(
             "SELECT ci.status FROM circle_involvements ci
              WHERE ci.person_id = ?
@@ -657,8 +675,8 @@ mod tests {
         .expect("No circle_involvement found for the accepted person in interval 2");
 
         assert_eq!(
-            involvement_row.status, "Onboarding",
-            "Expected involvement status to be Onboarding in interval 2, got {:?}",
+            involvement_row.status, "Active",
+            "Expected involvement status to be Active in interval 2, got {:?}",
             involvement_row.status
         );
     }
@@ -732,7 +750,7 @@ mod tests {
             .expect("Failed to check placeholder person");
         assert!(placeholder_person.is_none(), "Expected placeholder invited person to be deleted");
 
-        // The accepter should now have an onboarding involvement in circle 1, interval 1.
+        // The accepter should now have an active involvement in circle 1, interval 1.
         let accepter_involvement = sqlx::query!(
             "SELECT status FROM circle_involvements WHERE person_id = ? AND circle_id = 1 AND interval_number = 1",
             accepter_person.id
@@ -741,8 +759,8 @@ mod tests {
         .await
         .expect("Expected accepter person to have a circle involvement after acceptance");
         assert_eq!(
-            accepter_involvement.status, "Onboarding",
-            "Expected accepter involvement status to be Onboarding"
+            accepter_involvement.status, "Active",
+            "Expected accepter involvement status to be Active"
         );
 
         // No involvement should remain for the deleted placeholder person.

@@ -38,7 +38,7 @@ fn add_inside_circles_from(all_circles: &HashMap<i64, Circle>, result: &mut Hash
 pub async fn find_all_circles(project_id: ProjectId, pool: &SqlitePool) -> Result<Vec<Circle>, sqlx::Error> {
     sqlx::query_as!(
         Circle,
-        "SELECT id, project_id as \"project_id: i64\", name, slug, inside_circle_id
+        "SELECT id, project_id as \"project_id: i64\", name, slug, inside_circle_id, initial_involvement_status
         FROM circles
         WHERE project_id = ?
         ORDER BY id ASC",
@@ -64,7 +64,7 @@ pub async fn find_all_circles_ids(project_id: ProjectId, pool: &SqlitePool) -> R
 pub async fn find_circle_by_id(circle_id: CircleId, pool: &SqlitePool) -> Result<Circle, sqlx::Error> {
     sqlx::query_as!(
         Circle,
-        "SELECT id, project_id as \"project_id: i64\", name, slug, inside_circle_id
+        "SELECT id, project_id as \"project_id: i64\", name, slug, inside_circle_id, initial_involvement_status
         FROM circles
         WHERE id = ?",
         circle_id.id
@@ -95,12 +95,15 @@ where
 
 pub async fn update_circle(circle_id: CircleId, circle: &Circle, project_id: ProjectId, pool: &SqlitePool) -> Result<Circle, sqlx::Error> {
     sqlx::query!(
-        "UPDATE circles SET name = ?, slug = ?, inside_circle_id = ? WHERE id = ? AND project_id = ?",
+        "UPDATE circles
+        SET name = ?, slug = ?, inside_circle_id = ?, initial_involvement_status = ?
+        WHERE id = ? AND project_id = ?",
         circle.name,
         circle.slug,
         circle.inside_circle_id,
+        circle.initial_involvement_status,
         circle_id.id,
-        project_id.id
+        project_id.id,
     )
     .execute(pool)
     .await?;

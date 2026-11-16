@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT id, project_id as \"project_id: i64\", name, slug, inside_circle_id\n        FROM circles\n        WHERE id = ?",
+  "query": "SELECT id, project_id as \"project_id: i64\", name, slug, inside_circle_id, initial_involvement_status\n        FROM circles\n        WHERE id = ?",
   "describe": {
     "columns": [
       {
@@ -57,6 +57,17 @@
             "name": "inside_circle_id"
           }
         }
+      },
+      {
+        "name": "initial_involvement_status",
+        "ordinal": 5,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "circles",
+            "name": "initial_involvement_status"
+          }
+        }
       }
     ],
     "parameters": {
@@ -67,8 +78,9 @@
       false,
       false,
       false,
-      true
+      true,
+      false
     ]
   },
-  "hash": "2f59ea7f1a304e591a9d82710d7889fb84984032382c95f724852d55216fee94"
+  "hash": "c92cb445b448a5a8cd37481c2acb340b9ebd0e2fe6d4ac169d2eb1e3f9c9232e"
 }

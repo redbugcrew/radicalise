@@ -24,15 +24,17 @@ const defaultValues: InvitePersonFormValues = {
   message: "",
 }
 
-function convertToRequestValues(values: InvitePersonFormValues): InvitePersonRequest {
+function convertToRequestValues(values: InvitePersonFormValues, onlyCircle: Circle | null): InvitePersonRequest {
+  const defaultCircleId = onlyCircle?.id || null
   return {
     ...values,
-    circle_id: (values.circle_id ? parseInt(values.circle_id) : null)!,
+    circle_id: (values.circle_id ? parseInt(values.circle_id) : defaultCircleId)!,
   }
 }
 
 export default function InvitePersonForm({ circles, onSubmit }: InvitePersonFormProps) {
   const [actionResult, onSubmitWithResult] = useOnSubmitWithResult<InvitePersonRequest>(onSubmit)
+  const onlyCircle = circles.length === 1 ? circles[0] : null
 
   const form = useForm<InvitePersonFormValues>({
     mode: "controlled",
@@ -42,24 +44,26 @@ export default function InvitePersonForm({ circles, onSubmit }: InvitePersonForm
     validate: {
       name: (value) => (value ? null : "Name is required"),
       email: (value) => (isValidEmail(value) ? null : "Invalid email"),
-      circle_id: (value) => (value ? null : "Circle is required"),
+      circle_id: (value) => (value || onlyCircle ? null : "Circle is required"),
     },
   })
 
   return (
-    <form onSubmit={form.onSubmit((values) => onSubmitWithResult(convertToRequestValues(values)))}>
+    <form onSubmit={form.onSubmit((values) => onSubmitWithResult(convertToRequestValues(values, onlyCircle)))}>
       <Stack gap="lg">
         <Stack gap="md">
           <TextInput label="Name" withAsterisk placeholder="The name you know this person by" key="name" {...form.getInputProps("name")} />
           <TextInput label="Email" withAsterisk placeholder="Their email address" key="email" {...form.getInputProps("email")} />
-          <Select
-            label="Circle"
-            withAsterisk
-            placeholder="Select a circle to add this person to"
-            key="circle_id"
-            data={circles.map((circle) => ({ value: circle.id.toString(), label: circle.name }))}
-            {...form.getInputProps("circle_id")}
-          />
+          {!onlyCircle && (
+            <Select
+              label="Circle"
+              withAsterisk
+              placeholder="Select a circle to add this person to"
+              key="circle_id"
+              data={circles.map((circle) => ({ value: circle.id.toString(), label: circle.name }))}
+              {...form.getInputProps("circle_id")}
+            />
+          )}
           <Textarea
             label="Message"
             placeholder="Write something to this person about why you're inviting them"

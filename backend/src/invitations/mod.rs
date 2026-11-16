@@ -27,6 +27,7 @@ use crate::{
 mod circle_invitations_repo;
 mod emails;
 mod invitatations_service;
+pub use self::invitatations_service::is_invite_token_valid;
 
 pub fn router() -> OpenApiRouter {
     OpenApiRouter::new()

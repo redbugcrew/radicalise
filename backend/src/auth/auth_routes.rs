@@ -10,12 +10,15 @@ use utoipa::ToSchema;
 use utoipa_axum::{router::OpenApiRouter, routes};
 use uuid::Uuid;
 
-use crate::auth::{
-    UserPermissions,
-    auth_backend::{AuthSession, Credentials},
-    auth_email::reset_password_email,
-    auth_repo::{AuthRepo, AuthRepoError, AuthRepoInsertError},
-    load_user_permissions,
+use crate::{
+    auth::{
+        UserPermissions,
+        auth_backend::{AuthSession, Credentials},
+        auth_email::reset_password_email,
+        auth_repo::{AuthRepo, AuthRepoError, AuthRepoInsertError},
+        load_user_permissions,
+    },
+    invitations::is_invite_token_valid,
 };
 
 pub fn auth_router() -> OpenApiRouter {
@@ -162,6 +165,7 @@ async fn log_out(auth_session: AuthSession) -> impl IntoResponse {
 struct SignUpRequest {
     email: String,
     password: String,
+    invite_token: Option<String>,
 }
 
 impl SignUpRequest {
@@ -198,8 +202,18 @@ async fn sign_up(auth_session: AuthSession, Extension(pool): Extension<SqlitePoo
 
     let current_user = auth_session.user().await;
     let login_config = load_user_permissions(&current_user, &pool).await;
+
     if !login_config.signup_enabled {
-        return (StatusCode::BAD_REQUEST, "Sign up is disabled").into_response();
+        match data.invite_token {
+            Some(invite_token) => {
+                if is_invite_token_valid(invite_token, &pool).await.is_err() {
+                    return (StatusCode::BAD_REQUEST, "Invalid invite token").into_response();
+                }
+            }
+            None => {
+                return (StatusCode::BAD_REQUEST, "Sign up is disabled").into_response();
+            }
+        };
     }
 
     let hashed_password = generate_hash(&data.password);

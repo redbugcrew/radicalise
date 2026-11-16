@@ -1,6 +1,6 @@
 import { Button, NativeSelect, Stack, TextInput } from "@mantine/core"
 import { useForm } from "@mantine/form"
-import type { Circle } from "../../../api/Api"
+import { InvolvementStatus, type Circle } from "../../../api/Api"
 import { DisplayActionResult, useOnSubmitWithResult, type ActionPromiseResult } from "../../../components/ActionResult"
 
 interface CircleFormProps {
@@ -16,12 +16,16 @@ interface CircleFormValues {
   name: string
   slug: string
   inside_circle_id: string // Use string for form input, convert to number or null on submit
+  initial_involvement_status: string
 }
+
+const allInvolvementStatuses = Object.keys(InvolvementStatus).filter((item) => isNaN(Number(item)))
 
 function convertFormValuesToCircle(values: CircleFormValues): Circle {
   return {
     ...values,
     inside_circle_id: values.inside_circle_id ? parseInt(values.inside_circle_id) : null,
+    initial_involvement_status: values.initial_involvement_status as InvolvementStatus,
   }
 }
 
@@ -31,6 +35,7 @@ const defaultCircle: Circle = {
   name: "",
   slug: "",
   inside_circle_id: null,
+  initial_involvement_status: InvolvementStatus.Active,
 }
 
 export default function CircleForm({ onSubmit, submitText, value, otherCircles = [] }: CircleFormProps) {
@@ -50,6 +55,7 @@ export default function CircleForm({ onSubmit, submitText, value, otherCircles =
 
         return null
       },
+      initial_involvement_status: (value) => (value.trim() === "" ? "Initial status is required" : null),
     },
   })
 
@@ -64,6 +70,7 @@ export default function CircleForm({ onSubmit, submitText, value, otherCircles =
             description="How will people refer to this circle?"
             placeholder="Participants, Collaborators, etc"
             withAsterisk
+            key="name"
             {...form.getInputProps("name")}
           />
 
@@ -72,13 +79,24 @@ export default function CircleForm({ onSubmit, submitText, value, otherCircles =
             description="How will this circle be identified in URLs and APIs? "
             placeholder="participants, collaborators, etc"
             withAsterisk
+            key="slug"
             {...form.getInputProps("slug")}
+          />
+
+          <NativeSelect
+            label="Initial status"
+            description="The initial status for new people invited to the circle"
+            data={allInvolvementStatuses}
+            required
+            key="initial_involvement_status"
+            {...form.getInputProps("initial_involvement_status")}
           />
 
           <NativeSelect
             label="Is this circle inside another circle?"
             description="If set, people in this circle will also be part of the containing circle"
             data={[{ value: "", label: "None" }, ...otherCircles.map((circle) => ({ value: circle.id.toString(), label: circle.name }))]}
+            key="inside_circle_id"
             {...form.getInputProps("inside_circle_id")}
           />
         </Stack>
