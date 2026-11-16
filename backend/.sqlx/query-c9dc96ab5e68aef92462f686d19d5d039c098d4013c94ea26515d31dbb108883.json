@@ -1,10 +1,10 @@
 {
   "db_name": "SQLite",
-  "query": "SELECT id, project_id as \"project_id: i64\", name, slug, inside_circle_id\n        FROM circles\n        WHERE project_id = ?\n        ORDER BY id ASC",
+  "query": "SELECT c.id as \"id: i64\", c.project_id as \"project_id: i64\", name, slug, inside_circle_id, initial_involvement_status\n        FROM circle_involvements AS i\n        INNER JOIN circles AS c ON i.circle_id = c.id\n        WHERE\n            i.person_id = ? AND\n            i.interval_number = ? AND\n            i.project_id = ?",
   "describe": {
     "columns": [
       {
-        "name": "id",
+        "name": "id: i64",
         "ordinal": 0,
         "type_info": "Integer",
         "origin": {
@@ -57,18 +57,30 @@
             "name": "inside_circle_id"
           }
         }
+      },
+      {
+        "name": "initial_involvement_status",
+        "ordinal": 5,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "circles",
+            "name": "initial_involvement_status"
+          }
+        }
       }
     ],
     "parameters": {
-      "Right": 1
+      "Right": 3
     },
     "nullable": [
       false,
       false,
       false,
       false,
-      true
+      true,
+      false
     ]
   },
-  "hash": "7bf56db0edaf8c732db135205042c633b829e33df472f308803d4a6ae965d8e7"
+  "hash": "c9dc96ab5e68aef92462f686d19d5d039c098d4013c94ea26515d31dbb108883"
 }
