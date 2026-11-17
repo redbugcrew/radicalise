@@ -72,14 +72,18 @@ async fn create_event_template(
     ),
 )]
 async fn update_event_template(
-    Path(event_template_id): Path<i64>,
-    Path(project_id): Path<i64>,
+    Path((project_id, event_template_id)): Path<(i64, i64)>,
     Extension(pool): Extension<SqlitePool>,
     Extension(realtime_state): Extension<RealtimeState>,
     auth_session: AuthSession,
     axum::extract::Json(data): axum::extract::Json<EventTemplate>,
 ) -> impl IntoResponse {
-    tracing::info!("Updating event template with ID {}: {:?}", event_template_id, data);
+    tracing::info!(
+        "Updating event template with ID {} and Project {}: {:?}",
+        event_template_id,
+        project_id,
+        data
+    );
 
     let project_id = ProjectId::new(project_id);
 
