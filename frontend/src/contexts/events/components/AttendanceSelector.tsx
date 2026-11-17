@@ -2,9 +2,11 @@ import { SegmentedControl } from "@mantine/core"
 import { AttendanceIntention } from "../../../api/Api"
 import { useState } from "react"
 
+type NullableIntention = AttendanceIntention | null
+
 interface AttendanceSelectorProps {
   intention?: AttendanceIntention | null
-  onChange?: (intention: AttendanceIntention | null) => Promise<void>
+  onChange?: (intention: NullableIntention) => Promise<void>
 }
 
 const toTitleCase = (str: string) => {
@@ -12,7 +14,10 @@ const toTitleCase = (str: string) => {
 }
 
 export default function AttendanceSelector({ intention, onChange }: AttendanceSelectorProps) {
-  const possibleIntentions = [AttendanceIntention.Going, AttendanceIntention.Uncertain, AttendanceIntention.NotGoing]
+  const possibleIntentions: NullableIntention[] = [AttendanceIntention.Going, AttendanceIntention.Uncertain, AttendanceIntention.NotGoing]
+  if (intention == null) {
+    possibleIntentions.push(null)
+  }
   const [loading, setLoading] = useState(false)
 
   const onSelect = (value: string) => {
@@ -28,7 +33,10 @@ export default function AttendanceSelector({ intention, onChange }: AttendanceSe
     <SegmentedControl
       onChange={onSelect}
       disabled={onChange && loading}
-      data={possibleIntentions.map((intention) => ({ label: toTitleCase(intention), value: intention }))}
+      data={possibleIntentions.map((intention) => ({
+        label: intention ? toTitleCase(intention) : "Unspecified",
+        value: intention || "",
+      }))}
       value={intention ?? undefined}
       color="blue"
     />
