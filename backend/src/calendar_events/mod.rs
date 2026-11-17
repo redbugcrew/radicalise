@@ -5,6 +5,7 @@ use axum::{
     response::IntoResponse,
 };
 use sqlx::SqlitePool;
+use tracing::info;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 use crate::{
@@ -81,14 +82,16 @@ async fn create_calendar_event(
     ),
 )]
 async fn update_calendar_event(
-    Path(event_id): Path<i64>,
-    Path(project_id): Path<i64>,
+    Path((project_id, event_id)): Path<(i64, i64)>,
     Extension(pool): Extension<SqlitePool>,
     Extension(realtime_state): Extension<RealtimeState>,
     auth_session: AuthSession,
     axum::extract::Json(data): axum::extract::Json<CalendarEvent>,
 ) -> impl IntoResponse {
-    tracing::info!("Updating calendar event with ID {}: {:?}", event_id, data);
+    info!(
+        "Updating calendar event with ID {} for project {}: {:?}",
+        event_id, project_id, data
+    );
 
     match repo::update_calendar_event_with_links(
         CalendarEventId::new(event_id),

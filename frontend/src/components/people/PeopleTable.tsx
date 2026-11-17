@@ -1,10 +1,11 @@
-import { Badge, Group, Table, Text, Stack } from "@mantine/core"
+import { Group, Table, Text, Stack } from "@mantine/core"
 import { Anchor } from ".."
 import { useState } from "react"
 import CapacityScoreIcon from "../CapacityScoreIcon"
 import Avatar from "./Avatar"
 import { SearchField, SortableTh, sortData, Th } from "../SortableTable/SortableTable"
 import { currentProjectPath, useCurrentProjectSlug } from "../../contexts/projects"
+import { CrewBadge } from "../../contexts/crews"
 
 interface Crew {
   id: number
@@ -23,13 +24,6 @@ export interface PeopleTableRow {
 
 function matchesFilter(item: PeopleTableRow, lowerCaseQuery: string): boolean {
   return item.name.toLowerCase().includes(lowerCaseQuery) || item.crews.some((crew) => crew.name.toLowerCase().includes(lowerCaseQuery))
-}
-
-const crewColours: Record<number, string> = {
-  2: "blue",
-  3: "cyan",
-  4: "pink",
-  5: "green",
 }
 
 interface PersonLinkWithCapacityProps {
@@ -110,9 +104,7 @@ export default function PeopleTable({ people, intervalNumber }: PeopleTableProps
 
       <Table.Td>
         {item.crews.map((crew) => (
-          <Badge key={crew.id} color={crewColours[crew.id] || "gray"} variant="light" mr={5}>
-            {crew.name}
-          </Badge>
+          <CrewBadge key={crew.id} crew={crew} />
         ))}
       </Table.Td>
     </Table.Tr>
