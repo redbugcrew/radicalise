@@ -5,7 +5,9 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 use crate::{my_project::repo::find_project_by_slug, shared::entities::Project};
 
 pub fn router() -> OpenApiRouter {
-    OpenApiRouter::new().routes(routes!(get_project_by_slug))
+    OpenApiRouter::new()
+        .routes(routes!(get_project_by_slug))
+        .routes(routes!(crate::dev::health_check))
 }
 
 pub fn project_router() -> OpenApiRouter {
