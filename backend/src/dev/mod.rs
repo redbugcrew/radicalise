@@ -44,3 +44,18 @@ async fn recompute_implicit_involvements(Path(project_id): Path<i64>, Extension(
 
     (StatusCode::OK, ()).into_response()
 }
+
+#[utoipa::path(
+    get,
+    path = "/health",
+    responses(
+        (status = 200, description = "Recomputation started successfully", body = String),
+        (status = INTERNAL_SERVER_ERROR, description = "Internal server error", body = ()),
+    )
+)]
+pub async fn health_check(Extension(pool): Extension<SqlitePool>) -> impl IntoResponse {
+    match sqlx::query("SELECT 1").execute(&pool).await {
+        Ok(_) => (StatusCode::OK, "OK").into_response(),
+        Err(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
+    }
+}
